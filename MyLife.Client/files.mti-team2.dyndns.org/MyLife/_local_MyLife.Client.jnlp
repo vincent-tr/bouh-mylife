@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jnlp
+        codebase="file:/D:/Programmation/Java/workspaces/MyLife/MyLife.Client/files.mti-team2.dyndns.org/MyLife/" href="file:/D:/Programmation/Java/workspaces/MyLife/MyLife.Client/files.mti-team2.dyndns.org/MyLife/_local_MyLife.Client.jnlp">
+        <information>
+                <title>MyLife.Client</title>
+                <vendor>Vincent TRUMPFF</vendor>
+                <description kind="default">MyLife client</description>
+                <icon href="MyLife-128.png" kind="default"/>
+                <offline-allowed/>
+        </information>
+        <resources arch="" os="">
+                <j2se version="1.3+"/>
+                <jar href="MyLife.Client.jar" main="true"/>
+        </resources>
+        <application-desc main-class="mylife.client.Main"/>
+</jnlp>
