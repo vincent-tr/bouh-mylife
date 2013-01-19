@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jnlp
+<jnlp codebase="file:/D:/Programmation/Java/workspaces/MyLife/MyLife.Client/deploy/" href="file:/D:/Programmation/Java/workspaces/MyLife/MyLife.Client/deploy/_local_MyLife.Client.jnlp">
+	<information>
+    	<title>MyLife.Client</title>
+        <vendor>Vincent TRUMPFF</vendor>
+        <description kind="default">MyLife client</description>
+        <icon href="MyLife-128.png" kind="default"/>
+        <offline-allowed/>
+	</information>
+
+	<security>
+		<all-permissions />
+	</security>
+	
+    <resources arch="" os="">
+    	<j2se version="1.3+"/>
+        <jar href="MyLife.Client.jar" main="true"/>
+	</resources>
+		 
+    <resources arch="" os="Windows">
+		<jar href="swt-win32-windows-x86_64.jar" />
+    </resources>
+    
+	<application-desc main-class="mylife.client.Main"/>
+</jnlp>
