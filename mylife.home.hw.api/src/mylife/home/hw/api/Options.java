@@ -13,7 +13,7 @@ public enum Options {
 	DIRECTION_OUTPUT(1, "direction:output"),
 	
 	TYPE_DIGITAL(11, "type:digital"),
-	TYPE_ANALOG(12, "yupr:analog"),
+	TYPE_ANALOG(12, "type:analog"),
 	
     OPTION_PULL_DOWN(21, "pull:down"),
     OPTION_PULL_UP(22, "pull:up"); 

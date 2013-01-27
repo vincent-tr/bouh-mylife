@@ -6,9 +6,7 @@ import java.util.Map;
 
 import mylife.home.hw.api.Device;
 import mylife.home.hw.api.DeviceAccessDeniedException;
-import mylife.home.hw.api.InputDevice;
 import mylife.home.hw.api.Options;
-import mylife.home.hw.api.OutputDevice;
 
 class Manager {
 
@@ -68,11 +66,21 @@ class Manager {
 
 	}
 
-	private InputDevice openInput(int pinId, EnumSet<Options> options) {
-
+	private Device openInput(int pinId, EnumSet<Options> options) {
+		if(options.contains(Options.OPTION_PULL_DOWN)
+				&& options.contains(Options.OPTION_PULL_UP))
+				throw new IllegalArgumentException("Cannot contain both OPTION_PULL_DOWN and OPTION_PULL_UP");
+		
+		return new InputDeviceImpl(pinId, options);
 	}
 
-	private OutputDevice openOutput(int pinId, EnumSet<Options> options) {
-
+	private Device openOutput(int pinId, EnumSet<Options> options) {
+		
+		if (options.contains(Options.TYPE_ANALOG))
+			return new AnalogOutputDeviceImpl(pinId, options);
+		if (options.contains(Options.TYPE_DIGITAL))
+			return new DigitalOutputDeviceImpl(pinId, options);
+		
+		throw new IllegalArgumentException("No type defined");
 	}
 }

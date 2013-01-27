@@ -1,15 +1,15 @@
 package mylife.home.hw.api;
 
-public interface AnalogOutputDevice extends OutputDevice {
+public interface AnalogOutputDevice extends Device {
 
 	/**
-	 * Obtention de la valeur analogique du pin
+	 * Obtention de la valeur du pin
 	 * @return
 	 */
-	public int getAnalogValue();
+	public int getValue();
 
 	/**
-	 * Définition de la valeur analogique du pin
+	 * Définition de la valeur du pin
 	 */
-	public void setAnalogValue(int value);
+	public void setValue(int value);
 }
