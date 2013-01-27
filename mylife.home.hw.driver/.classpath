@@ -3,10 +3,6 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
 	<classpathentry kind="con" path="aQute.bnd.classpath.container"/>
-	<classpathentry kind="lib" path="C:/Programmation/Java/lib/pi4j-core.jar" sourcepath="C:/Programmation/Java/lib/pi4j-core-sources.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="jar:file:/C:/Programmation/Java/lib/pi4j-core-javadoc.jar!/"/>
-		</attributes>
-	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/PI4J"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

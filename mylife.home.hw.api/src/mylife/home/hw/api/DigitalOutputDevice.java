@@ -1,15 +1,15 @@
 package mylife.home.hw.api;
 
-public interface DigitalOutputDevice extends OutputDevice {
+public interface DigitalOutputDevice extends Device {
 
 	/**
-	 * Obtention de la valeur digiale du pin
+	 * Obtention de la valeur du pin
 	 * @return
 	 */
-	public boolean getDigitalValue();
+	public boolean getValue();
 
 	/**
-	 * Définition de la valeur digitale du pin
+	 * Définition de la valeur du pin
 	 */
-	public void setDigitalValue(boolean value);
+	public void setValue(boolean value);
 }
