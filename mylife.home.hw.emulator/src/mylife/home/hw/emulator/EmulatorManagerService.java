@@ -8,14 +8,12 @@ import mylife.home.hw.api.DeviceManager;
 import mylife.home.hw.api.Options;
 import aQute.bnd.annotation.component.Component;
 
-public class EmulatorManagerService {
-	@Component
-	public class DeviceManagerService implements DeviceManager {
+@Component
+public class EmulatorManagerService implements DeviceManager {
 
-		@Override
-		public Device open(int pinId, EnumSet<Options> options) throws DeviceAccessDeniedException {
-			return Manager.getInstance().open(pinId, options);
-		}
+	@Override
+	public Device open(int pinId, EnumSet<Options> options)
+			throws DeviceAccessDeniedException {
+		return Manager.getInstance().open(pinId, options);
 	}
-
 }
