@@ -1,11 +1,10 @@
--runbundles: osgi.cmpn,\
-	org.apache.felix.scr,\
-	org.apache.felix.shell,\
-	org.apache.felix.shell.tui
+-runbundles: mylife.home.hw.api;resolution=file:/D:/Programmation/Java/workspaces/MyLife/mylife.home.hw.api/generated/mylife.home.hw.api.jar;version=latest
 Service-Component: *
 -runfw: org.apache.felix.framework
 -buildpath: osgi.core,\
 	osgi.cmpn,\
 	biz.aQute.bnd.annotation,\
 	junit.osgi,\
-	mylife.home.hw.api;version=latest
+	mylife.home.hw.api;version=latest,\
+	org.apache.felix.http.jetty
+Private-Package: mylife.home.hw.emulator
