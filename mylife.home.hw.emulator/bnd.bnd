@@ -1,4 +1,5 @@
--runbundles: mylife.home.hw.api;resolution=file:/D:/Programmation/Java/workspaces/MyLife/mylife.home.hw.api/generated/mylife.home.hw.api.jar;version=latest
+-runbundles: org.apache.felix.http.jetty;resolution=file:/C:/Programmation/workspace/cnf/repo/org.apache.felix.http.jetty/org.apache.felix.http.jetty-2.2.0.jar;version='[2.2.0,2.2.1)',\
+	mylife.home.hw.api;resolution=file:/C:/Programmation/workspace/mylife.home.hw.api/generated/mylife.home.hw.api.jar;version=latest
 Service-Component: *
 -runfw: org.apache.felix.framework
 -buildpath: osgi.core,\
@@ -7,4 +8,8 @@ Service-Component: *
 	junit.osgi,\
 	mylife.home.hw.api;version=latest,\
 	org.apache.felix.http.jetty
-Private-Package: mylife.home.hw.emulator
+Private-Package: mylife.home.hw.emulator,\
+	mylife.home.hw.emulator.web
+Bundle-Version: 1.0.0
+Bundle-Activator: mylife.home.hw.emulator.web.WebActivator
+-runrequire: bundle:(symbolicname=org.apache.felix.http.jetty)
