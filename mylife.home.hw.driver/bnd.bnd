@@ -3,10 +3,12 @@
 	org.apache.felix.shell,\
 	org.apache.felix.shell.tui
 Service-Component: *
--runfw: org.apache.felix.framework
+-runfw: org.apache.felix.framework;version='[4.0.1,4.0.1]'
 -buildpath: osgi.core,\
 	osgi.cmpn,\
 	biz.aQute.bnd.annotation,\
 	junit.osgi,\
 	mylife.home.hw.api;version=latest
-Private-Package: mylife.home.hw.driver
+Private-Package: mylife.home.hw.driver,\
+	com.pi4j.*
+
