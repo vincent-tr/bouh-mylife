@@ -4,13 +4,8 @@ import java.util.EnumSet;
 
 import mylife.home.hw.api.Device;
 import mylife.home.hw.api.Options;
-
-import com.pi4j.io.gpio.GpioFactory;
-import com.pi4j.io.gpio.GpioPin;
-import com.pi4j.io.gpio.Pin;
-import com.pi4j.io.gpio.PinMode;
-import com.pi4j.io.gpio.PinPullResistance;
-import com.pi4j.io.gpio.RaspiPin;
+import mylife.home.hw.driver.layout.LayoutManager;
+import mylife.home.hw.driver.layout.PinLayout;
 
 /**
  * Implémentation de bsae
@@ -49,10 +44,6 @@ public abstract class DeviceImpl implements Device {
 	 * RAZ du pin
 	 */
 	protected void reset() {
-		pin.setMode(PinMode.DIGITAL_INPUT);
-		pin.setPullResistance(PinPullResistance.OFF);
-		pin.unexport();
-		GpioFactory.getInstance().unprovisionPin(pin);
 	}
 
 	/**
@@ -64,19 +55,25 @@ public abstract class DeviceImpl implements Device {
 	}
 	
 	private final int pinId;
+	private final int gpioId;
 	private final String name;
 	private final EnumSet<Options> options;
-	private final GpioPin pin;
 	
-	protected DeviceImpl(int pindId, EnumSet<Options> options, GpioPin pin) {
-		this.pinId = pindId;
+	protected DeviceImpl(int pinId, EnumSet<Options> options) {
+		
+		this.pinId = pinId;
 		this.options = options;
-		this.pin = pin;
+		
+		// gestion du layout
+		PinLayout pinLayout = LayoutManager.getInstance().getPinLayout();
+		this.gpioId = pinLayout.pinToGpio(pinId);
 		
 		// création du nom
 		StringBuffer build = new StringBuffer();
-		build.append("pin #");
+		build.append("P");
 		build.append(pinId);
+		build.append(" GPIO ");
+		build.append(gpioId);
 		build.append(" (");
 		boolean firstOption = true;
 		for(Options option : options) {
@@ -94,6 +91,10 @@ public abstract class DeviceImpl implements Device {
 	public int getPinId() {
 		return pinId;
 	}
+	
+	public int getGpioId() {
+		return gpioId;
+	}
 
 	@Override
 	public String getName() {
@@ -103,32 +104,5 @@ public abstract class DeviceImpl implements Device {
 	@Override
 	public EnumSet<Options> getOptions() {
 		return options;
-	}
-	
-	protected GpioPin getPin() {
-		return pin;
-	}
-
-	protected static Pin getPin(int pinId) {
-		switch(pinId) {
-		case 0: return RaspiPin.GPIO_00;
-		case 1: return RaspiPin.GPIO_01;
-		case 2: return RaspiPin.GPIO_02;
-		case 3: return RaspiPin.GPIO_03;
-		case 4: return RaspiPin.GPIO_04;
-		case 5: return RaspiPin.GPIO_05;
-		case 6: return RaspiPin.GPIO_06;
-		case 7: return RaspiPin.GPIO_07;
-		case 8: return RaspiPin.GPIO_08;
-		case 9: return RaspiPin.GPIO_09;
-		case 10: return RaspiPin.GPIO_10;
-		case 11: return RaspiPin.GPIO_11;
-		case 12: return RaspiPin.GPIO_12;
-		case 13: return RaspiPin.GPIO_13;
-		case 14: return RaspiPin.GPIO_14;
-		case 15: return RaspiPin.GPIO_15;
-		case 16: return RaspiPin.GPIO_16;
-		default: throw new UnsupportedOperationException();
-		}
 	}
 }
