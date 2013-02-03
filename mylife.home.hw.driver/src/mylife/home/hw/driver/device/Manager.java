@@ -1,4 +1,4 @@
-package mylife.home.hw.driver;
+package mylife.home.hw.driver.device;
 
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -8,7 +8,7 @@ import mylife.home.hw.api.Device;
 import mylife.home.hw.api.DeviceAccessDeniedException;
 import mylife.home.hw.api.Options;
 
-class Manager {
+public class Manager {
 
 	private Manager() {
 	}

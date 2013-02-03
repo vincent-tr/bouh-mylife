@@ -1,4 +1,4 @@
-package mylife.home.hw.driver;
+package mylife.home.hw.driver.device;
 
 import java.util.EnumSet;
 
@@ -43,8 +43,7 @@ public abstract class DeviceImpl implements Device {
 	/**
 	 * RAZ du pin
 	 */
-	protected void reset() {
-	}
+	protected abstract void reset();
 
 	/**
 	 * Vérifie si l'objet est fermé

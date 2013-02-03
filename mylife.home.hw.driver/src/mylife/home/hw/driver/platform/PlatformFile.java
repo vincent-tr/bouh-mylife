@@ -98,9 +98,20 @@ public class PlatformFile {
 	/**
 	 * Ouverture d'un fichier
 	 * @param fd
+	 * @param flags
+	 * @param mode
 	 */
 	public PlatformFile(String pathname, int flags, int mode) {
 		this.fd = open(pathname, flags, mode);
+	}
+	
+	/**
+	 * Ouverture d'un fichier
+	 * @param fd
+	 * @param flags
+	 */
+	public PlatformFile(String pathname, int flags) {
+		this(pathname, flags, 0);
 	}
 
 	/**

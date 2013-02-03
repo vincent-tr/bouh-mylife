@@ -6,6 +6,7 @@ import mylife.home.hw.api.Device;
 import mylife.home.hw.api.DeviceAccessDeniedException;
 import mylife.home.hw.api.DeviceManager;
 import mylife.home.hw.api.Options;
+import mylife.home.hw.driver.device.Manager;
 import aQute.bnd.annotation.component.Component;
 
 @Component
