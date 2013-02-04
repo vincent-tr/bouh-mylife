@@ -49,7 +49,6 @@ class PlatformCalls {
 					ex);
 		}
 	}
-	
 
 	/**
 	 * Structure pour poll
@@ -100,13 +99,23 @@ class PlatformCalls {
 	public static native int write(int fd, byte[] buf);
 
 	/**
-	 * Appel sysème poll
+	 * Appel système poll
 	 * 
 	 * @param fds
 	 * @param timeout
 	 * @return
 	 */
 	public static native int poll(pollfd[] fds, int timeout);
+
+	/**
+	 * Appel système lseek
+	 * 
+	 * @param fd
+	 * @param offset
+	 * @param whence
+	 * @return
+	 */
+	public static native int lseek(int fd, int offset, int whence);
 
 	/**
 	 * Obtention du message d'erreur associé
