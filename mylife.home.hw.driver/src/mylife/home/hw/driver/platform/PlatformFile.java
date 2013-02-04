@@ -85,6 +85,20 @@ public class PlatformFile {
 		return ret;
 	}
 	
+	
+	/**
+	 * Ecriture dans un fichier
+	 * @param fd
+	 * @param offset
+	 * @param whence
+	 * @return
+	 */
+	private static int lseek(int fd, int offset, int whence) {
+		int ret = PlatformCalls.lseek(fd, offset, whence);
+		checkReturn(ret, "lseek");
+		return ret;
+	}
+
 	/**
 	 * File descriptor du fichier
 	 */
@@ -240,6 +254,20 @@ public class PlatformFile {
 		 */
 		public short getCheckedEvents() {
 			return checkedEvents;
+		}
+	}
+
+	
+	/**
+	 * Ecriture dans un fichier
+	 * @param offset
+	 * @param whence
+	 * @return
+	 */
+	public int lseek(int offset, int whence) {
+		synchronized(fdLock) {
+			checkValid();
+			return lseek(fd, offset, whence);
 		}
 	}
 }

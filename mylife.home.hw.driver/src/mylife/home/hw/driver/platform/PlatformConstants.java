@@ -7,18 +7,18 @@ public final class PlatformConstants {
 	 * indicate the interesting event types; they will appear in `revents' to
 	 * indicate the status of the file descriptor.
 	 */
-	public static final int POLLIN = 0x001; /* There is data to read. */
-	public static final int POLLPRI = 0x002; /* There is urgent data to read. */
-	public static final int POLLOUT = 0x004; /* Writing now will not block. */
+	public static final short POLLIN = 0x001; /* There is data to read. */
+	public static final short POLLPRI = 0x002; /* There is urgent data to read. */
+	public static final short POLLOUT = 0x004; /* Writing now will not block. */
 
 	/*
 	 * Event types always implicitly polled for. These bits need not be set in
 	 * `events', but they will appear in `revents' to indicate the status of the
 	 * file descriptor.
 	 */
-	public static final int POLLERR = 0x008; /* Error condition. */
-	public static final int POLLHUP = 0x010; /* Hung up. */
-	public static final int POLLNVAL = 0x020; /* Invalid polling request. */
+	public static final short POLLERR = 0x008; /* Error condition. */
+	public static final short POLLHUP = 0x010; /* Hung up. */
+	public static final short POLLNVAL = 0x020; /* Invalid polling request. */
 
 	private static final int __O_SYNC = 04000000;
 
@@ -56,4 +56,7 @@ public final class PlatformConstants {
 	public static final int S_IWOTH = 00002;
 	public static final int S_IXOTH = 00001;
 
+	public static final int SEEK_SET       = 0;       /* Seek from beginning of file.  */
+	public static final int SEEK_CUR       = 1;       /* Seek from current position.  */
+	public static final int SEEK_END       = 2;       /* Seek from end of file.  */
 }
