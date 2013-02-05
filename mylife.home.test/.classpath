@@ -7,5 +7,7 @@
 			<attribute name="javadoc_location" value="jar:file:/D:/Programmation/Java/lib/pi4j-0.0.5-SNAPSHOT/lib/pi4j-core-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry combineaccessrules="false" kind="src" path="/mylife.home.hw.api"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/mylife.home.hw.driver"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

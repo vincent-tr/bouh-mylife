@@ -65,15 +65,9 @@ public class PollingService {
 		private boolean exit;
 
 		/**
-		 * Liste des pollables du service
-		 */
-		private final Set<Pollable> pollables;
-
-		/**
 		 * Constructeur par défaut
 		 */
 		public Worker() {
-			this.pollables = PollingService.instance.pollables;
 		}
 
 		/**
@@ -100,6 +94,7 @@ public class PollingService {
 		 */
 		private void doWork() {
 
+			final Set<Pollable> pollables = PollingService.instance.pollables;
 			PlatformFile.PollEvent[] events = null;
 
 			// création de la structure

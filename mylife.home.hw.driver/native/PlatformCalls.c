@@ -120,6 +120,17 @@ JNIEXPORT jint JNICALL Java_mylife_home_hw_driver_platform_PlatformCalls_poll
 
 /*
  * Class:     mylife_home_hw_driver_platform_PlatformCalls
+ * Method:    lseek
+ * Signature: (III)I
+ */
+JNIEXPORT jint JNICALL Java_mylife_home_hw_driver_platform_PlatformCalls_lseek
+  (JNIEnv *env, jclass declaringClass, jint fd, jint offset, jint whence)
+{
+	RETURN_ERROR_CHECK(lseek(fd, offset, whence));
+}
+
+/*
+ * Class:     mylife_home_hw_driver_platform_PlatformCalls
  * Method:    strerror
  * Signature: (I)Ljava/lang/String;
  */
