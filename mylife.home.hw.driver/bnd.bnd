@@ -9,6 +9,5 @@ Service-Component: *
 	biz.aQute.bnd.annotation,\
 	junit.osgi,\
 	mylife.home.hw.api;version=latest
-Private-Package: mylife.home.hw.driver,\
-	com.pi4j.*
+Private-Package: mylife.home.hw.driver
 

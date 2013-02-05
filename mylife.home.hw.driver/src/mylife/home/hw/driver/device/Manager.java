@@ -32,9 +32,6 @@ public class Manager {
 	public Device open(int pinId, EnumSet<Options> options)
 			throws DeviceAccessDeniedException {
 
-		if (pinId < 0 || pinId > 16)
-			throw new IllegalArgumentException("Invalid pin Id");
-
 		if (options == null)
 			throw new IllegalArgumentException("No option set");
 
