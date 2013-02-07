@@ -1,16 +1,17 @@
 -runfw: org.apache.felix.framework;version='[4,5)'
 
--runbundles: org.apache.felix.scr;resolution=file:/C:/Programmation/workspace/cnf/repo/org.apache.felix.scr/org.apache.felix.scr-1.6.0.jar;version='[1.6.0,1.6.1)',\
-	org.apache.felix.http.jetty;resolution=file:/C:/Programmation/workspace/cnf/repo/org.apache.felix.http.jetty/org.apache.felix.http.jetty-2.2.0.jar;version='[2.2.0,2.2.1)',\
-	org.apache.felix.metatype;resolution=file:/C:/Programmation/workspace/cnf/repo/org.apache.felix.metatype/org.apache.felix.metatype-1.0.4.jar;version='[1.0.4,1.0.5)',\
-	org.apache.felix.webconsole;resolution=file:/C:/Programmation/workspace/cnf/repo/org.apache.felix.webconsole/org.apache.felix.webconsole-3.1.8.jar;version='[3.1.8,3.1.9)',\
+-runbundles: org.apache.felix.http.jetty;resolution=file:/D:/Programmation/Java/workspaces/MyLife/cnf/repo/org.apache.felix.http.jetty/org.apache.felix.http.jetty-2.2.0.jar;version='[2.2.0,2.2.1)',\
+	mylife.home.hw.emulator;resolution=file:/D:/Programmation/Java/workspaces/MyLife/mylife.home.hw.emulator/generated/mylife.home.hw.emulator.jar;version=latest,\
+	org.apache.felix.metatype;resolution=file:/D:/Programmation/Java/workspaces/MyLife/cnf/repo/org.apache.felix.metatype/org.apache.felix.metatype-1.0.4.jar;version='[1.0.4,1.0.5)',\
 	osgi.cmpn;resolution=http://bundles.bndtools.org.s3.amazonaws.com/osgi.cmpn/osgi.cmpn-4.2.1.jar;version='[4.2.1,4.2.2)',\
-	org.apache.felix.shell.tui;resolution=file:/C:/Programmation/workspace/cnf/repo/org.apache.felix.shell.tui/org.apache.felix.shell.tui-1.4.1.jar;version='[1.4.1,1.4.2)',\
-	mylife.home.hw.api;resolution=file:/C:/Programmation/workspace/mylife.home.hw.api/generated/mylife.home.hw.api.jar;version=latest,\
-	mylife.home.hw.emulator;resolution=file:/C:/Programmation/workspace/mylife.home.hw.emulator/generated/mylife.home.hw.emulator.jar;version=latest,\
-	org.apache.felix.log;resolution=file:/C:/Programmation/workspace/cnf/repo/org.apache.felix.log/org.apache.felix.log-1.0.1.jar;version='[1.0.1,1.0.2)',\
-	org.apache.felix.shell;resolution=file:/C:/Programmation/workspace/cnf/repo/org.apache.felix.shell/org.apache.felix.shell-1.4.2.jar;version='[1.4.2,1.4.3)',\
-	org.apache.felix.configadmin;resolution=file:/C:/Programmation/workspace/cnf/repo/org.apache.felix.configadmin/org.apache.felix.configadmin-1.2.8.jar;version='[1.2.8,1.2.9)'
+	mylife.home.hw.api;resolution=file:/D:/Programmation/Java/workspaces/MyLife/mylife.home.hw.api/generated/mylife.home.hw.api.jar;version=latest,\
+	org.apache.felix.shell;resolution=file:/D:/Programmation/Java/workspaces/MyLife/cnf/repo/org.apache.felix.shell/org.apache.felix.shell-1.4.2.jar;version='[1.4.2,1.4.3)',\
+	org.apache.felix.configadmin;resolution=file:/D:/Programmation/Java/workspaces/MyLife/cnf/repo/org.apache.felix.configadmin/org.apache.felix.configadmin-1.2.8.jar;version='[1.2.8,1.2.9)',\
+	org.apache.felix.scr;resolution=file:/D:/Programmation/Java/workspaces/MyLife/cnf/repo/org.apache.felix.scr/org.apache.felix.scr-1.6.0.jar;version='[1.6.0,1.6.1)',\
+	org.apache.felix.webconsole;resolution=file:/D:/Programmation/Java/workspaces/MyLife/cnf/repo/org.apache.felix.webconsole/org.apache.felix.webconsole-3.1.8.jar;version='[3.1.8,3.1.9)',\
+	org.apache.felix.http.whiteboard;resolution=file:/D:/Programmation/Java/workspaces/MyLife/cnf/repo/org.apache.felix.http.whiteboard/org.apache.felix.http.whiteboard-2.2.0.jar;version='[2.2.0,2.2.1)',\
+	org.apache.felix.shell.tui;resolution=file:/D:/Programmation/Java/workspaces/MyLife/cnf/repo/org.apache.felix.shell.tui/org.apache.felix.shell.tui-1.4.1.jar;version='[1.4.1,1.4.2)',\
+	org.apache.felix.log;resolution=file:/D:/Programmation/Java/workspaces/MyLife/cnf/repo/org.apache.felix.log/org.apache.felix.log-1.0.1.jar;version='[1.0.1,1.0.2)'
 
 ## Uncomment if you need to change the HTTP port
 #-runproperties: org.osgi.service.http.port=8080
@@ -24,7 +25,8 @@
 	bundle:(&(symbolicname=osgi.cmpn)(version>=4.2)),\
 	bundle:(&(symbolicname=org.apache.felix.scr)(version>=1.6.0)),\
 	bundle:(symbolicname=mylife.home.hw.emulator),\
-	bundle:(symbolicname=org.apache.felix.http.jetty)
+	bundle:(symbolicname=org.apache.felix.http.jetty),\
+	bundle:(symbolicname=org.apache.felix.http.whiteboard)
 -runrepos: Local Repository,\
 	Release,\
 	Workspace
