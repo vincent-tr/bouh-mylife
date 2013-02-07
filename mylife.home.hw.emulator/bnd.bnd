@@ -11,5 +11,5 @@ Service-Component: *
 Private-Package: mylife.home.hw.emulator,\
 	mylife.home.hw.emulator.web
 Bundle-Version: 1.0.0
-Bundle-Activator: mylife.home.hw.emulator.web.WebActivator
+Bundle-Activator: mylife.home.hw.emulator.Activator
 -runrequire: bundle:(symbolicname=org.apache.felix.http.jetty)
