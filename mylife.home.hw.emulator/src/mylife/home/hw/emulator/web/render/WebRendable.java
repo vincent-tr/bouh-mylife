@@ -1,6 +1,7 @@
-package mylife.home.hw.emulator.web;
+package mylife.home.hw.emulator.web.render;
 
 import java.io.IOException;
+
 
 
 /**
@@ -12,8 +13,8 @@ public interface WebRendable {
 	
 	/**
 	 * Exécution du rendu
-	 * @param writer
+	 * @param stream
 	 */
-	public abstract void render(Appendable appender) throws IOException;
+	public abstract void render(WebStream stream) throws IOException;
 	
 }

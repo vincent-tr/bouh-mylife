@@ -2,7 +2,6 @@ package mylife.home.hw.emulator.web;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.lang.reflect.Method;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
@@ -10,6 +9,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import mylife.home.hw.emulator.web.render.Page;
+import mylife.home.hw.emulator.web.render.StringRender;
+import mylife.home.hw.emulator.web.render.WebStream;
 import aQute.bnd.annotation.component.Component;
 
 @Component(provide=Servlet.class, properties={"alias="+DefaultServlet.path})
@@ -26,7 +28,7 @@ public class DefaultServlet extends HttpServlet {
 		
 		// getRequestURI : /mylife.home.hw.emulator/zouave
 		// getQueryString : toto=toto&tata=tata
-		
+/*		
 		OutputStreamWriter w = new OutputStreamWriter( resp.getOutputStream());
 		
 		w.write("<html><head/><body>");
@@ -49,6 +51,17 @@ public class DefaultServlet extends HttpServlet {
 		w.write("</body></html>");
 		
 		w.flush();
+*/
+		OutputStreamWriter writer = new OutputStreamWriter( resp.getOutputStream());
+		WebStream stream = new WebStream(writer);
+		
+		Page page = new Page();
+		page.setTitle("MyLife.Home HW Emulator");
+		page.setIcon("MyLife-128.png");
+		page.getContent().add(new StringRender("<h1>MyLife.Home HW Emulator</h1>"));
+		
+		page.render(stream);
+		writer.flush();
 	}
 
 	/**
