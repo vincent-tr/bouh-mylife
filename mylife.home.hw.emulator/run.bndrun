@@ -1,32 +1,33 @@
 -runfw: org.apache.felix.framework;version='[4,5)'
+-runee: JavaSE-1.6
 
--runbundles: org.apache.felix.http.jetty;resolution=file:/D:/Programmation/Java/workspaces/MyLife/cnf/repo/org.apache.felix.http.jetty/org.apache.felix.http.jetty-2.2.0.jar;version='[2.2.0,2.2.1)',\
-	mylife.home.hw.emulator;resolution=file:/D:/Programmation/Java/workspaces/MyLife/mylife.home.hw.emulator/generated/mylife.home.hw.emulator.jar;version=latest,\
-	org.apache.felix.metatype;resolution=file:/D:/Programmation/Java/workspaces/MyLife/cnf/repo/org.apache.felix.metatype/org.apache.felix.metatype-1.0.4.jar;version='[1.0.4,1.0.5)',\
-	osgi.cmpn;resolution=http://bundles.bndtools.org.s3.amazonaws.com/osgi.cmpn/osgi.cmpn-4.2.1.jar;version='[4.2.1,4.2.2)',\
-	mylife.home.hw.api;resolution=file:/D:/Programmation/Java/workspaces/MyLife/mylife.home.hw.api/generated/mylife.home.hw.api.jar;version=latest,\
-	org.apache.felix.shell;resolution=file:/D:/Programmation/Java/workspaces/MyLife/cnf/repo/org.apache.felix.shell/org.apache.felix.shell-1.4.2.jar;version='[1.4.2,1.4.3)',\
-	org.apache.felix.configadmin;resolution=file:/D:/Programmation/Java/workspaces/MyLife/cnf/repo/org.apache.felix.configadmin/org.apache.felix.configadmin-1.2.8.jar;version='[1.2.8,1.2.9)',\
-	org.apache.felix.scr;resolution=file:/D:/Programmation/Java/workspaces/MyLife/cnf/repo/org.apache.felix.scr/org.apache.felix.scr-1.6.0.jar;version='[1.6.0,1.6.1)',\
-	org.apache.felix.webconsole;resolution=file:/D:/Programmation/Java/workspaces/MyLife/cnf/repo/org.apache.felix.webconsole/org.apache.felix.webconsole-3.1.8.jar;version='[3.1.8,3.1.9)',\
-	org.apache.felix.http.whiteboard;resolution=file:/D:/Programmation/Java/workspaces/MyLife/cnf/repo/org.apache.felix.http.whiteboard/org.apache.felix.http.whiteboard-2.2.0.jar;version='[2.2.0,2.2.1)',\
-	org.apache.felix.shell.tui;resolution=file:/D:/Programmation/Java/workspaces/MyLife/cnf/repo/org.apache.felix.shell.tui/org.apache.felix.shell.tui-1.4.1.jar;version='[1.4.1,1.4.2)',\
-	org.apache.felix.log;resolution=file:/D:/Programmation/Java/workspaces/MyLife/cnf/repo/org.apache.felix.log/org.apache.felix.log-1.0.1.jar;version='[1.0.1,1.0.2)'
+-runbundles: javax.servlet;version='[2.5.0,2.5.1)',\
+	mylife.home.hw.api;version=latest,\
+	mylife.home.hw.emulator;version=latest,\
+	org.apache.felix.configadmin;version='[1.4.0,1.4.1)',\
+	org.apache.felix.gogo.command;version='[0.12.0,0.12.1)',\
+	org.apache.felix.gogo.runtime;version='[0.10.0,0.10.1)',\
+	org.apache.felix.gogo.shell;version='[0.10.0,0.10.1)',\
+	org.apache.felix.http.jetty;version='[2.2.0,2.2.1)',\
+	org.apache.felix.http.whiteboard;version='[2.2.0,2.2.1)',\
+	org.apache.felix.log;version='[1.0.1,1.0.2)',\
+	org.apache.felix.metatype;version='[1.0.4,1.0.5)',\
+	org.apache.felix.scr;version='[1.6.0,1.6.1)',\
+	org.apache.felix.webconsole;version='[3.1.8,3.1.9)',\
+	osgi.cmpn;version='[4.2.0,4.2.1)'
 
 ## Uncomment if you need to change the HTTP port
 #-runproperties: org.osgi.service.http.port=8080
 
--runrequire: bundle:(symbolicname=org.apache.felix.shell),\
-	bundle:(symbolicname=org.apache.felix.shell.tui),\
-	bundle:(symbolicname=org.apache.felix.webconsole),\
-	bundle:(symbolicname=org.apache.felix.configadmin),\
-	bundle:(symbolicname=org.apache.felix.metatype),\
-	bundle:(symbolicname=org.apache.felix.log),\
-	bundle:(&(symbolicname=osgi.cmpn)(version>=4.2)),\
-	bundle:(&(symbolicname=org.apache.felix.scr)(version>=1.6.0)),\
-	bundle:(symbolicname=mylife.home.hw.emulator),\
-	bundle:(symbolicname=org.apache.felix.http.jetty),\
-	bundle:(symbolicname=org.apache.felix.http.whiteboard)
--runrepos: Local Repository,\
-	Release,\
-	Workspace
+-runrequires: osgi.identity;filter:='(osgi.identity=org.apache.felix.gogo.shell)',\
+	osgi.identity;filter:='(osgi.identity=org.apache.felix.gogo.command)',\
+	osgi.identity;filter:='(osgi.identity=org.apache.felix.webconsole)',\
+	osgi.identity;filter:='(osgi.identity=org.apache.felix.configadmin)',\
+	osgi.identity;filter:='(osgi.identity=org.apache.felix.metatype)',\
+	osgi.identity;filter:='(osgi.identity=org.apache.felix.log)',\
+	osgi.identity;filter:='(&(osgi.identity=osgi.cmpn)(version>=4.2))',\
+	osgi.identity;filter:='(&(osgi.identity=org.apache.felix.scr)(version>=1.6.0))',\
+	osgi.identity;filter:='(osgi.identity=mylife.home.hw.emulator)',\
+	osgi.identity;filter:='(osgi.identity=mylife.home.hw.api)',\
+	osgi.identity;filter:='(osgi.identity=org.apache.felix.http.whiteboard)'
+-resolve.effective: active
