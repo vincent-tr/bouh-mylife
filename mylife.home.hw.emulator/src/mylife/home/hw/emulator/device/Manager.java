@@ -29,6 +29,17 @@ public class Manager {
 			return devices.values().toArray(new DeviceImpl[0]);
 		}		
 	}
+
+	/**
+	 * Obtention d'un device ouvert par son pin, ou null si non ouvert
+	 * @param pinId
+	 * @return
+	 */
+	public DeviceImpl getOpenedDevice(int pinId) {
+		synchronized (devices) {
+			return devices.get(Integer.valueOf(pinId));
+		}		
+	}
 	
 	/**
 	 * Ouverture de l'accès

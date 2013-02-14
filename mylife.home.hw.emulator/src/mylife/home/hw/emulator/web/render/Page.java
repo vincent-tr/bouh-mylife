@@ -45,6 +45,47 @@ public class Page extends WebBase {
 	public String getIcon() {
 		return icon;
 	}
+	
+	/**
+	 * Icone
+	 * @param icon
+	 */
+	public void setIcon(String icon) {
+		this.icon = icon;
+	}
+
+	/**
+	 * Style
+	 */
+	private String style;
+
+	/**
+	 * Style
+	 * @return
+	 */
+	public String getStyle() {
+		return style;
+	}
+	
+	/**
+	 * Style
+	 * @param style
+	 */
+	public void setStyle(String style) {
+		this.style = style;
+	}
+
+	/**
+	 * Scripts
+	 */
+	private final Collection<String> scripts = new ArrayList<String>();
+
+	/**
+	 * Scripts
+	 */
+	public Collection<String> getScripts() {
+		return scripts;
+	}
 
 	/**
 	 * Contenu
@@ -58,14 +99,6 @@ public class Page extends WebBase {
 		return content;
 	}
 	
-	/**
-	 * Icone
-	 * @param icon
-	 */
-	public void setIcon(String icon) {
-		this.icon = icon;
-	}
-	
 	@Override
 	public void render(WebStream stream) throws IOException {
 		
@@ -76,6 +109,10 @@ public class Page extends WebBase {
 		stream.indentInc();
 		if(icon != null && !"".equals(icon))
 			stream.writeln("<link rel=\"shortcut icon\" href=\"" + getResourceUrl(encodeHtml(icon)) + "\" />");
+		if(style != null && !"".equals(style))
+			stream.writeln("<link rel=\"stylesheet\" href=\"" + getResourceUrl(encodeHtml(style)) + "\" />");
+		for(String script : scripts)
+			stream.writeln("<script type=\"text/javascript\" src=\"" + getResourceUrl(encodeHtml(script)) + "\" />");
 		if(title != null && !"".equals(title))
 		stream.writeln("<title>" + encodeHtml(title) + "</title>");
 		stream.indentDec();
