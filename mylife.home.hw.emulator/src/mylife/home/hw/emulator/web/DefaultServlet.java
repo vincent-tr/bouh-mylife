@@ -9,9 +9,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import mylife.home.hw.emulator.web.render.ImageRender;
-import mylife.home.hw.emulator.web.render.Page;
-import mylife.home.hw.emulator.web.render.StringRender;
 import mylife.home.hw.emulator.web.render.WebStream;
 import aQute.bnd.annotation.component.Component;
 
@@ -30,14 +27,7 @@ public class DefaultServlet extends HttpServlet {
 		OutputStreamWriter writer = new OutputStreamWriter(resp.getOutputStream());
 		WebStream stream = new WebStream(writer);
 		
-		Page page = new Page();
-		page.setTitle("MyLife.Home HW Emulator");
-		page.setIcon("MyLife-128.png");
-		//page.getScripts().add("bgrefresh.js");
-		
-		page.getContent().add(new ImageRender("MyLife-128.png"));
-		page.getContent().add(new StringRender("<h1>MyLife.Home HW Emulator</h1>"));
-		
+		MainPage page = new MainPage();
 		page.render(stream);
 		writer.flush();
 	}

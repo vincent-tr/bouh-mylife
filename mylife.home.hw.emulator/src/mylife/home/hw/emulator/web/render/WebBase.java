@@ -1,5 +1,9 @@
 package mylife.home.hw.emulator.web.render;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import mylife.home.hw.emulator.web.ResourceServlet;
 
 /**
@@ -39,5 +43,41 @@ public abstract class WebBase implements WebRendable {
 	        }
 	    }
 	    return out.toString();
+	}
+	
+	/**
+	 * Attributs
+	 */
+	private final Map<String, String> attributes = new HashMap<String, String>();
+	
+	/**
+	 * Attributs
+	 */
+	public Map<String, String> getAttributes() {
+		return attributes;
+	}
+	
+	/**
+	 * Ajout d'attributs
+	 * @param key
+	 * @param value
+	 * @return
+	 */
+	public WebBase putAttribute(String key, String value) {
+		getAttributes().put(key, value);
+		return this;
+	}
+	
+	/**
+	 * Formattage des attributs
+	 * @return
+	 */
+	protected String formatAttributes() {
+		
+		StringBuilder builder = new StringBuilder();
+		for(Entry<String, String> attribute : attributes.entrySet()) {
+			builder.append(" " + attribute.getKey() + "=\"" + attribute.getValue() + "\"");
+		}
+		return builder.toString();
 	}
 }

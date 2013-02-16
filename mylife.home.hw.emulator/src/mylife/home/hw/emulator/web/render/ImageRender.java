@@ -24,7 +24,7 @@ public class ImageRender extends WebBase {
 
 	@Override
 	public void render(WebStream stream) throws IOException {
-		stream.writeln("<img src=\"" + getResourceUrl(encodeHtml(image)) + "\" alt=\"\" />");		
+		stream.writeln("<img" + formatAttributes() + " src=\"" + getResourceUrl(encodeHtml(image)) + "\" alt=\"\" />");		
 	}
 
 }
