@@ -55,24 +55,15 @@ public class Page extends WebBase {
 	}
 
 	/**
-	 * Style
+	 * Styles
 	 */
-	private String style;
+	private final Collection<String> styles = new ArrayList<String>();
 
 	/**
-	 * Style
-	 * @return
+	 * Styles
 	 */
-	public String getStyle() {
-		return style;
-	}
-	
-	/**
-	 * Style
-	 * @param style
-	 */
-	public void setStyle(String style) {
-		this.style = style;
+	public Collection<String> getStyles() {
+		return styles;
 	}
 
 	/**
@@ -109,10 +100,10 @@ public class Page extends WebBase {
 		stream.indentInc();
 		if(icon != null && !"".equals(icon))
 			stream.writeln("<link rel=\"shortcut icon\" href=\"" + getResourceUrl(encodeHtml(icon)) + "\" />");
-		if(style != null && !"".equals(style))
+		for(String style : styles)
 			stream.writeln("<link rel=\"stylesheet\" href=\"" + getResourceUrl(encodeHtml(style)) + "\" />");
 		for(String script : scripts)
-			stream.writeln("<script type=\"text/javascript\" src=\"" + getResourceUrl(encodeHtml(script)) + "\" />");
+			stream.writeln("<script type=\"text/javascript\" src=\"" + getResourceUrl(encodeHtml(script)) + "\"></script>");
 		if(title != null && !"".equals(title))
 		stream.writeln("<title>" + encodeHtml(title) + "</title>");
 		stream.indentDec();
