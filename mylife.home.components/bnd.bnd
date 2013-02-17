@@ -1,0 +1,13 @@
+Service-Component: *
+Bundle-Name: Mylife.Home Components
+Private-Package: mylife.home.components
+-runfw: org.apache.felix.framework
+-runee: JavaSE-1.6
+-buildpath: osgi.core,\
+	osgi.cmpn,\
+	biz.aQute.bnd.annotation,\
+	junit.osgi
+-runrequires: osgi.identity;filter:='(osgi.identity=mylife.home.net.api)',\
+	osgi.identity;filter:='(osgi.identity=mylife.home.hw.api)'
+-runbundles: mylife.home.hw.api;version=latest,\
+	mylife.home.net.api;version=latest
