@@ -1,0 +1,11 @@
+Bundle-Version: 1.0.0
+Service-Component: *
+Bundle-Name: Mylife.Home Net XMPP
+Private-Package: mylife.home.net.xmpp
+-runfw: org.apache.felix.framework
+-runee: JavaSE-1.6
+-buildpath: osgi.core,\
+	osgi.cmpn,\
+	biz.aQute.bnd.annotation,\
+	junit.osgi,\
+	mylife.home.hw.api;version=latest
