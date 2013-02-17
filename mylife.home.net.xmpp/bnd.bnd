@@ -9,3 +9,5 @@ Private-Package: mylife.home.net.xmpp
 	biz.aQute.bnd.annotation,\
 	junit.osgi,\
 	mylife.home.hw.api;version=latest
+-runrequires: osgi.identity;filter:='(osgi.identity=mylife.home.net.api)'
+-runbundles: mylife.home.net.api;version=latest

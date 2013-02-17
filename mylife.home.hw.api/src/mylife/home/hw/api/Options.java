@@ -48,4 +48,17 @@ public enum Options {
         	    OPTION_PULL_DOWN,
         	    OPTION_PULL_UP); 
     }     
+    
+    public static EnumSet<Options> valueOfSet(String str) {
+    	String[] split = str.split(",");
+    	EnumSet<Options> options = null;
+    	for(String value : split) {
+    		Options opt = Options.valueOf(value);
+    		if(options == null)
+    			options = EnumSet.of(opt);
+    		else
+    			options.add(opt);
+    	}
+    	return options;
+    }     
 }
