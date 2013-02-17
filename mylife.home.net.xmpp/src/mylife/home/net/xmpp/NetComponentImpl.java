@@ -1,12 +1,21 @@
 package mylife.home.net.xmpp;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import mylife.home.net.api.Command;
 import mylife.home.net.api.CommandListener;
 import mylife.home.net.api.NetComponent;
+import mylife.home.net.api.Tokenizer;
 
+import org.jivesoftware.smack.Chat;
+import org.jivesoftware.smack.ChatManagerListener;
 import org.jivesoftware.smack.Connection;
 import org.jivesoftware.smack.ConnectionListener;
+import org.jivesoftware.smack.MessageListener;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.packet.Presence.Type;
 import org.jivesoftware.smackx.muc.MultiUserChat;
@@ -27,6 +36,7 @@ public class NetComponentImpl implements NetComponent {
 	private final Object managementLock = new Object();
 	private Connection connection;
 	private MultiUserChat room;
+	private final Map<String, CommandListener> commandListeners = new HashMap<String, CommandListener>();
 	
 	/**
 	 * Constructeur avec initialisation des données
@@ -81,15 +91,31 @@ public class NetComponentImpl implements NetComponent {
 
 	@Override
 	public boolean registerCommand(String verb, CommandListener listener) {
+		
+		if(verb == null)
+			throw new IllegalArgumentException("verb == null");
+		if(listener == null)
+			throw new IllegalArgumentException("listener == null");
+		
 		checkClosed();
-		// TODO Auto-generated method stub
-		return false;
+		
+		synchronized(commandListeners) {
+			if(commandListeners.containsKey(verb))
+				return false;
+			commandListeners.put(verb, listener);
+			return true;
+		}
 	}
 
 	@Override
 	public boolean unregisterCommand(String verb) {
-		// TODO Auto-generated method stub
-		return false;
+
+		if(verb == null)
+			throw new IllegalArgumentException("verb == null");
+
+		synchronized(commandListeners) {
+			return commandListeners.remove(verb) != null;
+		}
 	}
 
 	/**
@@ -174,14 +200,63 @@ public class NetComponentImpl implements NetComponent {
 	 */
 	private void connectionInit() throws XMPPException {
 		synchronized(managementLock) {
+			connection.getChatManager().addChatListener(chatListenerInstance);
 			sendStatus();
 			room = new MultiUserChat(connection, configuration.getMucRoom());
 			room.join(componentDisplay);
 		}
 	}
 	
+	/**
+	 * Gestion d'un message de chat
+	 * @param chat
+	 * @param message
+	 */
+	private void processChatMessage(Chat chat, Message message) {
+		String data = message.getBody();
+		if(data == null)
+			return;
+		int idx = data.indexOf(' ');
+		if(idx == -1)
+			return;
+		String verb = data.substring(0, idx);
+		String args = data.substring(idx);
+		Command cmd = new Command(verb, new Tokenizer(args));
+		synchronized(commandListeners) {
+			CommandListener listener = commandListeners.get(verb);
+			if(listener == null)
+				return;
+			listener.execute(cmd);
+		}
+		String retData = cmd.getReturnMessage();
+		if(retData == null)
+			return;
+		try {
+			chat.sendMessage(retData);
+		} catch (XMPPException e) {
+			// Logs
+			// probablement pas pu envoyer car déconnexion, déjà géré
+		}
+	}
+	
+	private final ChatListenerImpl chatListenerInstance = new ChatListenerImpl();
+	private class ChatListenerImpl implements ChatManagerListener {
+		@Override
+		public void chatCreated(Chat chat, boolean createdLocally) {
+			chat.addMessageListener(messageListenerInstance);
+		}
+	}
+	
+	private final MessageListenerImpl messageListenerInstance = new MessageListenerImpl();
+	private class MessageListenerImpl implements MessageListener {
+		@Override
+		public void processMessage(Chat chat, Message message) {
+			processChatMessage(chat, message);
+		}
+	}
+	
 	private final ConnectionListenerImpl connectionListenerInstance = new ConnectionListenerImpl();
-	class ConnectionListenerImpl implements ConnectionListener {
+	private class ConnectionListenerImpl implements ConnectionListener {
 
 		@Override
 		public void connectionClosed() {
