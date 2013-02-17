@@ -15,3 +15,5 @@ Private-Package: mylife.home.hw.emulator,\
 	mylife.home.hw.emulator.web.render
 Bundle-Version: 1.0.0
 -runrequire: bundle:(symbolicname=org.apache.felix.http.jetty)
+Bundle-Name: Mylife.Home HW Emulator
+-runee: JavaSE-1.6
