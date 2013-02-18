@@ -5,6 +5,6 @@ package mylife.home.components;
  * @author pumbawoman
  *
  */
-public class DimmableLight extends Component {
+public class DimmableLight  {
 
 }
