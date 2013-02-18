@@ -21,7 +21,7 @@ import aQute.bnd.annotation.component.Reference;
  * Gestion des composants
  * @author pumbawoman
  */
-@aQute.bnd.annotation.component.Component(provide=Object.class)
+@aQute.bnd.annotation.component.Component(servicefactory=true, designateFactory=Configuration.class)
 public class ComponentsFactory {
 
 	private final String CONFIG_ID = "id";
