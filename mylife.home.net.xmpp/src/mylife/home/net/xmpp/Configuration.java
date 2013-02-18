@@ -1,35 +1,23 @@
 package mylife.home.net.xmpp;
 
+import aQute.bnd.annotation.metatype.Meta;
+
 /**
  * Classe immuable de configuration
  * @author pumbawoman
  */
-public class Configuration {
-	
-	private final String xmppServer;
-	private final String mucRoom;
-	
-	/**
-	 * Constructeur avec données
-	 * @param xmppServer
-	 * @param mucRoom
-	 */
-	public Configuration(String xmppServer, String mucRoom) {
-		this.xmppServer = xmppServer;
-		this.mucRoom = mucRoom;
-	}
+@Meta.OCD(name="Mylife.Home Net XMPP")
+interface Configuration {
 
 	/**
 	 * Serveur
 	 */
-	public String getXmppServer() {
-		return xmppServer;
-	}
+	@Meta.AD(name="XMPP server", deflt="files.mti-team2.dyndns.org")
+	String xmppServer();
 	
 	/**
 	 * muc
 	 */
-	public String getMucRoom() {
-		return mucRoom;
-	}
+	@Meta.AD(name="MUC room", deflt="home@conference.mti-team2.dyndns.org")
+	String mucRoom();
 }

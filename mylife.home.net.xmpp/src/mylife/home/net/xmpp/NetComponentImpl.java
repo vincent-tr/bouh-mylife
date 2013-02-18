@@ -179,7 +179,7 @@ public class NetComponentImpl implements NetComponent {
 			closeConnection();
 			
 			try {
-				connection = new XMPPConnection(configuration.getXmppServer());
+				connection = new XMPPConnection(configuration.xmppServer());
 				connection.connect();
 				connection.login(componentId, null);
 				connection.addConnectionListener(connectionListenerInstance);
@@ -202,7 +202,7 @@ public class NetComponentImpl implements NetComponent {
 		synchronized(managementLock) {
 			connection.getChatManager().addChatListener(chatListenerInstance);
 			sendStatus();
-			room = new MultiUserChat(connection, configuration.getMucRoom());
+			room = new MultiUserChat(connection, configuration.mucRoom());
 			room.join(componentDisplay);
 		}
 	}

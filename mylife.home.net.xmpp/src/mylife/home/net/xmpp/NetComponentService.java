@@ -12,19 +12,14 @@ import org.osgi.service.component.ComponentContext;
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.Modified;
+import aQute.bnd.annotation.metatype.Configurable;
 
 /**
  * Implémentation du service
  * @author pumbawoman
  */
-@Component
+@Component(designate=Configuration.class)
 public class NetComponentService implements NetComponentFactory {
-
-	private final String KEY_XMPP_SERVER = "xmppServer";
-	private final String KEY_MUC_ROOM = "mucRoom";
-	
-	private final String DEFAULT_XMPP_SERVER = "files.mti-team2.dyndns.org"; 
-	private final String DEFAULT_MUC_ROOM = "home@conference.mti-team2.dyndns.org";
 	
 	/**
 	 * Liste des composants enregistrés
@@ -62,31 +57,13 @@ public class NetComponentService implements NetComponentFactory {
 	 */
 	@SuppressWarnings("rawtypes")
 	private void changeConfiguration(Dictionary properties) {
-		
-		Configuration configuration = new Configuration(
-				readConfigurationProperty(properties, KEY_XMPP_SERVER, DEFAULT_XMPP_SERVER),
-				readConfigurationProperty(properties, KEY_MUC_ROOM, DEFAULT_MUC_ROOM));
+		Configuration configuration = Configurable.createConfigurable(Configuration.class, properties);
 		
 		synchronized(components) {
 			this.configuration = configuration;
 			for(NetComponentImpl component : components)
 				component.changeConfiguration(configuration);
 		}
-	}
-	
-	/**
-	 * Lecture de configuration
-	 * @param properties
-	 * @param key
-	 * @param defaultValue
-	 * @return
-	 */
-	@SuppressWarnings("rawtypes")
-	private String readConfigurationProperty(Dictionary properties, String key, String defaultValue) {
-		Object value = properties.get(key);
-		if(value == null)
-			return defaultValue;
-		return (String)value;
 	}
 
 	/**
