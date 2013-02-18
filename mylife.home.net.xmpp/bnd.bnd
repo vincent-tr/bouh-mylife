@@ -8,7 +8,11 @@ Private-Package: mylife.home.net.xmpp
 	osgi.cmpn,\
 	biz.aQute.bnd.annotation,\
 	junit.osgi,\
-	mylife.home.hw.api;version=latest
+	mylife.home.hw.api;version=latest,\
+	org.igniterealtime.smack,\
+	org.igniterealtime.smack-ext,\
+	org.igniterealtime.smack-ext-debug,\
+	org.igniterealtime.smack-ext-jingle
 -runrequires: osgi.identity;filter:='(osgi.identity=mylife.home.net.api)',\
 	osgi.identity;filter:='(osgi.identity=org.igniterealtime.smack)',\
 	osgi.identity;filter:='(osgi.identity=org.igniterealtime.smack-ext)',\
