@@ -9,5 +9,13 @@ Private-Package: mylife.home.net.xmpp
 	biz.aQute.bnd.annotation,\
 	junit.osgi,\
 	mylife.home.hw.api;version=latest
--runrequires: osgi.identity;filter:='(osgi.identity=mylife.home.net.api)'
--runbundles: mylife.home.net.api;version=latest
+-runrequires: osgi.identity;filter:='(osgi.identity=mylife.home.net.api)',\
+	osgi.identity;filter:='(osgi.identity=org.igniterealtime.smack)',\
+	osgi.identity;filter:='(osgi.identity=org.igniterealtime.smack-ext)',\
+	osgi.identity;filter:='(osgi.identity=org.igniterealtime.smack-ext-debug)',\
+	osgi.identity;filter:='(osgi.identity=org.igniterealtime.smack-ext-jingle)'
+-runbundles: mylife.home.net.api;version=latest,\
+	org.igniterealtime.smack;version='[0.0.0,0.0.1)',\
+	org.igniterealtime.smack-ext;version='[0.0.0,0.0.1)',\
+	org.igniterealtime.smack-ext-debug;version='[0.0.0,0.0.1)',\
+	org.igniterealtime.smack-ext-jingle;version='[0.0.0,0.0.1)'
