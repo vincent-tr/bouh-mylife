@@ -165,7 +165,7 @@ public class NetComponentImpl implements NetComponent {
 			if(connection == null)
 				return;
 			Presence presence = new Presence(Type.available);
-			presence.setStatus(componentType + ":" + status);
+			presence.setStatus(componentId + ":" + componentType + ":" + status);
 			connection.sendPacket(presence);
 		}
 	}
@@ -181,7 +181,8 @@ public class NetComponentImpl implements NetComponent {
 			try {
 				connection = new XMPPConnection(configuration.xmppServer());
 				connection.connect();
-				connection.login(componentId, null);
+				//connection.login(componentId, null);
+				connection.loginAnonymously();
 				connection.addConnectionListener(connectionListenerInstance);
 				connectionInit();
 			}
