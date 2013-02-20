@@ -12,12 +12,12 @@ interface Configuration {
 	/**
 	 * Serveur
 	 */
-	@Meta.AD(name="XMPP server", deflt="files.mti-team2.dyndns.org")
+	@Meta.AD(name="XMPP server", deflt="files.mti-team2.dyndns.org", required=false)
 	String xmppServer();
 	
 	/**
 	 * muc
 	 */
-	@Meta.AD(name="MUC room", deflt="home@conference.mti-team2.dyndns.org")
+	@Meta.AD(name="MUC room", deflt="home@conference.mti-team2.dyndns.org", required=false)
 	String mucRoom();
 }
