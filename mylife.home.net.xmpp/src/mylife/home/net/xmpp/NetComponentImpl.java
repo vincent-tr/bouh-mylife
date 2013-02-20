@@ -19,6 +19,7 @@ import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.packet.Presence.Type;
 import org.jivesoftware.smackx.muc.MultiUserChat;
+import org.osgi.service.log.LogService;
 
 /**
  * Implémentation du composant de communication 
@@ -26,6 +27,7 @@ import org.jivesoftware.smackx.muc.MultiUserChat;
  */
 public class NetComponentImpl implements NetComponent {
 
+	private final LogService log;
 	private final NetComponentService owner;
 	private final String componentId;
 	private final String componentDisplay;
@@ -41,17 +43,21 @@ public class NetComponentImpl implements NetComponent {
 	/**
 	 * Constructeur avec initialisation des données
 	 * @param owner
+	 * @param log
 	 * @param configuration
 	 * @param componentId
 	 * @param componentDisplay
 	 * @param componentType
 	 */
-	public NetComponentImpl(NetComponentService owner, Configuration configuration, String componentId, String componentDisplay, String componentType) {
+	public NetComponentImpl(NetComponentService owner, LogService log, Configuration configuration, String componentId, String componentDisplay, String componentType) {
 		this.owner = owner;
+		this.log = log;
 		this.configuration = configuration;
 		this.componentId = componentId;
 		this.componentDisplay = componentDisplay;
 		this.componentType = componentType;
+		
+		log.log(LogService.LOG_INFO, "New net component : " + componentId);
 		
 		reset();
 	}
@@ -134,6 +140,7 @@ public class NetComponentImpl implements NetComponent {
 			owner.closeComponent(this);
 			closed = true;
 		}
+		log.log(LogService.LOG_INFO, "Net component closed : " + componentId);
 	}
 
 	/**
@@ -174,6 +181,7 @@ public class NetComponentImpl implements NetComponent {
 	 * RAZ de la connexion
 	 */
 	private void reset() {
+		log.log(LogService.LOG_INFO, "Net component reset : " + componentId);
 		synchronized(managementLock) {
 			
 			closeConnection();
@@ -187,7 +195,7 @@ public class NetComponentImpl implements NetComponent {
 				connectionInit();
 			}
 			catch(XMPPException ex) {
-				// Logs
+				log.log(LogService.LOG_ERROR, "Net component reset failed : " + componentId, ex);
 				connection = null;
 				room = null;
 				throw new RuntimeException("Unexcepted XMPP exception", ex);
@@ -199,12 +207,19 @@ public class NetComponentImpl implements NetComponent {
 	 * Appelé pour initialisation de la connexion
 	 * @throws XMPPException 
 	 */
-	private void connectionInit() throws XMPPException {
-		synchronized(managementLock) {
-			connection.getChatManager().addChatListener(chatListenerInstance);
-			sendStatus();
-			room = new MultiUserChat(connection, configuration.mucRoom());
-			room.join(componentDisplay);
+	private void connectionInit() {
+		try {
+			synchronized(managementLock) {
+				connection.getChatManager().addChatListener(chatListenerInstance);
+				sendStatus();
+				room = new MultiUserChat(connection, configuration.mucRoom());
+				room.join(componentDisplay);
+			}
+			
+		}
+		catch(XMPPException ex) {
+			log.log(LogService.LOG_ERROR, "Net component connection init error : " + componentId, ex);
+			throw new RuntimeException("Unexcepted XMPP exception", ex);
 		}
 	}
 	
@@ -235,7 +250,7 @@ public class NetComponentImpl implements NetComponent {
 		try {
 			chat.sendMessage(retData);
 		} catch (XMPPException e) {
-			// Logs
+			log.log(LogService.LOG_ERROR, "Net component error sending chat reply : " + componentId, e);
 			// probablement pas pu envoyer car déconnexion, déjà géré
 		}
 	}
@@ -261,34 +276,28 @@ public class NetComponentImpl implements NetComponent {
 
 		@Override
 		public void connectionClosed() {
-			// Logs
+			log.log(LogService.LOG_DEBUG, "Net component connection closed : " + componentId);
 		}
 
 		@Override
 		public void connectionClosedOnError(Exception e) {
-			// Logs
+			log.log(LogService.LOG_ERROR, "Net component connection closed on error : " + componentId, e);
 		}
 
 		@Override
 		public void reconnectingIn(int seconds) {
-			// Logs
+			log.log(LogService.LOG_DEBUG, "Net component connection reconnecting in " + seconds + "sec : " + componentId);
 		}
 
 		@Override
 		public void reconnectionSuccessful() {
-			// Logs
-			try {
-				connectionInit();
-			}
-			catch(XMPPException ex) {
-				// Logs
-				throw new RuntimeException("Unexcepted XMPP exception", ex);
-			}
+			log.log(LogService.LOG_DEBUG, "Net component connection reconnected : " + componentId);
+			connectionInit();
 		}
 
 		@Override
 		public void reconnectionFailed(Exception e) {
-			// Logs
+			log.log(LogService.LOG_ERROR, "Net component connection reconnection failed : " + componentId, e);
 		}
 		
 	}
