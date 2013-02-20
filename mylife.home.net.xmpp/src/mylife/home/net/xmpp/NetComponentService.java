@@ -8,11 +8,13 @@ import mylife.home.net.api.NetComponent;
 import mylife.home.net.api.NetComponentFactory;
 
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.log.LogService;
 
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
 import aQute.bnd.annotation.component.ConfigurationPolicy;
 import aQute.bnd.annotation.component.Modified;
+import aQute.bnd.annotation.component.Reference;
 import aQute.bnd.annotation.metatype.Configurable;
 
 /**
@@ -45,6 +47,11 @@ public class NetComponentService implements NetComponentFactory {
 	}
 	
 	/**
+	 * Logger
+	 */
+	private LogService log;
+	
+	/**
 	 * Liste des composants enregistrés
 	 */
 	private final Set<NetComponentImpl> components = new HashSet<NetComponentImpl>();
@@ -54,13 +61,18 @@ public class NetComponentService implements NetComponentFactory {
 	 */
 	private Configuration configuration;
 	
+	@Reference
+	public void setLog(LogService log)  {
+		this.log = log;
+	}
+	
 	/**
 	 * Création d'un composant
 	 */
 	@Override
 	public NetComponent createComponent(String componentId, String componentDisplay, String componentType) {
 		synchronized(components) {
-			return new NetComponentImpl(this, configuration, componentId, componentDisplay, componentType);
+			return new NetComponentImpl(this, log, configuration, componentId, componentDisplay, componentType);
 		}
 	}
 	
