@@ -233,10 +233,15 @@ public class NetComponentImpl implements NetComponent {
 		if(data == null)
 			return;
 		int idx = data.indexOf(' ');
-		if(idx == -1)
-			return;
-		String verb = data.substring(0, idx);
-		String args = data.substring(idx);
+		String verb;
+		String args;
+		if(idx == -1) {
+			verb = data;
+			args = "";
+		} else {
+			verb = data.substring(0, idx);
+			args = data.substring(idx);
+		}
 		Command cmd = new Command(verb, new Tokenizer(args));
 		synchronized(commandListeners) {
 			CommandListener listener = commandListeners.get(verb);
