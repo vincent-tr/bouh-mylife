@@ -1,8 +1,11 @@
 package mylife.home.hw.emulator.device;
 
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import mylife.home.hw.api.DeviceAccessDeniedException;
 import mylife.home.hw.api.Options;
@@ -42,6 +45,33 @@ public class Manager {
 	}
 	
 	/**
+	 * Liste des pins valides
+	 */
+	private final static Set<Integer> validPins;
+	
+	static {
+		HashSet<Integer> set = new HashSet<Integer>();
+		set.add(3);
+		set.add(5);
+		set.add(7);
+		set.add(8);
+		set.add(10);
+		set.add(11);
+		set.add(12);
+		set.add(13);
+		set.add(15);
+		set.add(16);
+		set.add(18);
+		set.add(19);
+		set.add(21);
+		set.add(22);
+		set.add(23);
+		set.add(24);
+		set.add(26);
+		validPins = Collections.unmodifiableSet(set);
+	}
+	
+	/**
 	 * Ouverture de l'accès
 	 * 
 	 * @param pinId
@@ -54,7 +84,9 @@ public class Manager {
 
 		if (options == null)
 			throw new IllegalArgumentException("No option set");
-
+		if(!validPins.contains(pinId))
+			throw new IllegalArgumentException("Invalid pin number : " + pinId);
+		
 		synchronized (devices) {
 			// vérification que le pin ne soit pas déjà utilisé
 			if (devices.containsKey(Integer.valueOf(pinId)))
