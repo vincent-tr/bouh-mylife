@@ -58,7 +58,15 @@ public class AnalogOutputDeviceImpl extends DeviceImpl implements
 	 * @return
 	 */
 	@Override
-	protected String getType() {
+	public String getType() {
 		return type;
+	}
+	
+	/**
+	 * Obtention du status du device
+	 * @return
+	 */
+	public String getStatus() {
+		return "" + value + "%";
 	}
 }

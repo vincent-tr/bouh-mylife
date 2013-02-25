@@ -98,13 +98,17 @@ public class Manager {
 				throw new DeviceAccessDeniedException("Pin #" + pinId
 						+ " already in use");
 
+			DeviceImpl device = null;
 			if (options.contains(Options.DIRECTION_INPUT))
-				return openInput(pinId, options);
-			if (options.contains(Options.DIRECTION_OUTPUT))
-				return openOutput(pinId, options);
+				device = openInput(pinId, options);
+			else if (options.contains(Options.DIRECTION_OUTPUT))
+				device = openOutput(pinId, options);
+			else
+				throw new IllegalArgumentException("No direction defined");
+			
+			devices.put(device.getPinId(), device);
+			return device;
 		}
-
-		throw new IllegalArgumentException("No direction defined");
 	}
 
 	/**

@@ -39,7 +39,7 @@ public class DefaultServlet extends HttpServlet {
 		"\t\t<script type=\"text/javascript\" src=\"/mylife.home.hw.emulator/resources/bgrefresh.js\"></script>\n"+
 		"\t\t<title>MyLife.Home HW Emulator</title>\n"+
 		"\t</head>\n"+
-		"\t<body>\n"+
+		"\t<body onload=\"new BGRefresh();\">\n"+
 		"\t\t<table width=\"100%\">\n"+
 		"\t\t\t<tr>\n"+
 		"\t\t\t\t<td>\n"+
