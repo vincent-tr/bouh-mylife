@@ -9,8 +9,7 @@ Service-Component: *
 Private-Package: mylife.home.hw.emulator,\
 	mylife.home.hw.emulator.web,\
 	mylife.home.hw.emulator.web.resources,\
-	mylife.home.hw.emulator.device,\
-	mylife.home.hw.emulator.web.render
+	mylife.home.hw.emulator.device
 Bundle-Version: 1.0.0
 Bundle-Name: Mylife.Home HW Emulator
 -runee: JavaSE-1.6

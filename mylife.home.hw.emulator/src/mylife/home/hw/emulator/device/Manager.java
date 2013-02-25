@@ -13,6 +13,25 @@ import mylife.home.hw.api.Options;
 public class Manager {
 
 	private Manager() {
+		HashSet<Integer> set = new HashSet<Integer>();
+		set.add(3);
+		set.add(5);
+		set.add(7);
+		set.add(8);
+		set.add(10);
+		set.add(11);
+		set.add(12);
+		set.add(13);
+		set.add(15);
+		set.add(16);
+		set.add(18);
+		set.add(19);
+		set.add(21);
+		set.add(22);
+		set.add(23);
+		set.add(24);
+		set.add(26);
+		validPins = Collections.unmodifiableSet(set);
 	}
 
 	private static final Manager instance = new Manager();
@@ -47,28 +66,14 @@ public class Manager {
 	/**
 	 * Liste des pins valides
 	 */
-	private final static Set<Integer> validPins;
+	private final Set<Integer> validPins;
 	
-	static {
-		HashSet<Integer> set = new HashSet<Integer>();
-		set.add(3);
-		set.add(5);
-		set.add(7);
-		set.add(8);
-		set.add(10);
-		set.add(11);
-		set.add(12);
-		set.add(13);
-		set.add(15);
-		set.add(16);
-		set.add(18);
-		set.add(19);
-		set.add(21);
-		set.add(22);
-		set.add(23);
-		set.add(24);
-		set.add(26);
-		validPins = Collections.unmodifiableSet(set);
+	/**
+	 * Liste des pins valides
+	 * @return
+	 */
+	public Set<Integer> getValidPins() {
+		return validPins;
 	}
 	
 	/**
