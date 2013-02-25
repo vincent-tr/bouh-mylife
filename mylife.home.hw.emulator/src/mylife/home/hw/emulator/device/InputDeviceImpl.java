@@ -91,7 +91,15 @@ public class InputDeviceImpl extends DeviceImpl implements InputDevice {
 	 * @return
 	 */
 	@Override
-	protected String getType() {
+	public String getType() {
 		return type;
+	}
+	
+	/**
+	 * Obtention du status du device
+	 * @return
+	 */
+	public String getStatus() {
+		return value ? "on" : "off";
 	}
 }

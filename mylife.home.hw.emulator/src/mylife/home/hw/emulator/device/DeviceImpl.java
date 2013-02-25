@@ -82,5 +82,11 @@ public abstract class DeviceImpl implements Device {
 	 * Obtention du type de device
 	 * @return
 	 */
-	protected abstract String getType();
+	public abstract String getType();
+	
+	/**
+	 * Obtention du status du device
+	 * @return
+	 */
+	public abstract String getStatus();
 }

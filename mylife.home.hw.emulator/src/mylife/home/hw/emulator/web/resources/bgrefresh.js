@@ -9,13 +9,13 @@ BGRefresh.prototype.changeInterval = function(value)
 	if(this.timer)
 		window.clearInterval(this.timer);
 	this.timer = window.setInterval(
-			function(){ this.executeRequest('/mylife.home.hw.emulator/refresh', null, this.updateResults) }, 
+			function(){ this.executeRequest('/mylife.home.hw.emulator/data', null, this.updateResults) }, 
 			interval);
 }
 
 BGRefresh.prototype.excuteRequest = function(url, data, callback)
 {
-	rq = new XMLHttpRequest();
+	var rq = new XMLHttpRequest();
 	rq.onreadystatechange = function()
 	{
 		if (rq.readyState != 4)
@@ -35,10 +35,50 @@ BGRefresh.prototype.excuteRequest = function(url, data, callback)
 
 BGRefresh.prototype.updateResults = function(xmlhttp)
 {
+	var doc = xmlhttp.responseXML;
+	var pins = doc.getElementsByTagName('pin');
+	var data = new Array();
+	
+	data['3'] = ['', ''];
+	data['5'] = ['', ''];
+	data['7'] = ['', ''];
+	data['8'] = ['', ''];
+	data['10'] = ['', ''];
+	data['11'] = ['', ''];
+	data['12'] = ['', ''];
+	data['13'] = ['', ''];
+	data['15'] = ['', ''];
+	data['16'] = ['', ''];
+	data['18'] = ['', ''];
+	data['19'] = ['', ''];
+	data['21'] = ['', ''];
+	data['22'] = ['', ''];
+	data['23'] = ['', ''];
+	data['24'] = ['', ''];
+	data['26'] = ['', ''];
+	
+	for (i=0;i<nodes.length;i++)
+	{
+		var pin = pins.item(i);
+		var id = pin.getAttribute('id');
+		var type = pin.getAttribute('type');
+		var status = pin.getAttribute('status');
+		
+		var typepos;
+		var typefull;
+		if(pin % 2 == 0)
+			typepos = 'Right';
+		else
+			typepos = 'Left';
+		typefull = '/mylife.home.hw.emulator/resources/' + type + typepos + '.png';
+		
+		data[pin] = [typefull, status];
+	}
+	
 	// TODO
 }
 
 BGRefresh.prototype.setInput = function(pinId, value)
 {
-	this.executeRequest('/mylife.home.hw.emulator/update', 'pinId='+pinId+"&value="+value, this.updateResults);
+	this.executeRequest('/mylife.home.hw.emulator/data', 'pinId='+pinId+"&value="+value, this.updateResults);
 }
