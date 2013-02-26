@@ -59,6 +59,6 @@ public class DigitalOutputDeviceImpl extends DeviceImpl implements
 	 * @return
 	 */
 	public String getStatus() {
-		return value ? "on" : "off";
+		return value ? "LightOn" : "LightOff";
 	}
 }

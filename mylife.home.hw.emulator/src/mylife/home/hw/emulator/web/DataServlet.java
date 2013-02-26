@@ -33,8 +33,20 @@ public class DataServlet extends HttpServlet {
 	 */
 	public static final String path = DefaultServlet.path + relativePath;
 
+
+	@Override
+	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+		executeRequest(req, resp);
+	}
+
 	@Override
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+		executeRequest(req, resp);
+	}
+	
+	private void executeRequest(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		
 		readData(req);
@@ -44,7 +56,7 @@ public class DataServlet extends HttpServlet {
 	private void readData(HttpServletRequest req) {
 		
 		// obtention du pin et de sa valeur s'il y en a une
-		String sPinId = req.getParameter("pinId");
+		String sPinId = req.getParameter("pinId"); 
 		String sValue = req.getParameter("value");
 		
 		if(sPinId == null || "".equals(sPinId) ||

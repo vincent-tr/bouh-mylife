@@ -100,6 +100,6 @@ public class InputDeviceImpl extends DeviceImpl implements InputDevice {
 	 * @return
 	 */
 	public String getStatus() {
-		return value ? "on" : "off";
+		return value ? "SwitchOn" : "SwitchOff";
 	}
 }

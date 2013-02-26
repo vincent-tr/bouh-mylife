@@ -60,23 +60,41 @@ public class DefaultServlet extends HttpServlet {
 		"\t\t\t\t\t<div style=\"position: relative; width: 435px; height: 581px\" class=\"container\">\n"+
 		"\t\t\t\t\t\t<img style=\"z-index:-1\" src=\"/mylife.home.hw.emulator/resources/LayoutBack.png\" alt=\"\" />\n"+
 		// gauche : 173px , droite : 238px , top = (68 + idx * 36)px
-		"\t\t\t\t\t\t<img id=\"pinType3\" style=\"position:absolute; top:104px; left:173px; z-index:1\" src=\"/mylife.home.hw.emulator/resources/AnalogOuputLeft.png\" alt=\"\" />\n"+
-		"\t\t\t\t\t\t<img id=\"pinType5\" style=\"position:absolute; top:140px; left:173px; z-index:1\" src=\"/mylife.home.hw.emulator/resources/AnalogOuputLeft.png\" alt=\"\" />\n"+
-		"\t\t\t\t\t\t<img id=\"pinType7\" style=\"position:absolute; top:176px; left:173px; z-index:1\" src=\"/mylife.home.hw.emulator/resources/AnalogOuputLeft.png\" alt=\"\" />\n"+
-		"\t\t\t\t\t\t<img id=\"pinType8\" style=\"position:absolute; top:176px; left:238px; z-index:1\" src=\"/mylife.home.hw.emulator/resources/AnalogOuputRight.png\" alt=\"\" />\n"+
-		"\t\t\t\t\t\t<img id=\"pinType10\" style=\"position:absolute; top:212px; left:238px; z-index:1\" src=\"/mylife.home.hw.emulator/resources/AnalogOuputRight.png\" alt=\"\" />\n"+
-		"\t\t\t\t\t\t<img id=\"pinType11\" style=\"position:absolute; top:248px; left:173px; z-index:1\" src=\"/mylife.home.hw.emulator/resources/AnalogOuputLeft.png\" alt=\"\" />\n"+
-		"\t\t\t\t\t\t<img id=\"pinType12\" style=\"position:absolute; top:248px; left:238px; z-index:1\" src=\"/mylife.home.hw.emulator/resources/AnalogOuputRight.png\" alt=\"\" />\n"+
-		"\t\t\t\t\t\t<img id=\"pinType13\" style=\"position:absolute; top:284px; left:173px; z-index:1\" src=\"/mylife.home.hw.emulator/resources/AnalogOuputLeft.png\" alt=\"\" />\n"+
-		"\t\t\t\t\t\t<img id=\"pinType15\" style=\"position:absolute; top:320px; left:173px; z-index:1\" src=\"/mylife.home.hw.emulator/resources/AnalogOuputLeft.png\" alt=\"\" />\n"+
-		"\t\t\t\t\t\t<img id=\"pinType16\" style=\"position:absolute; top:320px; left:238px; z-index:1\" src=\"/mylife.home.hw.emulator/resources/AnalogOuputRight.png\" alt=\"\" />\n"+
-		"\t\t\t\t\t\t<img id=\"pinType18\" style=\"position:absolute; top:356px; left:238px; z-index:1\" src=\"/mylife.home.hw.emulator/resources/AnalogOuputRight.png\" alt=\"\" />\n"+
-		"\t\t\t\t\t\t<img id=\"pinType19\" style=\"position:absolute; top:392px; left:173px; z-index:1\" src=\"/mylife.home.hw.emulator/resources/AnalogOuputLeft.png\" alt=\"\" />\n"+
-		"\t\t\t\t\t\t<img id=\"pinType21\" style=\"position:absolute; top:428px; left:173px; z-index:1\" src=\"/mylife.home.hw.emulator/resources/AnalogOuputLeft.png\" alt=\"\" />\n"+
-		"\t\t\t\t\t\t<img id=\"pinType22\" style=\"position:absolute; top:428px; left:238px; z-index:1\" src=\"/mylife.home.hw.emulator/resources/AnalogOuputRight.png\" alt=\"\" />\n"+
-		"\t\t\t\t\t\t<img id=\"pinType23\" style=\"position:absolute; top:464px; left:173px; z-index:1\" src=\"/mylife.home.hw.emulator/resources/AnalogOuputLeft.png\" alt=\"\" />\n"+
-		"\t\t\t\t\t\t<img id=\"pinType24\" style=\"position:absolute; top:464px; left:238px; z-index:1\" src=\"/mylife.home.hw.emulator/resources/AnalogOuputRight.png\" alt=\"\" />\n"+
-		"\t\t\t\t\t\t<img id=\"pinType26\" style=\"position:absolute; top:500px; left:238px; z-index:1\" src=\"/mylife.home.hw.emulator/resources/AnalogOuputRight.png\" alt=\"\" />\n"+
+		"\t\t\t\t\t\t<img id=\"pinType3\" style=\"position:absolute; top:104px; left:173px; z-index:1\" src=\"\" alt=\"\" />\n"+ 
+		"\t\t\t\t\t\t<img id=\"pinType5\" style=\"position:absolute; top:140px; left:173px; z-index:1\" src=\"\" alt=\"\" />\n"+
+		"\t\t\t\t\t\t<img id=\"pinType7\" style=\"position:absolute; top:176px; left:173px; z-index:1\" src=\"\" alt=\"\" />\n"+
+		"\t\t\t\t\t\t<img id=\"pinType8\" style=\"position:absolute; top:176px; left:238px; z-index:1\" src=\"\" alt=\"\" />\n"+
+		"\t\t\t\t\t\t<img id=\"pinType10\" style=\"position:absolute; top:212px; left:238px; z-index:1\" src=\"\" alt=\"\" />\n"+
+		"\t\t\t\t\t\t<img id=\"pinType11\" style=\"position:absolute; top:248px; left:173px; z-index:1\" src=\"\" alt=\"\" />\n"+
+		"\t\t\t\t\t\t<img id=\"pinType12\" style=\"position:absolute; top:248px; left:238px; z-index:1\" src=\"\" alt=\"\" />\n"+
+		"\t\t\t\t\t\t<img id=\"pinType13\" style=\"position:absolute; top:284px; left:173px; z-index:1\" src=\"\" alt=\"\" />\n"+
+		"\t\t\t\t\t\t<img id=\"pinType15\" style=\"position:absolute; top:320px; left:173px; z-index:1\" src=\"\" alt=\"\" />\n"+
+		"\t\t\t\t\t\t<img id=\"pinType16\" style=\"position:absolute; top:320px; left:238px; z-index:1\" src=\"\" alt=\"\" />\n"+
+		"\t\t\t\t\t\t<img id=\"pinType18\" style=\"position:absolute; top:356px; left:238px; z-index:1\" src=\"\" alt=\"\" />\n"+
+		"\t\t\t\t\t\t<img id=\"pinType19\" style=\"position:absolute; top:392px; left:173px; z-index:1\" src=\"\" alt=\"\" />\n"+
+		"\t\t\t\t\t\t<img id=\"pinType21\" style=\"position:absolute; top:428px; left:173px; z-index:1\" src=\"\" alt=\"\" />\n"+
+		"\t\t\t\t\t\t<img id=\"pinType22\" style=\"position:absolute; top:428px; left:238px; z-index:1\" src=\"\" alt=\"\" />\n"+
+		"\t\t\t\t\t\t<img id=\"pinType23\" style=\"position:absolute; top:464px; left:173px; z-index:1\" src=\"\" alt=\"\" />\n"+
+		"\t\t\t\t\t\t<img id=\"pinType24\" style=\"position:absolute; top:464px; left:238px; z-index:1\" src=\"\" alt=\"\" />\n"+
+		"\t\t\t\t\t\t<img id=\"pinType26\" style=\"position:absolute; top:500px; left:238px; z-index:1\" src=\"\" alt=\"\" />\n"+
+		// gauche : 100px , droite : 305px , top = (62 + idx * 36)px
+		"\t\t\t\t\t\t<img id=\"pinStatus3\" style=\"position:absolute; top:98px; left:100px; z-index:1\" src=\"\" alt=\"\" />\n"+
+		"\t\t\t\t\t\t<img id=\"pinStatus5\" style=\"position:absolute; top:134px; left:100px; z-index:1\" src=\"\" alt=\"\" />\n"+
+		"\t\t\t\t\t\t<img id=\"pinStatus7\" style=\"position:absolute; top:170px; left:100px; z-index:1\" src=\"\" alt=\"\" />\n"+
+		"\t\t\t\t\t\t<img id=\"pinStatus8\" style=\"position:absolute; top:170px; left:305px; z-index:1\" src=\"\" alt=\"\" />\n"+
+		"\t\t\t\t\t\t<img id=\"pinStatus10\" style=\"position:absolute; top:206px; left:305px; z-index:1\" src=\"\" alt=\"\" />\n"+
+		"\t\t\t\t\t\t<img id=\"pinStatus11\" style=\"position:absolute; top:242px; left:100px; z-index:1\" src=\"\" alt=\"\" />\n"+
+		"\t\t\t\t\t\t<img id=\"pinStatus12\" style=\"position:absolute; top:242px; left:305px; z-index:1\" src=\"\" alt=\"\" />\n"+
+		"\t\t\t\t\t\t<img id=\"pinStatus13\" style=\"position:absolute; top:278px; left:100px; z-index:1\" src=\"\" alt=\"\" />\n"+
+		"\t\t\t\t\t\t<img id=\"pinStatus15\" style=\"position:absolute; top:314px; left:100px; z-index:1\" src=\"\" alt=\"\" />\n"+
+		"\t\t\t\t\t\t<img id=\"pinStatus16\" style=\"position:absolute; top:314px; left:305px; z-index:1\" src=\"\" alt=\"\" />\n"+
+		"\t\t\t\t\t\t<img id=\"pinStatus18\" style=\"position:absolute; top:350px; left:305px; z-index:1\" src=\"\" alt=\"\" />\n"+
+		"\t\t\t\t\t\t<img id=\"pinStatus19\" style=\"position:absolute; top:386px; left:100px; z-index:1\" src=\"\" alt=\"\" />\n"+
+		"\t\t\t\t\t\t<img id=\"pinStatus21\" style=\"position:absolute; top:422px; left:100px; z-index:1\" src=\"\" alt=\"\" />\n"+
+		"\t\t\t\t\t\t<img id=\"pinStatus22\" style=\"position:absolute; top:422px; left:305px; z-index:1\" src=\"\" alt=\"\" />\n"+
+		"\t\t\t\t\t\t<img id=\"pinStatus23\" style=\"position:absolute; top:458px; left:100px; z-index:1\" src=\"\" alt=\"\" />\n"+
+		"\t\t\t\t\t\t<img id=\"pinStatus24\" style=\"position:absolute; top:458px; left:305px; z-index:1\" src=\"\" alt=\"\" />\n"+
+		"\t\t\t\t\t\t<img id=\"pinStatus26\" style=\"position:absolute; top:494px; left:305px; z-index:1\" src=\"\" alt=\"\" />\n"+
 		"\t\t\t\t\t</div>\n"+
 		"\t\t\t\t</td>\n"+
 		"\t\t\t</tr>\n"+
