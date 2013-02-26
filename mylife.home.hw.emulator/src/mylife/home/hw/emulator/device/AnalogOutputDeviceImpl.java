@@ -1,5 +1,6 @@
 package mylife.home.hw.emulator.device;
 
+import java.text.DecimalFormat;
 import java.util.EnumSet;
 
 import mylife.home.hw.api.AnalogOutputDevice;
@@ -51,7 +52,7 @@ public class AnalogOutputDeviceImpl extends DeviceImpl implements
 	/**
 	 * Type de device
 	 */
-	private static final String type = "AnalogOuput";
+	private static final String type = "AnalogOutput";
 	
 	/**
 	 * Obtention du type de device
@@ -67,6 +68,7 @@ public class AnalogOutputDeviceImpl extends DeviceImpl implements
 	 * @return
 	 */
 	public String getStatus() {
-		return "" + value + "%";
+		DecimalFormat df = new DecimalFormat("000");
+		return "Light" + df.format(value);
 	}
 }
