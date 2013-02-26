@@ -240,7 +240,7 @@ public class NetComponentImpl implements NetComponent {
 			args = "";
 		} else {
 			verb = data.substring(0, idx);
-			args = data.substring(idx);
+			args = data.substring(idx + 1);
 		}
 		Command cmd = new Command(verb, new Tokenizer(args));
 		synchronized(commandListeners) {
