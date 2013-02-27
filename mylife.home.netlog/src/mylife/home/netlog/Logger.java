@@ -34,7 +34,11 @@ public class Logger {
 		@Meta.AD(name="Component display")
 		String display();
 
-		@Meta.AD(name="Max log level")
+		@Meta.AD(
+				name="Max log level",
+				deflt="4",
+				optionLabels={"ERROR","WARNING","INFO","DEBUG"},
+				optionValues={"1","2","3","4"})
 		int maxLevel();
 	}
 	
