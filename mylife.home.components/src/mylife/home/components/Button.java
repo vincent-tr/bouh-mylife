@@ -11,6 +11,7 @@ import mylife.home.net.api.NetComponent;
 import mylife.home.net.api.NetComponentFactory;
 
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.log.LogService;
 
 import aQute.bnd.annotation.component.Activate;
 import aQute.bnd.annotation.component.Component;
@@ -45,6 +46,7 @@ public class Button implements InputDeviceListener {
 		int pinId();
 	}
 
+	private LogService log;
 	private DeviceManager deviceManager;
 	private NetComponentFactory netManager;
 	private Configuration configuration;
@@ -59,6 +61,11 @@ public class Button implements InputDeviceListener {
 	@Reference
 	public void setNetManager(NetComponentFactory netManager) {
 		this.netManager = netManager;
+	}
+	
+	@Reference
+	public void setLog(LogService log)  {
+		this.log = log;
 	}
 
 	/**
@@ -125,5 +132,6 @@ public class Button implements InputDeviceListener {
 	@Override
 	public void stateChanged(InputDevice device, boolean state) {
 		net.setStatus(state ? "on" : "off");
+		log.log(LogService.LOG_DEBUG, String.format("%s (type=%s) : state changed to %b", net.getComponentId(), net.getComponentType(), state));
 	}
 }
