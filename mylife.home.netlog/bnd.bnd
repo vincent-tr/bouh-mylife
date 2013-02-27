@@ -1,0 +1,12 @@
+Bundle-Version: 1.0.0
+Service-Component: *
+Private-Package: mylife.home.netlog
+-runfw: org.apache.felix.framework
+-runee: JavaSE-1.6
+Bundle-Name: MyLife.Home NetLog
+-buildpath: osgi.core,\
+	osgi.cmpn,\
+	biz.aQute.bnd.annotation,\
+	junit.osgi
+-runrequires: osgi.identity;filter:='(osgi.identity=mylife.home.net.api)'
+-runbundles: mylife.home.net.api;version=latest
