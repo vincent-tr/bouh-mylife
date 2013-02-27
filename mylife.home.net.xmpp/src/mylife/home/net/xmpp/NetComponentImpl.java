@@ -178,6 +178,21 @@ public class NetComponentImpl implements NetComponent {
 	}
 	
 	/**
+	 * Envoi d'un message
+	 */
+	@Override
+	public void sendMessage(String data) {
+		synchronized(managementLock) {
+			if(connection == null || room == null)
+				return;
+			Message msg = room.createMessage();
+			msg.setBody(data);
+			connection.sendPacket(msg);
+		}
+		
+	}
+	
+	/**
 	 * RAZ de la connexion
 	 */
 	private void reset() {

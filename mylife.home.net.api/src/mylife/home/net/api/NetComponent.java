@@ -59,6 +59,12 @@ public interface NetComponent {
 	public boolean unregisterCommand(String verb);
 	
 	/**
+	 * Envoi d'un message
+	 * @param data
+	 */
+	public void sendMessage(String data);
+	
+	/**
 	 * Fermeture du composant
 	 */
 	public void close();
