@@ -132,7 +132,7 @@ public class Light  {
 		}
 
 		changeState(false);
-}
+	}
 	
 	private void changeState(boolean state) {
 		device.setValue(state);
