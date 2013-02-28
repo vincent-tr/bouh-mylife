@@ -43,6 +43,9 @@ public class Light  {
 		@Meta.AD(name="Component display")
 		String display();
 
+		@Meta.AD(name="Backup state")
+		boolean backupState();
+
 		@Meta.AD(name="pin ID")
 		int pinId();
 	}
@@ -50,7 +53,9 @@ public class Light  {
 	private LogService log;
 	private DeviceManager deviceManager;
 	private NetComponentFactory netManager;
+	private StateBackupService stateBackup;
 	private Configuration configuration;
+	private String pid;
 	private NetComponent net;
 	private DigitalOutputDevice device;
 	private final Object statusLock = new Object();
@@ -69,6 +74,11 @@ public class Light  {
 	public void setLog(LogService log)  {
 		this.log = log;
 	}
+	
+	@Reference
+	public void setStateBackupService(StateBackupService stateBackup) {
+		this.stateBackup = stateBackup;
+	}
 
 	/**
 	 * Activation
@@ -77,6 +87,7 @@ public class Light  {
 	@Activate
 	public void activate(ComponentContext ctx) {
 		configuration = (Configuration)Configurable.createConfigurable(Configuration.class, ctx.getProperties());
+		pid = ctx.getProperties().get("service.pid").toString();
 		initialize();
 	}
 
@@ -131,12 +142,31 @@ public class Light  {
 			throw new RuntimeException(e);
 		}
 
-		changeState(false);
+		changeState(restoreState());
+	}
+	
+	private boolean restoreState() {
+		if(!configuration.backupState())
+			return false;
+
+		String strstate = stateBackup.getState(pid);
+		if(strstate == null)
+			return false;
+
+		try {
+			return Boolean.getBoolean(strstate);
+		}
+		catch(Exception ex) {
+			log.log(LogService.LOG_WARNING, String.format("%s (type=%s) : failed loading configuration", net.getComponentId(), net.getComponentType()), ex);
+			return false;
+		}
 	}
 	
 	private void changeState(boolean state) {
 		device.setValue(state);
 		net.setStatus(state ? "on" : "off");
+		if(configuration.backupState())
+			stateBackup.setState(pid, String.valueOf(state));
 		log.log(LogService.LOG_DEBUG, String.format("%s (type=%s) : state changed to %b", net.getComponentId(), net.getComponentType(), state));
 	}
 	

@@ -43,6 +43,9 @@ public class DimmableLight  {
 		@Meta.AD(name="Component display")
 		String display();
 
+		@Meta.AD(name="Backup state")
+		boolean backupState();
+
 		@Meta.AD(name="pin ID")
 		int pinId();
 	}
@@ -50,6 +53,8 @@ public class DimmableLight  {
 	private LogService log;
 	private DeviceManager deviceManager;
 	private NetComponentFactory netManager;
+	private StateBackupService stateBackup;
+	private String pid;
 	private Configuration configuration;
 	private NetComponent net;
 	private AnalogOutputDevice device;
@@ -69,6 +74,11 @@ public class DimmableLight  {
 	public void setLog(LogService log)  {
 		this.log = log;
 	}
+	
+	@Reference
+	public void setStateBackupService(StateBackupService stateBackup) {
+		this.stateBackup = stateBackup;
+	}
 
 	/**
 	 * Activation
@@ -77,6 +87,7 @@ public class DimmableLight  {
 	@Activate
 	public void activate(ComponentContext ctx) {
 		configuration = (Configuration)Configurable.createConfigurable(Configuration.class, ctx.getProperties());
+		pid = ctx.getProperties().get("service.pid").toString();
 		initialize();
 	}
 
@@ -131,12 +142,34 @@ public class DimmableLight  {
 			throw new RuntimeException(e);
 		}
 
-		changeState(0);
-}
+		changeState(restoreState());
+	}
+	
+	private int restoreState() {
+		if(!configuration.backupState())
+			return 0;
+
+		String strstate = stateBackup.getState(pid);
+		if(strstate == null)
+			return 0;
+
+		try {
+			int value = Integer.getInteger(strstate);
+			if(value > 100)
+				value = 100;
+			return value;
+		}
+		catch(Exception ex) {
+			log.log(LogService.LOG_WARNING, String.format("%s (type=%s) : failed loading configuration", net.getComponentId(), net.getComponentType()), ex);
+			return 0;
+		}
+	}
 	
 	private void changeState(int state) {
 		device.setValue(state);
 		net.setStatus("" + state + "%");
+		if(configuration.backupState())
+			stateBackup.setState(pid, String.valueOf(state));
 		log.log(LogService.LOG_DEBUG, String.format("%s (type=%s) : state changed to %d", net.getComponentId(), net.getComponentType(), state));
 	}
 	
