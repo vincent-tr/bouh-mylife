@@ -13,6 +13,7 @@ import org.jivesoftware.smack.ChatManagerListener;
 import org.jivesoftware.smack.Connection;
 import org.jivesoftware.smack.ConnectionListener;
 import org.jivesoftware.smack.MessageListener;
+import org.jivesoftware.smack.Roster.SubscriptionMode;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.packet.Message;
@@ -172,7 +173,7 @@ public class NetComponentImpl implements NetComponent {
 			if(connection == null)
 				return;
 			Presence presence = new Presence(Type.available);
-			presence.setStatus(componentId + ":" + componentType + ":" + status);
+			presence.setStatus(status);
 			connection.sendPacket(presence);
 		}
 	}
@@ -226,9 +227,10 @@ public class NetComponentImpl implements NetComponent {
 		try {
 			synchronized(managementLock) {
 				connection.getChatManager().addChatListener(chatListenerInstance);
+				connection.getRoster().setSubscriptionMode(SubscriptionMode.accept_all);
 				sendStatus();
 				room = new MultiUserChat(connection, configuration.mucRoom());
-				room.join(componentDisplay);
+				room.join(componentId + ":" + componentType + ":" + componentDisplay);
 			}
 			
 		}
