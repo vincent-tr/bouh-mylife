@@ -20,16 +20,15 @@ public class AnalogOutputDeviceImpl extends DeviceImpl implements
 	
 	private final SysFS pwm;
 	private final SysFS onOff;
+	
+	private final Object sync = new Object();
 
 	public AnalogOutputDeviceImpl(int pinId, EnumSet<Options> options) {
 		super(pinId, options);
 		pwm = new SysFS(getGpioId(), "/sys/class/soft_pwm", "export", "unexport", "pwm");
 		onOff = new SysFS(getGpioId(), "/sys/class/gpio", "export", "unexport", "gpio");
+		
 		try {
-			pwm.open();
-			pwm.writeValue("period", "10000");
-			onOff.open();
-			onOff.writeValue("direction", "out");
 			setValue(0);
 		} catch (RuntimeException ex) {
 			reset();
@@ -39,13 +38,14 @@ public class AnalogOutputDeviceImpl extends DeviceImpl implements
 
 	@Override
 	protected void reset() {
-		if(onOff.isOpened() && pwm.isOpened())
+		synchronized(sync) {
+			
 			setValue(0);
-		if(pwm.isOpened()) {
-			pwm.close();
-		}
-		if(onOff.isOpened()) {
-			onOff.close();
+			
+			if(pwm.isOpened())
+				pwm.close();
+			if(onOff.isOpened())
+				onOff.close();
 		}
 	}
 
@@ -56,17 +56,47 @@ public class AnalogOutputDeviceImpl extends DeviceImpl implements
 
 	@Override
 	public void setValue(int value) {
-		if (value < 0)
-			throw new IllegalArgumentException("value must be >= 0");
-		if (value > range)
-			throw new IllegalArgumentException("value must be <= " + range);
-
-		pwm.writeValue("pulse", "" + (range * value));
-		if(value == 0)
-			onOff.writeValue("value", "0");
-		else if(value == 100)
-			onOff.writeValue("value", "1");
-		this.value = value;
+		synchronized(sync) {
+			
+			if (value < 0)
+				throw new IllegalArgumentException("value must be >= 0");
+			if (value > range)
+				throw new IllegalArgumentException("value must be <= " + range);
+	
+			if(value == 0)
+				setDigital(false);
+			else if(value == 100)
+				setDigital(true);
+			else
+				setAnalog(value);
+			
+			this.value = value;
+		}
 	}
-
+	
+	private void setDigital(boolean value) {
+		
+		if(pwm.isOpened())
+			pwm.close();
+		
+		if(!onOff.isOpened()) {
+			onOff.open();
+			onOff.writeValue("direction", "out");
+		}
+		
+		onOff.writeValue("value", value ? "1" : "0");
+	}
+	
+	private void setAnalog(int value) {
+		
+		if(onOff.isOpened())
+			onOff.close();
+		
+		if(!pwm.isOpened()) {
+			pwm.open();
+			pwm.writeValue("period", "10000");
+		}
+		
+		pwm.writeValue("pulse", "" + (range * value));
+	}
 }

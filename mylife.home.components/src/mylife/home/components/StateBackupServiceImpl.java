@@ -2,6 +2,7 @@ package mylife.home.components;
 
 import java.io.IOException;
 import java.util.Dictionary;
+import java.util.Hashtable;
 
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -71,6 +72,8 @@ public class StateBackupServiceImpl implements StateBackupService {
 		synchronized(dataLock) {
 			config = configService.getConfiguration(localPid);
 			data = config.getProperties();
+			if(data == null)
+				data = new Hashtable();
 		}
 	}
 	
