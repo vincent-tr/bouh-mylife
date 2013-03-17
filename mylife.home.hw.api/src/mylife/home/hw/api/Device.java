@@ -8,7 +8,7 @@ import java.util.EnumSet;
  * @author pumbawoman
  *
  */
-public interface Device extends AutoCloseable {
+public interface Device {
 
 	/**
 	 * Obtention de l'identifiant du matériel
@@ -27,4 +27,9 @@ public interface Device extends AutoCloseable {
 	 * @return
 	 */
 	public EnumSet<Options> getOptions();
+	
+	/**
+	 * Fermeture du matériel
+	 */
+	public void close() throws Exception;
 }
