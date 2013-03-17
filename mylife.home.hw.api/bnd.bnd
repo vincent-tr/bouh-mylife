@@ -1,3 +1,5 @@
 Bundle-Version: 1.0.0
 Export-Package: mylife.home.hw.api
 Bundle-Name: Mylife.Home HW API
+-runfw: org.apache.felix.framework
+-runee: JavaSE-1.6
