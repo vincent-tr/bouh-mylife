@@ -2,20 +2,17 @@ package mylife.home.hw.driver.device;
 
 import java.io.File;
 import java.nio.charset.Charset;
-import java.util.EnumSet;
 
-import mylife.home.hw.api.Options;
 import mylife.home.hw.driver.platform.PlatformConstants;
 import mylife.home.hw.driver.platform.PlatformFile;
 
-/**
- * Implémentation d'un device avec sysfs
- * 
- * @author pumbawoman
- * 
- */
-public abstract class SysFSDeviceImpl extends DeviceImpl {
+class SysFS {
 
+	/**
+	 * Numéro GPIO
+	 */
+	private final int gpioId;
+	
 	/**
 	 * Fichier d'export '/sys/class/gpio/export'
 	 */
@@ -34,24 +31,21 @@ public abstract class SysFSDeviceImpl extends DeviceImpl {
 	/**
 	 * Constructeur avec données
 	 * 
-	 * @param pinId
+	 * @param gpioId
 	 * @param options
 	 * @param baseDirectory
 	 * @param exportFile
 	 * @param unexportFile
 	 * @param itemDirectoryName
 	 */
-	protected SysFSDeviceImpl(int pinId, EnumSet<Options> options,
+	public SysFS(int gpioId,
 			String baseDirectory, String exportFile, String unexportFile,
 			String itemDirectoryName) {
 
-		super(pinId, options);
-
+		this.gpioId = gpioId;
 		this.exportPath = baseDirectory + File.separator + exportFile;
 		this.unexportPath = baseDirectory + File.separator + unexportFile;
-		this.itemDirectoryPath = baseDirectory + File.separator + itemDirectoryName + getGpioId();
-
-		open();
+		this.itemDirectoryPath = baseDirectory + File.separator + itemDirectoryName + gpioId;
 	}
 
 	private static final Charset ascii = Charset.forName("US-ASCII");
@@ -62,7 +56,7 @@ public abstract class SysFSDeviceImpl extends DeviceImpl {
 	 * @param file
 	 * @param content
 	 */
-	protected void write(String file, String content) {
+	protected void writeFile(String file, String content) {
 		int flags = PlatformConstants.O_APPEND | PlatformConstants.O_WRONLY;
 		PlatformFile fd = new PlatformFile(file, flags);
 		try
@@ -71,6 +65,15 @@ public abstract class SysFSDeviceImpl extends DeviceImpl {
 		} finally {
 			fd.close();
 		}
+	}
+	
+	/**
+	 * Ecriture d'une valeur dans un fichier de l'interface
+	 * @param valueFile
+	 * @param value
+	 */
+	public void writeValue(String valueFile, String value) {
+		writeFile(itemDirectoryPath + File.separator + valueFile, value);
 	}
 
 	private boolean fileExists(String path) {
@@ -81,17 +84,35 @@ public abstract class SysFSDeviceImpl extends DeviceImpl {
 	/**
 	 * Ouverture du périphérique
 	 */
-	protected void open() {
-		if(fileExists(itemDirectoryPath))
+	public void open() {
+		if(isOpened())
 			throw new java.lang.UnsupportedOperationException("The specified pin is already opened");
-		write(exportPath, "" + getGpioId());
+		writeFile(exportPath, "" + gpioId);
+	}
+	
+	/**
+	 * Indique si le périphérique est ouvert
+	 * @return
+	 */
+	public boolean isOpened() {
+		return fileExists(itemDirectoryPath);
+	}
+	
+	/**
+	 * Fermeture du périphérique
+	 */
+	public void close() {
+		if(!isOpened())
+			throw new java.lang.UnsupportedOperationException("The specified pin is not opened");
+		writeFile(unexportPath, "" + gpioId);
 	}
 
 	/**
-	 * Fin d'utilisation du périphérique
+	 * Numéro GPIO
+	 * @return
 	 */
-	protected void reset() {
-		write(unexportPath, "" + getGpioId());
+	protected int getGpioId() {
+		return gpioId;
 	}
 
 	/**
@@ -125,5 +146,4 @@ public abstract class SysFSDeviceImpl extends DeviceImpl {
 	protected static Charset getAscii() {
 		return ascii;
 	}
-
 }

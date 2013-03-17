@@ -1,12 +1,11 @@
 package mylife.home.hw.driver.device;
 
-import java.io.File;
 import java.util.EnumSet;
 
 import mylife.home.hw.api.AnalogOutputDevice;
 import mylife.home.hw.api.Options;
 
-public class AnalogOutputDeviceImpl extends SysFSDeviceImpl implements
+public class AnalogOutputDeviceImpl extends DeviceImpl implements
 		AnalogOutputDevice {
 
 	/**
@@ -18,14 +17,21 @@ public class AnalogOutputDeviceImpl extends SysFSDeviceImpl implements
 	 * Valeur max
 	 */
 	private final int range = 100;
+	
+	private final SysFS pwm;
+	private final SysFS onOff;
 
 	public AnalogOutputDeviceImpl(int pinId, EnumSet<Options> options) {
-		super(pinId, options, "/sys/class/soft_pwm", "export", "unexport",
-				"pwm");
+		super(pinId, options);
+		pwm = new SysFS(getGpioId(), "/sys/class/soft_pwm", "export", "unexport", "pwm");
+		onOff = new SysFS(getGpioId(), "/sys/class/gpio", "export", "unexport", "gpio");
 		try {
-			write(getItemDirectoryPath() + File.separator + "period", "10000");
+			pwm.open();
+			pwm.writeValue("period", "10000");
+			onOff.open();
+			onOff.writeValue("direction", "out");
 			setValue(0);
-		} catch (Exception ex) {
+		} catch (RuntimeException ex) {
 			reset();
 			throw ex;
 		}
@@ -33,8 +39,14 @@ public class AnalogOutputDeviceImpl extends SysFSDeviceImpl implements
 
 	@Override
 	protected void reset() {
-		setValue(0);
-		super.reset();
+		if(onOff.isOpened() && pwm.isOpened())
+			setValue(0);
+		if(pwm.isOpened()) {
+			pwm.close();
+		}
+		if(onOff.isOpened()) {
+			onOff.close();
+		}
 	}
 
 	@Override
@@ -49,8 +61,11 @@ public class AnalogOutputDeviceImpl extends SysFSDeviceImpl implements
 		if (value > range)
 			throw new IllegalArgumentException("value must be <= " + range);
 
-		write(getItemDirectoryPath() + File.separator + "pulse", ""
-				+ (range * value));
+		pwm.writeValue("pulse", "" + (range * value));
+		if(value == 0)
+			onOff.writeValue("value", "0");
+		else if(value == 100)
+			onOff.writeValue("value", "1");
 		this.value = value;
 	}
 
