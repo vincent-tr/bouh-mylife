@@ -11,20 +11,24 @@ import mylife.home.hw.api.Options;
 import mylife.home.hw.driver.platform.PlatformConstants;
 import mylife.home.hw.driver.platform.PlatformFile;
 
-public class InputDeviceImpl extends SysFSDeviceImpl implements InputDevice, Pollable {
+public class InputDeviceImpl extends DeviceImpl implements InputDevice, Pollable {
 
+	private final SysFS sys;
+	
 	public InputDeviceImpl(int pinId, EnumSet<Options> options) {
-		super(pinId, options, "/sys/class/gpio", "export", "unexport", "gpio");
+		super(pinId, options);
+		sys = new SysFS(getGpioId(), "/sys/class/gpio", "export", "unexport", "gpio");
 		try {
-			write(getItemDirectoryPath() + File.separator + "direction", "in");
-			write(getItemDirectoryPath() + File.separator + "edge", "both");
+			sys.open();
+			sys.writeValue("direction", "in");
+			sys.writeValue("edge", "both");
 			// TODO : pull resistors
 			if (options.contains(Options.OPTION_PULL_DOWN)
 					|| options.contains(Options.OPTION_PULL_UP))
 				throw new UnsupportedOperationException(
 						"Pull resistors unsupported now");
 
-			String valueFilename = getItemDirectoryPath() + File.separator
+			String valueFilename = sys.getItemDirectoryPath() + File.separator
 					+ "value";
 			valueFile = new PlatformFile(valueFilename,
 					PlatformConstants.O_RDWR);
@@ -35,7 +39,7 @@ public class InputDeviceImpl extends SysFSDeviceImpl implements InputDevice, Pol
 			// Initialisation de la valeur
 			setEvents(PlatformConstants.POLLPRI);
 			
-		} catch (Exception ex) {
+		} catch (RuntimeException ex) {
 			reset();
 			throw ex;
 		}
@@ -47,9 +51,13 @@ public class InputDeviceImpl extends SysFSDeviceImpl implements InputDevice, Pol
 		PollingService.getInstance().removePollable(this);
 		
 		// fermeture du fichier de valeurs
-		valueFile.close();
+		if(valueFile != null) {
+			valueFile.close();
+		}
 		
-		super.reset();
+		if(sys.isOpened()) {
+			sys.close();
+		}
 	}
 
 	/**

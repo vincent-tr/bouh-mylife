@@ -19,7 +19,7 @@ class PlatformCalls {
 		try {
 			// obtention de l'url de la lib
 			URL resourceUrl = PlatformCalls.class
-					.getResource("/native/PlatformCalls.so");
+					.getResource("PlatformCalls.so");
 
 			// création d'un fichier temp pour la lib
 			File tempFile = File.createTempFile("PlatformCalls", ".so");
@@ -45,7 +45,7 @@ class PlatformCalls {
 
 		} catch (IOException ex) {
 			throw new RuntimeException(
-					"Initializer error while loading /native/PlatformCalls.so",
+					"Initializer error while loading PlatformCalls.so",
 					ex);
 		}
 	}
