@@ -40,11 +40,17 @@ public class LayoutManager {
 
 		Map<String, Integer> map = new HashMap<String, Integer>();
 
+		// http://elinux.org/RPi_HardwareHistory
 		map.put("0002", new Integer(1));
 		map.put("0003", new Integer(2));
 		map.put("0004", new Integer(2));
 		map.put("0005", new Integer(2));
 		map.put("0006", new Integer(2));
+		map.put("0007", new Integer(2));
+		map.put("0008", new Integer(2));
+		map.put("0009", new Integer(2));
+		map.put("000d", new Integer(2));
+		map.put("000e", new Integer(2));
 		map.put("000f", new Integer(2));
 
 		return map;
