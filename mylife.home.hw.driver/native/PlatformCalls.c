@@ -94,7 +94,7 @@ JNIEXPORT jint JNICALL Java_mylife_home_hw_driver_platform_PlatformCalls_poll
 	// lecture des structures
 	for(int index=0; index<count; ++index)
 	{
-		jobject jitem = (*env)->GetObjectArrayElement(env, fds, count);
+		jobject jitem = (*env)->GetObjectArrayElement(env, fds, index);
 		struct pollfd *citem = cfds + index;
 
 		citem->fd = (*env)->GetIntField(env, jitem, fdField);
@@ -107,7 +107,7 @@ JNIEXPORT jint JNICALL Java_mylife_home_hw_driver_platform_PlatformCalls_poll
 	// écriture des structures
 	for(int index=0; index<count; ++index)
 	{
-		jobject jitem = (*env)->GetObjectArrayElement(env, fds, count);
+		jobject jitem = (*env)->GetObjectArrayElement(env, fds, index);
 		struct pollfd *citem = cfds + index;
 
 		(*env)->SetShortField(env, jitem, reventsField, citem->revents);
