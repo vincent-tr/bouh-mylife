@@ -68,6 +68,8 @@ public class PollingService {
 		 * Constructeur par défaut
 		 */
 		public Worker() {
+			setName("DeviceDriver.PollingService.Worker");
+			setDaemon(true);
 		}
 
 		/**
