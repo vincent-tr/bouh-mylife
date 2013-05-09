@@ -101,6 +101,7 @@ public class PollingService {
 
 			// création de la structure
 			synchronized (pollables) {
+				
 				events = new PlatformFile.PollEvent[pollables.size()];
 				int index = 0;
 				for (Pollable pollable : pollables) {
@@ -109,6 +110,16 @@ public class PollingService {
 				}
 			}
 
+			// si rien à faire
+			if(events.length == 0) {
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					// interruption, rien à faire
+				}
+				return;
+			}
+			
 			// exécution d'un poll
 			PlatformFile.poll(events, 100);
 
