@@ -6,99 +6,23 @@ package mylife.home.irc.message;
  *
  */
 public enum Numerics {
-
 	
-	
-    401     ERR_NOSUCHNICK
-    "<nickname> :No such nick/channel"
-
-- Used to indicate the nickname parameter supplied to a
-command is currently unused.
-
-402     ERR_NOSUCHSERVER
-    "<server name> :No such server"
-
-- Used to indicate the server name given currently
-doesn't exist.
-
-403     ERR_NOSUCHCHANNEL
-    "<channel name> :No such channel"
-
-- Used to indicate the given channel name is invalid.
-
-404     ERR_CANNOTSENDTOCHAN
-    "<channel name> :Cannot send to channel"
-
-- Sent to a user who is either (a) not on a channel
-which is mode +n or (b) not a chanop (or mode +v) on
-a channel which has mode +m set and is trying to send
-a PRIVMSG message to that channel.
-
-405     ERR_TOOMANYCHANNELS
-    "<channel name> :You have joined too many \
-     channels"
-- Sent to a user when they have joined the maximum
-number of allowed channels and they try to join
-another channel.
-
-406     ERR_WASNOSUCHNICK
-    "<nickname> :There was no such nickname"
-
-- Returned by WHOWAS to indicate there is no history
-information for that nickname.
-
-407     ERR_TOOMANYTARGETS
-    "<target> :Duplicate recipients. No message \
-
-- Returned to a client which is attempting to send a
-PRIVMSG/NOTICE using the user@host destination format
-and for a user@host which has several occurrences.
-
-409     ERR_NOORIGIN
-    ":No origin specified"
-
-- PING or PONG message missing the originator parameter
-which is required since these commands must work
-without valid prefixes.
-
-411     ERR_NORECIPIENT
-    ":No recipient given (<command>)"
-412     ERR_NOTEXTTOSEND
-    ":No text to send"
-413     ERR_NOTOPLEVEL
-    "<mask> :No toplevel domain specified"
-414     ERR_WILDTOPLEVEL
-    "<mask> :Wildcard in toplevel domain"
-
-- 412 - 414 are returned by PRIVMSG to indicate that
-the message wasn't delivered for some reason.
-ERR_NOTOPLEVEL and ERR_WILDTOPLEVEL are errors that
-are returned when an invalid use of
-"PRIVMSG $<server>" or "PRIVMSG #<host>" is attempted.
-
-421     ERR_UNKNOWNCOMMAND
-    "<command> :Unknown command"
-
-- Returned to a registered client to indicate that the
-command sent is unknown by the server.
-
-422     ERR_NOMOTD
-    ":MOTD File is missing"
-
-- Server's MOTD file could not be opened by the server.
-
-423     ERR_NOADMININFO
-    "<server> :No administrative info available"
-
-- Returned by a server in response to an ADMIN message
-when there is an error in finding the appropriate
-information.
-
-424     ERR_FILEERROR
-":File error doing <file op> on <file>"
-
-- Generic error message used to report a failed file
-operation during the processing of a message.
+	ERR_NOSUCHNICK(401, "ERR_NOSUCHNICK", "<nickname> :No such nick/channel", "Used to indicate the nickname parameter supplied to a command is currently unused."),
+	ERR_NOSUCHSERVER(402, "ERR_NOSUCHSERVER", "<server name> :No such server", "Used to indicate the server name given currently doesn't exist."),
+	ERR_NOSUCHCHANNEL(403, "ERR_NOSUCHCHANNEL", "<channel name> :No such channel", "Used to indicate the given channel name is invalid."),
+	ERR_CANNOTSENDTOCHAN(404, "ERR_CANNOTSENDTOCHAN", "<channel name> :Cannot send to channel", "Sent to a user who is either (a) not on a channel which is mode +n or (b) not a chanop (or mode +v) on a channel which has mode +m set and is trying to send a PRIVMSG message to that channel."),
+	ERR_TOOMANYCHANNELS(405, "ERR_TOOMANYCHANNELS", "<channel name> :You have joined too many channels", "Sent to a user when they have joined the maximum number of allowed channels and they try to join another channel."),
+	ERR_WASNOSUCHNICK(406, "ERR_WASNOSUCHNICK", "<nickname> :There was no such nickname", "Returned by WHOWAS to indicate there is no history information for that nickname."),
+	ERR_TOOMANYTARGETS(407, "ERR_TOOMANYTARGETS", "<target> :Duplicate recipients. No message delivered", "Returned to a client which is attempting to send a PRIVMSG/NOTICE using the user@host destination format and for a user@host which has several occurrences."),
+	ERR_NOORIGIN(409, "ERR_NOORIGIN", ":No origin specified", "PING or PONG message missing the originator parameter which is required since these commands must work without valid prefixes."),
+	ERR_NORECIPIENT(411, "ERR_NORECIPIENT", ":No recipient given (<command>)", null),
+	ERR_NOTEXTTOSEND(412, "ERR_NOTEXTTOSEND", ":No text to send", "412 - 414 are returned by PRIVMSG to indicate that the message wasn't delivered for some reason. ERR_NOTOPLEVEL and ERR_WILDTOPLEVEL are errors that are returned when an invalid use of \"PRIVMSG $<server>\" or \"PRIVMSG #<host>\" is attempted."),
+	ERR_NOTOPLEVEL(413, "ERR_NOTOPLEVEL", "<mask> :No toplevel domain specified", null),
+	ERR_WILDTOPLEVEL(414, "ERR_WILDTOPLEVEL", "<mask> :Wildcard in toplevel domain", "412 - 414 are returned by PRIVMSG to indicate that the message wasn't delivered for some reason. ERR_NOTOPLEVEL and ERR_WILDTOPLEVEL are errors that are returned when an invalid use of \"PRIVMSG $<server>\" or \"PRIVMSG #<host>\" is attempted."),
+	ERR_UNKNOWNCOMMAND(421, "ERR_UNKNOWNCOMMAND", "<command> :Unknown command", "Returned to a registered client to indicate that the command sent is unknown by the server."),
+	ERR_NOMOTD(422, "ERR_NOMOTD", ":MOTD File is missing", "Server's MOTD file could not be opened by the server."),
+	ERR_NOADMININFO(423, "ERR_NOADMININFO", "<server> :No administrative info available", "Returned by a server in response to an ADMIN message when there is an error in finding the appropriate information."),
+	ERR_FILEERROR(424, "ERR_FILEERROR", ":File error doing <file op> on <file>", "Generic error message used to report a failed file operation during the processing of a message."),
 
 431     ERR_NONICKNAMEGIVEN
     ":No nickname given"
@@ -623,5 +547,56 @@ being displayed anyway.
       (RPL_ADMINLOC2) and finally the administrative
       contact for the server (an email address here
       is required) in RPL_ADMINEMAIL.
+
+  	private final int numeric;
+  	private final String code;
+  	private final String text;
+  	private final String description;
+  	
+  	/**
+  	 * Valeur numérique 
+  	 * @return
+  	 */
+  	public int numeric() {
+  		return numeric;
+  	}
+  	
+  	/**
+  	 * Code correspondant
+  	 * @return
+  	 */
+  	public String code() {
+  		return code;
+  	}
+  	
+  	/**
+  	 * Texte à formatter
+  	 * @return
+  	 */
+  	public String text() {
+  		return text;
+  	}
+  	
+  	/**
+  	 * Description
+  	 * @return
+  	 */
+  	public String description() {
+  		return description
+  	}
+  	
+  	/**
+  	 * Constructeur avec données
+  	 * @param numeric
+  	 * @param code
+  	 * @param text
+  	 * @param description
+  	 */
+  	private Numerics(int numeric, String code, String text, String description) {
+  		this.numeric = numeric;
+  		this.code = code;
+  		this.text = text;
+  		this.description = description;
+  	}
 	
 }
