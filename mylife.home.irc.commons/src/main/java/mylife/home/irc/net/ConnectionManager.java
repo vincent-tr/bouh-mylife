@@ -5,11 +5,11 @@ import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
-import java.util.TreeMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,8 +49,8 @@ public class ConnectionManager {
 
 			selector = Selector.open();
 			pendingOperations = new LinkedList<Runnable>();
-			connectionsByKey = new TreeMap<SelectionKey, Connection>();
-			keysByConnection = new TreeMap<Connection, SelectionKey>();
+			connectionsByKey = new HashMap<SelectionKey, Connection>();
+			keysByConnection = new HashMap<Connection, SelectionKey>();
 
 			worker = new Thread() {
 				@Override
@@ -136,6 +136,14 @@ public class ConnectionManager {
 			ensureOpen();
 			workerAddOperations(new OperationChangeConnection(connection));
 		}
+	}
+	
+	/**
+	 * Ajout d'opérations extérieurs à exécuter dans le thread de loop, cela permet d'avoir un fonctionnement single-thread du coeur du serveur, client, service, ...
+	 * @param operations
+	 */
+	public void addCustomOperations(Runnable ... operations) {
+		workerAddOperations(operations);
 	}
 
 	private class OperationClose implements Runnable {
