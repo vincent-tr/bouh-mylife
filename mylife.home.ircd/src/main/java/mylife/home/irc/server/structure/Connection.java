@@ -50,6 +50,11 @@ public class Connection {
 	private Component component;
 	
 	/**
+	 * Mot de passe qui peut avoir été défini
+	 */
+	private String password;
+	
+	/**
 	 * Constructeur avec données
 	 * @param stream
 	 */
@@ -96,4 +101,22 @@ public class Connection {
 	public void setComponent(Component component) {
 		this.component = component;
 	}
+
+	/**
+	 * Mot de passe qui peut avoir été défini
+	 * @return
+	 */
+	public String getPassword() {
+		return password;
+	}
+
+	/**
+	 * Mot de passe qui peut avoir été défini
+	 * @param password
+	 */
+	public void setPassword(String password) {
+		this.password = password;
+	}
+	
+	
 }
