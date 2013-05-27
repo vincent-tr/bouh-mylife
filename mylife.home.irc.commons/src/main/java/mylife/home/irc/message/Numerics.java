@@ -1,5 +1,8 @@
 package mylife.home.irc.message;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Réponse numérique de serveur
  * @author pumbawoman
@@ -200,5 +203,28 @@ public enum Numerics {
   		this.text = text;
   		this.description = description;
   	}
-	
+  	
+  	/**
+  	 * Création d'un message
+  	 * @param prefix
+  	 * @param args
+  	 * @return
+  	 */
+  	public Message createMessage(Prefix prefix, String... args) {
+  		String last = null;
+  		int index = this.text.indexOf(':');
+  		if(index > -1)
+  			last = this.text.substring(index + 1);
+  		
+  		List<String> parameters = new ArrayList<String>();
+  		if(args != null) {
+  			for(String arg : args) {
+  				parameters.add(arg);
+  			}
+  		}
+  		if(last != null)
+  			parameters.add(last);
+  		
+  		return new Message(prefix, String.valueOf(this.numeric), parameters);
+  	}
 }
