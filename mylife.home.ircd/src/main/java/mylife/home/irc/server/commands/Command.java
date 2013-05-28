@@ -1,8 +1,6 @@
 package mylife.home.irc.server.commands;
 
-import mylife.home.irc.message.Message;
 import mylife.home.irc.server.IrcServer;
-import mylife.home.irc.server.structure.Connection;
 
 /**
  * Implémentation d'un commande
@@ -24,8 +22,7 @@ public interface Command {
 	
 	/**
 	 * Prise en charge de la commande
-	 * @param connection
-	 * @param message
+	 * @param ce
 	 */
-	public void handle(Connection connection, Message message);
+	public void handle(CommandExecution ce);
 }

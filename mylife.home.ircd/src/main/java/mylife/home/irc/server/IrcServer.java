@@ -10,9 +10,11 @@ import java.util.Map;
 import java.util.Set;
 
 import mylife.home.irc.message.Message;
+import mylife.home.irc.message.Numerics;
 import mylife.home.irc.net.ConnectionManager;
 import mylife.home.irc.net.ListenerConnection;
 import mylife.home.irc.server.commands.Command;
+import mylife.home.irc.server.commands.CommandExecution;
 import mylife.home.irc.server.structure.Component;
 import mylife.home.irc.server.structure.Connection;
 import mylife.home.irc.server.structure.Network;
@@ -237,11 +239,16 @@ public class IrcServer {
 	 * @param m
 	 */
 	private void handleReceiveConnection(Connection connection, Message m) {
-		Command cmd = commands.get(m.getCommand().toUpperCase());
-		if (cmd == null)
-			;// TODO : envoyer un message d'erreur ?
+		Command cmd = commands.get(m.getCommand());
 
-		cmd.handle(connection, m);
+		CommandExecution ce = new CommandExecution(this, connection, m);
+		
+		if (cmd == null) {
+			ce.reply(Numerics.ERR_UNKNOWNCOMMAND, m.getCommand());
+			return;
+		}
+		
+		cmd.handle(ce);
 	}
 
 	/**
