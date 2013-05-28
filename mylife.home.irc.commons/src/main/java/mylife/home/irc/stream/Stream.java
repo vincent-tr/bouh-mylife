@@ -221,7 +221,7 @@ public class Stream extends DataConnection {
 			if (parser.command() == null)
 				throw new IllegalArgumentException("command can not be null");
 
-			message = new Message(prefix, parser.command(), parser.args());
+			message = new Message(prefix, parser.command().toUpperCase(), parser.args());
 
 		} catch (Exception e) {
 			try {
