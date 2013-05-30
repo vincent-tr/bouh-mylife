@@ -6,6 +6,7 @@ import mylife.home.irc.message.Prefix;
 import mylife.home.irc.message.ServerPrefix;
 import mylife.home.irc.server.IrcServer;
 import mylife.home.irc.server.structure.Connection;
+import mylife.home.irc.server.structure.Server;
 
 /**
  * Paramètre de l'exécution d'une commande
@@ -89,5 +90,29 @@ public class CommandExecution {
 		Prefix prefix = selfPrefix();
 		numeric.createMessage(prefix, args);
 		connection.getStream().send(message);
+	}
+	
+	/**
+	 * Envoi d'un message à tous les serveurs sauf ceux exclus
+	 * @param message
+	 * @param exclusions
+	 */
+	public void serverBroadcast(Message message, Server... exclusions) {
+		for(Server srv : server.getNetwork().getServers()) {
+			if(srv.isSelf())
+				continue;
+			
+			boolean excluded = false;
+			for(Server exclusion : exclusions) {
+				if(exclusion == srv) {
+					excluded = true;
+					continue;
+				}
+			}
+			if(excluded)
+				continue;
+			
+			srv.getServerConnection().getStream().send(message);
+		}
 	}
 }

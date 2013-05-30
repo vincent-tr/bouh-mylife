@@ -113,4 +113,50 @@ public class Network {
 		// on doit toujours avoir un serveur local
 		throw new UnsupportedOperationException();
 	}
+	
+	/**
+	 * Suppression d'un serveur
+	 * @param server
+	 */
+	public void deleteServer(Server server) {
+		// suppression de tous les users du serveur
+		for(User user : server.getUsers()) {
+			deleteUser(user);
+		}
+		// suppression de la liste globale
+		this.getServers().remove(server);
+	}
+	
+	/**
+	 * Suppression d'un utilisateur
+	 * @param user
+	 */
+	public void deleteUser(User user) {
+		// on s'enleve des salons
+		// copie de la liste en local pour appel à userLeftChannel
+		for(Channel channel : new ArrayList<Channel>(this.getChannels())) {
+			userLeftChannel(user, channel);
+		}
+		// on s'enleve du serveur
+		user.getServer().getUsers().remove(user);
+		// on s'enleve de la liste globale
+		this.getUsers().remove(user);
+	}
+	
+	/**
+	 * Un utilisateur quitte un salon
+	 * Attention : cette méthode qui supprimer le salon s'il est vide
+	 * @param user
+	 * @param channel
+	 * @return false si l'utilisateur n'était pas sur le salon, true s'il a quitté le salon
+	 */
+	public boolean userLeftChannel(User user, Channel channel) {
+		Collection<User> chanUsers = channel.getUsers();
+		if(!chanUsers.remove(user))
+			return false;
+		// si channel vide, on le supprime
+		if(chanUsers.size() == 0)
+			this.getChannels().remove(channel);
+		return true;
+	}
 }

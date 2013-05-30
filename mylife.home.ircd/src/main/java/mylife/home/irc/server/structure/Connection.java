@@ -1,5 +1,8 @@
 package mylife.home.irc.server.structure;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import mylife.home.irc.stream.Stream;
 
 /**
@@ -50,9 +53,19 @@ public class Connection {
 	private Component component;
 	
 	/**
-	 * Mot de passe qui peut avoir été défini
+	 * Gestion des données d'initialisation
 	 */
-	private String password;
+	private final Map<String, Object> initData = new HashMap<String, Object>();
+
+	/**
+	 * Gestion des données d'initialisation
+	 */
+	public Map<String, Object> getInitData() {
+		return initData;
+	}
+	
+	public static final String INIT_DATA_KEY_PASS = "pass";
+	public static final String INIt_DATA_KEY_NICK = "nick";
 	
 	/**
 	 * Constructeur avec données
@@ -101,22 +114,4 @@ public class Connection {
 	public void setComponent(Component component) {
 		this.component = component;
 	}
-
-	/**
-	 * Mot de passe qui peut avoir été défini
-	 * @return
-	 */
-	public String getPassword() {
-		return password;
-	}
-
-	/**
-	 * Mot de passe qui peut avoir été défini
-	 * @param password
-	 */
-	public void setPassword(String password) {
-		this.password = password;
-	}
-	
-	
 }

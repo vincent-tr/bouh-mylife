@@ -205,25 +205,30 @@ public enum Numerics {
   	}
   	
   	/**
+  	 * Obtient seulement le message du texte
+  	 * @return
+  	 */
+  	public String textMessage() {
+  		int index = this.text.indexOf(':');
+  		if(index > -1)
+  			return this.text.substring(index + 1);
+ 		return this.text;
+  	}
+  	
+  	/**
   	 * Création d'un message
   	 * @param prefix
   	 * @param args
   	 * @return
   	 */
   	public Message createMessage(Prefix prefix, String... args) {
-  		String last = null;
-  		int index = this.text.indexOf(':');
-  		if(index > -1)
-  			last = this.text.substring(index + 1);
-  		
   		List<String> parameters = new ArrayList<String>();
   		if(args != null) {
   			for(String arg : args) {
   				parameters.add(arg);
   			}
   		}
-  		if(last != null)
-  			parameters.add(last);
+  		parameters.add(textMessage());
   		
   		return new Message(prefix, String.valueOf(this.numeric), parameters);
   	}

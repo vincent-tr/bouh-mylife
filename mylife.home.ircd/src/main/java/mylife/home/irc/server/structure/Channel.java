@@ -23,7 +23,7 @@ public class Channel {
 	/**
 	 * Modes du salon
 	 */
-	private final Collection<Mode> modes = new ArrayList<Mode>();
+	private final ModeCollection modes = new ModeCollection();
 	
 	/**
 	 * Utilisateurs présents sur le salon
@@ -68,7 +68,7 @@ public class Channel {
 	 * Modes du salon
 	 * @return
 	 */
-	public Collection<Mode> getModes() {
+	public ModeCollection getModes() {
 		return modes;
 	}
 

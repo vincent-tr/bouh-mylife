@@ -3,6 +3,8 @@ package mylife.home.irc.server.structure;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import mylife.home.irc.message.ServerPrefix;
+
 /**
  * Représentation d'un serveur
  * @author pumbawoman
@@ -125,5 +127,14 @@ public class Server extends Component {
 	 */
 	public boolean isSelf() {
 		return this.serverConnection == null;
+	}
+
+	
+	/**
+	 * Création du préfix correspondant au serveur
+	 * @return
+	 */
+	public ServerPrefix prefix()  {
+		return new ServerPrefix(this.getName());
 	}
 }

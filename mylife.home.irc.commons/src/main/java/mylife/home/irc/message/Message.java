@@ -1,5 +1,6 @@
 package mylife.home.irc.message;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -37,6 +38,17 @@ public class Message {
 		this.prefix = prefix;
 		this.command = command;
 		this.parameters = Collections.unmodifiableList(parameters);
+	}
+	
+	/**
+	 * Constructeur avec données
+	 * 
+	 * @param prefix
+	 * @param command
+	 * @param parameters
+	 */
+	public Message(Prefix prefix, String command, String... parameters) {
+		this(prefix, command, Arrays.asList(parameters));
 	}
 
 	/**
