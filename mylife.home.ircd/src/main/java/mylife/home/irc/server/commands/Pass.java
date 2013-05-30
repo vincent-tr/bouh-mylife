@@ -38,7 +38,7 @@ public class Pass extends BaseCommand {
 			return;
 		}
 		
-		ce.getConnection().setPassword(pass);
+		ce.getConnection().getInitData().put(Connection.INIT_DATA_KEY_PASS, pass);
 		ce.getConnection().setStatus(Connection.STATUS_PASS_DEFINED);
 	}
 }

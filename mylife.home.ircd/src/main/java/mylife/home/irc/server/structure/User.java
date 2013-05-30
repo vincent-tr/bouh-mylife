@@ -3,6 +3,8 @@ package mylife.home.irc.server.structure;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import mylife.home.irc.message.UserPrefix;
+
 /**
  * Représentation d'un utilisateur
  * 
@@ -39,7 +41,7 @@ public class User extends Component {
 	/**
 	 * Modes de l'utilisateur
 	 */
-	private final Collection<Mode> modes = new ArrayList<Mode>();
+	private final ModeCollection modes = new ModeCollection();
 
 	/**
 	 * Salons sur lequel l'utilisateur est présent
@@ -61,7 +63,7 @@ public class User extends Component {
 	 * @param server
 	 * @param clientConnection
 	 */
-	public User(String nick, String user, String host, String realName, Server server,  Connection clientConnection) {
+	public User(String nick, String user, String host, String realName, Server server, Connection clientConnection) {
 		if (nick == null || nick.length() == 0)
 			throw new IllegalArgumentException("User nick can not be null");
 		if (user == null || user.length() == 0)
@@ -135,7 +137,7 @@ public class User extends Component {
 	 * 
 	 * @return
 	 */
-	public Collection<Mode> getModes() {
+	public ModeCollection getModes() {
 		return modes;
 	}
 
@@ -175,5 +177,13 @@ public class User extends Component {
 	 */
 	public boolean isLocal() {
 		return this.clientConnection != null;
+	}
+	
+	/**
+	 * Création du préfix correspondant à l'utilisateur
+	 * @return
+	 */
+	public UserPrefix prefix()  {
+		return new UserPrefix(new mylife.home.irc.message.User(this.getNick(), this.getUser(), this.getHost()));
 	}
 }
