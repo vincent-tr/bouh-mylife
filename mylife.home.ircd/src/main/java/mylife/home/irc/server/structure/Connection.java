@@ -28,7 +28,7 @@ public class Connection {
 	public static final int STATUS_SERVER_OK = 0x1F;
 	
 	/**
-	 * Le handshake a recu le pseudo est est en attention du user en mode client
+	 * Le handshake a recu le pseudo est est en attente du user en mode client
 	 */
 	public static final int STATUS_CLIENT_NICK = 0x21;
 	
@@ -55,17 +55,17 @@ public class Connection {
 	/**
 	 * Gestion des données d'initialisation
 	 */
-	private final Map<String, Object> initData = new HashMap<String, Object>();
+	private final Map<String, String> initData = new HashMap<String, String>();
 
 	/**
 	 * Gestion des données d'initialisation
 	 */
-	public Map<String, Object> getInitData() {
+	public Map<String, String> getInitData() {
 		return initData;
 	}
 	
 	public static final String INIT_DATA_KEY_PASS = "pass";
-	public static final String INIt_DATA_KEY_NICK = "nick";
+	public static final String INIT_DATA_KEY_NICK = "nick";
 	
 	/**
 	 * Constructeur avec données
