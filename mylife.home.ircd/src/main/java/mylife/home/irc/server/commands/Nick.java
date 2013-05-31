@@ -80,7 +80,7 @@ public class Nick extends BaseCommand {
 		}
 
 		ce.getConnection().getInitData()
-				.put(Connection.INIT_DATA_KEY_PASS, nick);
+				.put(Connection.INIT_DATA_KEY_NICK, nick);
 	}
 
 	/**
