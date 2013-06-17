@@ -7,8 +7,9 @@
 
 #include <stddef.h>
 #include <dlfcn.h>
-#include "modules.h"
+#include "module.h"
 #include "list.h"
+#include "core_api.h"
 
 struct module
 {
@@ -26,7 +27,11 @@ struct list modules;
 // définit le module correspondant au core
 static struct core_api api =
 {
-	// TODO
+	.list_init = list_init,
+	.list_add = list_add,
+	.list_remove = list_remove,
+	.list_foreach = list_foreach, // return 0 = break foreach
+	.list_clear = list_clear
 };
 
 static struct module_def me_def =
@@ -34,7 +39,8 @@ static struct module_def me_def =
 	.name = "core",
 	.major = 1,
 	.minor = 0,
-	.required = { NULL }
+	.required = { NULL },
+	.api = api
 };
 
 static struct module me =
@@ -46,15 +52,14 @@ static struct module me =
 	.terminate = NULL
 };
 
-void modules_init()
+void module_init()
 {
 	list_init(&modules);
 	list_add(&modules, &me);
 }
 
-void modules_terminate()
+void module_terminate()
 {
-
 }
 
 void module_enum_files(int (*callback)(char *)) // ret 0 = stop enum

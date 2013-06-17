@@ -20,10 +20,14 @@ struct list
 	struct list_node *tail;
 };
 
+#ifdef CORE
+
 extern void list_init(struct list *list);
 extern void list_add(struct list *list, void *node);
 extern void list_remove(struct list *list, void *node);
 extern void list_foreach(struct list *list, int (*callback)(void *node)); // return 0 = break foreach
 extern void list_clear(struct list *list, void (*free_node)(void *node));
+
+#endif // CORE
 
 #endif /* LIST_H_ */

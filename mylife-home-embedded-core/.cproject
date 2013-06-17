@@ -30,6 +30,9 @@
 									<listOptionValue builtIn="false" value="../include"/>
 								</option>
 								<option id="gnu.c.compiler.option.misc.other.1632775876" name="Other flags" superClass="gnu.c.compiler.option.misc.other" value="-c -fmessage-length=0 -std=c99" valueType="string"/>
+								<option id="gnu.c.compiler.option.preprocessor.def.symbols.620225440" superClass="gnu.c.compiler.option.preprocessor.def.symbols" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="CORE"/>
+								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.2084201342" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.cross.cpp.compiler.1603296104" name="Cross G++ Compiler" superClass="cdt.managedbuild.tool.gnu.cross.cpp.compiler">
