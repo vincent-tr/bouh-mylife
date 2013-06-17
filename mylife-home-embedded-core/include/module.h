@@ -1,15 +1,15 @@
 /*
- * modules.h
+ * module.h
  *
  *  Created on: 16 juin 2013
  *      Author: pumbawoman
  */
 
-#ifndef MODULES_H_
-#define MODULES_H_
+#ifndef MODULE_H_
+#define MODULE_H_
 
-extern void modules_init();
-extern void modules_terminate();
+extern void module_init();
+extern void module_terminate();
 
 struct module;
 
@@ -40,12 +40,7 @@ struct module_def
 };
 
 // required = NULL terminated array
-#define MODULE_DEFINE (name, version_major, version_minor, required) \
-	struct module_def module_def = { .name = name, .major = major, .minor = minor, .required = required }
+#define MODULE_DEFINE (name, version_major, version_minor, required, api) \
+	struct module_def module_def = { .name = name, .major = major, .minor = minor, .required = required, .api = api }
 
-struct core_api
-{
-
-};
-
-#endif /* MODULES_H_ */
+#endif /* MODULE_H_ */

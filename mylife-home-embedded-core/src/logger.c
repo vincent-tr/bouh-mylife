@@ -5,6 +5,9 @@
  *      Author: pumbawoman
  */
 
+// localtime_r
+#define _POSIX_C_SOURCE 1
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -50,6 +53,15 @@ void log_write(const char *file, int line, int level, const char *format, ...)
 	size_t len = strlen(buffer);
 	char *ptr = buffer + len;
 	len = buffer_len - len;
+
+	// écriture du fichier/ligne
+	snprintf(ptr, len, "%s:%i", file, line);
+
+	// calcul de l'espace restant
+	len = strlen(buffer);
+	ptr = buffer + len;
+	len = buffer_len - len;
+
 
 	// écriture du buffer
 	va_list ap;
