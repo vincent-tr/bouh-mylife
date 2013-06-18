@@ -13,7 +13,7 @@
 
 struct module
 {
-	struct node_list node;
+	struct list_node node;
 
 	const char *file;
 	void *lib;
@@ -25,7 +25,7 @@ struct module
 struct list modules;
 
 // définit le module correspondant au core
-static struct core_api api =
+const static struct core_api api =
 {
 	.list_init = list_init,
 	.list_add = list_add,
@@ -34,16 +34,16 @@ static struct core_api api =
 	.list_clear = list_clear
 };
 
-static struct module_def me_def =
+const static struct module_def me_def =
 {
-	.name = "core",
-	.major = 1,
-	.minor = 0,
+	.name.name = "core",
+	.name.major = 1,
+	.name.minor = 0,
 	.required = { NULL },
 	.api = api
 };
 
-static struct module me =
+const static struct module me =
 {
 	.file = NULL,
 	.lib = NULL,
