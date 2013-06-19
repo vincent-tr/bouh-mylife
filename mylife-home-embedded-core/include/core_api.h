@@ -8,6 +8,11 @@
 #ifndef CORE_API_H_
 #define CORE_API_H_
 
+#include "list.h"
+#include "logger.h"
+#include "module.h"
+#include "loop.h"
+
 struct core_api
 {
 	void (*list_init)(struct list *list);
@@ -29,6 +34,13 @@ struct core_api
 	int (*module_unload)(struct module *module);
 	const char *(*module_get_file)(struct module *module);
 	const struct module_name *(*module_get_name)(struct module *module);
+
+	struct loop_handle *(*loop_register_tick)(void (*callback)(void *ctx), void *ctx);
+	struct loop_handle *(*loop_register_timer)(void (*callback)(void *ctx), void *ctx, int period_ms);
+	struct loop_handle *(*loop_register_listener)(callback_select callback_add, callback_select callback_process, void *ctx);
+	void (*loop_unregister)(struct loop_handle *handle);
+	void *(*loop_get_ctx)(struct loop_handle *handle);
+	void (*loop_set_ctx)(struct loop_handle *handle, void *ctx);
 
 	// TODO
 };

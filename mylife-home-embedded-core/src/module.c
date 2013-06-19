@@ -67,7 +67,14 @@ static struct core_api api =
 	.module_load = module_load,
 	.module_unload = module_unload,
 	.module_get_file = module_get_file,
-	.module_get_name = module_get_name
+	.module_get_name = module_get_name,
+
+	.loop_register_tick = loop_register_tick,
+	.loop_register_timer = loop_register_timer,
+	.loop_register_listener = loop_register_listener,
+	.loop_unregister = loop_unregister,
+	.loop_get_ctx = loop_get_ctx,
+	.loop_set_ctx = loop_set_ctx
 
 	// TODO
 };
