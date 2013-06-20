@@ -10,7 +10,7 @@
 
 struct loop_handle;
 
-typedef void (*callback_select)(fd_set *readfds, fd_set *writefds, fd_set *exceptfds, void *ctx);
+typedef void (*callback_select)(int *nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, void *ctx);
 
 #ifdef CORE
 

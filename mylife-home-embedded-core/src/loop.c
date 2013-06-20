@@ -9,9 +9,11 @@
 #include <sys/select.h>
 #include <sys/time.h>
 
+#include "logger.h"
 #include "loop.h"
 #include "list.h"
 #include "tools.h"
+#include "config_base.h"
 
 struct tick
 {
@@ -52,11 +54,33 @@ struct loop_handle
 	} data;
 };
 
+struct timer_exec_data
+{
+
+};
+
+struct listener_exec_data
+{
+	int *nfds;
+	fd_set *readfds;
+	fd_set *writefds;
+	fd_set *exceptfds;
+};
+
 struct list handles;
 static int running = 1;
 
-static void clear_free(void *node, void *ctx);
-static void run_step();
+static void run_ticks(struct list *handles_copy);
+static void run_timers(struct list *handles_copy);
+static void run_listeners(struct list *handles_copy);
+
+static void list_free_item(void *node, void *ctx);
+static int list_copy_item(void *node, void *ctx);
+static int list_run_item_tick(void *node, void *ctx);
+static int list_run_item_listener_add(void *node, void *ctx);
+static int list_run_item_listener_process(void *node, void *ctx);
+
+static void ms2tv(struct timeval *result, unsigned long interval_ms);
 
 void loop_init()
 {
@@ -65,18 +89,24 @@ void loop_init()
 
 void loop_terminate()
 {
-	list_clear(&handles, clear_free, NULL);
-}
-
-void clear_free(void *node, void *ctx)
-{
-	free(node);
+	list_clear(&handles, list_free_item, NULL);
 }
 
 void loop_run()
 {
 	while(running)
-		run_step();
+	{
+		// copie de la liste pour ne pas subir les suppressions/ajouts d'items
+		struct list handles_copy;
+		list_init(&handles_copy);
+		list_foreach(&handles, list_copy_item, &handles_copy);
+
+		run_ticks(&handles_copy);
+		run_timers(&handles_copy);
+		run_listeners(&handles_copy);
+
+		list_clear(&handles_copy, list_free_item, NULL);
+	}
 }
 
 void loop_exit()
@@ -84,9 +114,103 @@ void loop_exit()
 	running = 0;
 }
 
-void run_step()
+void run_ticks(struct list *handles_copy)
+{
+	list_foreach(handles_copy, list_run_item_tick, NULL);
+}
+
+void run_timers(struct list *handles_copy)
 {
 	// TODO
+}
+
+void run_listeners(struct list *handles_copy)
+{
+	int nfds;
+	fd_set readfds;
+	fd_set writefds;
+	fd_set exceptfds;
+	struct timeval tv;
+
+	struct listener_exec_data data;
+	data.exceptfds = &exceptfds;
+	data.readfds = &readfds;
+	data.writefds = &writefds;
+	data.nfds = &nfds;
+
+	nfds = -1;
+	FD_ZERO(&readfds);
+	FD_ZERO(&writefds);
+	FD_ZERO(&exceptfds);
+	ms2tv(&tv, CONFIG_LOOP_MS);
+
+	list_foreach(handles_copy, list_run_item_listener_add, &data);
+	log_assert(select(nfds, &readfds, &writefds, &exceptfds, &tv) != -1);
+	list_foreach(handles_copy, list_run_item_listener_process, &data);
+}
+
+void list_free_item(void *node, void *ctx)
+{
+	free(node);
+}
+
+int list_copy_item(void *node, void *ctx)
+{
+	struct list *handles_copy = ctx;
+	struct loop_handle *src = node;
+	struct loop_handle *dest;
+
+	malloc_nofail(dest);
+	memcpy(dest, src, sizeof(*src));
+	list_add(handles_copy, dest);
+
+	return 1;
+}
+
+int list_run_item_tick(void *node, void *ctx)
+{
+	struct loop_handle *handle = node;
+
+	if(handle->type != TICK)
+		return 1;
+
+	handle->data.tick.callback(handle->ctx);
+
+	return 1;
+}
+
+int list_run_item_listener_add(void *node, void *ctx)
+{
+	struct loop_handle *handle = node;
+	struct listener_exec_data *data = ctx;
+
+	if(handle->type != LISTENER)
+		return 1;
+
+	handle->data.listener.callback_add(data->nfds, data->readfds, data->writefds, data->exceptfds, handle->ctx);
+	return 1;
+}
+
+int list_run_item_listener_process(void *node, void *ctx)
+{
+	struct loop_handle *handle = node;
+	struct listener_exec_data *data = ctx;
+
+	if(handle->type != LISTENER)
+		return 1;
+
+	handle->data.listener.callback_process(data->nfds, data->readfds, data->writefds, data->exceptfds, handle->ctx);
+	return 1;
+}
+
+/*
+ * convert ms(milliseconds) to timeval struct
+ * http://enl.usc.edu/enl/trunk/peg/testPlayer/timeval.c
+ */
+void ms2tv(struct timeval *result, unsigned long interval_ms)
+{
+    result->tv_sec = (interval_ms / 1000);
+    result->tv_usec = ((interval_ms % 1000) * 1000);
 }
 
 struct loop_handle *loop_register_tick(void (*callback)(void *ctx), void *ctx)
