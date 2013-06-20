@@ -139,6 +139,7 @@ void irc_set_status(struct irc_bot *bot, const char *status)
 	bot->status = NULL;
 	if(status)
 		strdup_nofail(bot->status, status);
+	// TODO : changement nick
 }
 
 const char *irc_get_status(struct irc_bot *bot)
