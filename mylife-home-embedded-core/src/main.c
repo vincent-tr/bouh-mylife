@@ -20,6 +20,7 @@
 #include "logger.h"
 #include "module.h"
 #include "loop.h"
+#include "irc.h"
 
 #define ARG_START 1
 #define ARG_STOP 2
@@ -45,12 +46,14 @@ void init()
 {
 	log_init(is_interactive);
 	loop_init();
+	irc_init();
 	module_init();
 }
 
 void terminate()
 {
 	module_terminate();
+	irc_terminate();
 	loop_terminate();
 	log_terminate();
 }

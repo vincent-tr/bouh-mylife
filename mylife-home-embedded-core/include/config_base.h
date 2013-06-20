@@ -15,4 +15,8 @@
 
 #define CONFIG_LOOP_MS 10
 
+#define CONFIG_IRC_SERVER "127.0.0.1"
+#define CONFIG_IRC_PORT 6667
+#define CONFIG_IRC_CHANNEL "#mylife-home"
+
 #endif /* CONFIG_BASE_H_ */

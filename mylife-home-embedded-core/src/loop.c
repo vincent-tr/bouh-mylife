@@ -24,7 +24,7 @@ struct timer
 {
 	void (*callback)(void *ctx);
 	int period_ms;
-	struct timeval last_run;
+	struct timeval next_run;
 };
 
 struct listener
@@ -56,7 +56,7 @@ struct loop_handle
 
 struct timer_exec_data
 {
-
+	struct timeval *now;
 };
 
 struct listener_exec_data
@@ -77,10 +77,13 @@ static void run_listeners(struct list *handles_copy);
 static void list_free_item(void *node, void *ctx);
 static int list_copy_item(void *node, void *ctx);
 static int list_run_item_tick(void *node, void *ctx);
+static int list_run_item_timer(void *node, void *ctx);
 static int list_run_item_listener_add(void *node, void *ctx);
 static int list_run_item_listener_process(void *node, void *ctx);
 
 static void ms2tv(struct timeval *result, unsigned long interval_ms);
+static int compare_timeval(struct timeval *a, struct timeval *b);
+static void add_ms_to_timeval(struct timeval *a, unsigned long interval_ms, struct timeval *result);
 
 void loop_init()
 {
@@ -121,7 +124,13 @@ void run_ticks(struct list *handles_copy)
 
 void run_timers(struct list *handles_copy)
 {
-	// TODO
+	struct timeval now;
+	struct timer_exec_data data;
+
+	log_assert(gettimeofday(&now, NULL) != -1);
+	data.now = &now;
+
+	list_foreach(handles_copy, list_run_item_timer, &data);
 }
 
 void run_listeners(struct list *handles_copy)
@@ -179,6 +188,24 @@ int list_run_item_tick(void *node, void *ctx)
 	return 1;
 }
 
+int list_run_item_timer(void *node, void *ctx)
+{
+	struct loop_handle *handle = node;
+	struct timer_exec_data *data = ctx;
+
+	if(handle->type != TIMER)
+		return 1;
+
+	struct timer *timer = &(handle->data.timer);
+	if(compare_timeval(&(timer->next_run), data->now) <= 0)
+	{
+		timer->callback(handle->ctx);
+		add_ms_to_timeval(data->now, timer->period_ms, &(timer->next_run));
+	}
+
+	return 1;
+}
+
 int list_run_item_listener_add(void *node, void *ctx)
 {
 	struct loop_handle *handle = node;
@@ -204,7 +231,46 @@ int list_run_item_listener_process(void *node, void *ctx)
 }
 
 /*
+ * return an integer greater than, equal to, or less than 0,
+ * according as the timeval a is greater than,
+ * equal to, or less than the timeval b.
+ *
+ * http://enl.usc.edu/enl/trunk/peg/testPlayer/timeval.c
+ */
+int compare_timeval(struct timeval *a, struct timeval *b)
+{
+    if (a->tv_sec > b->tv_sec)
+        return 1;
+    else if (a->tv_sec < b->tv_sec)
+        return -1;
+    else if (a->tv_usec > b->tv_usec)
+        return 1;
+    else if (a->tv_usec < b->tv_usec)
+        return -1;
+    return 0;
+}
+
+/*
+ * Adds 'interval_ms' to timeval 'a' and store in 'result'
+ *  - 'interval_ms' is in milliseconds
+ *
+ * http://enl.usc.edu/enl/trunk/peg/testPlayer/timeval.c
+ */
+
+void add_ms_to_timeval(struct timeval *a, unsigned long interval_ms, struct timeval *result)
+{
+    result->tv_sec = a->tv_sec + (interval_ms / 1000);
+    result->tv_usec = a->tv_usec + ((interval_ms % 1000) * 1000);
+    if (result->tv_usec > 1000000)
+    {
+        result->tv_usec -= 1000000;
+        result->tv_sec++;
+    }
+}
+
+/*
  * convert ms(milliseconds) to timeval struct
+ *
  * http://enl.usc.edu/enl/trunk/peg/testPlayer/timeval.c
  */
 void ms2tv(struct timeval *result, unsigned long interval_ms)
@@ -242,7 +308,10 @@ struct loop_handle *loop_register_timer(void (*callback)(void *ctx), void *ctx, 
 	handle->type = TIMER;
 	handle->data.timer.callback = callback;
 	handle->data.timer.period_ms = period_ms;
-	gettimeofday(&(handle->data.timer.last_run), NULL);
+	struct timeval now;
+	log_assert(gettimeofday(&now, NULL) != -1);
+	add_ms_to_timeval(&now, handle->data.timer.period_ms, &(handle->data.timer.next_run));
+
 	handle->ctx = ctx;
 
 	list_add(&handles, handle);
