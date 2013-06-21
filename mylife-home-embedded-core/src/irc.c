@@ -24,15 +24,12 @@
 #define HOST_NAME_MAX 255
 #endif
 
-
 /*
  * nick irc : host|id|type|status
  *
  */
 
 #define NICK_MAX 30
-
-static char host[HOST_NAME_MAX+1];
 
 struct irc_component
 {
@@ -48,12 +45,21 @@ struct irc_component
 
 struct irc_bot
 {
-	irc_session_t *session;
-	int connected;
+	void *ctx;
+	irc_session_t *session; // session.ctx = self
+	int connected; // means connected and on channel with names received
 
+	struct irc_bot_callbacks callbacks;
 	struct irc_component *me;
 	struct list net;
 };
+
+static void nick_new(struct irc_bot *bot, const char *nick);
+static void nick_change(struct irc_bot *bot, const char *oldnick, const char *newnick);
+static void nick_delete(struct irc_bot *bot, const char *nick);
+
+static void comp_set_status(struct irc_component *comp, const char *status);
+static struct irc_component *comp_lookup(struct irc_bot *bot, const char *host, const char *id, const char *type);
 
 // --- events ---
 static void event_connect(irc_session_t * session, const char * event, const char * origin, const char ** params, unsigned int count);
@@ -72,48 +78,43 @@ static void event_unknown(irc_session_t * session, const char * event, const cha
 static void event_numeric(irc_session_t * session, unsigned int event, const char * origin, const char ** params, unsigned int count);
 // --- events ---
 
-static void make_nick(struct irc_bot *bot);
-static void channel_nick_new(struct irc_bot *bot, const char *nick);
-static void channel_nick_delete(struct irc_bot *bot, const char *nick);
-static void channel_nick_change(struct irc_bot *bot, const char *oldnick, const char *newnick);
+static char host[HOST_NAME_MAX+1];
+static irc_callbacks_t irc_callbacks;
 
 void irc_init()
 {
 	log_assert(gethostname(host, HOST_NAME_MAX+1) != -1);
+
+	memset(&irc_callbacks, sizeof(irc_callbacks), 0);
+	irc_callbacks.event_channel = event_connect;
+	irc_callbacks.event_kick = event_kick; // + tracking
+	irc_callbacks.event_channel = event_channel;
+	irc_callbacks.event_privmsg = event_privmsg;
+	irc_callbacks.event_notice = event_notice;
+	irc_callbacks.event_channel_notice = event_channel_notice;
+	//tracking
+	irc_callbacks.event_nick = event_nick;
+	irc_callbacks.event_quit = event_quit;
+	irc_callbacks.event_join = event_join;
+	irc_callbacks.event_part = event_part;
+	// misc
+	irc_callbacks.event_unknown = event_unknown;
+	irc_callbacks.event_numeric = event_numeric;
 }
 
 void irc_terminate()
 {
 }
 
-struct irc_bot *irc_create(const char *id, const char *type)
+struct irc_bot *irc_create(const char *id, const char *type, struct irc_bot_callbacks *callbacks, void *ctx)
 {
-	irc_callbacks_t *callbacks;
-	malloc_nofail(callbacks);
-	memset(callbacks, sizeof(*callbacks), 0);
-
-	callbacks->event_connect = event_connect;
-	callbacks->event_kick = event_kick; // + tracking
-	callbacks->event_channel = event_channel;
-	callbacks->event_privmsg = event_privmsg;
-	callbacks->event_notice = event_notice;
-	callbacks->event_channel_notice = event_channel_notice;
-
-	//tracking
-	callbacks->event_nick = event_nick;
-	callbacks->event_quit = event_quit;
-	callbacks->event_join = event_join;
-	callbacks->event_part = event_part;
-
-	// misc
-	callbacks->event_unknown = event_unknown;
-	callbacks->event_numeric = event_numeric;
-
 	struct irc_bot *bot;
 	malloc_nofail(bot);
 
-	log_assert(bot->session = irc_create_session(callbacks));
+	log_assert(bot->session = irc_create_session(&irc_callbacks));
 	irc_set_ctx(bot->session, bot);
+	memcpy(&(bot->callbacks), callbacks, sizeof(*callbacks));
+	list_init(&(bot->net));
 
 	strdup_nofail(bot->id, id);
 	strdup_nofail(bot->type, type);
@@ -143,7 +144,22 @@ void irc_delete(struct irc_bot *bot)
 	free(bot);
 }
 
-void irc_set_status(struct irc_bot *bot, const char *status)
+void *irc_bot_get_ctx(struct irc_bot *bot)
+{
+	return bot->ctx;
+}
+
+void irc_bot_set_ctx(struct irc_bot *bot, void *ctx)
+{
+	bot->ctx = ctx;
+}
+
+int irc_bot_is_connected(struct irc_bot *bot)
+{
+	return bot->connected;
+}
+
+void irc_bot_set_comp_status(struct irc_bot *bot, const char *status)
 {
 	if(bot->status)
 		free(bot->status);
@@ -153,9 +169,44 @@ void irc_set_status(struct irc_bot *bot, const char *status)
 	// TODO : changement nick
 }
 
-const char *irc_get_status(struct irc_bot *bot)
+struct irc_component *irc_get_me(struct irc_bot *bot)
 {
-	return bot->status;
+	return bot->me;
+}
+
+void irc_comp_list(struct irc_bot *bot, int (*callback)(struct irc_component *comp, void *ctx), void *ctx)
+{
+	list_foreach(&(bot->net), (int (*)(void *node, void *ctx))callback, ctx);
+}
+
+int irc_comp_is_me(struct irc_bot *bot, struct irc_component *comp)
+{
+	return bot->me == comp;
+}
+
+const char *irc_comp_get_nick(struct irc_bot *bot, struct irc_component *comp)
+{
+	return comp->nick;
+}
+
+const char *irc_comp_get_host(struct irc_bot *bot, struct irc_component *comp) // NULL if unrecognized nick format
+{
+	return comp->host;
+}
+
+const char *irc_comp_get_id(struct irc_bot *bot, struct irc_component *comp) // NULL if unrecognized nick format
+{
+	return comp->id;
+}
+
+const char *irc_comp_get_type(struct irc_bot *bot, struct irc_component *comp) // NULL if unrecognized nick format
+{
+	return comp->type;
+}
+
+const char *irc_comp_get_status(struct irc_bot *bot, struct irc_component *comp) // NULL if unrecognized nick format or if no status
+{
+	return comp->status;
 }
 
 void make_nick(struct irc_bot *bot)
@@ -172,6 +223,21 @@ void make_nick(struct irc_bot *bot)
 		snprintf(nick, NICK_MAX, "%s|%s|%s", host, bot->id, bot->type);
 
 	nick[NICK_MAX] = '\0';
+}
+
+void nick_new(struct irc_bot *bot, const char *nick)
+{
+
+}
+
+void nick_change(struct irc_bot *bot, const char *oldnick, const char *newnick)
+{
+
+}
+
+void nick_delete(struct irc_bot *bot, const char *nick)
+{
+
 }
 
 // --- events ---
@@ -236,5 +302,4 @@ void event_numeric(irc_session_t * session, unsigned int event, const char * ori
 {
 
 }
-
 // --- events ---
