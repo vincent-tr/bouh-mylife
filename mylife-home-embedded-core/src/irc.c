@@ -16,6 +16,7 @@
 #include "irc.h"
 #include "loop.h"
 #include "logger.h"
+#include "list.h"
 #include "tools.h"
 #include "config_base.h"
 
