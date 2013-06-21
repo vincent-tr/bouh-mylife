@@ -34,17 +34,25 @@
 
 static char host[HOST_NAME_MAX+1];
 
+struct irc_component
+{
+	struct list_node node;
+
+	char *nick;
+
+	char *host;
+	char *id;
+	char *type;
+	char *status;
+};
+
 struct irc_bot
 {
 	irc_session_t *session;
 	int connected;
-	char *nick;
 
-	char *id;
-	char *type;
-	char *status;
-
-	// TODO
+	struct irc_component *me;
+	struct list net;
 };
 
 // --- events ---
@@ -64,7 +72,10 @@ static void event_unknown(irc_session_t * session, const char * event, const cha
 static void event_numeric(irc_session_t * session, unsigned int event, const char * origin, const char ** params, unsigned int count);
 // --- events ---
 
-void make_nick(struct irc_bot *bot);
+static void make_nick(struct irc_bot *bot);
+static void channel_nick_new(struct irc_bot *bot, const char *nick);
+static void channel_nick_delete(struct irc_bot *bot, const char *nick);
+static void channel_nick_change(struct irc_bot *bot, const char *oldnick, const char *newnick);
 
 void irc_init()
 {
