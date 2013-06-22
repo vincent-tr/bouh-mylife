@@ -10,8 +10,10 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 
 #include "libircclient.h"
+#include "libirc_rfcnumeric.h"
 
 #include "irc.h"
 #include "loop.h"
@@ -27,7 +29,6 @@
 
 /*
  * nick irc : host|id|type|status
- *
  */
 
 #define NICK_MAX 30
@@ -48,6 +49,8 @@ struct irc_bot
 {
 	void *ctx;
 	irc_session_t *session; // session.ctx = self
+	struct loop_handle *listener;
+
 	int connected; // means connected and on channel with names received
 
 	struct irc_bot_callbacks callbacks;
@@ -73,19 +76,22 @@ struct nick_split
 };
 
 static void connect(struct irc_bot *bot);
+static void disconnected(struct irc_bot *bot);
+static void comp_free(void *node, void *ctx);
 
 static void nick_split(const char *nick, struct nick_split *split); // nick_split is not allocated => no free -- thread unsafe
 static void nick_join(char *nick, const struct nick_split *split); // nick must be array of MAX_NICK+1 length -- thread unsafe
 
-static void nick_new(struct irc_bot *bot, const char *nick); // return 1 if self else 0
+static int nick_new(struct irc_bot *bot, const char *nick); // return 1 if self else 0
 static void nick_change(struct irc_bot *bot, const char *oldnick, const char *newnick);
-static void nick_delete(struct irc_bot *bot, const char *nick); // return 1 if self else 0
+static int nick_delete(struct irc_bot *bot, const char *nick); // return 1 if self else 0
 
 static void comp_set_status(struct irc_component *comp, const char *status);
 static struct irc_component *comp_lookup(struct irc_bot *bot, const char *host, const char *id, const char *type);
 static int comp_lookup_callback(void *node, void *ctx);
-static struct irc_component *comp_create(struct irc_bot *bot, const char *host, const char *id, const char *type, const char *nick); // nick or host/id/type can be null
-static void comp_delete(struct irc_bot *bot, struct irc_component *comp);
+static struct irc_component *comp_create(struct irc_bot *bot, const char *host, const char *id, const char *type, const char *nick, int add_to_list, int fire_callback); // nick or host/id/type can be null
+static void comp_delete(struct irc_bot *bot, struct irc_component *comp, int remove_from_list, int fire_callback);
+static struct irc_component *comp_lookup_by_origin(struct irc_bot *bot, const char *origin);
 
 // --- events ---
 static void event_connect(irc_session_t * session, const char * event, const char * origin, const char ** params, unsigned int count);
@@ -103,6 +109,9 @@ static void event_part(irc_session_t * session, const char * event, const char *
 static void event_unknown(irc_session_t * session, const char * event, const char * origin, const char ** params, unsigned int count);
 static void event_numeric(irc_session_t * session, unsigned int event, const char * origin, const char ** params, unsigned int count);
 // --- events ---
+
+static void listener_callback_add(int *nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, void *ctx);
+static void listener_callback_process(fd_set *readfds, fd_set *writefds, fd_set *exceptfds, void *ctx);
 
 static char host[HOST_NAME_MAX+1];
 static irc_callbacks_t irc_callbacks;
@@ -132,7 +141,7 @@ void irc_terminate()
 {
 }
 
-struct irc_bot *irc_create(const char *id, const char *type, struct irc_bot_callbacks *callbacks, void *ctx)
+struct irc_bot *irc_bot_create(const char *id, const char *type, struct irc_bot_callbacks *callbacks, void *ctx)
 {
 	struct irc_bot *bot;
 	malloc_nofail(bot);
@@ -143,22 +152,10 @@ struct irc_bot *irc_create(const char *id, const char *type, struct irc_bot_call
 	memcpy(&(bot->callbacks), callbacks, sizeof(*callbacks));
 	bot->ctx = ctx;
 
+	bot->listener = loop_register_listener(listener_callback_add, listener_callback_process, bot);
+
 	list_init(&(bot->net));
-
-	malloc_nofail(bot->me);
-	strdup_nofail(bot->me->host, host);
-	strdup_nofail(bot->me->id, id);
-	strdup_nofail(bot->me->type, type);
-	bot->me->status = NULL;
-
-	struct nick_split split;
-	split.host = bot->me->host;
-	split.id = bot->me->id;
-	split.type = bot->me->type;
-	split.status = NULL;
-
-	malloc_array_nofail(bot->me->nick, NICK_MAX+1);
-	nick_join(bot->me->nick, &split);
+	bot->me = comp_create(bot, host, id, type, NULL, 0, 0);
 
 	bot->connected = 0;
 	connect(bot);
@@ -166,18 +163,17 @@ struct irc_bot *irc_create(const char *id, const char *type, struct irc_bot_call
 	return bot;
 }
 
-void irc_delete(struct irc_bot *bot)
+void irc_bot_delete(struct irc_bot *bot)
 {
 	if(irc_is_connected(bot->session))
 		irc_disconnect(bot->session);
 	irc_destroy_session(bot->session);
 
-	free(bot->id);
-	free(bot->type);
-	if(bot->status)
-		free(bot->status);
-	if(bot->nick)
-		free(bot->nick);
+	disconnected(bot);
+
+	loop_unregister(bot->listener);
+
+	comp_delete(bot, bot->me, 0, 0);
 	free(bot);
 }
 
@@ -199,7 +195,22 @@ int irc_bot_is_connected(struct irc_bot *bot)
 void irc_bot_set_comp_status(struct irc_bot *bot, const char *status)
 {
 	comp_set_status(bot->me, status);
-	// TODO : changement nick
+
+	// new nick
+	struct irc_component *me = bot->me;
+	struct nick_split split;
+	split.host = me->host;
+	split.id = me->id;
+	split.type = me->type;
+	split.status = me->status;
+	if(me->nick)
+		free(me->nick);
+	malloc_array_nofail(me->nick, NICK_MAX+1);
+	nick_join(me->nick, &split);
+
+	// nick change if connected
+	if(irc_is_connected(bot->session))
+		irc_cmd_nick(bot->session, me->nick);
 }
 
 struct irc_component *irc_get_me(struct irc_bot *bot)
@@ -248,6 +259,23 @@ void connect(struct irc_bot *bot)
 	log_assert(irc_connect(bot->session, CONFIG_IRC_SERVER, CONFIG_IRC_PORT, NULL, nick, nick, nick) == 0);
 }
 
+void disconnected(struct irc_bot *bot)
+{
+	bot->connected = 0;
+
+	struct irc_component *comp = irc_get_me(bot);
+	list_remove(&(bot->net), comp);
+	list_clear(&(bot->net), comp_free, bot);
+}
+
+void comp_free(void *node, void *ctx)
+{
+	struct irc_bot *bot = ctx;
+	struct irc_component *comp = node;
+
+	comp_delete(bot, comp, 0, 1);
+}
+
 void nick_split(const char *nick, struct nick_split *split) // nick_split is not allocated => no free -- thread unsafe
 {
 	static char wnick[NICK_MAX+1];
@@ -275,17 +303,13 @@ void nick_join(char *nick, const struct nick_split *split)
 
 int nick_new(struct irc_bot *bot, const char *nick) // return 1 if self else 0
 {
-	if(!stricmp(bot->me->nick, nick))
+	if(!strcasecmp(bot->me->nick, nick))
 	{
 		list_add(&(bot->net), bot->me);
 		return 1;
 	}
 
-	struct irc_component *comp = comp_create(bot, NULL, NULL, NULL, nick);
-
-	void (*on_comp_new)(struct irc_bot *bot, struct irc_component *comp) = bot->callbacks.on_comp_new;
-	if(on_comp_new)
-		on_comp_new(bot, comp);
+	comp_create(bot, NULL, NULL, NULL, nick, 1, 1);
 
 	return 0;
 }
@@ -303,9 +327,9 @@ void nick_change(struct irc_bot *bot, const char *oldnick, const char *newnick)
 	}
 
 	nick_split(newnick, &split);
-	int samebase = !stricmp(comp->host, split.host)
-			&& !stricmp(comp->id, split.id)
-			&& !stricmp(comp->type, split.type);
+	int samebase = !strcasecmp(comp->host, split.host)
+			&& !strcasecmp(comp->id, split.id)
+			&& !strcasecmp(comp->type, split.type);
 	if(samebase)
 	{
 		comp_set_status(comp, split.status);
@@ -321,25 +345,17 @@ void nick_change(struct irc_bot *bot, const char *oldnick, const char *newnick)
 	log_warning("nick change '%s' -> '%s' results in component delete and create", oldnick, newnick);
 
 	// suppression
-	void (*on_comp_delete)(struct irc_bot *bot, struct irc_component *comp) = bot->callbacks.on_comp_delete;
-	if(on_comp_delete)
-		on_comp_delete(bot, comp);
-
-	comp_delete(bot, comp);
+	comp_delete(bot, comp, 1, 1);
 
 	// création
-	comp = comp_create(bot, NULL, NULL, NULL, newnick);
-
-	void (*on_comp_new)(struct irc_bot *bot, struct irc_component *comp) = bot->callbacks.on_comp_new;
-	if(on_comp_new)
-		on_comp_new(bot, comp);
+	comp = comp_create(bot, NULL, NULL, NULL, newnick, 1, 1);
 }
 
 int nick_delete(struct irc_bot *bot, const char *nick) // return 1 if self else 0
 {
-	if(!stricmp(bot->me->nick, nick))
+	if(!strcasecmp(bot->me->nick, nick))
 	{
-		list_remove(&(bot->me), bot->me);
+		list_remove(&(bot->net), bot->me);
 		return 1;
 	}
 
@@ -353,11 +369,7 @@ int nick_delete(struct irc_bot *bot, const char *nick) // return 1 if self else 
 		return 0;
 	}
 
-	void (*on_comp_delete)(struct irc_bot *bot, struct irc_component *comp) = bot->callbacks.on_comp_delete;
-	if(on_comp_delete)
-		on_comp_delete(bot, comp);
-
-	comp_delete(bot, comp);
+	comp_delete(bot, comp, 1, 1);
 	return 0;
 }
 
@@ -387,11 +399,11 @@ int comp_lookup_callback(void *node, void *ctx)
 	struct irc_component *comp = node;
 	struct comp_lookup_data *data = ctx;
 
-	if(stricmp(comp->host, data->host))
+	if(strcasecmp(comp->host, data->host))
 		return 1;
-	if(stricmp(comp->id, data->id))
+	if(strcasecmp(comp->id, data->id))
 		return 1;
-	if(stricmp(comp->type, data->type))
+	if(strcasecmp(comp->type, data->type))
 		return 1;
 
 	// found
@@ -399,7 +411,7 @@ int comp_lookup_callback(void *node, void *ctx)
 	return 0;
 }
 
-struct irc_component *comp_create(struct irc_bot *bot, const char *host, const char *id, const char *type, const char *nick) // nick or host/id/type can be null
+struct irc_component *comp_create(struct irc_bot *bot, const char *host, const char *id, const char *type, const char *nick, int add_to_list, int fire_callback) // nick or host/id/type can be null
 {
 	struct irc_component *comp;
 	malloc_nofail(comp);
@@ -418,9 +430,10 @@ struct irc_component *comp_create(struct irc_bot *bot, const char *host, const c
 	{
 		malloc_array_nofail(comp->nick, NICK_MAX+1);
 		struct nick_split split;
-		split.host = host;
-		split.id = id;
-		split.type = type;
+		// const-cast because in nick_join split is not modified
+		split.host = (char *)host;
+		split.id = (char *)id;
+		split.type = (char *)type;
 		split.status = NULL;
 		nick_join(comp->nick, &split);
 	}
@@ -440,13 +453,31 @@ struct irc_component *comp_create(struct irc_bot *bot, const char *host, const c
 			strdup_nofail(comp->status, split.status);
 	}
 
-	list_add(&(bot->net), comp);
+	if(add_to_list)
+		list_add(&(bot->net), comp);
+
+	if(fire_callback)
+	{
+		void (*on_comp_new)(struct irc_bot *bot, struct irc_component *comp) = bot->callbacks.on_comp_new;
+		if(on_comp_new)
+			on_comp_new(bot, comp);
+	}
+
 	return comp;
 }
 
-void comp_delete(struct irc_bot *bot, struct irc_component *comp)
+void comp_delete(struct irc_bot *bot, struct irc_component *comp, int remove_from_list, int fire_callback)
 {
-	list_remove(&(bot->net), comp);
+	if(fire_callback)
+	{
+		void (*on_comp_delete)(struct irc_bot *bot, struct irc_component *comp) = bot->callbacks.on_comp_delete;
+		if(on_comp_delete)
+			on_comp_delete(bot, comp);
+	}
+
+	if(remove_from_list)
+		list_remove(&(bot->net), comp);
+
 	if(comp->nick)
 		free(comp->nick);
 	if(comp->host)
@@ -460,66 +491,216 @@ void comp_delete(struct irc_bot *bot, struct irc_component *comp)
 	free(comp);
 }
 
+struct irc_component *comp_lookup_by_origin(struct irc_bot *bot, const char *origin)
+{
+	char nick[NICK_MAX+1];
+	irc_target_get_nick(origin, nick, NICK_MAX+1);
+
+	struct nick_split split;
+	nick_split(nick, &split);
+
+	return comp_lookup(bot, split.host, split.id, split.type);
+}
+
 // --- events ---
 void event_connect(irc_session_t * session, const char * event, const char * origin, const char ** params, unsigned int count)
 {
-	// TODO
+	struct irc_bot *bot = irc_get_ctx(session);
+
+	// on connection we set nick appropriatly and join the rooms
+	irc_cmd_nick(session, bot->me->nick);
+	irc_cmd_join(session, CONFIG_IRC_CHANNEL, NULL);
 }
 
 void event_kick(irc_session_t * session, const char * event, const char * origin, const char ** params, unsigned int count) // + tracking
 {
+	struct irc_bot *bot = irc_get_ctx(session);
 
+	const char *channel = params[0];
+	if(strcasecmp(channel, CONFIG_IRC_CHANNEL))
+		return;
+
+	const char *nick = params[1];
+	if(!strcasecmp(nick, bot->me->nick))
+	{
+		// it is us !
+		disconnected(bot);
+
+		// trying to re-join
+		irc_cmd_join(session, CONFIG_IRC_CHANNEL, NULL);
+	}
+	else
+	{
+		nick_delete(bot, nick);
+	}
 }
 
 void event_channel(irc_session_t * session, const char * event, const char * origin, const char ** params, unsigned int count)
 {
+	struct irc_bot *bot = irc_get_ctx(session);
 
+	const char *channel = params[0];
+	if(strcasecmp(channel, CONFIG_IRC_CHANNEL))
+		return;
+
+	struct irc_component *comp = comp_lookup_by_origin(bot, origin);
+	if(!comp) // message from unknown source, ignoring
+		return;
+
+	const char *text;
+	if(count < 2 || !(text = params[1]))
+		return;
+
+	void (*on_message)(struct irc_bot *bot, struct irc_component *from, const char *text) = bot->callbacks.on_message;
+	if(on_message)
+		on_message(bot, comp, text);
 }
 
 void event_privmsg(irc_session_t * session, const char * event, const char * origin, const char ** params, unsigned int count)
 {
+	/*
+	 * not implemented for now
+	 *
+	struct irc_bot *bot = irc_get_ctx(session);
 
+	struct irc_component *comp = comp_lookup_by_origin(origin);
+	if(!comp) // message from unknown source, ignoring
+		return;
+
+	const char *text;
+	if(count < 2 || !(text = params[1]))
+		return;
+	*/
 }
 
 void event_notice(irc_session_t * session, const char * event, const char * origin, const char ** params, unsigned int count)
 {
+	/*
+	 * not implemented for now
+	 *
+	struct irc_bot *bot = irc_get_ctx(session);
 
+	struct irc_component *comp = comp_lookup_by_origin(origin);
+	if(!comp) // message from unknown source, ignoring
+		return;
+
+	const char *text;
+	if(count < 2 || !(text = params[1]))
+		return;
+	*/
 }
 
 void event_channel_notice(irc_session_t * session, const char * event, const char * origin, const char ** params, unsigned int count)
 {
+	struct irc_bot *bot = irc_get_ctx(session);
 
+	const char *channel = params[0];
+	if(strcasecmp(channel, CONFIG_IRC_CHANNEL))
+		return;
+
+	struct irc_component *comp = comp_lookup_by_origin(bot, origin);
+	if(!comp) // message from unknown source, ignoring
+		return;
+
+	const char *text;
+	if(count < 2 || !(text = params[1]))
+		return;
+
+	void (*on_notice)(struct irc_bot *bot, struct irc_component *from, const char *text) = bot->callbacks.on_notice;
+	if(on_notice)
+		on_notice(bot, comp, text);
 }
 
 // tracking
 void event_nick(irc_session_t * session, const char * event, const char * origin, const char ** params, unsigned int count)
 {
+	struct irc_bot *bot = irc_get_ctx(session);
 
+	char oldnick[NICK_MAX+1];
+	irc_target_get_nick(origin, oldnick, NICK_MAX+1);
+
+	const char *newnick = params[0];
+
+	nick_change(bot, oldnick, newnick);
 }
 
 void event_quit(irc_session_t * session, const char * event, const char * origin, const char ** params, unsigned int count)
 {
+	struct irc_bot *bot = irc_get_ctx(session);
 
+	char nick[NICK_MAX+1];
+	irc_target_get_nick(origin, nick, NICK_MAX+1);
+
+	nick_delete(bot, nick);
 }
 
 void event_join(irc_session_t * session, const char * event, const char * origin, const char ** params, unsigned int count)
 {
+	struct irc_bot *bot = irc_get_ctx(session);
 
+	const char *channel = params[0];
+	if(strcasecmp(channel, CONFIG_IRC_CHANNEL))
+		return;
+
+	char nick[NICK_MAX+1];
+	irc_target_get_nick(origin, nick, NICK_MAX+1);
+
+	nick_new(bot, nick);
 }
 
 void event_part(irc_session_t * session, const char * event, const char * origin, const char ** params, unsigned int count)
 {
+	struct irc_bot *bot = irc_get_ctx(session);
 
+	const char *channel = params[0];
+	if(strcasecmp(channel, CONFIG_IRC_CHANNEL))
+		return;
+
+	char nick[NICK_MAX+1];
+	irc_target_get_nick(origin, nick, NICK_MAX+1);
+
+	nick_delete(bot, nick);
 }
 
 // misc
 void event_unknown(irc_session_t * session, const char * event, const char * origin, const char ** params, unsigned int count)
 {
+	/*
+	 * not implemented
+	 *
+	struct irc_bot *bot = irc_get_ctx(session);
 
+	 */
 }
 
 void event_numeric(irc_session_t * session, unsigned int event, const char * origin, const char ** params, unsigned int count)
 {
+	struct irc_bot *bot = irc_get_ctx(session);
+	const char *nick;
 
+	switch(event)
+	{
+	case LIBIRC_RFC_RPL_NAMREPLY:
+		nick = params[0];
+		nick_new(bot, nick);
+		break;
+
+	case LIBIRC_RFC_RPL_ENDOFNAMES:
+		// end of nick list => we are fully connected
+		bot->connected = 1;
+		break;
+	}
 }
 // --- events ---
+
+void listener_callback_add(int *nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, void *ctx)
+{
+	struct irc_bot *bot = ctx;
+	irc_add_select_descriptors(bot->session, readfds, writefds, nfds);
+}
+
+void listener_callback_process(fd_set *readfds, fd_set *writefds, fd_set *exceptfds, void *ctx)
+{
+	struct irc_bot *bot = ctx;
+	irc_process_select_descriptors(bot->session, readfds, writefds);
+}

@@ -29,8 +29,8 @@ struct timer
 
 struct listener
 {
-	callback_select callback_add;
-	callback_select callback_process;
+	callback_select_add callback_add;
+	callback_select_process callback_process;
 };
 
 struct loop_handle
@@ -226,7 +226,7 @@ int list_run_item_listener_process(void *node, void *ctx)
 	if(handle->type != LISTENER)
 		return 1;
 
-	handle->data.listener.callback_process(data->nfds, data->readfds, data->writefds, data->exceptfds, handle->ctx);
+	handle->data.listener.callback_process(data->readfds, data->writefds, data->exceptfds, handle->ctx);
 	return 1;
 }
 
@@ -318,7 +318,7 @@ struct loop_handle *loop_register_timer(void (*callback)(void *ctx), void *ctx, 
 	return handle;
 }
 
-struct loop_handle *loop_register_listener(callback_select callback_add, callback_select callback_process, void *ctx)
+struct loop_handle *loop_register_listener(callback_select_add callback_add, callback_select_process callback_process, void *ctx)
 {
 	if(!callback_add)
 		return NULL;
