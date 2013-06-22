@@ -37,7 +37,7 @@ struct core_api
 
 	struct loop_handle *(*loop_register_tick)(void (*callback)(void *ctx), void *ctx);
 	struct loop_handle *(*loop_register_timer)(void (*callback)(void *ctx), void *ctx, int period_ms);
-	struct loop_handle *(*loop_register_listener)(callback_select callback_add, callback_select callback_process, void *ctx);
+	struct loop_handle *(*loop_register_listener)(callback_select_add callback_add, callback_select_process callback_process, void *ctx);
 	void (*loop_unregister)(struct loop_handle *handle);
 	void *(*loop_get_ctx)(struct loop_handle *handle);
 	void (*loop_set_ctx)(struct loop_handle *handle, void *ctx);

@@ -21,6 +21,7 @@
 #include "module.h"
 #include "loop.h"
 #include "irc.h"
+#include "manager.h"
 
 #define ARG_START 1
 #define ARG_STOP 2
@@ -48,10 +49,12 @@ void init()
 	loop_init();
 	irc_init();
 	module_init();
+	manager_init();
 }
 
 void terminate()
 {
+	manager_terminate();
 	module_terminate();
 	irc_terminate();
 	loop_terminate();
