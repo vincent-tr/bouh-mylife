@@ -121,7 +121,7 @@ void irc_init()
 	log_assert(gethostname(host, HOST_NAME_MAX+1) != -1);
 
 	memset(&irc_callbacks, sizeof(irc_callbacks), 0);
-	irc_callbacks.event_channel = event_connect;
+	irc_callbacks.event_connect = event_connect;
 	irc_callbacks.event_kick = event_kick; // + tracking
 	irc_callbacks.event_channel = event_channel;
 	irc_callbacks.event_privmsg = event_privmsg;
