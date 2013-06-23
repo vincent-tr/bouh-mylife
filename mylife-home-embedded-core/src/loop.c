@@ -154,7 +154,7 @@ void run_listeners(struct list *handles_copy)
 	ms2tv(&tv, CONFIG_LOOP_MS);
 
 	list_foreach(handles_copy, list_run_item_listener_add, &data);
-	log_assert(select(nfds, &readfds, &writefds, &exceptfds, &tv) != -1);
+	log_assert(select(nfds + 1, &readfds, &writefds, &exceptfds, &tv) != -1);
 	list_foreach(handles_copy, list_run_item_listener_process, &data);
 }
 
