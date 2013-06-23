@@ -10,18 +10,20 @@
 
 struct irc_bot;
 struct irc_component;
+struct irc_handler;
+
+typedef void (*irc_callback)(struct irc_bot *bot);
+typedef void (*irc_comp_callback)(struct irc_bot *bot, struct irc_component *comp);
+typedef void (*irc_handler_callback)(struct irc_bot *bot, struct irc_component *from, const char *verb, int broadcast, const char **args, int argc);
 
 struct irc_bot_callbacks
 {
-	void (*on_connected)(struct irc_bot *bot);
-	void (*on_disconnected)(struct irc_bot *bot);
+	irc_callback on_connected;
+	irc_callback on_disconnected;
 
-	void (*on_comp_new)(struct irc_bot *bot, struct irc_component *comp);
-	void (*on_comp_delete)(struct irc_bot *bot, struct irc_component *comp);
-	void (*on_comp_change_status)(struct irc_bot *bot, struct irc_component *comp);
-
-	void (*on_message)(struct irc_bot *bot, struct irc_component *from, const char *text); // on chan only
-	void (*on_notice)(struct irc_bot *bot, struct irc_component *from, const char *text); // on chan only
+	irc_comp_callback on_comp_new;
+	irc_comp_callback on_comp_delete;
+	irc_comp_callback on_comp_change_status;
 };
 
 #ifdef CORE
@@ -44,6 +46,18 @@ extern const char *irc_comp_get_host(struct irc_bot *bot, struct irc_component *
 extern const char *irc_comp_get_id(struct irc_bot *bot, struct irc_component *comp); // NULL if unrecognized nick format
 extern const char *irc_comp_get_type(struct irc_bot *bot, struct irc_component *comp); // NULL if unrecognized nick format
 extern const char *irc_comp_get_status(struct irc_bot *bot, struct irc_component *comp); // NULL if unrecognized nick format or if no status
+
+/*
+ * command format : !target verb arg1 arg2 :arg3
+ * if verb == NULL => register all verbs
+ * if broadcast register target = *
+ */
+extern struct irc_handler *irc_bot_add_message_handler(struct irc_bot *bot, const char *verb, int broadcast, irc_handler_callback callback);
+extern struct irc_handler *irc_bot_add_notice_handler(struct irc_bot *bot, const char *verb, int broadcast, irc_handler_callback callback);
+extern void irc_bot_remove_handler(struct irc_bot *bot, struct irc_handler *handler);
+
+extern int irc_bot_send_message(struct irc_bot *bot, struct irc_component *comp, const char *verb, const char **args, int argc); // comp NULL = broadcast -- thread unsafe
+extern int irc_bot_send_notice(struct irc_bot *bot, struct irc_component *comp, const char *verb, const char **args, int argc); // comp NULL = broadcast -- thread unsafe
 
 #else // CORE
 

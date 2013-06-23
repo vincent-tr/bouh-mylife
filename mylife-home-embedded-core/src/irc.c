@@ -32,6 +32,8 @@
  */
 
 #define NICK_MAX 30
+#define BUFFER_MAX 1024
+#define ARGS_MAX 250
 
 struct irc_component
 {
@@ -56,6 +58,24 @@ struct irc_bot
 	struct irc_bot_callbacks callbacks;
 	struct irc_component *me;
 	struct list net;
+
+	struct list handlers;
+};
+
+enum handler_type
+{
+	NOTICE,
+	MESSAGE
+};
+
+struct irc_handler
+{
+	struct list_node node;
+
+	enum handler_type type;
+	char *verb;
+	int broadcast;
+	irc_handler_callback handler;
 };
 
 struct comp_lookup_data
@@ -75,9 +95,21 @@ struct nick_split
 	char *status;
 };
 
+struct handler_dispatch_data
+{
+	struct irc_bot *bot;
+	enum handler_type type;
+	struct irc_component *from;
+	const char *verb;
+	int broadcast;
+	const char **args;
+	int argc;
+};
+
 static void connect(struct irc_bot *bot);
 static void disconnected(struct irc_bot *bot);
 static void comp_free(void *node, void *ctx);
+static void handler_free(void *node, void *ctx);
 
 static void nick_split(const char *nick, struct nick_split *split); // nick_split is not allocated => no free -- thread unsafe
 static void nick_join(char *nick, const struct nick_split *split); // nick must be array of MAX_NICK+1 length -- thread unsafe
@@ -112,6 +144,13 @@ static void event_numeric(irc_session_t * session, unsigned int event, const cha
 
 static void listener_callback_add(int *nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, void *ctx);
 static void listener_callback_process(fd_set *readfds, fd_set *writefds, fd_set *exceptfds, void *ctx);
+
+static void on_message(struct irc_bot *bot, struct irc_component *from, const char *text);
+static void on_notice(struct irc_bot *bot, struct irc_component *from, const char *text);
+static void handler_dispatch(struct irc_bot *bot, enum handler_type type, struct irc_component *from, const char *target, const char *verb, const char **args, int argc);
+static int handler_dispatch_item(void *node, void *ctx);
+static int handler_text_parse(const char *text, char **target, char **verb, char ***args, int *argc); // thread unsafe
+static int irc_bot_send(struct irc_bot *bot, struct irc_component *comp, enum handler_type type, const char *verb, const char **args, int argc); // comp NULL = broadcast -- thread unsafe
 
 static char host[HOST_NAME_MAX+1];
 static irc_callbacks_t irc_callbacks;
@@ -157,6 +196,8 @@ struct irc_bot *irc_bot_create(const char *id, const char *type, struct irc_bot_
 	list_init(&(bot->net));
 	bot->me = comp_create(bot, host, id, type, NULL, 0, 0);
 
+	list_init(&(bot->handlers));
+
 	bot->connected = 0;
 	connect(bot);
 
@@ -174,6 +215,7 @@ void irc_bot_delete(struct irc_bot *bot)
 	loop_unregister(bot->listener);
 
 	comp_delete(bot, bot->me, 0, 0);
+	list_clear(&(bot->handlers), handler_free, bot);
 	free(bot);
 }
 
@@ -274,6 +316,16 @@ void comp_free(void *node, void *ctx)
 	struct irc_component *comp = node;
 
 	comp_delete(bot, comp, 0, 1);
+}
+
+void handler_free(void *node, void *ctx)
+{
+	//struct irc_bot *bot = ctx;
+	struct irc_handler *handler = node;
+
+	if(handler->verb)
+		free(handler->verb);
+	free(handler);
 }
 
 void nick_split(const char *nick, struct nick_split *split) // nick_split is not allocated => no free -- thread unsafe
@@ -551,9 +603,7 @@ void event_channel(irc_session_t * session, const char * event, const char * ori
 	if(count < 2 || !(text = params[1]))
 		return;
 
-	void (*on_message)(struct irc_bot *bot, struct irc_component *from, const char *text) = bot->callbacks.on_message;
-	if(on_message)
-		on_message(bot, comp, text);
+	on_message(bot, comp, text);
 }
 
 void event_privmsg(irc_session_t * session, const char * event, const char * origin, const char ** params, unsigned int count)
@@ -606,9 +656,7 @@ void event_channel_notice(irc_session_t * session, const char * event, const cha
 	if(count < 2 || !(text = params[1]))
 		return;
 
-	void (*on_notice)(struct irc_bot *bot, struct irc_component *from, const char *text) = bot->callbacks.on_notice;
-	if(on_notice)
-		on_notice(bot, comp, text);
+	on_notice(bot, comp, text);
 }
 
 // tracking
@@ -703,4 +751,235 @@ void listener_callback_process(fd_set *readfds, fd_set *writefds, fd_set *except
 {
 	struct irc_bot *bot = ctx;
 	irc_process_select_descriptors(bot->session, readfds, writefds);
+}
+
+void on_message(struct irc_bot *bot, struct irc_component *from, const char *text)
+{
+	char *target;
+	char *verb;
+	char **args;
+	int argc;
+
+	if(!handler_text_parse(text, &target, &verb, &args, &argc))
+		return; // not a command
+
+	handler_dispatch(bot, MESSAGE, from, target, verb, (const char **)args, argc);
+}
+
+void on_notice(struct irc_bot *bot, struct irc_component *from, const char *text)
+{
+	char *target;
+	char *verb;
+	char **args;
+	int argc;
+
+	if(!handler_text_parse(text, &target, &verb, &args, &argc))
+		return; // not a command
+
+	handler_dispatch(bot, NOTICE, from, target, verb, (const char **)args, argc);
+
+}
+
+int handler_text_parse(const char *text, char **target, char **verb, char ***args, int *argc) // thread unsafe
+{
+	static char buffer[BUFFER_MAX];
+	static char *wargs[ARGS_MAX];
+	char *ptr;
+	int args_index;
+
+	strcpy(buffer, text);
+	memset(wargs, 0, sizeof(wargs));
+	args_index = 0;
+
+	ptr = buffer;
+	if(*ptr != '!')
+		return 0;
+	++ptr;
+
+	// target
+	*target = ptr;
+	while (*ptr && *ptr != ' ')
+		ptr++;
+	*ptr++ = '\0';
+
+	// verb
+	*verb = ptr;
+	while (*ptr && *ptr != ' ')
+		ptr++;
+	*ptr++ = '\0';
+
+	while (*ptr &&  args_index < ARGS_MAX)
+	{
+		// beginning from ':', this is the last param
+		if ( *ptr == ':' )
+		{
+			wargs[args_index++] = ptr + 1; // skip :
+			break;
+		}
+
+		// Just a param
+		for(wargs[args_index++] = ptr; *ptr && *ptr != ' '; ptr++);
+
+		if ( !*ptr )
+			break;
+
+		*ptr++ = '\0';
+	}
+
+	*args = wargs;
+	*argc = args_index;
+
+	return 1;
+}
+
+void handler_dispatch(struct irc_bot *bot, enum handler_type type, struct irc_component *from, const char *target, const char *verb, const char **args, int argc)
+{
+	int broadcast = 0;
+	if(!strcasecmp(target, "*"))
+	{
+		broadcast = 1;
+	}
+	else
+	{
+		struct nick_split split;
+		nick_split(target, &split);
+		struct irc_component *target_comp = comp_lookup(bot, split.host, split.id, split.type);
+		if(target_comp != bot->me)
+			return; // not a broadcast and not for us
+	}
+
+	struct handler_dispatch_data data;
+	data.bot = bot;
+	data.type = type;
+	data.from = from;
+	data.verb = verb;
+	data.broadcast = broadcast;
+	data.args = args;
+	data.argc = argc;
+
+	list_foreach(&(bot->handlers), handler_dispatch_item, &data);
+}
+
+int handler_dispatch_item(void *node, void *ctx)
+{
+	struct handler_dispatch_data *data = ctx;
+	struct irc_handler *handler = node;
+
+	if(handler->type != data->type)
+		return 1;
+	if(!handler->broadcast && data->broadcast) // handler is not listening to broadcast but message is broadcast
+		return 1;
+	if(handler->verb && strcasecmp(handler->verb, data->verb)) // non corresponding verb
+		return 1;
+
+	handler->handler(data->bot, data->from, data->verb, data->broadcast, data->args, data->argc);
+	return 1;
+}
+
+struct irc_handler *irc_bot_add_message_handler(struct irc_bot *bot, const char *verb, int broadcast, irc_handler_callback callback)
+{
+	log_assert(callback);
+
+	struct irc_handler *handler;
+	malloc_nofail(handler);
+
+	handler->type = MESSAGE;
+	handler->verb = NULL;
+	if(verb)
+		strdup_nofail(handler->verb, verb);
+	handler->broadcast = broadcast ? 1 : 0;
+	handler->handler = callback;
+
+	return handler;
+}
+
+struct irc_handler *irc_bot_add_notice_handler(struct irc_bot *bot, const char *verb, int broadcast, irc_handler_callback callback)
+{
+	log_assert(callback);
+
+	struct irc_handler *handler;
+	malloc_nofail(handler);
+
+	handler->type = NOTICE;
+	handler->verb = NULL;
+	if(verb)
+		strdup_nofail(handler->verb, verb);
+	handler->broadcast = broadcast ? 1 : 0;
+	handler->handler = callback;
+
+	return handler;
+}
+
+void irc_bot_remove_handler(struct irc_bot *bot, struct irc_handler *handler)
+{
+	list_remove(&(bot->handlers), handler);
+	if(handler->verb)
+		free(handler->verb);
+	free(handler);
+}
+
+int irc_bot_send_message(struct irc_bot *bot, struct irc_component *comp, const char *verb, const char **args, int argc) // comp NULL = broadcast
+{
+	return irc_bot_send(bot, comp, MESSAGE, verb, args, argc);
+}
+
+int irc_bot_send_notice(struct irc_bot *bot, struct irc_component *comp, const char *verb, const char **args, int argc) // comp NULL = broadcast
+{
+	return irc_bot_send(bot, comp, NOTICE, verb, args, argc);
+}
+
+int irc_bot_send(struct irc_bot *bot, struct irc_component *comp, enum handler_type type, const char *verb, const char **args, int argc) // comp NULL = broadcast
+{
+	static char buffer[BUFFER_MAX];
+	static char nick[NICK_MAX+1];
+	int idx;
+
+	if(!irc_bot_is_connected(bot))
+		return 0;
+
+	if(comp)
+	{
+		struct nick_split split;
+		split.host = comp->host;
+		split.id = comp->id;
+		split.type = comp->type;
+		split.status = NULL;
+		nick_join(nick, &split);
+	}
+	else
+	{
+		// broadcast
+		strcpy(nick, "*");
+	}
+
+	int ret = 0;
+	irc_session_t *session = bot->session;
+
+	snprintf(buffer, BUFFER_MAX, "!%s %s", nick, verb);
+	buffer[BUFFER_MAX-1] = '\0';
+
+	for(idx = 0; idx < argc - 1; ++idx)
+	{
+		strncat(buffer, " ", BUFFER_MAX-1);
+		strncat(buffer, args[idx], BUFFER_MAX-1);
+	}
+
+	if(argc > 0)
+	{
+		strncat(buffer, " :", BUFFER_MAX-1);
+		strncat(buffer, args[argc-1], BUFFER_MAX-1);
+	}
+
+	switch(type)
+	{
+	case MESSAGE:
+		ret = irc_cmd_msg(session, CONFIG_IRC_CHANNEL, buffer);
+		break;
+
+	case NOTICE:
+		ret = irc_cmd_notice(session, CONFIG_IRC_CHANNEL, buffer);
+		break;
+	}
+
+	return ret;
 }
