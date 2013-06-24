@@ -693,6 +693,10 @@ void event_join(irc_session_t * session, const char * event, const char * origin
 	char nick[NICK_MAX+1];
 	irc_target_get_nick(origin, nick, NICK_MAX+1);
 
+	// if it is us we don't add because we will on names
+	if(!strcasecmp(bot->me->nick, nick))
+		return;
+
 	nick_new(bot, nick);
 }
 
@@ -724,16 +728,47 @@ void event_unknown(irc_session_t * session, const char * event, const char * ori
 void event_numeric(irc_session_t * session, unsigned int event, const char * origin, const char ** params, unsigned int count)
 {
 	struct irc_bot *bot = irc_get_ctx(session);
+	//int arg_idx;
 	const char *nick;
+	char *nick_list;
+	const char *channel;
+	char *tok_save;
 
 	switch(event)
 	{
 	case LIBIRC_RFC_RPL_NAMREPLY:
-		nick = params[0];
-		nick_new(bot, nick);
+		// http://tools.ietf.org/html/rfc2812#section-3.2.1
+		// const char *self = params[0] ???
+		// params[1] = "=" for public channels
+		channel = params[2];
+		if(strcasecmp(channel, CONFIG_IRC_CHANNEL))
+			return;
+
+		strdup_nofail(nick_list, params[3]);
+		nick = strtok_r(nick_list, " ", &tok_save);
+		while(nick)
+		{
+			// {~&@%+}nick
+			switch(nick[0])
+			{
+				case '~':
+				case '&':
+				case '@':
+				case '%':
+				case '+':
+					++nick;
+					break;
+			}
+			nick_new(bot, nick);
+			nick = strtok_r(NULL, " ", &tok_save);
+		}
 		break;
 
 	case LIBIRC_RFC_RPL_ENDOFNAMES:
+		// const char *self = params[0] ???
+		channel = params[1];
+		if(strcasecmp(channel, CONFIG_IRC_CHANNEL))
+			return;
 		// end of nick list => we are fully connected
 		bot->connected = 1;
 		break;
@@ -890,6 +925,7 @@ struct irc_handler *irc_bot_add_message_handler(struct irc_bot *bot, const char 
 	handler->broadcast = broadcast ? 1 : 0;
 	handler->handler = callback;
 
+	list_add(&(bot->handlers), handler);
 	return handler;
 }
 
@@ -907,6 +943,7 @@ struct irc_handler *irc_bot_add_notice_handler(struct irc_bot *bot, const char *
 	handler->broadcast = broadcast ? 1 : 0;
 	handler->handler = callback;
 
+	list_add(&(bot->handlers), handler);
 	return handler;
 }
 
