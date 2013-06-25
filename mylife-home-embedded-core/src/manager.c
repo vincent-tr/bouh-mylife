@@ -14,15 +14,20 @@
 
 #include "irc.h"
 
-struct irc_bot *bot;
+static struct irc_bot *bot;
 
-struct irc_bot_callbacks callbacks =
+static struct irc_bot_callbacks callbacks =
 {
 	.on_connected = NULL,
 	.on_disconnected = NULL,
 	.on_comp_new = NULL,
 	.on_comp_delete = NULL,
 	.on_comp_change_status = NULL
+};
+
+struct subverb_data
+{
+
 };
 
 struct debug_complist_data
@@ -34,16 +39,24 @@ struct debug_complist_data
 static void debug_handler(struct irc_bot *bot, struct irc_component *from, const char *verb, int broadcast, const char **args, int argc);
 static int debug_complist(struct irc_component *comp, void *ctx);
 
+static void module_handler(struct irc_bot *bot, struct irc_component *from, const char *verb, int broadcast, const char **args, int argc);
+
 void manager_init()
 {
 	bot = irc_bot_create("core", "core", &callbacks, NULL);
 
 	irc_bot_add_message_handler(bot, "debug", 0, debug_handler);
+	irc_bot_add_message_handler(bot, "module", 0, module_handler);
 }
 
 void manager_terminate()
 {
 	irc_bot_delete(bot);
+}
+
+struct irc_bot *manager_get_bot()
+{
+	return bot;
 }
 
 void debug_handler(struct irc_bot *bot, struct irc_component *from, const char *verb, int broadcast, const char **args, int argc)
@@ -82,4 +95,9 @@ int debug_complist(struct irc_component *comp, void *ctx)
 	const char *args[] = {"nick", irc_comp_get_nick(data->bot, comp)};
 	irc_bot_send_notice(bot, data->target, "reply", args, sizeof(args) / sizeof(*args));
 	return 1;
+}
+
+void module_handler(struct irc_bot *bot, struct irc_component *from, const char *verb, int broadcast, const char **args, int argc)
+{
+
 }

@@ -68,14 +68,26 @@ enum handler_type
 	MESSAGE
 };
 
+struct irc_command
+{
+	struct list_node node;
+
+	char *verb;
+	char **description; // NULL terminated
+
+	struct list children;
+
+	void *ctx;
+	irc_handler_callback callback;
+};
+
 struct irc_handler
 {
 	struct list_node node;
 
 	enum handler_type type;
-	char *verb;
-	int broadcast;
-	irc_handler_callback handler;
+	int support_broadcast;
+	struct irc_command *command;
 };
 
 struct comp_lookup_data
@@ -101,7 +113,7 @@ struct handler_dispatch_data
 	enum handler_type type;
 	struct irc_component *from;
 	const char *verb;
-	int broadcast;
+	int is_broadcast;
 	const char **args;
 	int argc;
 };
@@ -150,6 +162,11 @@ static void on_notice(struct irc_bot *bot, struct irc_component *from, const cha
 static void handler_dispatch(struct irc_bot *bot, enum handler_type type, struct irc_component *from, const char *target, const char *verb, const char **args, int argc);
 static int handler_dispatch_item(void *node, void *ctx);
 static int handler_text_parse(const char *text, char **target, char **verb, char ***args, int *argc); // thread unsafe
+static struct irc_handler *handler_add(struct irc_bot *bot, int support_broadcast, struct irc_command_description *description, enum handler_type type);
+static struct irc_command *handler_create_command(struct irc_command_description *description);
+static void handler_delete(struct irc_handler *handler);
+static void handler_delete_command(struct irc_command *command, void *useless);
+
 static int irc_bot_send(struct irc_bot *bot, struct irc_component *comp, enum handler_type type, const char *verb, const char **args, int argc); // comp NULL = broadcast -- thread unsafe
 
 static char host[HOST_NAME_MAX+1];
@@ -323,9 +340,7 @@ void handler_free(void *node, void *ctx)
 	//struct irc_bot *bot = ctx;
 	struct irc_handler *handler = node;
 
-	if(handler->verb)
-		free(handler->verb);
-	free(handler);
+	handler_delete(handler);
 }
 
 void nick_split(const char *nick, struct nick_split *split) // nick_split is not allocated => no free -- thread unsafe
@@ -869,10 +884,10 @@ int handler_text_parse(const char *text, char **target, char **verb, char ***arg
 
 void handler_dispatch(struct irc_bot *bot, enum handler_type type, struct irc_component *from, const char *target, const char *verb, const char **args, int argc)
 {
-	int broadcast = 0;
+	int is_broadcast = 0;
 	if(!strcasecmp(target, "*"))
 	{
-		broadcast = 1;
+		is_broadcast = 1;
 	}
 	else
 	{
@@ -888,7 +903,7 @@ void handler_dispatch(struct irc_bot *bot, enum handler_type type, struct irc_co
 	data.type = type;
 	data.from = from;
 	data.verb = verb;
-	data.broadcast = broadcast;
+	data.is_broadcast = is_broadcast;
 	data.args = args;
 	data.argc = argc;
 
@@ -911,48 +926,92 @@ int handler_dispatch_item(void *node, void *ctx)
 	return 1;
 }
 
-struct irc_handler *irc_bot_add_message_handler(struct irc_bot *bot, const char *verb, int broadcast, irc_handler_callback callback)
+struct irc_handler *irc_bot_add_message_handler(struct irc_bot *bot, int support_broadcast, struct irc_command_description *description)
 {
-	log_assert(callback);
+	return handler_add(bot, support_broadcast, description, MESSAGE);
+}
 
+struct irc_handler *irc_bot_add_notice_handler(struct irc_bot *bot, int support_broadcast, struct irc_command_description *description)
+{
+	return handler_add(bot, support_broadcast, description, NOTICE);
+}
+
+struct irc_handler *handler_add(struct irc_bot *bot, int support_broadcast, struct irc_command_description *description, enum handler_type type)
+{
 	struct irc_handler *handler;
 	malloc_nofail(handler);
 
-	handler->type = MESSAGE;
-	handler->verb = NULL;
-	if(verb)
-		strdup_nofail(handler->verb, verb);
-	handler->broadcast = broadcast ? 1 : 0;
-	handler->handler = callback;
+	handler->type = type;
+	handler->support_broadcast = support_broadcast;
+	handler->command = handler_create_command(description);
 
 	list_add(&(bot->handlers), handler);
 	return handler;
 }
 
-struct irc_handler *irc_bot_add_notice_handler(struct irc_bot *bot, const char *verb, int broadcast, irc_handler_callback callback)
+struct irc_command *handler_create_command(struct irc_command_description *description)
 {
-	log_assert(callback);
+	struct irc_command *cmd;
+	malloc_nofail(cmd);
+	memset(cmd, 0, sizeof(*cmd));
 
-	struct irc_handler *handler;
-	malloc_nofail(handler);
+	if(description->verb)
+		strdup_nofail(cmd->verb, description->verb);
 
-	handler->type = NOTICE;
-	handler->verb = NULL;
-	if(verb)
-		strdup_nofail(handler->verb, verb);
-	handler->broadcast = broadcast ? 1 : 0;
-	handler->handler = callback;
+	if(description->description)
+	{
+		int count;
+		const char *ptr;
+		char *dptr;
+		for(ptr = *(description->description), count = 0; ptr; ++ptr, ++count);
+		malloc_array_nofail(cmd->description, count + 1);
+		for(ptr = *(description->description), dptr = *(cmd->description); ptr; ++ptr, ++dptr)
+			strdup_nofail(dptr, ptr);
+	}
 
-	list_add(&(bot->handlers), handler);
-	return handler;
+	list_init(&(cmd->children));
+	if(description->children)
+	{
+		struct irc_command_description *child = *(description->children);
+		while(child)
+		{
+			struct irc_command *childcmd = handler_create_command(child++);
+			list_add(&(cmd->children), childcmd);
+		}
+	}
+
+	cmd->ctx = description->ctx;
+	cmd->callback = description->callback;
+
+	return cmd;
+}
+
+void handler_delete(struct irc_handler *handler)
+{
+	handler_delete_command(handler->command, NULL);
+	free(handler);
+}
+
+void handler_delete_command(struct irc_command *command, void *useless)
+{
+	if(command->verb)
+		free(command->verb);
+	if(command->description)
+	{
+		char *ptr = *(command->description);
+		while(ptr)
+			free(ptr++);
+		free(command->description);
+	}
+
+	list_clear(&(command->children), (void (*)(void *, void*))handler_delete_command, NULL);
+	free(command);
 }
 
 void irc_bot_remove_handler(struct irc_bot *bot, struct irc_handler *handler)
 {
 	list_remove(&(bot->handlers), handler);
-	if(handler->verb)
-		free(handler->verb);
-	free(handler);
+	handler_delete(handler);
 }
 
 int irc_bot_send_message(struct irc_bot *bot, struct irc_component *comp, const char *verb, const char **args, int argc) // comp NULL = broadcast
