@@ -14,7 +14,7 @@ struct irc_handler;
 
 typedef void (*irc_callback)(struct irc_bot *bot);
 typedef void (*irc_comp_callback)(struct irc_bot *bot, struct irc_component *comp);
-typedef void (*irc_handler_callback)(struct irc_bot *bot, struct irc_component *from, const char *verb, int broadcast, const char **args, int argc);
+typedef void (*irc_handler_callback)(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx);
 
 struct irc_bot_callbacks
 {
@@ -24,6 +24,17 @@ struct irc_bot_callbacks
 	irc_comp_callback on_comp_new;
 	irc_comp_callback on_comp_delete;
 	irc_comp_callback on_comp_change_status;
+};
+
+struct irc_command_description
+{
+	const char *verb;
+	const char **description; // NULL terminated
+
+	struct irc_command_description **children; // NULL terminated
+
+	void *ctx;
+	irc_handler_callback callback;
 };
 
 #ifdef CORE
@@ -49,11 +60,11 @@ extern const char *irc_comp_get_status(struct irc_bot *bot, struct irc_component
 
 /*
  * command format : !target verb arg1 arg2 :arg3
- * if verb == NULL => register all verbs
+ * if verb == NULL => register all (get all messages) and children and description are ignored)
  * if broadcast register target = *
  */
-extern struct irc_handler *irc_bot_add_message_handler(struct irc_bot *bot, const char *verb, int broadcast, irc_handler_callback callback);
-extern struct irc_handler *irc_bot_add_notice_handler(struct irc_bot *bot, const char *verb, int broadcast, irc_handler_callback callback);
+extern struct irc_handler *irc_bot_add_message_handler(struct irc_bot *bot, int support_broadcast, struct irc_command_description *description);
+extern struct irc_handler *irc_bot_add_notice_handler(struct irc_bot *bot, int support_broadcast, struct irc_command_description *description);
 extern void irc_bot_remove_handler(struct irc_bot *bot, struct irc_handler *handler);
 
 extern int irc_bot_send_message(struct irc_bot *bot, struct irc_component *comp, const char *verb, const char **args, int argc); // comp NULL = broadcast -- thread unsafe
