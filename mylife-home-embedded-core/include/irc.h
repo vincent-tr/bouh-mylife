@@ -29,7 +29,7 @@ struct irc_bot_callbacks
 struct irc_command_description
 {
 	const char *verb;
-	const char **description; // NULL terminated
+	char **description; // NULL terminated
 
 	struct irc_command_description **children; // NULL terminated
 
@@ -67,8 +67,10 @@ extern struct irc_handler *irc_bot_add_message_handler(struct irc_bot *bot, int 
 extern struct irc_handler *irc_bot_add_notice_handler(struct irc_bot *bot, int support_broadcast, struct irc_command_description *description);
 extern void irc_bot_remove_handler(struct irc_bot *bot, struct irc_handler *handler);
 
-extern int irc_bot_send_message(struct irc_bot *bot, struct irc_component *comp, const char *verb, const char **args, int argc); // comp NULL = broadcast -- thread unsafe
-extern int irc_bot_send_notice(struct irc_bot *bot, struct irc_component *comp, const char *verb, const char **args, int argc); // comp NULL = broadcast -- thread unsafe
+extern int irc_bot_send_message(struct irc_bot *bot, struct irc_component *comp, const char **args, int argc); // comp NULL = broadcast -- thread unsafe
+extern int irc_bot_send_notice(struct irc_bot *bot, struct irc_component *comp, const char **args, int argc); // comp NULL = broadcast -- thread unsafe
+extern int irc_bot_send_message_va(struct irc_bot *bot, struct irc_component *comp, int argc, ...); // comp NULL = broadcast -- thread unsafe
+extern int irc_bot_send_notice_va(struct irc_bot *bot, struct irc_component *comp, int argc, ...); // comp NULL = broadcast -- thread unsafe
 
 #else // CORE
 

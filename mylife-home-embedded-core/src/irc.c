@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <stdarg.h>
 
 #include "libircclient.h"
 #include "libirc_rfcnumeric.h"
@@ -112,10 +113,22 @@ struct handler_dispatch_data
 	struct irc_bot *bot;
 	enum handler_type type;
 	struct irc_component *from;
-	const char *verb;
 	int is_broadcast;
 	const char **args;
 	int argc;
+};
+
+struct handler_help_data
+{
+	struct irc_bot *bot;
+	struct irc_component *from;
+};
+
+struct handler_help_data_child
+{
+	struct irc_bot *bot;
+	struct irc_component *from;
+	const char *parent_verb;
 };
 
 static void connect(struct irc_bot *bot);
@@ -159,15 +172,20 @@ static void listener_callback_process(fd_set *readfds, fd_set *writefds, fd_set 
 
 static void on_message(struct irc_bot *bot, struct irc_component *from, const char *text);
 static void on_notice(struct irc_bot *bot, struct irc_component *from, const char *text);
-static void handler_dispatch(struct irc_bot *bot, enum handler_type type, struct irc_component *from, const char *target, const char *verb, const char **args, int argc);
+static void handler_dispatch(struct irc_bot *bot, enum handler_type type, struct irc_component *from, const char *target, const char **args, int argc);
 static int handler_dispatch_item(void *node, void *ctx);
-static int handler_text_parse(const char *text, char **target, char **verb, char ***args, int *argc); // thread unsafe
+static void handler_dispatch_command(struct irc_bot *bot, struct irc_command *command, struct irc_component *from, int is_broadcast, const char **args, int argc);
+static int handler_dispatch_command_help_child(void *node, void *ctx);
+static int handler_dispatch_command_item(void *node, void *ctx);
+static int handler_help_item(void *node, void *ctx);
+static int handler_text_parse(const char *text, char **target, char ***args, int *argc); // thread unsafe
 static struct irc_handler *handler_add(struct irc_bot *bot, int support_broadcast, struct irc_command_description *description, enum handler_type type);
 static struct irc_command *handler_create_command(struct irc_command_description *description);
 static void handler_delete(struct irc_handler *handler);
 static void handler_delete_command(struct irc_command *command, void *useless);
 
-static int irc_bot_send(struct irc_bot *bot, struct irc_component *comp, enum handler_type type, const char *verb, const char **args, int argc); // comp NULL = broadcast -- thread unsafe
+static int irc_bot_send_va(struct irc_bot *bot, struct irc_component *comp, enum handler_type type, int argc, va_list list); // comp NULL = broadcast -- thread unsafe
+static int irc_bot_send(struct irc_bot *bot, struct irc_component *comp, enum handler_type type, const char **args, int argc); // comp NULL = broadcast -- thread unsafe
 
 static char host[HOST_NAME_MAX+1];
 static irc_callbacks_t irc_callbacks;
@@ -806,31 +824,29 @@ void listener_callback_process(fd_set *readfds, fd_set *writefds, fd_set *except
 void on_message(struct irc_bot *bot, struct irc_component *from, const char *text)
 {
 	char *target;
-	char *verb;
 	char **args;
 	int argc;
 
-	if(!handler_text_parse(text, &target, &verb, &args, &argc))
+	if(!handler_text_parse(text, &target, &args, &argc))
 		return; // not a command
 
-	handler_dispatch(bot, MESSAGE, from, target, verb, (const char **)args, argc);
+	handler_dispatch(bot, MESSAGE, from, target, (const char **)args, argc);
 }
 
 void on_notice(struct irc_bot *bot, struct irc_component *from, const char *text)
 {
 	char *target;
-	char *verb;
 	char **args;
 	int argc;
 
-	if(!handler_text_parse(text, &target, &verb, &args, &argc))
+	if(!handler_text_parse(text, &target, &args, &argc))
 		return; // not a command
 
-	handler_dispatch(bot, NOTICE, from, target, verb, (const char **)args, argc);
+	handler_dispatch(bot, NOTICE, from, target, (const char **)args, argc);
 
 }
 
-int handler_text_parse(const char *text, char **target, char **verb, char ***args, int *argc) // thread unsafe
+int handler_text_parse(const char *text, char **target, char ***args, int *argc) // thread unsafe
 {
 	static char buffer[BUFFER_MAX];
 	static char *wargs[ARGS_MAX];
@@ -848,12 +864,6 @@ int handler_text_parse(const char *text, char **target, char **verb, char ***arg
 
 	// target
 	*target = ptr;
-	while (*ptr && *ptr != ' ')
-		ptr++;
-	*ptr++ = '\0';
-
-	// verb
-	*verb = ptr;
 	while (*ptr && *ptr != ' ')
 		ptr++;
 	*ptr++ = '\0';
@@ -882,7 +892,7 @@ int handler_text_parse(const char *text, char **target, char **verb, char ***arg
 	return 1;
 }
 
-void handler_dispatch(struct irc_bot *bot, enum handler_type type, struct irc_component *from, const char *target, const char *verb, const char **args, int argc)
+void handler_dispatch(struct irc_bot *bot, enum handler_type type, struct irc_component *from, const char *target, const char **args, int argc)
 {
 	int is_broadcast = 0;
 	if(!strcasecmp(target, "*"))
@@ -898,11 +908,23 @@ void handler_dispatch(struct irc_bot *bot, enum handler_type type, struct irc_co
 			return; // not a broadcast and not for us
 	}
 
+	// special command : 'help' on root
+	if(argc > 0 && !strcasecmp("help", args[0]))
+	{
+		if(!is_broadcast)
+		{
+			struct handler_help_data data;
+			data.bot = bot;
+			data.from = from;
+			list_foreach(&(bot->handlers), handler_help_item, &data);
+		}
+		return;
+	}
+
 	struct handler_dispatch_data data;
 	data.bot = bot;
 	data.type = type;
 	data.from = from;
-	data.verb = verb;
 	data.is_broadcast = is_broadcast;
 	data.args = args;
 	data.argc = argc;
@@ -917,12 +939,126 @@ int handler_dispatch_item(void *node, void *ctx)
 
 	if(handler->type != data->type)
 		return 1;
-	if(!handler->broadcast && data->broadcast) // handler is not listening to broadcast but message is broadcast
-		return 1;
-	if(handler->verb && strcasecmp(handler->verb, data->verb)) // non corresponding verb
+	if(!handler->support_broadcast && data->is_broadcast) // handler is not listening to broadcast but message is broadcast
 		return 1;
 
-	handler->handler(data->bot, data->from, data->verb, data->broadcast, data->args, data->argc);
+	const char **args = data->args;
+	int argc = data->argc;
+
+	if(!handler->command->verb)
+	{
+		// no verb => spying, send with all args
+		handler->command->callback(data->bot, data->from, data->is_broadcast, args, argc, handler->command->ctx);
+		return 1;
+	}
+
+	// else check
+	if(argc && !strcasecmp(handler->command->verb, args[0]))
+	{
+		handler_dispatch_command(data->bot, handler->command, data->from, data->is_broadcast, args + 1, argc - 1);
+	}
+
+	return 1;
+}
+
+void handler_dispatch_command(struct irc_bot *bot, struct irc_command *command, struct irc_component *from, int is_broadcast, const char **args, int argc)
+{
+	// special help
+	if(argc > 0 && !strcasecmp("help", args[0]))
+	{
+		if(!is_broadcast)
+		{
+			irc_bot_send_notice_va(bot, from, 2, "help", command->verb);
+
+			if(command->description)
+			{
+				char **desc;
+				for(desc = command->description; *desc; ++desc)
+					irc_bot_send_notice_va(bot, from, 4, "help", command->verb, "desc", *desc);
+			}
+
+			struct handler_help_data_child data;
+			data.bot = bot;
+			data.from = from;
+			data.parent_verb = command->verb;
+			list_foreach(&(command->children), handler_dispatch_command_help_child, &data);
+		}
+
+		return;
+	}
+
+	// if impl then execute it
+	if(command->callback)
+	{
+		command->callback(bot, from, is_broadcast, args, argc, command->ctx);
+		return;
+	}
+
+	// is no args anymore then nothing to do ..
+	if(!argc)
+		return;
+
+	// else find sub commands
+	struct handler_dispatch_data data;
+	data.bot = bot;
+	data.from = from;
+	data.is_broadcast = is_broadcast;
+	data.args = args;
+	data.argc = argc;
+	//data.type useless
+	list_foreach(&(command->children), handler_dispatch_command_item, &data);
+}
+
+int handler_dispatch_command_help_child(void *node, void *ctx)
+{
+	struct handler_help_data_child *data = ctx;
+	struct irc_command *command = node;
+
+	irc_bot_send_notice_va(data->bot, data->from, 4, "help", command->verb, "child", command->verb);
+
+	return 1;
+}
+
+int handler_dispatch_command_item(void *node, void *ctx)
+{
+	struct handler_dispatch_data *data = ctx;
+	struct irc_command *command = node;
+
+	// check is the command fetch (argc is > 0, already checked)
+	if(!strcasecmp(command->verb, data->args[0]))
+	{
+		handler_dispatch_command(data->bot, command, data->from, data->is_broadcast, data->args + 1, data->argc - 1);
+	}
+
+	return 1;
+}
+
+int handler_help_item(void *node, void *ctx)
+{
+	struct handler_help_data *data = ctx;
+	struct irc_handler *handler = node;
+
+	static char buffer[BUFFER_MAX];
+
+	if(!handler->command->verb)
+		return 1;
+
+	snprintf(buffer, BUFFER_MAX, "%s : %s", handler->command->verb, handler->type == MESSAGE ? "message" : "notice");
+	buffer[BUFFER_MAX - 1] = '\0';
+	if(handler->support_broadcast)
+	{
+		strncat(buffer, ", support_broadcast", BUFFER_MAX);
+		buffer[BUFFER_MAX - 1] = '\0';
+	}
+	irc_bot_send_notice_va(data->bot, data->from, 2, "help", buffer);
+
+	if(handler->command->description)
+	{
+		char **desc;
+		for(desc = handler->command->description; *desc; ++desc)
+			irc_bot_send_notice_va(data->bot, data->from, 4, "help", handler->command->verb, "desc", *desc);
+	}
+
 	return 1;
 }
 
@@ -938,6 +1074,8 @@ struct irc_handler *irc_bot_add_notice_handler(struct irc_bot *bot, int support_
 
 struct irc_handler *handler_add(struct irc_bot *bot, int support_broadcast, struct irc_command_description *description, enum handler_type type)
 {
+	log_assert(description->verb || description->callback); // if no verb callback must be supplied
+
 	struct irc_handler *handler;
 	malloc_nofail(handler);
 
@@ -961,21 +1099,22 @@ struct irc_command *handler_create_command(struct irc_command_description *descr
 	if(description->description)
 	{
 		int count;
-		const char *ptr;
-		char *dptr;
-		for(ptr = *(description->description), count = 0; ptr; ++ptr, ++count);
+		char **ptr;
+		char **dptr;
+		for(ptr = description->description, count = 0; *ptr; ++ptr, ++count);
 		malloc_array_nofail(cmd->description, count + 1);
-		for(ptr = *(description->description), dptr = *(cmd->description); ptr; ++ptr, ++dptr)
-			strdup_nofail(dptr, ptr);
+		for(ptr = description->description, dptr = cmd->description; *ptr; ++ptr, ++dptr)
+			strdup_nofail(*dptr, *ptr);
+		*dptr = NULL;
 	}
 
 	list_init(&(cmd->children));
 	if(description->children)
 	{
-		struct irc_command_description *child = *(description->children);
-		while(child)
+		struct irc_command_description **child = description->children;
+		while(*child)
 		{
-			struct irc_command *childcmd = handler_create_command(child++);
+			struct irc_command *childcmd = handler_create_command(*(child++));
 			list_add(&(cmd->children), childcmd);
 		}
 	}
@@ -1014,17 +1153,46 @@ void irc_bot_remove_handler(struct irc_bot *bot, struct irc_handler *handler)
 	handler_delete(handler);
 }
 
-int irc_bot_send_message(struct irc_bot *bot, struct irc_component *comp, const char *verb, const char **args, int argc) // comp NULL = broadcast
+int irc_bot_send_message(struct irc_bot *bot, struct irc_component *comp, const char **args, int argc) // comp NULL = broadcast -- thread unsafe
 {
-	return irc_bot_send(bot, comp, MESSAGE, verb, args, argc);
+	return irc_bot_send(bot, comp, MESSAGE, args, argc);
 }
 
-int irc_bot_send_notice(struct irc_bot *bot, struct irc_component *comp, const char *verb, const char **args, int argc) // comp NULL = broadcast
+int irc_bot_send_notice(struct irc_bot *bot, struct irc_component *comp, const char **args, int argc) // comp NULL = broadcast -- thread unsafe
 {
-	return irc_bot_send(bot, comp, NOTICE, verb, args, argc);
+	return irc_bot_send(bot, comp, NOTICE, args, argc);
 }
 
-int irc_bot_send(struct irc_bot *bot, struct irc_component *comp, enum handler_type type, const char *verb, const char **args, int argc) // comp NULL = broadcast
+int irc_bot_send_message_va(struct irc_bot *bot, struct irc_component *comp, int argc, ...) // comp NULL = broadcast -- thread unsafe
+{
+	va_list list;
+	va_start(list, argc);
+	int ret = irc_bot_send_va(bot, comp, MESSAGE, argc, list);
+	va_end(list);
+	return ret;
+}
+
+int irc_bot_send_notice_va(struct irc_bot *bot, struct irc_component *comp, int argc, ...) // comp NULL = broadcast -- thread unsafe
+{
+	va_list list;
+	va_start(list, argc);
+	int ret = irc_bot_send_va(bot, comp, NOTICE, argc, list);
+	va_end(list);
+	return ret;
+}
+
+int irc_bot_send_va(struct irc_bot *bot, struct irc_component *comp, enum handler_type type, int argc, va_list list) // comp NULL = broadcast
+{
+	static char *args[ARGS_MAX];
+	int i;
+
+	for(i=0; i<argc; i++)
+		args[i] = va_arg(list, char *);
+
+	return irc_bot_send(bot, comp, type, (const char **)args, argc);
+}
+
+int irc_bot_send(struct irc_bot *bot, struct irc_component *comp, enum handler_type type, const char **args, int argc) // comp NULL = broadcast
 {
 	static char buffer[BUFFER_MAX];
 	static char nick[NICK_MAX+1];
@@ -1051,7 +1219,7 @@ int irc_bot_send(struct irc_bot *bot, struct irc_component *comp, enum handler_t
 	int ret = 0;
 	irc_session_t *session = bot->session;
 
-	snprintf(buffer, BUFFER_MAX, "!%s %s", nick, verb);
+	snprintf(buffer, BUFFER_MAX, "!%s", nick);
 	buffer[BUFFER_MAX-1] = '\0';
 
 	for(idx = 0; idx < argc - 1; ++idx)
