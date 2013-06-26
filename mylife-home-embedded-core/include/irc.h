@@ -74,6 +74,33 @@ extern int irc_bot_send_notice_va(struct irc_bot *bot, struct irc_component *com
 
 #else // CORE
 
+#include "core_api.h"
+
+#define irc_bot_create(id, type, callbacks, ctx) (core_api->irc_bot_create(id, type, callbacks, ctx))
+#define irc_bot_delete(bot) (core_api->irc_bot_delete(bot))
+#define irc_bot_get_ctx(bot) (core_api->irc_bot_get_ctx(bot))
+#define irc_bot_set_ctx(bot, ctx) (core_api->irc_bot_set_ctx(bot, ctx))
+#define irc_bot_is_connected(bot) (core_api->irc_bot_is_connected(bot))
+#define irc_bot_set_comp_status(bot, status) (core_api->irc_bot_set_comp_status(bot, status))
+
+#define irc_get_me(bot) (core_api->irc_get_me(bot)
+#define irc_comp_list(bot, callback, ctx) (core_api->irc_comp_list(bot, callback, ctx))
+#define irc_comp_is_me(bot, comp) (core_api->irc_comp_is_me(bot, comp))
+#define irc_comp_get_nick(bot, comp) (core_api->irc_comp_get_nick(bot, comp))
+#define irc_comp_get_host(bot, comp) (core_api->irc_comp_get_host(bot, comp))
+#define irc_comp_get_id(bot, comp) (core_api->irc_comp_get_id(bot, comp))
+#define irc_comp_get_type(bot, comp) (core_api->irc_comp_get_type(bot, comp))
+#define irc_comp_get_status(bot, comp) (core_api->irc_comp_get_status(bot, comp))
+
+#define irc_bot_add_message_handler(bot, support_broadcast, description) (core_api->irc_bot_add_message_handler(bot, support_broadcast, description))
+#define irc_bot_add_notice_handler(bot, support_broadcast, description) (core_api->irc_bot_add_notice_handler(bot, support_broadcast, description))
+#define irc_bot_remove_handler(bot, handler) (core_api->irc_bot_remove_handler(bot, handler))
+
+#define irc_bot_send_message(bot, comp, args, argc) (core_api->irc_bot_send_message(bot, comp, args, argc))
+#define irc_bot_send_notice(bot, comp, args, argc) (core_api->irc_bot_send_notice(bot, comp, args, argc))
+#define irc_bot_send_message_va(bot, comp, argc, ...) (core_api->irc_bot_send_message_va(bot, comp, argc, __VA_ARGS__))
+#define irc_bot_send_notice_va(bot, comp, argc, ...) (core_api->irc_bot_send_notice_va(bot, comp, argc, __VA_ARGS__))
+
 #endif // CORE
 
 #endif /* IRC_H_ */

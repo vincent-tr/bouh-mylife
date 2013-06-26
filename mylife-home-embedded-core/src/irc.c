@@ -1014,7 +1014,7 @@ int handler_dispatch_command_help_child(void *node, void *ctx)
 	struct handler_help_data_child *data = ctx;
 	struct irc_command *command = node;
 
-	irc_bot_send_notice_va(data->bot, data->from, 4, "help", command->verb, "child", command->verb);
+	irc_bot_send_notice_va(data->bot, data->from, 4, "help", data->parent_verb, "child", command->verb);
 
 	return 1;
 }

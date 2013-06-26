@@ -23,6 +23,8 @@
 #include "config_base.h"
 #include "logger.h"
 #include "tools.h"
+#include "irc.h"
+#include "manager.h"
 
 struct module_ref
 {
@@ -42,6 +44,12 @@ struct module
 	char *file;
 	void *lib;
 	struct module_def *def;
+};
+
+struct ref_enum_data
+{
+	void *ctx;
+	int (*callback)(struct module *ref, void *ctx);
 };
 
 static struct list modules;
@@ -74,7 +82,33 @@ static struct core_api api =
 	.loop_register_listener = loop_register_listener,
 	.loop_unregister = loop_unregister,
 	.loop_get_ctx = loop_get_ctx,
-	.loop_set_ctx = loop_set_ctx
+	.loop_set_ctx = loop_set_ctx,
+	.module_enum_ref = module_enum_ref, // ret 0 = stop enum
+	.module_enum_refby = module_enum_refby, // ret 0 = stop enum
+
+	.manager_get_bot = manager_get_bot,
+
+	.irc_bot_create = irc_bot_create,
+	.irc_bot_delete = irc_bot_delete,
+	.irc_bot_get_ctx = irc_bot_get_ctx,
+	.irc_bot_set_ctx = irc_bot_set_ctx,
+	.irc_bot_is_connected = irc_bot_is_connected,
+	.irc_bot_set_comp_status = irc_bot_set_comp_status,
+	.irc_get_me = irc_get_me,
+	.irc_comp_list = irc_comp_list,
+	.irc_comp_is_me = irc_comp_is_me,
+	.irc_comp_get_nick = irc_comp_get_nick,
+	.irc_comp_get_host = irc_comp_get_host, // NULL if unrecognized nick format
+	.irc_comp_get_id = irc_comp_get_id, // NULL if unrecognized nick format
+	.irc_comp_get_type = irc_comp_get_type, // NULL if unrecognized nick format
+	.irc_comp_get_status = irc_comp_get_status, // NULL if unrecognized nick format or if no status
+	.irc_bot_add_message_handler = irc_bot_add_message_handler,
+	.irc_bot_add_notice_handler = irc_bot_add_notice_handler,
+	.irc_bot_remove_handler = irc_bot_remove_handler,
+	.irc_bot_send_message = irc_bot_send_message, // comp NULL = broadcast -- thread unsafe
+	.irc_bot_send_notice = irc_bot_send_notice, // comp NULL = broadcast -- thread unsafe
+	.irc_bot_send_message_va = irc_bot_send_message_va, // comp NULL = broadcast -- thread unsafe
+	.irc_bot_send_notice_va = irc_bot_send_notice_va // comp NULL = broadcast -- thread unsafe
 
 	// TODO
 };
@@ -110,6 +144,7 @@ struct lookup_data
 
 static int module_find_by_file_callback(struct module *module, void *ctx);
 static int module_find_by_name_callback(struct module *module, void *ctx);
+static int module_ref_callback(void *node, void *ctx);
 
 void module_init()
 {
@@ -151,7 +186,7 @@ void module_enum_files(int (*callback)(const char *file, void *ctx), void *ctx) 
 	closedir(dir);
 }
 
-int module_create(char *file, void *content, size_t content_len)
+int module_create(const char *file, const void *content, size_t content_len)
 {
 	char path[PATH_MAX];
 
@@ -176,7 +211,7 @@ int module_create(char *file, void *content, size_t content_len)
 	return 1;
 }
 
-int module_delete(char *file)
+int module_delete(const char *file)
 {
 	char path[PATH_MAX];
 
@@ -364,4 +399,28 @@ const char *module_get_file(struct module *module)
 const struct module_name *module_get_name(struct module *module)
 {
 	return &(module->def->name);
+}
+
+void module_enum_ref(struct module *module, int (*callback)(struct module *ref, void *ctx), void *ctx) // ret 0 = stop enum
+{
+	struct ref_enum_data data;
+	data.callback = callback;
+	data.ctx = ctx;
+	list_foreach(&(module->references), module_ref_callback, &data);
+}
+
+void module_enum_refby(struct module *module, int (*callback)(struct module *ref, void *ctx), void *ctx) // ret 0 = stop enum
+{
+	struct ref_enum_data data;
+	data.callback = callback;
+	data.ctx = ctx;
+	list_foreach(&(module->referenced_by), module_ref_callback, &data);
+
+}
+
+int module_ref_callback(void *node, void *ctx)
+{
+	struct module_ref *ref = node;
+	struct ref_enum_data *data = ctx;
+	return data->callback(ref->ref, data->ctx);
 }
