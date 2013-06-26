@@ -16,6 +16,9 @@
 
 static struct irc_bot *bot;
 
+static void debug_complist_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx);
+static int debug_complist_item(struct irc_component *comp, void *ctx);
+
 static struct irc_bot_callbacks callbacks =
 {
 	.on_connected = NULL,
@@ -25,28 +28,53 @@ static struct irc_bot_callbacks callbacks =
 	.on_comp_change_status = NULL
 };
 
-struct subverb_data
-{
-
-};
-
 struct debug_complist_data
 {
 	struct irc_bot *bot;
 	struct irc_component *target;
 };
 
-static void debug_handler(struct irc_bot *bot, struct irc_component *from, const char *verb, int broadcast, const char **args, int argc);
-static int debug_complist(struct irc_component *comp, void *ctx);
+static char *cmd_debug_complist_desc[] =
+{
+	"shows all other known components",
+	NULL
+};
 
-static void module_handler(struct irc_bot *bot, struct irc_component *from, const char *verb, int broadcast, const char **args, int argc);
+struct irc_command_description cmd_debug_complist =
+{
+	.verb = "complist",
+	.description = cmd_debug_complist_desc,
+	.children = NULL,
+	.callback = debug_complist_handler,
+	.ctx = NULL
+};
+
+static char *cmd_debug_desc[] =
+{
+	"debug and testing commands",
+	NULL
+};
+
+static struct irc_command_description *cmd_debug_children[] =
+{
+	&cmd_debug_complist,
+	NULL
+};
+
+struct irc_command_description cmd_debug =
+{
+	.verb = "debug",
+	.description = cmd_debug_desc,
+	.children = cmd_debug_children,
+	.callback = NULL,
+	.ctx = NULL
+};
 
 void manager_init()
 {
 	bot = irc_bot_create("core", "core", &callbacks, NULL);
 
-	irc_bot_add_message_handler(bot, "debug", 0, debug_handler);
-	irc_bot_add_message_handler(bot, "module", 0, module_handler);
+	irc_bot_add_message_handler(bot, 0, &cmd_debug);
 }
 
 void manager_terminate()
@@ -59,45 +87,26 @@ struct irc_bot *manager_get_bot()
 	return bot;
 }
 
-void debug_handler(struct irc_bot *bot, struct irc_component *from, const char *verb, int broadcast, const char **args, int argc)
+void debug_complist_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx)
 {
-	if(argc < 1)
-	{
-		const char *args[] = {"not enough arguments"};
-		irc_bot_send_notice(bot, from, "reply", args, sizeof(args) / sizeof(*args));
-		return;
-	}
+	struct debug_complist_data data;
+	data.bot = bot;
+	data.target = from;
+	irc_bot_send_notice_va(bot, from, 3, "reply", "complist", "listbegin");
+	irc_comp_list(bot, debug_complist_item, &data);
+	irc_bot_send_notice_va(bot, from, 3, "reply", "complist", "listend");
 
-	const char *subverb = args[0];
-
-	if(!strcasecmp(subverb, "complist"))
-	{
-		struct debug_complist_data data;
-		data.bot = bot;
-		data.target = from;
-		const char *args_begin[] = {"list begin"};
-		irc_bot_send_notice(bot, from, "reply", args_begin, sizeof(args_begin) / sizeof(*args_begin));
-		irc_comp_list(bot, debug_complist, &data);
-		const char *args_end[] = {"list end"};
-		irc_bot_send_notice(bot, from, "reply", args_end, sizeof(args_end) / sizeof(*args_end));
-	}
-	else
-	{
-		const char *args[] = {"unknown subverb"};
-		irc_bot_send_notice(bot, from, "reply", args, sizeof(args) / sizeof(*args));
-		return;
-	}
 }
 
-int debug_complist(struct irc_component *comp, void *ctx)
+int debug_complist_item(struct irc_component *comp, void *ctx)
 {
 	struct debug_complist_data *data = ctx;
-	const char *args[] = {"nick", irc_comp_get_nick(data->bot, comp)};
-	irc_bot_send_notice(bot, data->target, "reply", args, sizeof(args) / sizeof(*args));
+	const char *status = irc_comp_get_status(data->bot, comp);
+	irc_bot_send_notice_va(bot, data->target, 12, "reply", "complist",
+			"nick", irc_comp_get_nick(data->bot, comp),
+			"host", irc_comp_get_host(data->bot, comp),
+			"id", irc_comp_get_id(data->bot, comp),
+			"type", irc_comp_get_type(data->bot, comp),
+			"status", status ? status : "<no status>");
 	return 1;
-}
-
-void module_handler(struct irc_bot *bot, struct irc_component *from, const char *verb, int broadcast, const char **args, int argc)
-{
-
 }
