@@ -17,6 +17,10 @@ extern struct irc_bot *manager_get_bot();
 
 #else // CORE
 
+#include "core_api.h"
+
+#define manager_get_bot() (core_api->manager_get_bot())
+
 #endif // CORE
 
 #endif /* MANAGER_H_ */

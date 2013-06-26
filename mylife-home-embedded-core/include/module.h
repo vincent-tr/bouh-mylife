@@ -36,8 +36,8 @@ extern void module_init();
 extern void module_terminate();
 
 extern void module_enum_files(int (*callback)(const char *file, void *ctx), void *ctx); // ret 0 = stop enum
-extern int module_create(char *file, void *content, size_t content_len);
-extern int module_delete(char *file);
+extern int module_create(const char *file, const void *content, size_t content_len);
+extern int module_delete(const char *file);
 
 extern void module_enum_loaded(int (*callback)(struct module *module, void *ctx), void *ctx); // ret 0 = stop enum, ne pas charger ou décharger le module et continuer l'enum !!!
 extern struct module *module_find_by_file(const char *file);
@@ -48,6 +48,8 @@ extern int module_unload(struct module *module);
 
 extern const char *module_get_file(struct module *module);
 extern const struct module_name *module_get_name(struct module *module);
+extern void module_enum_ref(struct module *module, int (*callback)(struct module *ref, void *ctx), void *ctx); // ret 0 = stop enum
+extern void module_enum_refby(struct module *module, int (*callback)(struct module *ref, void *ctx), void *ctx); // ret 0 = stop enum
 
 #else // CORE
 
@@ -67,6 +69,9 @@ extern const struct module_name *module_get_name(struct module *module);
 
 #define module_get_file(module) (core_api->module_get_file(module))
 #define module_get_name(module) (core_api->module_get_name(module))
+#define module_enum_ref(module, callback, ctx) (core_api->module_enum_ref(module, callback, ctx)) // ret 0 = stop enum
+#define module_enum_refby(module, callback, ctx) (core_api->module_enum_refby(module, callback, ctx)) // ret 0 = stop enum
+
 
 #endif // CORE
 
