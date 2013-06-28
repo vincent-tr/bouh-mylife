@@ -462,8 +462,10 @@ void comp_set_status(struct irc_component *comp, const char *status)
 {
 	if(comp->status)
 		free(comp->status);
+
 	comp->status = NULL;
-	strdup_nofail(comp->status, status);
+	if(status)
+		strdup_nofail(comp->status, status);
 }
 
 struct irc_component *comp_lookup(struct irc_bot *bot, const char *host, const char *id, const char *type)
