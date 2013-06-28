@@ -16,4 +16,5 @@
 #define malloc_array_nofail(var, size) (log_assert(var = malloc(sizeof(*var) * size)));
 #define strdup_nofail(dst, src) (log_assert(dst = strdup(src)));
 
+
 #endif /* TOOLS_H_ */

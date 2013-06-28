@@ -67,7 +67,7 @@ struct listener_exec_data
 	fd_set *exceptfds;
 };
 
-struct list handles;
+static struct list handles;
 static int running = 1;
 
 static void run_ticks(struct list *handles_copy);
