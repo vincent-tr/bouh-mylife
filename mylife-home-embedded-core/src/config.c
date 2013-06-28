@@ -310,6 +310,7 @@ void config_file_save(struct config_section *section)
 	log_assert((fd = open(path, O_WRONLY | O_CREAT | O_TRUNC)) != -1);
 
 	 // TODO
+#error todo
 
 	close(fd);
 }
