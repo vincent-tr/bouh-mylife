@@ -28,6 +28,7 @@ extern void list_remove(struct list *list, void *node);
 extern void list_foreach(struct list *list, int (*callback)(void *node, void *ctx), void *ctx); // return 0 = break foreach
 extern void list_clear(struct list *list, void (*free_node)(void *node, void *ctx), void *ctx);
 extern int list_is_empty(struct list *list);
+extern int list_count(struct list *list);
 
 #else // CORE
 
@@ -39,6 +40,7 @@ extern int list_is_empty(struct list *list);
 #define list_foreach(list, callback, ctx) (core_api->list_foreach(list, callback, ctx)) // return 0 = break foreach
 #define list_clear(list, free_node, ctx) (core_api->list_clear(list, free_node, ctx))
 #define list_is_empty(list) (core_api->list_is_empty(list))
+#define list_count(list) (core_api->list_count(list))
 
 #endif // CORE
 

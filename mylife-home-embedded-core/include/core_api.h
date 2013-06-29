@@ -23,6 +23,7 @@ struct core_api
 	void (*list_foreach)(struct list *list, int (*callback)(void *node, void *ctx), void *ctx); // return 0 = break foreach
 	void (*list_clear)(struct list *list, void (*free_node)(void *node, void *ctx), void *ctx);
 	int (*list_is_empty)(struct list *list);
+	int (*list_count)(struct list *list);
 
 	void (*log_write)(const char *file, int line, int level, const char *format, ...);
 

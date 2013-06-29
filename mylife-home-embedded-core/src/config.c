@@ -309,6 +309,10 @@ void config_file_save(struct config_section *section)
 	int fd;
 	log_assert((fd = open(path, O_WRONLY | O_CREAT | O_TRUNC)) != -1);
 
+	struct file_header fheader;
+	struct config_entry fentry;
+
+
 	 // TODO
 #error todo
 
