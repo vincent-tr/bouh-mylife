@@ -75,3 +75,10 @@ int list_is_empty(struct list *list)
 {
 	return list->head ? 1 : 0;
 }
+
+int list_count(struct list *list)
+{
+	int count;
+	for(struct list_node *node = list->head, count = 0; node; node = node->next, ++count);
+	return count;
+}

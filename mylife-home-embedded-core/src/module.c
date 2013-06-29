@@ -63,6 +63,7 @@ static struct core_api api =
 	.list_foreach = list_foreach, // return 0 = break foreach
 	.list_clear = list_clear,
 	.list_is_empty = list_is_empty,
+	.list_count = list_count,
 
 	.log_write = log_write,
 
