@@ -83,9 +83,16 @@ struct file_header
 
 struct writer_symbol
 {
-	void *file_offset; // file offset where to write the file offset of the written buffer
+	off_t file_offset; // file offset where to write the file offset of the written buffer
 	void *buffer;
 	size_t len;
+};
+
+struct config_file_write_data
+{
+	int fd;
+	struct writer_symbol *symbols;
+	size_t used_symbols;
 };
 
 struct node_lookup_data
@@ -109,6 +116,7 @@ struct enum_entry_data
 static const char *file_get(const char *name); // thread unsafe
 static char *file_load_string(void *filebuff, size_t filesize, char *offset);
 static void *file_load_buffer(void *filebuff, size_t filesize, void *offset, size_t buffsize);
+static int config_file_write_item(void *node, void *ctx);
 static void config_file_load(const char *name);
 static void config_file_save(struct config_section *section);
 static void config_file_delete(struct config_section *section);
@@ -233,6 +241,8 @@ void config_file_load(const char *name)
 			case CHAR:
 			case INT:
 			case INT64:
+				break;
+
 			case STRING:
 				entry->data.string_value = file_load_string(filebuff, size, fentry->data.string_value);
 				break;
@@ -303,21 +313,151 @@ void config_file_load(const char *name)
 	munmap(filebuff, size);
 }
 
+#define write_nofail(fd, buf, count) log_assert(write(fd, buf, count) == count)
+#define write_type_nofail(fd, ptr) write_nofail(fd, (ptr), sizeof(*(ptr)))
+
 void config_file_save(struct config_section *section)
 {
+
 	const char *path = file_get(section->name);
 	int fd;
 	log_assert((fd = open(path, O_WRONLY | O_CREAT | O_TRUNC)) != -1);
 
 	struct file_header fheader;
-	struct config_entry fentry;
 
+	fheader.magic = MAGIC;
+	fheader.entry_count = list_count(&(section->entries));
+	write_type_nofail(fd, &fheader);
 
-	 // TODO
-#error todo
+	if(fheader.entry_count > 0)
+	{
+		// needed symbols is at most 2x entry count, an entry must as a named and may have an attached data buffer
+		struct config_file_write_data data;
+		data.fd = fd;
+		malloc_array_nofail(data.symbols, 2*fheader.entry_count);
+		data.used_symbols = 0;
+
+		list_foreach(&(section->entries), config_file_write_item, &data);
+	}
 
 	close(fd);
 }
+
+#define get_symbol(data) (data->symbols + ((data->used_symbols)++))
+
+int config_file_write_item(void *node, void *ctx)
+{
+	struct config_entry *entry = node;
+	struct config_file_write_data *data = ctx;
+
+	struct config_entry fentry;
+
+	// offset where we write the entry in the file
+	off_t pos = lseek(data->fd, 0, SEEK_CUR);
+
+	// basic copy for type and basic data
+	memcpy(&fentry, entry, sizeof(*entry));
+
+	write_type_nofail(data->fd, &fentry);
+
+	//fentry.node useless in files
+
+	// symbol for name
+	struct writer_symbol *sym = get_symbol(data);
+	sym->buffer = entry->name;
+	sym->len = strlen(entry->name) + 1;
+	sym->file_offset = pos + offsetof(struct config_entry, name);
+
+	switch(entry->type)
+	{
+		case CHAR:
+		case INT:
+		case INT64:
+			break;
+
+		case STRING:
+			sym = get_symbol(data);
+			sym->buffer = entry->data.string_value;
+			sym->len = strlen(entry->data.string_value) + 1;
+			sym->file_offset = pos + offsetof(struct config_entry, data.string_value);
+			break;
+
+		case BUFFER:
+			sym = get_symbol(data);
+			sym->buffer = entry->data.buffer_value.data;
+			sym->len = entry->data.buffer_value.len;
+			sym->file_offset = pos + offsetof(struct config_entry, data.buffer_value.data);
+			break;
+
+		case CHAR_ARRAY:
+			sym = get_symbol(data);
+			sym->buffer = entry->data.char_array_value.array;
+			sym->len = entry->data.char_array_value.count * sizeof(char);
+			sym->file_offset = pos + offsetof(struct config_entry, data.char_array_value.array);
+			break;
+
+		case INT_ARRAY:
+			sym = get_symbol(data);
+			sym->buffer = entry->data.int_array_value.array;
+			sym->len = entry->data.int_array_value.count * sizeof(int);
+			sym->file_offset = pos + offsetof(struct config_entry, data.int_array_value.array);
+			break;
+
+		case INT64_ARRAY:
+			sym = get_symbol(data);
+			sym->buffer = entry->data.int64_array_value.array;
+			sym->len = entry->data.int64_array_value.count * sizeof(long long);
+			sym->file_offset = pos + offsetof(struct config_entry, data.int64_array_value.array);
+			break;
+
+		case STRING_ARRAY:
+			{
+				char **array = NULL;
+				char **value = (char **)(((char*)fentry->data.string_array_value.array) + (ptrdiff_t)filebuff);
+				size_t array_len = entry->data.string_array_value.count;
+				if(array_len)
+				{
+					size_t len = array_len * sizeof(char *);
+					size_t i;
+
+					for(i=0; i<array_len; i++)
+					{
+						const char *src = value[i];
+						if(src)
+						{
+							log_assert(size >= (size_t)src);
+							src += (ptrdiff_t)filebuff;
+							len += strlen(src) + 1;
+						}
+					}
+
+					// buf layout : string ptr array | string1\0 | string2\0 ...
+					log_assert(array = malloc(len));
+					memset(array, 0, len);
+					char *ptr = ((char*)array) + array_len * sizeof(char *); // right after ptr array
+					for(i=0; i<array_len; i++)
+					{
+						const char *src = value[i];
+						if(src)
+						{
+							log_assert(size >= (size_t)src);
+							src += (ptrdiff_t)filebuff;
+							while((*(ptr++) = *(src++)));
+						}
+					}
+				}
+				entry->data.string_array_value.array = array;
+				entry->data.string_array_value.count = array_len;
+			}
+			break;
+	}
+
+	return 1;
+}
+
+#undef get_symbol
+#undef write_nofail
+#undef write_type_nofail
 
 void config_file_delete(struct config_section *section)
 {

@@ -78,7 +78,7 @@ int list_is_empty(struct list *list)
 
 int list_count(struct list *list)
 {
-	int count;
-	for(struct list_node *node = list->head, count = 0; node; node = node->next, ++count);
+	int count = 0;
+	for(struct list_node *node = list->head; node; node = node->next, ++count);
 	return count;
 }
