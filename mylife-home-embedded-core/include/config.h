@@ -34,7 +34,7 @@ extern int config_read_buffer(const char *section, const char *name, void **buff
 extern int config_read_char_array(const char *section, const char *name, size_t *array_len, char **value); // array allocated, free it after range
 extern int config_read_int_array(const char *section, const char *name, size_t *array_len, int **value); // array allocated, free it after range
 extern int config_read_int64_array(const char *section, const char *name, size_t *array_len, long long **value); // array allocated, free it after range
-extern int config_read_string_array(const char *section, const char *name, size_t *array_len, char ***value); // value allocated, free it after usage, and each value allocated, free it after range
+extern int config_read_string_array(const char *section, const char *name, size_t *array_len, char ***value); // value allocated, free it after usage (1 buffer)
 
 extern int config_write_char(const char *section, const char *name, char value);
 extern int config_write_int(const char *section, const char *name, int value);
