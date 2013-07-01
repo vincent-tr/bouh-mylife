@@ -16,24 +16,21 @@
 #include <dirent.h>
 #include <unistd.h>
 #include <sys/mman.h>
+#include <limits.h>
 
 #include "config.h"
 #include "list.h"
 #include "tools.h"
 #include "config_base.h"
 
-struct config_section
+struct file_header
 {
-	struct list_node node;
-
-	char *name;
-	struct list entries;
+	int magic;
+	size_t entry_count;
 };
 
-struct config_entry
+struct file_entry
 {
-	struct list_node node;
-
 	char *name;
 	enum config_type type;
 	union
@@ -69,21 +66,31 @@ struct config_entry
 
 		struct
 		{
-			char **array; // backed in file as a buffer of #len# null-terminated string, each one after each other : "toto\0tata\0titi\0"
+			void *buffer; // buffer : array of bits, char aligned, to indicate NULL or filled value, and then string1 + \0 + string2 + \0 + ...
 			size_t count;
 		} string_array_value;
 	} data;
 };
 
-struct file_header
+struct config_section
 {
-	int magic;
-	size_t entry_count;
+	struct list_node node;
+
+	char *name;
+	struct list entries;
+};
+
+struct config_entry
+{
+	struct list_node node;
+
+	struct file_entry entry;
 };
 
 struct writer_symbol
 {
-	off_t file_offset; // file offset where to write the file offset of the written buffer
+	off_t address_offset; // file offset where to write the file offset of the written buffer
+	off_t buffer_offset;
 	void *buffer;
 	size_t len;
 };
@@ -116,6 +123,7 @@ struct enum_entry_data
 static const char *file_get(const char *name); // thread unsafe
 static char *file_load_string(void *filebuff, size_t filesize, char *offset);
 static void *file_load_buffer(void *filebuff, size_t filesize, void *offset, size_t buffsize);
+static size_t config_file_string_array_len(const void *array_buffer, size_t array_len);
 static int config_file_write_item(void *node, void *ctx);
 static void config_file_load(const char *name);
 static void config_file_save(struct config_section *section);
@@ -139,6 +147,9 @@ static struct list sections;
 
 static const char config_magic[] = {'c', 'o', 'n', 'f'};
 #define MAGIC (*(int *)config_magic)
+
+#define read_bit(buf, pos) (((const char*)(buf))[(pos) / CHAR_BIT] & (((char)1) >> ((pos) ^ CHAR_BIT)))
+#define write_bit(buf, pos, value) (((char*)(buf))[(pos) / CHAR_BIT] = value ? (((char*)(buf))[(pos) / CHAR_BIT] | (((char)1) >> ((pos) ^ CHAR_BIT))) : (((char*)(buf))[(pos) / CHAR_BIT] & ~(((char)1) >> ((pos) ^ CHAR_BIT))))
 
 void config_init()
 {
@@ -197,6 +208,28 @@ void *file_load_buffer(void *filebuff, size_t filesize, void *offset, size_t buf
 	return ret;
 }
 
+size_t config_file_string_array_len(const void *array_buffer, size_t array_len)
+{
+	const char *bitarray = array_buffer;
+	const char *str = array_buffer;
+
+	size_t buflen = array_len / CHAR_BIT;
+	str += buflen;
+
+	for(size_t i=0; i<array_len; i++)
+	{
+		char bit = read_bit(bitarray, i);
+		if(bit)
+		{
+			size_t slen = strlen(str) + 1;
+			buflen += slen;
+			str += slen;
+		}
+	}
+
+	return buflen;
+}
+
 void config_file_load(const char *name)
 {
 	const char *path = file_get(name);
@@ -204,7 +237,7 @@ void config_file_load(const char *name)
 	int fd;
 	void *filebuff;
 	struct file_header *fheader;
-	struct config_entry *fentry;
+	struct file_entry *fentry;
 	size_t i;
 
 	log_assert(!stat(path, &sb));
@@ -225,18 +258,17 @@ void config_file_load(const char *name)
 	strdup_nofail(section->name, name);
 	list_init(&(section->entries));
 
-	for(i=0, fentry = (struct config_entry *)(fheader+1); i<fheader->entry_count; i++, fentry++)
+	for(i=0, fentry = (struct file_entry *)(fheader+1); i<fheader->entry_count; i++, fentry++)
 	{
 		struct config_entry *entry;
 		malloc_nofail(entry);
 
 		// basic copy for type and basic data
-		memcpy(entry, fentry, sizeof(*entry));
+		memcpy(&(entry->entry), fentry, sizeof(*fentry));
 
-		//fentry->node useless in files
-		entry->name = file_load_string(filebuff, size, fentry->name);
+		entry->entry.name = file_load_string(filebuff, size, fentry->name);
 
-		switch(entry->type)
+		switch(entry->entry.type)
 		{
 			case CHAR:
 			case INT:
@@ -244,63 +276,40 @@ void config_file_load(const char *name)
 				break;
 
 			case STRING:
-				entry->data.string_value = file_load_string(filebuff, size, fentry->data.string_value);
+				entry->entry.data.string_value = file_load_string(filebuff, size, fentry->data.string_value);
 				break;
 
 			case BUFFER:
-				entry->data.buffer_value.data = file_load_buffer(filebuff, size, fentry->data.buffer_value.data, entry->data.buffer_value.len);
+				entry->entry.data.buffer_value.data = file_load_buffer(filebuff, size, fentry->data.buffer_value.data, entry->entry.data.buffer_value.len);
 				break;
 
 			case CHAR_ARRAY:
-				entry->data.char_array_value.array = file_load_buffer(filebuff, size, fentry->data.char_array_value.array, entry->data.char_array_value.count * sizeof(char));
+				entry->entry.data.char_array_value.array = file_load_buffer(filebuff, size, fentry->data.char_array_value.array, entry->entry.data.char_array_value.count * sizeof(char));
 				break;
 
 			case INT_ARRAY:
-				entry->data.int_array_value.array = file_load_buffer(filebuff, size, fentry->data.int_array_value.array, entry->data.int_array_value.count * sizeof(int));
+				entry->entry.data.int_array_value.array = file_load_buffer(filebuff, size, fentry->data.int_array_value.array, entry->entry.data.int_array_value.count * sizeof(int));
 				break;
 
 			case INT64_ARRAY:
-				entry->data.int64_array_value.array = file_load_buffer(filebuff, size, fentry->data.int64_array_value.array, entry->data.int64_array_value.count * sizeof(long long));
+				entry->entry.data.int64_array_value.array = file_load_buffer(filebuff, size, fentry->data.int64_array_value.array, entry->entry.data.int64_array_value.count * sizeof(long long));
 				break;
 
 			case STRING_ARRAY:
 				{
-					char **array = NULL;
-					char **value = (char **)(((char*)fentry->data.string_array_value.array) + (ptrdiff_t)filebuff);
-					size_t array_len = entry->data.string_array_value.count;
+					// buffer : array of bits, char aligned, to indicate NULL or filled value, and then string1 + \0 + string2 + \0 + ...
+					size_t array_len = fentry->data.string_array_value.count;
+					size_t buflen = 0;
+
 					if(array_len)
 					{
-						size_t len = array_len * sizeof(char *);
-						size_t i;
-
-						for(i=0; i<array_len; i++)
-						{
-							const char *src = value[i];
-							if(src)
-							{
-								log_assert(size >= (size_t)src);
-								src += (ptrdiff_t)filebuff;
-								len += strlen(src) + 1;
-							}
-						}
-
-						// buf layout : string ptr array | string1\0 | string2\0 ...
-						log_assert(array = malloc(len));
-						memset(array, 0, len);
-						char *ptr = ((char*)array) + array_len * sizeof(char *); // right after ptr array
-						for(i=0; i<array_len; i++)
-						{
-							const char *src = value[i];
-							if(src)
-							{
-								log_assert(size >= (size_t)src);
-								src += (ptrdiff_t)filebuff;
-								while((*(ptr++) = *(src++)));
-							}
-						}
+						// get buffer ptr
+						char *buf =  (char *)fentry->data.string_array_value.buffer + (ptrdiff_t)filebuff;
+						// measure buf len
+						buflen = config_file_string_array_len(buf, array_len);
 					}
-					entry->data.string_array_value.array = array;
-					entry->data.string_array_value.count = array_len;
+
+					entry->entry.data.string_array_value.buffer = file_load_buffer(filebuff, size, fentry->data.string_array_value.buffer, buflen);
 				}
 				break;
 		}
@@ -335,9 +344,34 @@ void config_file_save(struct config_section *section)
 		struct config_file_write_data data;
 		data.fd = fd;
 		malloc_array_nofail(data.symbols, 2*fheader.entry_count);
+		memset(data.symbols, 0, sizeof(*(data.symbols)) * 2*fheader.entry_count);
 		data.used_symbols = 0;
 
 		list_foreach(&(section->entries), config_file_write_item, &data);
+
+		// write symbols
+		off_t pos = lseek(fd, 0, SEEK_CUR);
+		for(int i=0; i<data.used_symbols; i++)
+		{
+			struct writer_symbol *sym = data.symbols + i;
+			if(!sym->buffer || !sym->len)
+				continue;
+
+			sym->buffer_offset = pos;
+			write_nofail(fd, sym->buffer, sym->len);
+			pos += sym->len;
+		}
+
+		// write address of symbols
+		for(int i=0; i<data.used_symbols; i++)
+		{
+			struct writer_symbol *sym = data.symbols + i;
+			if(!sym->buffer || !sym->len)
+				continue;
+
+			lseek(fd, sym->address_offset, SEEK_SET);
+			write_type_nofail(fd, &(sym->buffer_offset));
+		}
 	}
 
 	close(fd);
@@ -350,7 +384,7 @@ int config_file_write_item(void *node, void *ctx)
 	struct config_entry *entry = node;
 	struct config_file_write_data *data = ctx;
 
-	struct config_entry fentry;
+	struct file_entry fentry;
 
 	// offset where we write the entry in the file
 	off_t pos = lseek(data->fd, 0, SEEK_CUR);
@@ -360,15 +394,13 @@ int config_file_write_item(void *node, void *ctx)
 
 	write_type_nofail(data->fd, &fentry);
 
-	//fentry.node useless in files
-
 	// symbol for name
 	struct writer_symbol *sym = get_symbol(data);
-	sym->buffer = entry->name;
-	sym->len = strlen(entry->name) + 1;
-	sym->file_offset = pos + offsetof(struct config_entry, name);
+	sym->buffer = entry->entry.name;
+	sym->len = strlen(entry->entry.name) + 1;
+	sym->address_offset = pos + offsetof(struct file_entry, name);
 
-	switch(entry->type)
+	switch(entry->entry.type)
 	{
 		case CHAR:
 		case INT:
@@ -377,77 +409,49 @@ int config_file_write_item(void *node, void *ctx)
 
 		case STRING:
 			sym = get_symbol(data);
-			sym->buffer = entry->data.string_value;
-			sym->len = strlen(entry->data.string_value) + 1;
-			sym->file_offset = pos + offsetof(struct config_entry, data.string_value);
+			sym->buffer = entry->entry.data.string_value;
+			sym->len = strlen(entry->entry.data.string_value) + 1;
+			sym->address_offset = pos + offsetof(struct file_entry, data.string_value);
 			break;
 
 		case BUFFER:
 			sym = get_symbol(data);
-			sym->buffer = entry->data.buffer_value.data;
-			sym->len = entry->data.buffer_value.len;
-			sym->file_offset = pos + offsetof(struct config_entry, data.buffer_value.data);
+			sym->buffer = entry->entry.data.buffer_value.data;
+			sym->len = entry->entry.data.buffer_value.len;
+			sym->address_offset = pos + offsetof(struct file_entry, data.buffer_value.data);
 			break;
 
 		case CHAR_ARRAY:
 			sym = get_symbol(data);
-			sym->buffer = entry->data.char_array_value.array;
-			sym->len = entry->data.char_array_value.count * sizeof(char);
-			sym->file_offset = pos + offsetof(struct config_entry, data.char_array_value.array);
+			sym->buffer = entry->entry.data.char_array_value.array;
+			sym->len = entry->entry.data.char_array_value.count * sizeof(char);
+			sym->address_offset = pos + offsetof(struct file_entry, data.char_array_value.array);
 			break;
 
 		case INT_ARRAY:
 			sym = get_symbol(data);
-			sym->buffer = entry->data.int_array_value.array;
-			sym->len = entry->data.int_array_value.count * sizeof(int);
-			sym->file_offset = pos + offsetof(struct config_entry, data.int_array_value.array);
+			sym->buffer = entry->entry.data.int_array_value.array;
+			sym->len = entry->entry.data.int_array_value.count * sizeof(int);
+			sym->address_offset = pos + offsetof(struct file_entry, data.int_array_value.array);
 			break;
 
 		case INT64_ARRAY:
 			sym = get_symbol(data);
-			sym->buffer = entry->data.int64_array_value.array;
-			sym->len = entry->data.int64_array_value.count * sizeof(long long);
-			sym->file_offset = pos + offsetof(struct config_entry, data.int64_array_value.array);
+			sym->buffer = entry->entry.data.int64_array_value.array;
+			sym->len = entry->entry.data.int64_array_value.count * sizeof(long long);
+			sym->address_offset = pos + offsetof(struct file_entry, data.int64_array_value.array);
 			break;
 
 		case STRING_ARRAY:
 			{
-				char **array = NULL;
-				char **value = (char **)(((char*)fentry->data.string_array_value.array) + (ptrdiff_t)filebuff);
-				size_t array_len = entry->data.string_array_value.count;
-				if(array_len)
-				{
-					size_t len = array_len * sizeof(char *);
-					size_t i;
+				size_t len = entry->entry.data.string_array_value.count;
+				if(len)
+					len = config_file_string_array_len(entry->entry.data.string_array_value.buffer, len);
 
-					for(i=0; i<array_len; i++)
-					{
-						const char *src = value[i];
-						if(src)
-						{
-							log_assert(size >= (size_t)src);
-							src += (ptrdiff_t)filebuff;
-							len += strlen(src) + 1;
-						}
-					}
-
-					// buf layout : string ptr array | string1\0 | string2\0 ...
-					log_assert(array = malloc(len));
-					memset(array, 0, len);
-					char *ptr = ((char*)array) + array_len * sizeof(char *); // right after ptr array
-					for(i=0; i<array_len; i++)
-					{
-						const char *src = value[i];
-						if(src)
-						{
-							log_assert(size >= (size_t)src);
-							src += (ptrdiff_t)filebuff;
-							while((*(ptr++) = *(src++)));
-						}
-					}
-				}
-				entry->data.string_array_value.array = array;
-				entry->data.string_array_value.count = array_len;
+				sym = get_symbol(data);
+				sym->buffer = entry->entry.data.string_array_value.buffer;
+				sym->len = len;
+				sym->address_offset = pos + offsetof(struct file_entry, data.string_array_value.buffer);
 			}
 			break;
 	}
@@ -538,7 +542,7 @@ int entry_find_item(void *node, void *ctx)
 	struct config_entry *entry = node;
 	struct node_lookup_data *data = ctx;
 
-	if(!strcmp(entry->name, data->name))
+	if(!strcmp(entry->entry.name, data->name))
 	{
 		data->result = entry;
 		return 0; // we found, break
@@ -562,7 +566,7 @@ struct config_entry *read_entry(const char *section_name, const char *entry_name
 	if(!entry)
 		return NULL;
 
-	if(entry->type != requested_type)
+	if(entry->entry.type != requested_type)
 		return NULL;
 	return entry;
 }
@@ -581,15 +585,15 @@ struct config_entry *prepare_write_entry(const char *section_name, const char *e
 	struct config_entry *entry = get_entry(section, entry_name);
 	if(entry)
 	{
-		if(entry->type != requested_type)
+		if(entry->entry.type != requested_type)
 			return NULL;
 		return entry;
 	}
 
 	malloc_nofail(entry);
 	memset(entry, 0, sizeof(*entry)); // default data
-	strdup_nofail(entry->name, entry_name);
-	entry->type = requested_type;
+	strdup_nofail(entry->entry.name, entry_name);
+	entry->entry.type = requested_type;
 	list_add(&(section->entries), entry);
 	return entry;
 }
@@ -611,7 +615,7 @@ void entry_free(void *node, void *ctx)
 	struct config_entry *entry = node;
 	void *bufptr;
 
-	switch(entry->type)
+	switch(entry->entry.type)
 	{
 		case CHAR:
 		case INT:
@@ -620,33 +624,33 @@ void entry_free(void *node, void *ctx)
 			break;
 
 		case STRING:
-			bufptr = entry->data.string_value;
+			bufptr = entry->entry.data.string_value;
 			break;
 
 		case BUFFER:
-			bufptr = entry->data.buffer_value.data;
+			bufptr = entry->entry.data.buffer_value.data;
 			break;
 
 		case CHAR_ARRAY:
-			bufptr = entry->data.char_array_value.array;
+			bufptr = entry->entry.data.char_array_value.array;
 			break;
 
 		case INT_ARRAY:
-			bufptr = entry->data.int_array_value.array;
+			bufptr = entry->entry.data.int_array_value.array;
 			break;
 
 		case INT64_ARRAY:
-			bufptr = entry->data.int64_array_value.array;
+			bufptr = entry->entry.data.int64_array_value.array;
 			break;
 
 		case STRING_ARRAY:
-			bufptr = entry->data.string_array_value.array;
+			bufptr = entry->entry.data.string_array_value.buffer;
 			break;
 	}
 
 	if(bufptr)
 		free(bufptr);
-	free(entry->name);
+	free(entry->entry.name);
 	free(entry);
 }
 
@@ -659,7 +663,7 @@ int config_read_char(const char *section, const char *name, char *value)
 	if(!entry)
 		return 0;
 
-	*value = entry->data.char_value;
+	*value = entry->entry.data.char_value;
 	return 1;
 }
 
@@ -672,7 +676,7 @@ int config_read_int(const char *section, const char *name, int *value)
 	if(!entry)
 		return 0;
 
-	*value = entry->data.int_value;
+	*value = entry->entry.data.int_value;
 	return 1;
 }
 
@@ -685,7 +689,7 @@ int config_read_int64(const char *section, const char *name, long long *value)
 	if(!entry)
 		return 0;
 
-	*value = entry->data.int64_value;
+	*value = entry->entry.data.int64_value;
 	return 1;
 }
 
@@ -698,7 +702,7 @@ int config_read_string(const char *section, const char *name, char **value) // v
 	if(!entry)
 		return 0;
 
-	char *string_value = entry->data.string_value;
+	char *string_value = entry->entry.data.string_value;
 	*value = NULL;
 	if(string_value)
 	{
@@ -719,12 +723,12 @@ int config_read_buffer(const char *section, const char *name, void **buffer, siz
 	size_t len;
 	void *buf;
 
-	len = entry->data.buffer_value.len;
+	len = entry->entry.data.buffer_value.len;
 	buf = NULL;
 	if(len > 0)
 	{
 		log_assert(buf = malloc(len));
-		memcpy(buf, entry->data.buffer_value.data, len);
+		memcpy(buf, entry->entry.data.buffer_value.data, len);
 	}
 
 	*buffer_len = len;
@@ -742,12 +746,12 @@ int config_read_char_array(const char *section, const char *name, size_t *array_
 	if(!entry)
 		return 0;
 
-	size_t count = entry->data.char_array_value.count;
+	size_t count = entry->entry.data.char_array_value.count;
 	char *val = NULL;
 	if(count > 0)
 	{
 		malloc_array_nofail(val, count);
-		memcpy(val, entry->data.char_array_value.array, count * sizeof(*val));
+		memcpy(val, entry->entry.data.char_array_value.array, count * sizeof(*val));
 	}
 
 	*array_len = count;
@@ -765,12 +769,12 @@ int config_read_int_array(const char *section, const char *name, size_t *array_l
 	if(!entry)
 		return 0;
 
-	size_t count = entry->data.int_array_value.count;
+	size_t count = entry->entry.data.int_array_value.count;
 	int *val = NULL;
 	if(count > 0)
 	{
 		malloc_array_nofail(val, count);
-		memcpy(val, entry->data.int_array_value.array, count * sizeof(*val));
+		memcpy(val, entry->entry.data.int_array_value.array, count * sizeof(*val));
 	}
 
 	*array_len = count;
@@ -788,12 +792,12 @@ int config_read_int64_array(const char *section, const char *name, size_t *array
 	if(!entry)
 		return 0;
 
-	size_t count = entry->data.int64_array_value.count;
+	size_t count = entry->entry.data.int64_array_value.count;
 	long long *val = NULL;
 	if(count > 0)
 	{
 		malloc_array_nofail(val, count);
-		memcpy(val, entry->data.int64_array_value.array, count * sizeof(*val));
+		memcpy(val, entry->entry.data.int64_array_value.array, count * sizeof(*val));
 	}
 
 	*array_len = count;
@@ -802,7 +806,7 @@ int config_read_int64_array(const char *section, const char *name, size_t *array
 	return 1;
 }
 
-int config_read_string_array(const char *section, const char *name, size_t *array_len, char ***value) // value allocated, free it after usage, and each value allocated, free it after range
+int config_read_string_array(const char *section, const char *name, size_t *array_len, char ***value) // value allocated, free it after usage (1 buffer)
 {
 	if(!array_len || !value)
 		return 0;
@@ -811,19 +815,31 @@ int config_read_string_array(const char *section, const char *name, size_t *arra
 	if(!entry)
 		return 0;
 
-	size_t count = entry->data.string_array_value.count;
+	size_t count = entry->entry.data.string_array_value.count;
 	char **val = NULL;
 	if(count > 0)
 	{
-		malloc_array_nofail(val, count);
-		size_t i;
-		char **src = entry->data.string_array_value.array;
-		for(i=0; i<count; i++)
+		const char *srcbuf = entry->entry.data.string_array_value.buffer;
+		size_t bufflen = config_file_string_array_len(srcbuf, count);
+		bufflen -= (count / CHAR_BIT); // remove bit array prefix
+		bufflen += sizeof(char*) * count;// add char ** prefix
+		const char *src = srcbuf + (count / CHAR_BIT); // add prefix to source to begin at strings
+
+		log_assert(val = malloc(bufflen));
+
+		char *str = (char*)(val + count + 1);
+		for(size_t i=0; i<count; i++)
 		{
-			val[i] = NULL;
-			if(src[i])
+			char isvalue = read_bit(srcbuf, i);
+			if(isvalue)
 			{
-				strdup_nofail(val[i], src[i]);
+				// read string
+				val[i] = str;
+				while((*++str = *++src));
+			}
+			else
+			{
+				val[i] = NULL;
 			}
 		}
 	}
@@ -841,7 +857,7 @@ int config_write_char(const char *section, const char *name, char value)
 	if(!entry)
 		return 0;
 
-	entry->data.char_value = value;
+	entry->entry.data.char_value = value;
 
 	config_file_save(sec);
 	return 1;
@@ -854,7 +870,7 @@ int config_write_int(const char *section, const char *name, int value)
 	if(!entry)
 		return 0;
 
-	entry->data.int_value = value;
+	entry->entry.data.int_value = value;
 
 	config_file_save(sec);
 	return 1;
@@ -867,7 +883,7 @@ int config_write_int64(const char *section, const char *name, long long value)
 	if(!entry)
 		return 0;
 
-	entry->data.int64_value = value;
+	entry->entry.data.int64_value = value;
 
 	config_file_save(sec);
 	return 1;
@@ -880,13 +896,13 @@ int config_write_string(const char *section, const char *name, const char *value
 	if(!entry)
 		return 0;
 
-	if(entry->data.string_value)
-		free(entry->data.string_value); // clean old value
+	if(entry->entry.data.string_value)
+		free(entry->entry.data.string_value); // clean old value
 
-	entry->data.string_value = NULL;
+	entry->entry.data.string_value = NULL;
 	if(value)
 	{
-		strdup_nofail(entry->data.string_value, value);
+		strdup_nofail(entry->entry.data.string_value, value);
 	}
 
 	config_file_save(sec);
@@ -903,8 +919,8 @@ int config_write_buffer(const char *section, const char *name, const void *buffe
 	if(!entry)
 		return 0;
 
-	if(entry->data.buffer_value.data)
-		free(entry->data.buffer_value.data); // clean old value
+	if(entry->entry.data.buffer_value.data)
+		free(entry->entry.data.buffer_value.data); // clean old value
 
 	void *bufcopy = NULL;
 	if(buffer_len)
@@ -912,8 +928,8 @@ int config_write_buffer(const char *section, const char *name, const void *buffe
 		log_assert(bufcopy = malloc(buffer_len));
 		memcpy(bufcopy, buffer, buffer_len);
 	}
-	entry->data.buffer_value.data = bufcopy;
-	entry->data.buffer_value.len = buffer_len;
+	entry->entry.data.buffer_value.data = bufcopy;
+	entry->entry.data.buffer_value.len = buffer_len;
 
 	config_file_save(sec);
 	return 1;
@@ -929,8 +945,8 @@ int config_write_char_array(const char *section, const char *name, size_t array_
 	if(!entry)
 		return 0;
 
-	if(entry->data.char_array_value.array)
-		free(entry->data.char_array_value.array); // clean old value
+	if(entry->entry.data.char_array_value.array)
+		free(entry->entry.data.char_array_value.array); // clean old value
 
 	char *array = NULL;
 	if(array_len)
@@ -938,8 +954,8 @@ int config_write_char_array(const char *section, const char *name, size_t array_
 		malloc_array_nofail(array, array_len);
 		memcpy(array, value, array_len * sizeof(*array));
 	}
-	entry->data.char_array_value.array = array;
-	entry->data.char_array_value.count = array_len;
+	entry->entry.data.char_array_value.array = array;
+	entry->entry.data.char_array_value.count = array_len;
 
 	config_file_save(sec);
 	return 1;
@@ -955,8 +971,8 @@ int config_write_int_array(const char *section, const char *name, size_t array_l
 	if(!entry)
 		return 0;
 
-	if(entry->data.int_array_value.array)
-		free(entry->data.int_array_value.array); // clean old value
+	if(entry->entry.data.int_array_value.array)
+		free(entry->entry.data.int_array_value.array); // clean old value
 
 	int *array = NULL;
 	if(array_len)
@@ -964,8 +980,8 @@ int config_write_int_array(const char *section, const char *name, size_t array_l
 		malloc_array_nofail(array, array_len);
 		memcpy(array, value, array_len * sizeof(*array));
 	}
-	entry->data.int_array_value.array = array;
-	entry->data.int_array_value.count = array_len;
+	entry->entry.data.int_array_value.array = array;
+	entry->entry.data.int_array_value.count = array_len;
 
 	config_file_save(sec);
 	return 1;
@@ -981,8 +997,8 @@ int config_write_int64_array(const char *section, const char *name, size_t array
 	if(!entry)
 		return 0;
 
-	if(entry->data.int64_array_value.array)
-		free(entry->data.int64_array_value.array); // clean old value
+	if(entry->entry.data.int64_array_value.array)
+		free(entry->entry.data.int64_array_value.array); // clean old value
 
 	long long *array = NULL;
 	if(array_len)
@@ -990,8 +1006,8 @@ int config_write_int64_array(const char *section, const char *name, size_t array
 		malloc_array_nofail(array, array_len);
 		memcpy(array, value, array_len * sizeof(*array));
 	}
-	entry->data.int64_array_value.array = array;
-	entry->data.int64_array_value.count = array_len;
+	entry->entry.data.int64_array_value.array = array;
+	entry->entry.data.int64_array_value.count = array_len;
 
 	config_file_save(sec);
 	return 1;
@@ -1007,35 +1023,36 @@ int config_write_string_array(const char *section, const char *name, size_t arra
 	if(!entry)
 		return 0;
 
-	if(entry->data.string_array_value.array)
-		free(entry->data.string_array_value.array); // clean old value
+	if(entry->entry.data.string_array_value.buffer)
+		free(entry->entry.data.string_array_value.buffer); // clean old value
 
-	char **array = NULL;
+	void *buf = NULL;
 	if(array_len)
 	{
-		size_t len = array_len * sizeof(char *);
-		size_t i;
-
-		for(i=0; i<array_len; i++)
+		size_t bufflen = array_len / CHAR_BIT;
+		for(size_t i=0; i<array_len; i++)
 		{
-			const char *src = value[i];
-			if(src)
-				len += strlen(src) + 1;
+			if(!value[i])
+				continue;
+			bufflen += strlen(value[i]) + 1;
 		}
 
-		// buf layout : string ptr array | string1\0 | string2\0 ...
-		log_assert(array = malloc(len));
-		memset(array, 0, len);
-		char *ptr = ((char*)array) + array_len * sizeof(char *); // right after ptr array
-		for(i=0; i<array_len; i++)
+		log_assert(buf = malloc(bufflen));
+
+		char *str = (char*)buf + (array_len / CHAR_BIT);
+		for(size_t i=0; i<array_len; i++)
 		{
 			const char *src = value[i];
-			if(src)
-				while((*(ptr++) = *(src++)));
+			char isvalue = src ? 1 : 0;
+			write_bit(buf, i, isvalue);
+			if(!isvalue)
+				continue;
+			while((*++str = *++src));
 		}
 	}
-	entry->data.string_array_value.array = array;
-	entry->data.string_array_value.count = array_len;
+
+	entry->entry.data.string_array_value.buffer = buf;
+	entry->entry.data.string_array_value.count = array_len;
 
 	config_file_save(sec);
 	return 1;
@@ -1121,7 +1138,7 @@ int config_enum_entry_item(void *node, void *ctx)
 	struct enum_entry_data *data = ctx;
 	struct config_entry *entry = node;
 
-	return data->callback(entry->name, data->ctx);
+	return data->callback(entry->entry.name, data->ctx);
 }
 
 int config_get_entry_type(const char *section, const char *name, enum config_type *type) // 1 if success 0 if error
@@ -1141,6 +1158,6 @@ int config_get_entry_type(const char *section, const char *name, enum config_typ
 	if(!entry)
 		return 0;
 
-	*type = entry->type;
+	*type = entry->entry.type;
 	return 1;
 }
