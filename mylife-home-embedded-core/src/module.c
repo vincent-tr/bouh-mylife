@@ -109,9 +109,31 @@ static struct core_api api =
 	.irc_bot_send_message = irc_bot_send_message, // comp NULL = broadcast -- thread unsafe
 	.irc_bot_send_notice = irc_bot_send_notice, // comp NULL = broadcast -- thread unsafe
 	.irc_bot_send_message_va = irc_bot_send_message_va, // comp NULL = broadcast -- thread unsafe
-	.irc_bot_send_notice_va = irc_bot_send_notice_va // comp NULL = broadcast -- thread unsafe
+	.irc_bot_send_notice_va = irc_bot_send_notice_va, // comp NULL = broadcast -- thread unsafe
 
-	// TODO
+	.config_read_char = config_read_char,
+	.config_read_int = config_read_int,
+	.config_read_int64 = config_read_int64,
+	.config_read_string = config_read_string, // value allocated, free it after usage
+	.config_read_buffer = config_read_buffer, // buffer allocated, free it after usage
+	.config_read_char_array = config_read_char_array, // array allocated, free it after range
+	.config_read_int_array = config_read_int_array, // array allocated, free it after range
+	.config_read_int64_array = config_read_int64_array, // array allocated, free it after range
+	.config_read_string_array = config_read_string_array, // value allocated, free it after usage (1 buffer)
+	.config_write_char = config_write_char,
+	.config_write_int = config_write_int,
+	.config_write_int64 = config_write_int64,
+	.config_write_string = config_write_string,
+	.config_write_buffer = config_write_buffer,
+	.config_write_char_array = config_write_char_array,
+	.config_write_int_array = config_write_int_array,
+	.config_write_int64_array = config_write_int64_array,
+	.config_write_string_array = config_write_string_array,
+	.config_delete_entry = config_delete_entry, // 1 if success 0 if error
+	.config_delete_section = config_delete_section, // 1 if success 0 if error
+	.config_enum_sections = config_enum_sections,
+	.config_enum_entries = config_enum_entries, // 1 if success 0 if error
+	.config_get_entry_type = config_get_entry_type // 1 if success 0 if error
 };
 
 static const char *required[] =
