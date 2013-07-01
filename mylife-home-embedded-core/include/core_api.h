@@ -14,6 +14,7 @@
 #include "loop.h"
 #include "irc.h"
 #include "manager.h"
+#include "config.h"
 
 struct core_api
 {
@@ -71,7 +72,29 @@ struct core_api
 	int (*irc_bot_send_message_va)(struct irc_bot *bot, struct irc_component *comp, int argc, ...); // comp NULL = broadcast -- thread unsafe
 	int (*irc_bot_send_notice_va)(struct irc_bot *bot, struct irc_component *comp, int argc, ...); // comp NULL = broadcast -- thread unsafe
 
-	// TODO
+	int (*config_read_char)(const char *section, const char *name, char *value);
+	int (*config_read_int)(const char *section, const char *name, int *value);
+	int (*config_read_int64)(const char *section, const char *name, long long *value);
+	int (*config_read_string)(const char *section, const char *name, char **value); // value allocated, free it after usage
+	int (*config_read_buffer)(const char *section, const char *name, void **buffer, size_t *buffer_len); // buffer allocated, free it after usage
+	int (*config_read_char_array)(const char *section, const char *name, size_t *array_len, char **value); // array allocated, free it after range
+	int (*config_read_int_array)(const char *section, const char *name, size_t *array_len, int **value); // array allocated, free it after range
+	int (*config_read_int64_array)(const char *section, const char *name, size_t *array_len, long long **value); // array allocated, free it after range
+	int (*config_read_string_array)(const char *section, const char *name, size_t *array_len, char ***value); // value allocated, free it after usage (1 buffer)
+	int (*config_write_char)(const char *section, const char *name, char value);
+	int (*config_write_int)(const char *section, const char *name, int value);
+	int (*config_write_int64)(const char *section, const char *name, long long value);
+	int (*config_write_string)(const char *section, const char *name, const char *value);
+	int (*config_write_buffer)(const char *section, const char *name, const void *buffer, size_t buffer_len);
+	int (*config_write_char_array)(const char *section, const char *name, size_t array_len, const char *value);
+	int (*config_write_int_array)(const char *section, const char *name, size_t array_len, const int *value);
+	int (*config_write_int64_array)(const char *section, const char *name, size_t array_len, const long long *value);
+	int (*config_write_string_array)(const char *section, const char *name, size_t array_len, const char **value);
+	int (*config_delete_entry)(const char *section, const char *name); // 1 if success 0 if error
+	int (*config_delete_section)(const char *section); // 1 if success 0 if error
+	void (*config_enum_sections)(int (*callback)(const char *section, void *ctx), void *ctx);
+	int (*config_enum_entries)(const char *section, int (*callback)(const char *name, void *ctx), void *ctx); // 1 if success 0 if error
+	int (*config_get_entry_type)(const char *section, const char *name, enum config_type *type); // 1 if success 0 if error
 };
 
 #ifndef CORE
