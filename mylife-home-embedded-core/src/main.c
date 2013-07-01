@@ -18,6 +18,7 @@
 
 #include "config_base.h"
 #include "logger.h"
+#include "config.h"
 #include "module.h"
 #include "loop.h"
 #include "irc.h"
@@ -48,6 +49,7 @@ void init()
 	log_init(is_interactive);
 	loop_init();
 	irc_init();
+	config_init();
 	module_init();
 	manager_init();
 }
@@ -56,6 +58,7 @@ void terminate()
 {
 	manager_terminate();
 	module_terminate();
+	config_terminate();
 	irc_terminate();
 	loop_terminate();
 	log_terminate();

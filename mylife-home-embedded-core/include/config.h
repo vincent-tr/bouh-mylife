@@ -64,6 +64,7 @@ extern int config_get_entry_type(const char *section, const char *name, enum con
 #define config_read_int_array(section, name, array_len, value) (core_api->config_read_int_array(section, name, array_len, value)) // array allocated, free it after range
 #define config_read_int64_array(section, name, array_len, value) (core_api->config_read_int64_array(section, name, array_len, value)) // array allocated, free it after range
 #define config_read_string_array(section, name, array_len, value) (core_api->config_read_string_array(section, name, array_len, value)) // value allocated, free it after usage (1 buffer)
+
 #define config_write_char(section, name, value) (core_api->config_write_char(section, name, value))
 #define config_write_int(section, name, value) (core_api->config_write_int(section, name, value))
 #define config_write_int64(section, name, value) (core_api->config_write_int64(section, name, value))
@@ -73,8 +74,10 @@ extern int config_get_entry_type(const char *section, const char *name, enum con
 #define config_write_int_array(section, name, array_len, value) (core_api->config_write_int_array(section, name, array_len, value))
 #define config_write_int64_array(section, name, array_len, value) (core_api->config_write_int64_array(section, name, array_len, value))
 #define config_write_string_array(section, name, array_len, value) (core_api->config_write_string_array(section, name, array_len, value))
+
 #define config_delete_entry(section, name) (core_api->config_delete_entry(section, name)) // 1 if success 0 if error
 #define config_delete_section(section) (core_api->config_delete_section(section)) // 1 if success 0 if error
+
 #define config_enum_sections(callback, ctx) (core_api->config_enum_sections(callback, ctx))
 #define config_enum_entries(section, callback, ctx) (core_api->config_enum_entries(section, callback, ctx)) // 1 if success 0 if error
 #define config_get_entry_type(section, name, type) (core_api->config_get_entry_type(section, name, type)) // 1 if success 0 if error
