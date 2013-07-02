@@ -51,7 +51,7 @@ static char *cmd_debug_complist_desc[] =
 	NULL
 };
 
-struct irc_command_description cmd_debug_complist =
+static struct irc_command_description cmd_debug_complist =
 {
 	.verb = "complist",
 	.description = cmd_debug_complist_desc,
@@ -72,7 +72,7 @@ static struct irc_command_description *cmd_debug_children[] =
 	NULL
 };
 
-struct irc_command_description cmd_debug =
+static struct irc_command_description cmd_debug =
 {
 	.verb = "debug",
 	.description = cmd_debug_desc,
@@ -98,7 +98,7 @@ static char *cmd_module_files_desc[] =
 	NULL
 };
 
-struct irc_command_description cmd_module_files =
+static struct irc_command_description cmd_module_files =
 {
 	.verb = "files",
 	.description = cmd_module_files_desc,
@@ -113,7 +113,7 @@ static char *cmd_module_create_desc[] =
 	NULL
 };
 
-struct irc_command_description cmd_module_create =
+static struct irc_command_description cmd_module_create =
 {
 	.verb = "create",
 	.description = cmd_module_create_desc,
@@ -128,7 +128,7 @@ static char *cmd_module_delete_desc[] =
 	NULL
 };
 
-struct irc_command_description cmd_module_delete =
+static struct irc_command_description cmd_module_delete =
 {
 	.verb = "delete",
 	.description = cmd_module_delete_desc,
@@ -143,7 +143,7 @@ static char *cmd_module_loaded_desc[] =
 	NULL
 };
 
-struct irc_command_description cmd_module_loaded =
+static struct irc_command_description cmd_module_loaded =
 {
 	.verb = "loaded",
 	.description = cmd_module_loaded_desc,
@@ -158,7 +158,7 @@ static char *cmd_module_load_desc[] =
 	NULL
 };
 
-struct irc_command_description cmd_module_load =
+static struct irc_command_description cmd_module_load =
 {
 	.verb = "load",
 	.description = cmd_module_load_desc,
@@ -173,7 +173,7 @@ static char *cmd_module_unload_desc[] =
 	NULL
 };
 
-struct irc_command_description cmd_module_unload =
+static struct irc_command_description cmd_module_unload =
 {
 	.verb = "unload",
 	.description = cmd_module_unload_desc,
@@ -199,11 +199,154 @@ static struct irc_command_description *cmd_module_children[] =
 	NULL
 };
 
-struct irc_command_description cmd_module =
+static struct irc_command_description cmd_module =
 {
 	.verb = "module",
 	.description = cmd_module_desc,
 	.children = cmd_module_children,
+	.callback = NULL,
+	.ctx = NULL
+};
+
+/*************************************************************************
+ * config
+ */
+
+static void config_read_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx);
+static void config_writechar_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx);;
+static void config_writeint_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx);
+static void config_writeint64_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx);
+static void config_writestring_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx);
+static void config_writebuffer_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx);
+static void config_writechararray_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx);
+static void config_writeintarray_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx);
+static void config_writeint64array_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx);
+static void config_writestringarray_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx);
+static void config_enumsections_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx);
+static void config_enumentries_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx);
+static void config_deletesection_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx);
+static void config_deleteentry_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx);
+
+static char *cmd_config_read_desc[] =
+{
+	"read config entry, args : section, name",
+	NULL
+};
+
+struct irc_command_description cmd_config_read =
+{
+	.verb = "read",
+	.description = cmd_config_read_desc,
+	.children = NULL,
+	.callback = config_read_handler,
+	.ctx = NULL
+};
+
+static char *cmd_config_writechar_desc[] =
+{
+	"write config entry of type char, args : section, name, value",
+	NULL
+};
+
+static struct irc_command_description cmd_config_writechar =
+{
+	.verb = "writechar",
+	.description = cmd_config_writechar_desc,
+	.children = NULL,
+	.callback = config_writechar_handler,
+	.ctx = NULL
+};
+
+static char *cmd_config_writeint_desc[] =
+{
+	"write config entry of type int, args : section, name, value",
+	NULL
+};
+
+static struct irc_command_description cmd_config_writeint =
+{
+	.verb = "writeint",
+	.description = cmd_config_writeint_desc,
+	.children = NULL,
+	.callback = config_writeint_handler,
+	.ctx = NULL
+};
+
+static char *cmd_config_writeint64_desc[] =
+{
+	"write config entry of type int64, args : section, name, value",
+	NULL
+};
+
+static struct irc_command_description cmd_config_writeint64 =
+{
+	.verb = "writeint",
+	.description = cmd_config_writeint64_desc,
+	.children = NULL,
+	.callback = config_writeint64_handler,
+	.ctx = NULL
+};
+
+static char *cmd_config_writestring_desc[] =
+{
+	"write config entry of type string, args : section, name, value",
+	NULL
+};
+
+static struct irc_command_description cmd_config_writestring =
+{
+	.verb = "writeint",
+	.description = cmd_config_writestring_desc,
+	.children = NULL,
+	.callback = config_writestring_handler,
+	.ctx = NULL
+};
+
+static char *cmd_config_writebuffer_desc[] =
+{
+	"write config entry of type buffer, args : section, name, value (hex)",
+	NULL
+};
+
+static struct irc_command_description cmd_config_writebuffer =
+{
+	.verb = "writebuffer",
+	.description = cmd_config_writebuffer_desc,
+	.children = NULL,
+	.callback = config_writebuffer_handler,
+	.ctx = NULL
+};
+
+static char *cmd_config_desc[] =
+{
+	"config management commands",
+	NULL
+};
+
+static struct irc_command_description *cmd_config_children[] =
+{
+	cmd_config_read,
+	cmd_config_writechar,
+	cmd_config_writeint,
+	cmd_config_writeint64,
+	cmd_config_writestring,
+	cmd_config_writebuffer,
+	cmd_config_writechararray,
+	cmd_config_writeintarray,
+	cmd_config_writeint64array,
+	cmd_config_writestringarray,
+	cmd_config_enumsections,
+	cmd_config_enumentries,
+	cmd_config_deletesection,
+	cmd_config_deleteentry,
+	NULL
+};
+
+static struct irc_command_description cmd_config =
+{
+	.verb = "config",
+	.description = cmd_config_desc,
+	.children = cmd_config_children,
 	.callback = NULL,
 	.ctx = NULL
 };
@@ -274,6 +417,7 @@ int module_files_item(const char *file, void *ctx)
 
 void module_create_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx)
 {
+	// TODO
 	irc_bot_send_notice_va(bot, from, 2, "reply", "not implemented!");
 }
 
