@@ -673,3 +673,6 @@ void module_unload_handler(struct irc_bot *bot, struct irc_component *from, int 
 
 // TODO : int ret = readparameters(bot, from, paramcount, mandatorycount, "param1", &ptr1, "param2", &ptr2, ...);
 // => auto send missing parameters and auto assign ptr to args, ret = 1 on success, 0 on failure
+// http://stackoverflow.com/questions/5957679/is-there-a-way-to-use-c-preprocessor-stringification-on-variadic-macro-argumen
+// => readparameters(bot, from, &param1, &param2, ...); // all mandatory
+// => readparameters_notmandatory(bot, from, mandatory_count, &param1, &param2, ...);
