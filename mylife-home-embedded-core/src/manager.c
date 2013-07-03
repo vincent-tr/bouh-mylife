@@ -670,3 +670,6 @@ void module_unload_handler(struct irc_bot *bot, struct irc_component *from, int 
 
 	irc_bot_send_notice_va(bot, from, 2, "reply", "module unloaded");
 }
+
+// TODO : int ret = readparameters(bot, from, paramcount, mandatorycount, "param1", &ptr1, "param2", &ptr2, ...);
+// => auto send missing parameters and auto assign ptr to args, ret = 1 on success, 0 on failure
