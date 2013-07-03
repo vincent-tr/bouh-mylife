@@ -317,6 +317,126 @@ static struct irc_command_description cmd_config_writebuffer =
 	.ctx = NULL
 };
 
+static char *cmd_config_writechararray_desc[] =
+{
+	"write config entry of type char array, args : section, name, values (1 arg per value => space separated)",
+	NULL
+};
+
+static struct irc_command_description cmd_config_writechararray =
+{
+	.verb = "writechararray",
+	.description = cmd_config_writechararray_desc,
+	.children = NULL,
+	.callback = config_writechararray_handler,
+	.ctx = NULL
+};
+
+static char *cmd_config_writeintarray_desc[] =
+{
+	"write config entry of type int array, args : section, name, values (1 arg per value => space separated)",
+	NULL
+};
+
+static struct irc_command_description cmd_config_writeintarray =
+{
+	.verb = "writeintarray",
+	.description = cmd_config_writeintarray_desc,
+	.children = NULL,
+	.callback = config_writeintarray_handler,
+	.ctx = NULL
+};
+
+static char *cmd_config_writeint64array_desc[] =
+{
+	"write config entry of type int64 array, args : section, name, values (1 arg per value => space separated)",
+	NULL
+};
+
+static struct irc_command_description cmd_config_writeint64array =
+{
+	.verb = "writeint64array",
+	.description = cmd_config_writeint64array_desc,
+	.children = NULL,
+	.callback = config_writeint64array_handler,
+	.ctx = NULL
+};
+
+static char *cmd_config_writestringarray_desc[] =
+{
+	"write config entry of type string array, args : section, name, values (values are semi-colon separated ; )",
+	NULL
+};
+
+static struct irc_command_description cmd_config_writestringarray =
+{
+	.verb = "writestringarray",
+	.description = cmd_config_writestringarray_desc,
+	.children = NULL,
+	.callback = config_writestringarray_handler,
+	.ctx = NULL
+};
+
+static char *cmd_config_enumsections_desc[] =
+{
+	"enumerate all sections in the configuration manager",
+	NULL
+};
+
+static struct irc_command_description cmd_config_enumsections =
+{
+	.verb = "enumsections",
+	.description = cmd_config_enumsections_desc,
+	.children = NULL,
+	.callback = config_enumsections_handler,
+	.ctx = NULL
+};
+
+static char *cmd_config_enumentries_desc[] =
+{
+	"enumerate all entries from a section, args : section name",
+	NULL
+};
+
+static struct irc_command_description cmd_config_enumentries =
+{
+	.verb = "enumentries",
+	.description = cmd_config_enumentries_desc,
+	.children = NULL,
+	.callback = config_enumentries_handler,
+	.ctx = NULL
+};
+
+static char *cmd_config_deletesection_desc[] =
+{
+	"delete an entire section from the configuration manager, args : section name",
+	NULL
+};
+
+static struct irc_command_description cmd_config_deletesection =
+{
+	.verb = "deletesection",
+	.description = cmd_config_deletesection_desc,
+	.children = NULL,
+	.callback = config_deletesection_handler,
+	.ctx = NULL
+};
+
+static char *cmd_config_deleteentry_desc[] =
+{
+	"delete an entry from a section, args : section name, entry name",
+	NULL
+};
+
+static struct irc_command_description cmd_config_deleteentry =
+{
+	.verb = "deleteentry",
+	.description = cmd_config_deleteentry_desc,
+	.children = NULL,
+	.callback = config_deleteentry_handler,
+	.ctx = NULL
+};
+
 static char *cmd_config_desc[] =
 {
 	"config management commands",
@@ -325,20 +445,20 @@ static char *cmd_config_desc[] =
 
 static struct irc_command_description *cmd_config_children[] =
 {
-	cmd_config_read,
-	cmd_config_writechar,
-	cmd_config_writeint,
-	cmd_config_writeint64,
-	cmd_config_writestring,
-	cmd_config_writebuffer,
-	cmd_config_writechararray,
-	cmd_config_writeintarray,
-	cmd_config_writeint64array,
-	cmd_config_writestringarray,
-	cmd_config_enumsections,
-	cmd_config_enumentries,
-	cmd_config_deletesection,
-	cmd_config_deleteentry,
+	&cmd_config_read,
+	&cmd_config_writechar,
+	&cmd_config_writeint,
+	&cmd_config_writeint64,
+	&cmd_config_writestring,
+	&cmd_config_writebuffer,
+	&cmd_config_writechararray,
+	&cmd_config_writeintarray,
+	&cmd_config_writeint64array,
+	&cmd_config_writestringarray,
+	&cmd_config_enumsections,
+	&cmd_config_enumentries,
+	&cmd_config_deletesection,
+	&cmd_config_deleteentry,
 	NULL
 };
 
@@ -360,6 +480,7 @@ void manager_init()
 
 	irc_bot_add_message_handler(bot, 0, &cmd_debug);
 	irc_bot_add_message_handler(bot, 0, &cmd_module);
+	irc_bot_add_message_handler(bot, 0, &cmd_config);
 }
 
 void manager_terminate()
@@ -517,6 +638,8 @@ void module_load_handler(struct irc_bot *bot, struct irc_component *from, int is
 		return;
 	}
 
+	// TODO : add to config autoload ?
+
 	irc_bot_send_notice_va(bot, from, 2, "reply", "module loaded");
 }
 
@@ -542,6 +665,8 @@ void module_unload_handler(struct irc_bot *bot, struct irc_component *from, int 
 		irc_bot_send_notice_va(bot, from, 2, "reply", "error unloading module");
 		return;
 	}
+
+	// TODO : remove from config autoload ?
 
 	irc_bot_send_notice_va(bot, from, 2, "reply", "module unloaded");
 }
