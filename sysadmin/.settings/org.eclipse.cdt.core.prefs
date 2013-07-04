@@ -1,0 +1,6 @@
+eclipse.preferences.version=1
+environment/project/cdt.managedbuild.config.gnu.cross.so.debug.689142769/PATH/delimiter=;
+environment/project/cdt.managedbuild.config.gnu.cross.so.debug.689142769/PATH/operation=replace
+environment/project/cdt.managedbuild.config.gnu.cross.so.debug.689142769/PATH/value=D\:\\Programmation\\C\\rpi-cross-compiler;D\:\\Programmation\\C\\rpi-cross-compiler\\gcc-4.6.3-eglibc-2.13\\arm-linux-gnueabihf\\bin
+environment/project/cdt.managedbuild.config.gnu.cross.so.debug.689142769/append=true
+environment/project/cdt.managedbuild.config.gnu.cross.so.debug.689142769/appendContributed=true
