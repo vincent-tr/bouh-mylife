@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <strings.h>
+#include <limits.h>
 
 #include "irc.h"
 #include "module.h"
@@ -244,7 +245,7 @@ struct irc_command_description cmd_config_read =
 
 static char *cmd_config_writechar_desc[] =
 {
-	"write config entry of type char, args : section, name, value",
+	"write config entry of type char, args : section, name, value (hex)",
 	NULL
 };
 
@@ -319,7 +320,7 @@ static struct irc_command_description cmd_config_writebuffer =
 
 static char *cmd_config_writechararray_desc[] =
 {
-	"write config entry of type char array, args : section, name, values (1 arg per value => space separated)",
+	"write config entry of type char array, args : section, name, values (Hex comma separated)",
 	NULL
 };
 
@@ -334,7 +335,7 @@ static struct irc_command_description cmd_config_writechararray =
 
 static char *cmd_config_writeintarray_desc[] =
 {
-	"write config entry of type int array, args : section, name, values (1 arg per value => space separated)",
+	"write config entry of type int array, args : section, name, values (comma separated)",
 	NULL
 };
 
@@ -349,7 +350,7 @@ static struct irc_command_description cmd_config_writeintarray =
 
 static char *cmd_config_writeint64array_desc[] =
 {
-	"write config entry of type int64 array, args : section, name, values (1 arg per value => space separated)",
+	"write config entry of type int64 array, args : section, name, values (comma separated)",
 	NULL
 };
 
@@ -364,7 +365,7 @@ static struct irc_command_description cmd_config_writeint64array =
 
 static char *cmd_config_writestringarray_desc[] =
 {
-	"write config entry of type string array, args : section, name, values (values are semi-colon separated ; )",
+	"write config entry of type string array, args : section, name, values (comma separated)",
 	NULL
 };
 
@@ -539,26 +540,22 @@ int module_files_item(const char *file, void *ctx)
 void module_create_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx)
 {
 	// TODO
-	irc_bot_send_notice_va(bot, from, 2, "reply", "not implemented!");
+	irc_bot_send_reply(bot, from, "not implemented!");
 }
 
 void module_delete_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx)
 {
-	if(!argc)
-	{
-		irc_bot_send_notice_va(bot, from, 2, "reply", "missing parameter : file");
+	const char *file;
+	if(!irc_bot_read_parameters(bot, from, args, argc, &file))
 		return;
-	}
-
-	const char *file = args[0];
 
 	if(!module_delete(file))
 	{
-		irc_bot_send_notice_va(bot, from, 2, "reply", "error deleting file");
+		irc_bot_send_reply(bot, from, "error deleting file");
 		return;
 	}
 
-	irc_bot_send_notice_va(bot, from, 2, "reply", "module file deleted");
+	irc_bot_send_reply(bot, from, "module file deleted");
 }
 
 void module_loaded_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx)
@@ -624,13 +621,9 @@ int module_loaded_refby_item(struct module *mod, void *ctx)
 
 void module_load_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx)
 {
-	if(!argc)
-	{
-		irc_bot_send_notice_va(bot, from, 2, "reply", "missing parameter : file");
+	const char *file;
+	if(!irc_bot_read_parameters(bot, from, args, argc, &file))
 		return;
-	}
-
-	const char *file = args[0];
 
 	if(!module_load(file))
 	{
@@ -645,13 +638,9 @@ void module_load_handler(struct irc_bot *bot, struct irc_component *from, int is
 
 void module_unload_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx)
 {
-	if(!argc)
-	{
-		irc_bot_send_notice_va(bot, from, 2, "reply", "missing parameter : name");
+	const char *name;
+	if(!irc_bot_read_parameters(bot, from, args, argc, &name))
 		return;
-	}
-
-	const char *name = args[0];
 
 	struct module *mod = module_find_by_name(name);
 	if(!mod)
@@ -671,8 +660,152 @@ void module_unload_handler(struct irc_bot *bot, struct irc_component *from, int 
 	irc_bot_send_notice_va(bot, from, 2, "reply", "module unloaded");
 }
 
-// TODO : int ret = readparameters(bot, from, paramcount, mandatorycount, "param1", &ptr1, "param2", &ptr2, ...);
-// => auto send missing parameters and auto assign ptr to args, ret = 1 on success, 0 on failure
-// http://stackoverflow.com/questions/5957679/is-there-a-way-to-use-c-preprocessor-stringification-on-variadic-macro-argumen
-// => readparameters(bot, from, &param1, &param2, ...); // all mandatory
-// => readparameters_notmandatory(bot, from, mandatory_count, &param1, &param2, ...);
+void config_read_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx)
+{
+	const char *section;
+	const char *name;
+	if(!irc_bot_read_parameters(bot, from, args, argc, &section, &name))
+		return;
+
+	// TODO
+	irc_bot_send_reply(bot, from, "not implemented!");
+}
+
+void config_writechar_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx)
+{
+	const char *section;
+	const char *name;
+	const char *value;
+	if(!irc_bot_read_parameters(bot, from, args, argc, &section, &name, &value))
+		return;
+
+	// TODO
+	irc_bot_send_reply(bot, from, "not implemented!");
+}
+
+void config_writeint_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx)
+{
+	const char *section;
+	const char *name;
+	const char *value;
+	if(!irc_bot_read_parameters(bot, from, args, argc, &section, &name, &value))
+		return;
+
+	// TODO
+	irc_bot_send_reply(bot, from, "not implemented!");
+}
+
+void config_writeint64_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx)
+{
+	const char *section;
+	const char *name;
+	const char *value;
+	if(!irc_bot_read_parameters(bot, from, args, argc, &section, &name, &value))
+		return;
+
+	// TODO
+	irc_bot_send_reply(bot, from, "not implemented!");
+}
+
+void config_writestring_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx)
+{
+	const char *section;
+	const char *name;
+	const char *value;
+	if(!irc_bot_read_parameters(bot, from, args, argc, &section, &name, &value))
+		return;
+
+	// TODO
+	irc_bot_send_reply(bot, from, "not implemented!");
+}
+
+void config_writebuffer_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx)
+{
+	const char *section;
+	const char *name;
+	const char *value;
+	if(!irc_bot_read_parameters(bot, from, args, argc, &section, &name, &value))
+		return;
+
+	// TODO
+	irc_bot_send_reply(bot, from, "not implemented!");
+}
+
+void config_writechararray_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx)
+{
+	const char *section;
+	const char *name;
+	const char *value;
+	if(!irc_bot_read_parameters(bot, from, args, argc, &section, &name, &value))
+		return;
+
+	// TODO
+	irc_bot_send_reply(bot, from, "not implemented!");
+}
+
+void config_writeintarray_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx)
+{
+	// TODO
+	irc_bot_send_reply(bot, from, "not implemented!");
+}
+
+void config_writeint64array_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx)
+{
+	const char *section;
+	const char *name;
+	const char *value;
+	if(!irc_bot_read_parameters(bot, from, args, argc, &section, &name, &value))
+		return;
+
+	// TODO
+	irc_bot_send_reply(bot, from, "not implemented!");
+}
+
+void config_writestringarray_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx)
+{
+	const char *section;
+	const char *name;
+	const char *value;
+	if(!irc_bot_read_parameters(bot, from, args, argc, &section, &name, &value))
+		return;
+
+	// TODO
+	irc_bot_send_reply(bot, from, "not implemented!");
+}
+
+void config_enumsections_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx)
+{
+	// TODO
+	irc_bot_send_reply(bot, from, "not implemented!");
+}
+
+void config_enumentries_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx)
+{
+	const char *section;
+	if(!irc_bot_read_parameters(bot, from, args, argc, &section))
+		return;
+
+	// TODO
+	irc_bot_send_reply(bot, from, "not implemented!");
+}
+
+void config_deletesection_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx)
+{
+	const char *section;
+	if(!irc_bot_read_parameters(bot, from, args, argc, &section))
+		return;
+
+	// TODO
+	irc_bot_send_reply(bot, from, "not implemented!");
+}
+
+void config_deleteentry_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx)
+{
+	const char *section_name;
+	const char *entry_name;
+	if(!irc_bot_read_parameters(bot, from, args, argc, &section_name, &entry_name))
+		return;
+
+	// TODO
+	irc_bot_send_reply(bot, from, "not implemented!");
+}

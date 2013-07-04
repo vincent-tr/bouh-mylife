@@ -71,6 +71,8 @@ struct core_api
 	int (*irc_bot_send_notice)(struct irc_bot *bot, struct irc_component *comp, const char **args, int argc); // comp NULL = broadcast -- thread unsafe
 	int (*irc_bot_send_message_va)(struct irc_bot *bot, struct irc_component *comp, int argc, ...); // comp NULL = broadcast -- thread unsafe
 	int (*irc_bot_send_notice_va)(struct irc_bot *bot, struct irc_component *comp, int argc, ...); // comp NULL = broadcast -- thread unsafe
+	int (*irc_bot_send_reply)(struct irc_bot *bot, struct irc_component *comp, const char *reply_fmt, ...); // thread unsafe
+	int (*irc_bot_read_parameters_internal)(struct irc_bot *bot, struct irc_component *from, const char **args, int argc, size_t optcount, const char *va_names, ...);
 
 	int (*config_read_char)(const char *section, const char *name, char *value);
 	int (*config_read_int)(const char *section, const char *name, int *value);

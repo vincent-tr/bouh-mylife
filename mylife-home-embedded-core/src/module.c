@@ -110,6 +110,8 @@ static struct core_api api =
 	.irc_bot_send_notice = irc_bot_send_notice, // comp NULL = broadcast -- thread unsafe
 	.irc_bot_send_message_va = irc_bot_send_message_va, // comp NULL = broadcast -- thread unsafe
 	.irc_bot_send_notice_va = irc_bot_send_notice_va, // comp NULL = broadcast -- thread unsafe
+	.irc_bot_send_reply = irc_bot_send_reply,
+	.irc_bot_read_parameters_internal = irc_bot_read_parameters_internal,
 
 	.config_read_char = config_read_char,
 	.config_read_int = config_read_int,
@@ -268,7 +270,7 @@ int module_find_by_file_callback(struct module *module, void *ctx)
 {
 	struct lookup_data *data = ctx;
 
-	if(!strcmp(module->file, data->criteria))
+	if(module->file && !strcmp(module->file, data->criteria))
 	{
 		data->result = module;
 		return 0;
