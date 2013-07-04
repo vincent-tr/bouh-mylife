@@ -14,6 +14,7 @@
 #include <stdarg.h>
 #include <syslog.h>
 #include <string.h>
+#include <errno.h>
 
 #include "logger.h"
 #include "config.h"
@@ -73,6 +74,12 @@ void log_write(const char *file, int line, int level, const char *format, ...)
 
 	if(level == LOG_EMERG)
 	{
+		const char *serrno = NULL;
+		if(errno != 0)
+			serrno = strerror(errno);
+		if(serrno)
+			syslog(level, "%s", serrno);
+
 		log_terminate();
 		exit(EXIT_FAILURE);
 	}
