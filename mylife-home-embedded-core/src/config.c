@@ -148,8 +148,9 @@ static struct list sections;
 static const char config_magic[] = {'c', 'o', 'n', 'f'};
 #define MAGIC (*(int *)config_magic)
 
-#define read_bit(buf, pos) (((const char*)(buf))[(pos) / CHAR_BIT] & (((char)1) >> ((pos) ^ CHAR_BIT)))
-#define write_bit(buf, pos, value) (((char*)(buf))[(pos) / CHAR_BIT] = value ? (((char*)(buf))[(pos) / CHAR_BIT] | (((char)1) >> ((pos) ^ CHAR_BIT))) : (((char*)(buf))[(pos) / CHAR_BIT] & ~(((char)1) >> ((pos) ^ CHAR_BIT))))
+#define read_bit(buf, pos) (((const char*)(buf))[(pos) / CHAR_BIT] & (((char)(0x80)) >> ((pos) % CHAR_BIT)))
+#define write_bit(buf, pos, value) (((char*)(buf))[(pos) / CHAR_BIT] = (value ? (((char*)(buf))[(pos) / CHAR_BIT] | (((char)(0x80)) >> ((pos) % CHAR_BIT))) : (((char*)(buf))[(pos) / CHAR_BIT] & ~(((char)(0x80)) >> ((pos) % CHAR_BIT)))))
+#define bitarray_size(array_len) (((array_len) % CHAR_BIT ? array_len + (CHAR_BIT - ((array_len) % CHAR_BIT)) : (array_len)) / CHAR_BIT )
 
 void config_init()
 {
@@ -213,7 +214,7 @@ size_t config_file_string_array_len(const void *array_buffer, size_t array_len)
 	const char *bitarray = array_buffer;
 	const char *str = array_buffer;
 
-	size_t buflen = array_len / CHAR_BIT;
+	size_t buflen = bitarray_size(array_len);
 	str += buflen;
 
 	for(size_t i=0; i<array_len; i++)
@@ -821,9 +822,9 @@ int config_read_string_array(const char *section, const char *name, size_t *arra
 	{
 		const char *srcbuf = entry->entry.data.string_array_value.buffer;
 		size_t bufflen = config_file_string_array_len(srcbuf, count);
-		bufflen -= (count / CHAR_BIT); // remove bit array prefix
+		bufflen -= bitarray_size(count); // remove bit array prefix
 		bufflen += sizeof(char*) * count;// add char ** prefix
-		const char *src = srcbuf + (count / CHAR_BIT); // add prefix to source to begin at strings
+		const char *src = srcbuf + bitarray_size(count); // add prefix to source to begin at strings
 
 		log_assert(val = malloc(bufflen));
 
@@ -835,7 +836,8 @@ int config_read_string_array(const char *section, const char *name, size_t *arra
 			{
 				// read string
 				val[i] = str;
-				while((*++str = *++src));
+				while(*src)
+					*(str++) = *(src++);
 			}
 			else
 			{
@@ -1029,7 +1031,7 @@ int config_write_string_array(const char *section, const char *name, size_t arra
 	void *buf = NULL;
 	if(array_len)
 	{
-		size_t bufflen = array_len / CHAR_BIT;
+		size_t bufflen = bitarray_size(array_len);
 		for(size_t i=0; i<array_len; i++)
 		{
 			if(!value[i])
@@ -1038,8 +1040,9 @@ int config_write_string_array(const char *section, const char *name, size_t arra
 		}
 
 		log_assert(buf = malloc(bufflen));
+		memset(buf, 0, bitarray_size(array_len));
 
-		char *str = (char*)buf + (array_len / CHAR_BIT);
+		char *str = (char*)buf + bitarray_size(array_len);
 		for(size_t i=0; i<array_len; i++)
 		{
 			const char *src = value[i];
@@ -1047,7 +1050,8 @@ int config_write_string_array(const char *section, const char *name, size_t arra
 			write_bit(buf, i, isvalue);
 			if(!isvalue)
 				continue;
-			while((*++str = *++src));
+			while(*src)
+				*(str++) = *(src++);
 		}
 	}
 

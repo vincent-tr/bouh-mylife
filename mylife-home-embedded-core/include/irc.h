@@ -105,7 +105,7 @@ extern int irc_bot_read_parameters_internal(struct irc_bot *bot, struct irc_comp
 #define irc_bot_send_notice(bot, comp, args, argc) (core_api->irc_bot_send_notice(bot, comp, args, argc))
 #define irc_bot_send_message_va(bot, comp, argc, ...) (core_api->irc_bot_send_message_va(bot, comp, argc, __VA_ARGS__))
 #define irc_bot_send_notice_va(bot, comp, argc, ...) (core_api->irc_bot_send_notice_va(bot, comp, argc, __VA_ARGS__))
-#define irc_bot_send_reply(bot, comp, reply_fmt, ...) (core_api->irc_bot_send_reply(bot, comp, reply_fmt, __VA_ARGS__))
+#define irc_bot_send_reply(bot, comp, reply_fmt, ...) (core_api->irc_bot_send_reply(bot, comp, reply_fmt, ##__VA_ARGS__))
 
 #define irc_bot_read_parameters(bot, from, args, argc, ...) (core_api->irc_bot_read_parameters_internal(bot, from, args, argc, (INT_MAX, #__VA_ARGS__, __VA_ARGS__))
 #define irc_bot_read_parameters_opt(bot, from, mandatory_count, args, argc, ...) (core_api->irc_bot_read_parameters_internal(bot, from, args, argc, mandatory_count, #__VA_ARGS__, __VA_ARGS__))

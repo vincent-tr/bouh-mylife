@@ -27,8 +27,8 @@ struct module_def
 };
 
 // required = NULL terminated array
-#define MODULE_DEFINE (name, version_major, version_minor, required, api, init, terminate) \
-	struct module_def module_def = { .name = name, .major = major, .minor = minor, .required = required, .api = api, .init = init, .terminate = terminate }
+#define MODULE_DEFINE(module_name, version_major, version_minor, required_modules, published_api, finit, fterminate) \
+		struct module_def module_def = { .name.name = module_name, .name.major = version_major, .name.minor = version_minor, .required = required_modules, .api = published_api, .init = finit, .terminate = fterminate }
 
 #ifdef CORE
 

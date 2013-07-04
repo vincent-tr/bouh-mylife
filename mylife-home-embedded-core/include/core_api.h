@@ -41,6 +41,7 @@ struct core_api
 	void (*module_enum_ref)(struct module *module, int (*callback)(struct module *ref, void *ctx), void *ctx); // ret 0 = stop enum
 	void (*module_enum_refby)(struct module *module, int (*callback)(struct module *ref, void *ctx), void *ctx); // ret 0 = stop enum
 
+	void (*loop_exit)();
 	struct loop_handle *(*loop_register_tick)(void (*callback)(void *ctx), void *ctx);
 	struct loop_handle *(*loop_register_timer)(void (*callback)(void *ctx), void *ctx, int period_ms);
 	struct loop_handle *(*loop_register_listener)(callback_select_add callback_add, callback_select_process callback_process, void *ctx);
