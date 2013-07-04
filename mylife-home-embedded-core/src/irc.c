@@ -1249,3 +1249,61 @@ int irc_bot_send(struct irc_bot *bot, struct irc_component *comp, enum handler_t
 
 	return ret;
 }
+
+int irc_bot_send_reply(struct irc_bot *bot, struct irc_component *comp, const char *reply_fmt, ...)
+{
+	static char buffer[BUFFER_MAX];
+
+	va_list ap;
+	va_start(ap, reply_fmt);
+	vsnprintf(buffer, BUFFER_MAX, reply_fmt, ap);
+	buffer[BUFFER_MAX-1] = '\0';
+	va_end(ap);
+
+	return irc_bot_send_notice_va(bot, comp, 2, "reply", buffer);
+}
+
+int irc_bot_read_parameters_internal(struct irc_bot *bot, struct irc_component *from, const char **args, int argc, size_t mandatory_count, const char *va_names, ...)
+{
+	// http://stackoverflow.com/questions/5957679/is-there-a-way-to-use-c-preprocessor-stringification-on-variadic-macro-argumen
+	static char buffer[ARGS_MAX * 10];
+	strcpy(buffer, va_names);
+	size_t idx = 0;
+	va_list ap;
+
+	va_start(ap, va_names);
+
+	int ret = 1;
+
+	for(char *token = strtok(buffer, ","); token; token = strtok(NULL, ","), ++idx)
+	{
+		// strip & and ' '
+		while(*token == '&' || *token == ' ')
+			++token;
+		char *ptr = token + strlen(token) - 1; // pos on last char
+		while(*ptr == '&' || *ptr == ' ')
+			*(ptr++) = 0;
+
+		char ** varg = va_arg(ap, char **);
+
+		const char *arg = NULL;
+		if(idx + 1 > argc)
+		{
+			// more data to read than available
+			if(mandatory_count > idx)
+			{
+				irc_bot_send_reply(bot, from, "missing parameter : %s", token);
+				ret = 0;
+			}
+		}
+		else
+		{
+			arg = args[idx];
+		}
+
+		*varg = (char*)arg;
+	}
+
+	va_end(ap);
+	return ret;
+}
