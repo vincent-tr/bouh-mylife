@@ -73,7 +73,7 @@ void list_clear(struct list *list, void (*free_node)(void *node, void *ctx), voi
 
 int list_is_empty(struct list *list)
 {
-	return list->head ? 1 : 0;
+	return list->head ? 0 : 1;
 }
 
 int list_count(struct list *list)

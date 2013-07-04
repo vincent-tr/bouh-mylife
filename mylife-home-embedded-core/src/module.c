@@ -78,6 +78,7 @@ static struct core_api api =
 	.module_get_file = module_get_file,
 	.module_get_name = module_get_name,
 
+	.loop_exit = loop_exit,
 	.loop_register_tick = loop_register_tick,
 	.loop_register_timer = loop_register_timer,
 	.loop_register_listener = loop_register_listener,
@@ -382,7 +383,7 @@ struct module *module_load(const char *file)
 		struct module_ref *refby;
 		malloc_nofail(refby);
 		refby->ref = module;
-		list_add(&(refmod->references), refby);
+		list_add(&(refmod->referenced_by), refby);
 	}
 
 	// exécution de init

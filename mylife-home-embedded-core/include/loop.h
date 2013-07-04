@@ -31,6 +31,9 @@ extern void loop_set_ctx(struct loop_handle *handle, void *ctx);
 
 #include "core_api.h"
 
+// stop the core !
+#define loop_exit() (core_api->loop_exit())
+
 #define loop_register_tick(callback, ctx) (core_api->loop_register_tick(callback, ctx))
 #define loop_register_timer(callback, ctx, period_ms) (core_api->loop_register_timer(callback, ctx, period_ms)) // devrait être au moins égal à CONFIG_LOOP_MS
 #define loop_register_listener(callback_add, callback_process, ctx) (core_api->loop_register_listener(callback_add, callback_process, ctx))

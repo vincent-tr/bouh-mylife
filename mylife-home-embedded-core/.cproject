@@ -45,7 +45,7 @@
 								<option id="gnu.c.link.option.paths.1227803665" name="Library search path (-L)" superClass="gnu.c.link.option.paths" valueType="libPaths">
 									<listOptionValue builtIn="false" value="../libs"/>
 								</option>
-								<option id="gnu.c.link.option.userobjs.626774365" superClass="gnu.c.link.option.userobjs" valueType="userObjs">
+								<option id="gnu.c.link.option.userobjs.626774365" name="Other objects" superClass="gnu.c.link.option.userobjs" valueType="userObjs">
 									<listOptionValue builtIn="false" value="../libs/libircclient.a"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.linker.input.1750713537" superClass="cdt.managedbuild.tool.gnu.c.linker.input">
