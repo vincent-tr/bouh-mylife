@@ -13,7 +13,7 @@
 #include "logger.h"
 
 #define malloc_nofail(var) (log_assert(var = malloc(sizeof(*var))));
-#define malloc_array_nofail(var, size) (log_assert(var = malloc(sizeof(*var) * size)));
+#define malloc_array_nofail(var, size) (log_assert(var = malloc(sizeof(*var) * (size))));
 #define strdup_nofail(dst, src) (log_assert(dst = strdup(src)));
 
 

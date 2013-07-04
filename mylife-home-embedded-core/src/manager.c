@@ -5,6 +5,7 @@
  *      Author: pumbawoman
  */
 
+#define _BSD_SOURCE
 #include <stdio.h>
 #include <stddef.h>
 #include <stdlib.h>
@@ -15,6 +16,8 @@
 
 #include "irc.h"
 #include "module.h"
+#include "config.h"
+#include "tools.h"
 
 static struct irc_bot *bot;
 
@@ -39,6 +42,14 @@ static int module_files_item(const char *file, void *ctx);
 static int module_loaded_item(struct module *mod, void *ctx);
 static int module_loaded_ref_item(struct module *mod, void *ctx);
 static int module_loaded_refby_item(struct module *mod, void *ctx);
+static int config_enum_section_item(const char *section, void *ctx);
+static int config_enum_entry_item(const char *name, void *ctx);
+static void manager_load_startup_modules();
+static void manager_add_startup_module(const char *file);
+static void manager_remove_startup_module(const char *file);
+
+#define CONFIG_SECTION "manager"
+#define CONFIG_ENTRY "startup_modules"
 
 /*************************************************************************
  * debug
@@ -281,7 +292,7 @@ static char *cmd_config_writeint64_desc[] =
 
 static struct irc_command_description cmd_config_writeint64 =
 {
-	.verb = "writeint",
+	.verb = "writeint64",
 	.description = cmd_config_writeint64_desc,
 	.children = NULL,
 	.callback = config_writeint64_handler,
@@ -296,7 +307,7 @@ static char *cmd_config_writestring_desc[] =
 
 static struct irc_command_description cmd_config_writestring =
 {
-	.verb = "writeint",
+	.verb = "writestring",
 	.description = cmd_config_writestring_desc,
 	.children = NULL,
 	.callback = config_writestring_handler,
@@ -482,6 +493,8 @@ void manager_init()
 	irc_bot_add_message_handler(bot, 0, &cmd_debug);
 	irc_bot_add_message_handler(bot, 0, &cmd_module);
 	irc_bot_add_message_handler(bot, 0, &cmd_config);
+
+	manager_load_startup_modules();
 }
 
 void manager_terminate()
@@ -492,6 +505,81 @@ void manager_terminate()
 struct irc_bot *manager_get_bot()
 {
 	return bot;
+}
+
+void manager_load_startup_modules()
+{
+	size_t count;
+	char **array;
+
+	if(!config_read_string_array(CONFIG_SECTION, CONFIG_ENTRY, &count, &array))
+		return; // no config => no modules
+
+	for(size_t i=0; i<count; i++)
+	{
+		const char *file = array[i];
+		if(!module_load(file))
+			log_warning("error loading module '%s'", file);
+	}
+}
+
+void manager_add_startup_module(const char *file)
+{
+	size_t count;
+	char **array_old;
+	const char **array_new;
+
+	if(!config_read_string_array(CONFIG_SECTION, CONFIG_ENTRY, &count, &array_old))
+	{
+		count = 0;
+		array_old = NULL;
+	}
+
+	malloc_array_nofail(array_new, count+1);
+
+	if(array_old)
+		memcpy(array_new, array_old, count*sizeof(*array_new));
+	array_new[count++] = file; // last item
+
+	config_write_string_array(CONFIG_SECTION, CONFIG_ENTRY, count, array_new);
+
+	if(array_old)
+		free(array_old);
+	free(array_new);
+}
+
+void manager_remove_startup_module(const char *file)
+{
+	size_t count;
+	size_t idx = (size_t)(-1);
+	char **array;
+
+	if(!config_read_string_array(CONFIG_SECTION, CONFIG_ENTRY, &count, &array))
+		return; // no config => nothing to remove
+
+	for(size_t i=0; i<count; i++)
+	{
+		// find index
+		if(!strcasecmp(array[i], file))
+		{
+			idx = i;
+			break;
+		}
+	}
+
+	if(idx == (size_t)(-1))
+	{
+		free(array);
+		return; // not found
+	}
+
+	// moving the item after index
+	for(size_t i=idx+1; i<count; i++)
+		array[i-1] = array[i];
+
+	config_write_string_array(CONFIG_SECTION, CONFIG_ENTRY, count-1, (const char **)array);
+
+	free(array);
 }
 
 void debug_complist_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx)
@@ -627,13 +715,13 @@ void module_load_handler(struct irc_bot *bot, struct irc_component *from, int is
 
 	if(!module_load(file))
 	{
-		irc_bot_send_notice_va(bot, from, 2, "reply", "error loading module");
+		irc_bot_send_reply(bot, from, "error loading module");
 		return;
 	}
 
-	// TODO : add to config autoload ?
+	manager_add_startup_module(file);
 
-	irc_bot_send_notice_va(bot, from, 2, "reply", "module loaded");
+	irc_bot_send_reply(bot, from, "module loaded");
 }
 
 void module_unload_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx)
@@ -645,19 +733,24 @@ void module_unload_handler(struct irc_bot *bot, struct irc_component *from, int 
 	struct module *mod = module_find_by_name(name);
 	if(!mod)
 	{
-		irc_bot_send_notice_va(bot, from, 2, "reply", "error module not found");
+		irc_bot_send_reply(bot, from, "error module not found");
 		return;
 	}
+
+	const char *modfile = module_get_file(mod);
+	char *file;
+	strdup_nofail(file, modfile);
 
 	if(!module_unload(mod))
 	{
-		irc_bot_send_notice_va(bot, from, 2, "reply", "error unloading module");
+		irc_bot_send_reply(bot, from, "error unloading module");
 		return;
 	}
 
-	// TODO : remove from config autoload ?
+	manager_remove_startup_module(file);
+	free(file);
 
-	irc_bot_send_notice_va(bot, from, 2, "reply", "module unloaded");
+	irc_bot_send_reply(bot, from, "module unloaded");
 }
 
 void config_read_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx)
@@ -667,8 +760,250 @@ void config_read_handler(struct irc_bot *bot, struct irc_component *from, int is
 	if(!irc_bot_read_parameters(bot, from, args, argc, &section, &name))
 		return;
 
-	// TODO
-	irc_bot_send_reply(bot, from, "not implemented!");
+	enum config_type type;
+	if(!config_get_entry_type(section, name, &type))
+	{
+		irc_bot_send_reply(bot, from, "error reading entry");
+		return;
+	}
+
+	char cval;
+	int ival;
+	long long llval;
+	char *sval;
+	void *bval;
+	size_t blen;
+	char *acval;
+	int *aival;
+	long long *allval;
+	char **asval;
+	size_t alen;
+
+	size_t i;
+	size_t off;
+
+#define BUFFER_SIZE 100
+	static char buffer[BUFFER_SIZE];
+
+	switch(type)
+	{
+	case CHAR:
+		if(!config_read_char(section, name, &cval))
+		{
+			irc_bot_send_reply(bot, from, "error reading entry");
+			return;
+		}
+
+		snprintf(buffer, BUFFER_SIZE, "%c", cval);
+		buffer[BUFFER_SIZE - 1] = '\0';
+
+		irc_bot_send_notice_va(bot, from, 3, "reply", "type", "char");
+		irc_bot_send_notice_va(bot, from, 3, "reply", "value", buffer);
+
+		break;
+
+	case INT:
+		if(!config_read_int(section, name, &ival))
+		{
+			irc_bot_send_reply(bot, from, "error reading entry");
+			return;
+		}
+
+		snprintf(buffer, BUFFER_SIZE, "%i", ival);
+		buffer[BUFFER_SIZE - 1] = '\0';
+
+		irc_bot_send_notice_va(bot, from, 3, "reply", "type", "int");
+		irc_bot_send_notice_va(bot, from, 3, "reply", "value", buffer);
+
+		break;
+
+	case INT64:
+		if(!config_read_int64(section, name, &llval))
+		{
+			irc_bot_send_reply(bot, from, "error reading entry");
+			return;
+		}
+
+		snprintf(buffer, BUFFER_SIZE, "%lld", llval);
+		buffer[BUFFER_SIZE - 1] = '\0';
+
+		irc_bot_send_notice_va(bot, from, 3, "reply", "type", "int64");
+		irc_bot_send_notice_va(bot, from, 3, "reply", "value", buffer);
+
+		break;
+
+	case STRING:
+		if(!config_read_string(section, name, &sval))
+		{
+			irc_bot_send_reply(bot, from, "error reading entry");
+			return;
+		}
+
+		snprintf(buffer, BUFFER_SIZE, "%s", sval);
+		buffer[BUFFER_SIZE - 1] = '\0';
+
+		free(sval);
+
+		irc_bot_send_notice_va(bot, from, 3, "reply", "type", "string");
+		irc_bot_send_notice_va(bot, from, 3, "reply", "value", buffer);
+		break;
+
+	case BUFFER:
+		if(!config_read_buffer(section, name, &bval, &blen))
+		{
+			irc_bot_send_reply(bot, from, "error reading entry");
+			return;
+		}
+
+		snprintf(buffer, BUFFER_SIZE, "%i", blen);
+		buffer[BUFFER_SIZE - 1] = '\0';
+
+		irc_bot_send_notice_va(bot, from, 3, "reply", "type", "buffer");
+		irc_bot_send_notice_va(bot, from, 3, "reply", "len", buffer);
+
+		irc_bot_send_notice_va(bot, from, 3, "reply", "value", "listbegin");
+
+		// 20/line
+		off = 0;
+		buffer[0] = '\0';
+		for(i=0; i<blen; i++)
+		{
+			char part[3];
+			sprintf(part, "%hhX", ((char*)bval)[i]);
+
+			if(*buffer != '\0')
+				strcat(buffer, " ");
+			strcat(buffer, part);
+			++off;
+
+			if(off == 20)
+			{
+				irc_bot_send_notice_va(bot, from, 3, "reply", "value", buffer);
+				off = 0;
+				*buffer = '\0' ;
+			}
+		}
+
+		if(off > 0)
+			irc_bot_send_notice_va(bot, from, 3, "reply", "value", buffer);
+
+		irc_bot_send_notice_va(bot, from, 3, "reply", "value", "listend");
+
+		free(bval);
+
+		break;
+
+	case CHAR_ARRAY:
+		if(!config_read_char_array(section, name, &alen, &acval))
+		{
+			irc_bot_send_reply(bot, from, "error reading entry");
+			return;
+		}
+
+		snprintf(buffer, BUFFER_SIZE, "%i", alen);
+		buffer[BUFFER_SIZE - 1] = '\0';
+
+		irc_bot_send_notice_va(bot, from, 3, "reply", "type", "char_array");
+		irc_bot_send_notice_va(bot, from, 3, "reply", "len", buffer);
+
+		irc_bot_send_notice_va(bot, from, 3, "reply", "value", "listbegin");
+
+		for(i=0; i<alen; i++)
+		{
+			snprintf(buffer, BUFFER_SIZE, "%c", acval[i]);
+			buffer[BUFFER_SIZE - 1] = '\0';
+			irc_bot_send_notice_va(bot, from, 3, "reply", "value", buffer);
+		}
+		irc_bot_send_notice_va(bot, from, 3, "reply", "value", "listend");
+
+		free(acval);
+
+		break;
+
+	case INT_ARRAY:
+		if(!config_read_int_array(section, name, &alen, &aival))
+		{
+			irc_bot_send_reply(bot, from, "error reading entry");
+			return;
+		}
+
+		snprintf(buffer, BUFFER_SIZE, "%i", alen);
+		buffer[BUFFER_SIZE - 1] = '\0';
+
+		irc_bot_send_notice_va(bot, from, 3, "reply", "type", "int_array");
+		irc_bot_send_notice_va(bot, from, 3, "reply", "len", buffer);
+
+		irc_bot_send_notice_va(bot, from, 3, "reply", "value", "listbegin");
+
+		for(i=0; i<alen; i++)
+		{
+			snprintf(buffer, BUFFER_SIZE, "%i", aival[i]);
+			buffer[BUFFER_SIZE - 1] = '\0';
+			irc_bot_send_notice_va(bot, from, 3, "reply", "value", buffer);
+		}
+		irc_bot_send_notice_va(bot, from, 3, "reply", "value", "listend");
+
+		free(aival);
+		break;
+
+	case INT64_ARRAY:
+		if(!config_read_int64_array(section, name, &alen, &allval))
+		{
+			irc_bot_send_reply(bot, from, "error reading entry");
+			return;
+		}
+
+		snprintf(buffer, BUFFER_SIZE, "%i", alen);
+		buffer[BUFFER_SIZE - 1] = '\0';
+
+		irc_bot_send_notice_va(bot, from, 3, "reply", "type", "int64_array");
+		irc_bot_send_notice_va(bot, from, 3, "reply", "len", buffer);
+
+		irc_bot_send_notice_va(bot, from, 3, "reply", "value", "listbegin");
+
+		for(i=0; i<alen; i++)
+		{
+			snprintf(buffer, BUFFER_SIZE, "%lld", allval[i]);
+			buffer[BUFFER_SIZE - 1] = '\0';
+			irc_bot_send_notice_va(bot, from, 3, "reply", "value", buffer);
+		}
+		irc_bot_send_notice_va(bot, from, 3, "reply", "value", "listend");
+
+		free(allval);
+		break;
+
+	case STRING_ARRAY:
+		if(!config_read_string_array(section, name, &alen, &asval))
+		{
+			irc_bot_send_reply(bot, from, "error reading entry");
+			return;
+		}
+
+		snprintf(buffer, BUFFER_SIZE, "%i", alen);
+		buffer[BUFFER_SIZE - 1] = '\0';
+
+		irc_bot_send_notice_va(bot, from, 3, "reply", "type", "string_array");
+		irc_bot_send_notice_va(bot, from, 3, "reply", "len", buffer);
+
+		irc_bot_send_notice_va(bot, from, 3, "reply", "value", "listbegin");
+
+		for(i=0; i<alen; i++)
+		{
+			const char *sval = asval[i];
+			if(!sval)
+				sval = "(null)";
+			irc_bot_send_notice_va(bot, from, 3, "reply", "value", sval);
+		}
+		irc_bot_send_notice_va(bot, from, 3, "reply", "value", "listend");
+
+		free(asval);
+		break;
+
+	default:
+		irc_bot_send_reply(bot, from, "error reading entry : entry type unknown");
+		return;
+	}
+#undef BUFFER_SIZE
 }
 
 void config_writechar_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx)
@@ -679,8 +1014,20 @@ void config_writechar_handler(struct irc_bot *bot, struct irc_component *from, i
 	if(!irc_bot_read_parameters(bot, from, args, argc, &section, &name, &value))
 		return;
 
-	// TODO
-	irc_bot_send_reply(bot, from, "not implemented!");
+	char val;
+	if(sscanf(value, "%c", &val) != 1)
+	{
+		irc_bot_send_reply(bot, from, "bad value : '%s'", value);
+		return;
+	}
+
+	if(!config_write_char(section, name, val))
+	{
+		irc_bot_send_reply(bot, from, "error writing value");
+		return;
+	}
+
+	irc_bot_send_reply(bot, from, "value written");
 }
 
 void config_writeint_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx)
@@ -691,8 +1038,20 @@ void config_writeint_handler(struct irc_bot *bot, struct irc_component *from, in
 	if(!irc_bot_read_parameters(bot, from, args, argc, &section, &name, &value))
 		return;
 
-	// TODO
-	irc_bot_send_reply(bot, from, "not implemented!");
+	int val;
+	if(sscanf(value, "%i", &val) != 1)
+	{
+		irc_bot_send_reply(bot, from, "bad value : '%s'", value);
+		return;
+	}
+
+	if(!config_write_int(section, name, val))
+	{
+		irc_bot_send_reply(bot, from, "error writing value");
+		return;
+	}
+
+	irc_bot_send_reply(bot, from, "value written");
 }
 
 void config_writeint64_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx)
@@ -703,8 +1062,20 @@ void config_writeint64_handler(struct irc_bot *bot, struct irc_component *from, 
 	if(!irc_bot_read_parameters(bot, from, args, argc, &section, &name, &value))
 		return;
 
-	// TODO
-	irc_bot_send_reply(bot, from, "not implemented!");
+	long long val;
+	if(sscanf(value, "%lld", &val) != 1)
+	{
+		irc_bot_send_reply(bot, from, "bad value : '%s'", value);
+		return;
+	}
+
+	if(!config_write_int64(section, name, val))
+	{
+		irc_bot_send_reply(bot, from, "error writing value");
+		return;
+	}
+
+	irc_bot_send_reply(bot, from, "value written");
 }
 
 void config_writestring_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx)
@@ -715,8 +1086,13 @@ void config_writestring_handler(struct irc_bot *bot, struct irc_component *from,
 	if(!irc_bot_read_parameters(bot, from, args, argc, &section, &name, &value))
 		return;
 
-	// TODO
-	irc_bot_send_reply(bot, from, "not implemented!");
+	if(!config_write_string(section, name, value))
+	{
+		irc_bot_send_reply(bot, from, "error writing value");
+		return;
+	}
+
+	irc_bot_send_reply(bot, from, "value written");
 }
 
 void config_writebuffer_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx)
@@ -745,6 +1121,12 @@ void config_writechararray_handler(struct irc_bot *bot, struct irc_component *fr
 
 void config_writeintarray_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx)
 {
+	const char *section;
+	const char *name;
+	const char *value;
+	if(!irc_bot_read_parameters(bot, from, args, argc, &section, &name, &value))
+		return;
+
 	// TODO
 	irc_bot_send_reply(bot, from, "not implemented!");
 }
@@ -775,8 +1157,20 @@ void config_writestringarray_handler(struct irc_bot *bot, struct irc_component *
 
 void config_enumsections_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx)
 {
-	// TODO
-	irc_bot_send_reply(bot, from, "not implemented!");
+	struct list_data data;
+	data.bot = bot;
+	data.target = from;
+	data.ctxdata = NULL;
+	irc_bot_send_notice_va(bot, from, 3, "reply", "configsections", "listbegin");
+	config_enum_sections(config_enum_section_item, &data);
+	irc_bot_send_notice_va(bot, from, 3, "reply", "configsections", "listend");
+}
+
+int config_enum_section_item(const char *section, void *ctx)
+{
+	struct list_data *data = ctx;
+	irc_bot_send_notice_va(data->bot, data->target, 3, "reply", "configsections", section);
+	return 1;
 }
 
 void config_enumentries_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx)
@@ -785,8 +1179,40 @@ void config_enumentries_handler(struct irc_bot *bot, struct irc_component *from,
 	if(!irc_bot_read_parameters(bot, from, args, argc, &section))
 		return;
 
-	// TODO
-	irc_bot_send_reply(bot, from, "not implemented!");
+	struct list_data data;
+	data.bot = bot;
+	data.target = from;
+	data.ctxdata = (char*)section;
+	irc_bot_send_notice_va(bot, from, 3, "reply", "configentries", "listbegin");
+	config_enum_entries(section, config_enum_entry_item, &data);
+	irc_bot_send_notice_va(bot, from, 3, "reply", "configentries", "listend");
+}
+
+int config_enum_entry_item(const char *name, void *ctx)
+{
+	struct list_data *data = ctx;
+
+	enum config_type type;
+	const char *stype = "unknown";
+	if(config_get_entry_type(data->ctxdata, name, &type))
+	{
+		switch(type)
+		{
+		case CHAR: stype = "char"; break;
+		case INT: stype = "int"; break;
+		case INT64: stype = "int64"; break;
+		case STRING: stype = "string"; break;
+		case BUFFER: stype = "buffer"; break;
+		case CHAR_ARRAY: stype = "char_array"; break;
+		case INT_ARRAY: stype = "int_array"; break;
+		case INT64_ARRAY: stype = "int64_array"; break;
+		case STRING_ARRAY: stype = "string_array"; break;
+		default: stype = "unknown"; break;
+		}
+	}
+
+	irc_bot_send_notice_va(data->bot, data->target, 5, "reply", "configentries", name, "type", stype);
+	return 1;
 }
 
 void config_deletesection_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx)
@@ -795,8 +1221,13 @@ void config_deletesection_handler(struct irc_bot *bot, struct irc_component *fro
 	if(!irc_bot_read_parameters(bot, from, args, argc, &section))
 		return;
 
-	// TODO
-	irc_bot_send_reply(bot, from, "not implemented!");
+	if(!config_delete_section(section))
+	{
+		irc_bot_send_reply(bot, from, "error deleting section");
+		return;
+	}
+
+	irc_bot_send_reply(bot, from, "section deleted");
 }
 
 void config_deleteentry_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx)
@@ -806,6 +1237,11 @@ void config_deleteentry_handler(struct irc_bot *bot, struct irc_component *from,
 	if(!irc_bot_read_parameters(bot, from, args, argc, &section_name, &entry_name))
 		return;
 
-	// TODO
-	irc_bot_send_reply(bot, from, "not implemented!");
+	if(!config_delete_entry(section_name, entry_name))
+	{
+		irc_bot_send_reply(bot, from, "error deleting entry");
+		return;
+	}
+
+	irc_bot_send_reply(bot, from, "entry deleted");
 }

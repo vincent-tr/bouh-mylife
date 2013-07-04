@@ -181,7 +181,7 @@ const char *file_get(const char *name) // thread unsafe
 	static char path[PATH_MAX];
 
 	// nom de fichier
-	snprintf(path, PATH_MAX, "%s/%s", CONFIG_MODULES_DIRECTORY, name);
+	snprintf(path, PATH_MAX, "%s/%s", CONFIG_CONFIG_DIRECTORY, name);
 	path[PATH_MAX-1] = '\0';
 
 	return path;
@@ -330,7 +330,7 @@ void config_file_save(struct config_section *section)
 
 	const char *path = file_get(section->name);
 	int fd;
-	log_assert((fd = open(path, O_WRONLY | O_CREAT | O_TRUNC)) != -1);
+	log_assert((fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)) != -1);
 
 	struct file_header fheader;
 
@@ -390,7 +390,7 @@ int config_file_write_item(void *node, void *ctx)
 	off_t pos = lseek(data->fd, 0, SEEK_CUR);
 
 	// basic copy for type and basic data
-	memcpy(&fentry, entry, sizeof(*entry));
+	memcpy(&fentry, &(entry->entry), sizeof(fentry));
 
 	write_type_nofail(data->fd, &fentry);
 

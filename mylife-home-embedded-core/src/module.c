@@ -222,7 +222,7 @@ int module_create(const char *file, const void *content, size_t content_len)
 	path[PATH_MAX-1] = '\0';
 
 	// check si déjà existant
-	int fd = open(path, O_WRONLY | O_CREAT | O_EXCL);
+	int fd = open(path, O_WRONLY | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 	if(fd == -1)
 		return 0;
 
