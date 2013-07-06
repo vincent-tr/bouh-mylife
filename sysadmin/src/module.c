@@ -9,8 +9,6 @@
 #include <sys/select.h>
 
 #include "core_api.h"
-#include "module.h"
-#include "irc.h"
 #include "commands.h"
 
 static void mod_init(void **apis);

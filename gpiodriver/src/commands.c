@@ -11,9 +11,10 @@
 #include <unistd.h>
 #include <errno.h>
 #include <string.h>
+#include <stdarg.h>
 
 #include "core_api.h"
-#include "gpio.h"
+#include "gpiodriver.h"
 
 static void gpiodriver_list_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx);
 static void gpiodriver_status_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx);
