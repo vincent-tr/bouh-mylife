@@ -180,7 +180,8 @@ void module_init()
 
 void module_terminate()
 {
-	// TODO
+	// modules must be unloaded before
+	log_assert(list_is_empty(&modules));
 }
 
 void module_enum_files(int (*callback)(const char *file, void *ctx), void *ctx) // ret 0 = stop enum
@@ -390,6 +391,8 @@ struct module *module_load(const char *file)
 	void (*init)(void **apis) = module->def->init;
 	if(init)
 		init(apis);
+
+	free(apis);
 
 	return module;
 }

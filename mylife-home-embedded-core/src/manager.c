@@ -45,6 +45,7 @@ static int module_loaded_refby_item(struct module *mod, void *ctx);
 static int config_enum_section_item(const char *section, void *ctx);
 static int config_enum_entry_item(const char *name, void *ctx);
 static void manager_load_startup_modules();
+static void manager_unload_startup_modules();
 static void manager_add_startup_module(const char *file);
 static void manager_remove_startup_module(const char *file);
 
@@ -499,6 +500,7 @@ void manager_init()
 
 void manager_terminate()
 {
+	manager_unload_startup_modules();
 	irc_bot_delete(bot);
 }
 
@@ -520,6 +522,30 @@ void manager_load_startup_modules()
 		const char *file = array[i];
 		if(!module_load(file))
 			log_warning("error loading module '%s'", file);
+	}
+}
+
+void manager_unload_startup_modules()
+{
+	size_t count;
+	char **array;
+
+	if(!config_read_string_array(CONFIG_SECTION, CONFIG_ENTRY, &count, &array))
+		return; // no config => no modules
+
+	// unload from last to first
+	for(size_t i=count-1; i>=0; i--)
+	{
+		const char *file = array[i];
+		struct module *mod;
+		if(!(mod = module_find_by_file(file)))
+		{
+			log_warning("error unloading module '%s' : not loaded", file);
+			continue;
+		}
+
+		if(!module_unload(mod))
+			log_warning("error unloading module '%s'", file);
 	}
 }
 
