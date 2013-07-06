@@ -14,8 +14,6 @@
 #include <string.h>
 
 #include "core_api.h"
-#include "irc.h"
-#include "manager.h"
 
 static void sysadmin_reboot_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx);
 static void sysadmin_shutdown_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx);

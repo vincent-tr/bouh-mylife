@@ -1,0 +1,32 @@
+/*
+ * gpiodriver_internal.h
+ *
+ *  Created on: 6 juil. 2013
+ *      Author: pumbawoman
+ */
+
+#ifndef GPIODRIVER_INTERNAL_H_
+#define GPIODRIVER_INTERNAL_H_
+
+struct driver_type
+{
+	struct list_node node; // reserved
+
+	int type;
+	int (*open)(struct gpio *gpio, va_list args);
+	void (*close)(struct gpio *gpio);
+	int (*ctl)(struct gpio *gpio, int ctl, va_list args);
+
+	size_t refcount; // reserved
+};
+
+struct gpio
+{
+	struct driver_type *type;
+	void *type_data;
+};
+
+extern void register_type(struct driver_type *type);
+extern void unregister_type(struct driver_type *type);
+
+#endif /* GPIODRIVER_INTERNAL_H_ */

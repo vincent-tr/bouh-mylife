@@ -34,6 +34,9 @@
 									<listOptionValue builtIn="false" value="../include"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/mylife-home-embedded-core}/include&quot;"/>
 								</option>
+								<option id="gnu.c.compiler.option.preprocessor.def.symbols.360027835" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="MOD_SYSADMIN"/>
+								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1828685079" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.cross.cpp.compiler.59570290" name="Cross G++ Compiler" superClass="cdt.managedbuild.tool.gnu.cross.cpp.compiler">
