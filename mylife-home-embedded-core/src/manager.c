@@ -534,7 +534,7 @@ void manager_unload_startup_modules()
 		return; // no config => no modules
 
 	// unload from last to first
-	for(size_t i=count-1; i>=0; i--)
+	for(int i=((int)count)-1; i>=0; i--)
 	{
 		const char *file = array[i];
 		struct module *mod;
