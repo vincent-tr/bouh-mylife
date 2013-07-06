@@ -1139,9 +1139,9 @@ void handler_delete_command(struct irc_command *command, void *useless)
 		free(command->verb);
 	if(command->description)
 	{
-		char *ptr = *(command->description);
-		while(ptr)
-			free(ptr++);
+		char **ptr = command->description;
+		while(*ptr)
+			free(*(ptr++));
 		free(command->description);
 	}
 
