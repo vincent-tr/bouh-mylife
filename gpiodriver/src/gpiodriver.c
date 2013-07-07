@@ -146,15 +146,35 @@ int gpio_ctl(struct gpio *gpio, int ctl, ...)
 	switch(ctl)
 	{
 	case GPIO_CTL_GET_PIN_NUMBER:
-		// TODO : base functions
+		{
+			int *pin = va_arg(args, int *);
+			*pin = gpio->pin;
+			ret = 1;
+		}
 		break;
 
 	case GPIO_CTL_GET_GPIO_NUMBER:
-		// TODO : base functions
+		{
+			int *gpionb = va_arg(args, int *);
+			*gpionb = gpio_from_pin[gpio->pin];
+			ret = 1;
+		}
 		break;
 
 	case GPIO_CTL_GET_TYPE:
-		// TODO : base functions
+		{
+			int *type = va_arg(args, int *);
+			*type = gpio->type->type;
+			ret = 1;
+		}
+		break;
+
+	case GPIO_CTL_GET_USAGE:
+		{
+			const char **usage = va_arg(args, const char **);
+			*usage = gpio->usage;
+			ret = 1;
+		}
 		break;
 
 	default:
