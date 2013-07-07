@@ -9,10 +9,14 @@
 #define GPIODRIVER_API_H_
 
 #include "gpiodriver.h"
+#include "gpiodriver_io.h"
+#include "gpiodriver_pwm.h"
 
 struct gpiodriver_api
 {
-
+	struct gpio *(*gpio_open)(int pin, const char *usage, int type, ...);
+	void (*gpio_close)(struct gpio *gpio);
+	int (*gpio_ctl)(struct gpio *gpio, int ctl, ...);
 };
 
 #ifndef CORE
