@@ -23,6 +23,7 @@ struct driver_type
 struct gpio
 {
 	int pin;
+	int gpio;
 	char *usage;
 	struct driver_type *type;
 	void *type_data;

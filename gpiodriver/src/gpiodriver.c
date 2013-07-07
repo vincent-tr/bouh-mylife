@@ -153,6 +153,7 @@ struct gpio *gpio_open(int pin, const char *usage, int type, ...)
 	malloc_nofail(gpio);
 	strdup_nofail(gpio->usage, usage);
 	gpio->type = data.result;
+	gpio->gpio = gpio_from_pin[gpio->pin];
 
 	va_list args;
 	va_start(args, type);
@@ -202,7 +203,7 @@ int gpio_ctl(struct gpio *gpio, int ctl, ...)
 	case GPIO_CTL_GET_GPIO_NUMBER:
 		{
 			int *gpionb = va_arg(args, int *);
-			*gpionb = gpio_from_pin[gpio->pin];
+			*gpionb = gpio->gpio;
 			ret = 1;
 		}
 		break;
