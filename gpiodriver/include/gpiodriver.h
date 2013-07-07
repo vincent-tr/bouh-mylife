@@ -32,6 +32,7 @@ struct gpio;
 #define GPIO_CTL_GET_PIN_NUMBER			(GPIO_CTL_BASE + 1)
 #define GPIO_CTL_GET_GPIO_NUMBER		(GPIO_CTL_BASE + 2)
 #define GPIO_CTL_GET_TYPE				(GPIO_CTL_BASE + 3)
+#define GPIO_CTL_GET_USAGE				(GPIO_CTL_BASE + 4)
 // other values are type dependant
 
 #ifdef MOD_GPIODRIVER
