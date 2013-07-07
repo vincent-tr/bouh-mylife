@@ -5,4 +5,13 @@
  *      Author: pumbawoman
  */
 
+#include <stddef.h>
+#include <stdarg.h>
+#include <sys/select.h>
 
+#include "core_api.h"
+#include "gpiodriver.h"
+#include "gpiodriver_internal.h"
+#include "gpiodriver_io.h"
+
+// TODO

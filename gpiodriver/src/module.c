@@ -21,6 +21,9 @@ static void mod_terminate();
 
 static struct gpiodriver_api myapi =
 {
+	.gpio_open = gpio_open,
+	.gpio_close = gpio_close,
+	.gpio_ctl = gpio_ctl
 };
 
 static const char *required_modules[] = { "core", NULL };

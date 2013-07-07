@@ -10,10 +10,10 @@
 
 struct gpio;
 
-#define GPIO_PIN_03 (03)
-#define GPIO_PIN_05 (05)
-#define GPIO_PIN_07 (07)
-#define GPIO_PIN_08 (08)
+#define GPIO_PIN_03 (3)
+#define GPIO_PIN_05 (5)
+#define GPIO_PIN_07 (7)
+#define GPIO_PIN_08 (8)
 #define GPIO_PIN_10 (10)
 #define GPIO_PIN_11 (11)
 #define GPIO_PIN_12 (12)
@@ -28,10 +28,10 @@ struct gpio;
 #define GPIO_PIN_24 (24)
 #define GPIO_PIN_26 (26)
 
-#define GPIO_CTL_GET_BASE				(0)
-#define GPIO_CTL_GET_PIN_NUMBER			(GPIO_CTL_GET_BASE + 1)
-#define GPIO_CTL_GET_GPIO_NUMBER		(GPIO_CTL_GET_BASE + 2)
-#define GPIO_CTL_GET_TYPE				(GPIO_CTL_GET_BASE + 3)
+#define GPIO_CTL_BASE					(0x000)
+#define GPIO_CTL_GET_PIN_NUMBER			(GPIO_CTL_BASE + 1)
+#define GPIO_CTL_GET_GPIO_NUMBER		(GPIO_CTL_BASE + 2)
+#define GPIO_CTL_GET_TYPE				(GPIO_CTL_BASE + 3)
 // other values are type dependant
 
 #ifdef MOD_GPIODRIVER
@@ -39,7 +39,7 @@ struct gpio;
 extern void gpio_init();
 extern void gpio_terminate();
 
-extern struct gpio *gpio_open(int pin, int type, ...);
+extern struct gpio *gpio_open(int pin, const char *usage, int type, ...);
 extern void gpio_close(struct gpio *gpio);
 extern int gpio_ctl(struct gpio *gpio, int ctl, ...);
 
@@ -49,7 +49,7 @@ extern int gpio_ctl(struct gpio *gpio, int ctl, ...);
 
 #include "gpiodriver_api.h"
 
-#define gpio_open(pin, type, ...) (gpiodriver_api->gpio_open(pin, type, ##__VA_ARGS__))
+#define gpio_open(pin, usage, type, ...) (gpiodriver_api->gpio_open(pin, usage, type, ##__VA_ARGS__))
 #define gpio_close(gpio) (gpiodriver_api->gpio_close(gpio))
 #define gpio_ctl(gpio, ctl, ...) (gpiodriver_api->gpio_ctl(gpio, ctl, ##__VA_ARGS__))
 
