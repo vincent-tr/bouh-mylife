@@ -60,6 +60,7 @@ void error_init()
 
 	error_register_factory(ERROR_FACTORY_CORE, "core");
 	error_register_value(ERROR_CORE_INVAL, "Invalid argument");
+	error_register_value(ERROR_CORE_ACCESDENIED, "Access denied");
 	error_register_value(ERROR_CORE_NOTFOUND, "The requested object is not found");
 	error_register_value(ERROR_CORE_EXISTS, "The requested object already exists");
 	error_register_value(ERROR_CORE_IOERROR, "An I/O error occured");
