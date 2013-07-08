@@ -35,6 +35,8 @@ struct gpio;
 #define GPIO_CTL_GET_USAGE				(GPIO_CTL_BASE + 4)
 // other values are type dependant
 
+#define ERROR_FACTORY_GPIO 1
+
 #ifdef MOD_GPIODRIVER
 
 extern void gpio_init();

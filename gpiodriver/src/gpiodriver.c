@@ -120,7 +120,7 @@ void gpio_terminate()
 struct gpio *gpio_open(int pin, const char *usage, int type, ...)
 {
 	if(!usage)
-		return NULL; // no usage specified
+		return error_failed_ptr(ERROR_CORE_INVAL); // no usage specified
 
 	int valid = 0;
 	int i;
@@ -133,7 +133,7 @@ struct gpio *gpio_open(int pin, const char *usage, int type, ...)
 		}
 	}
 	if(!valid)
-		return NULL; // invalid pin number
+		return error_failed_ptr(ERROR_CORE_INVAL); // invalid pin number
 
 	struct pin_lookup_data data_pin;
 	data_pin.pin = pin;
@@ -147,7 +147,7 @@ struct gpio *gpio_open(int pin, const char *usage, int type, ...)
 	data.result = NULL;
 	list_foreach(&types, type_lookup, &data);
 	if(!data.result)
-		return NULL; // type not found
+		return error_failed_ptr(ERROR_CORE_INVAL); // type not found
 
 	struct gpio *gpio;
 	malloc_nofail(gpio);
@@ -170,6 +170,7 @@ struct gpio *gpio_open(int pin, const char *usage, int type, ...)
 	list_add(&gpios, gpio);
 	++(gpio->type->refcount);
 
+	error_success();
 	return gpio;
 }
 
@@ -188,7 +189,7 @@ int gpio_ctl(struct gpio *gpio, int ctl, ...)
 {
 	va_list args;
 	va_start(args, ctl);
-	int ret = 0;
+	int ret;
 
 	switch(ctl)
 	{
@@ -196,7 +197,7 @@ int gpio_ctl(struct gpio *gpio, int ctl, ...)
 		{
 			int *pin = va_arg(args, int *);
 			*pin = gpio->pin;
-			ret = 1;
+			ret = error_success();
 		}
 		break;
 
@@ -204,7 +205,7 @@ int gpio_ctl(struct gpio *gpio, int ctl, ...)
 		{
 			int *gpionb = va_arg(args, int *);
 			*gpionb = gpio->gpio;
-			ret = 1;
+			ret = error_success();
 		}
 		break;
 
@@ -212,7 +213,7 @@ int gpio_ctl(struct gpio *gpio, int ctl, ...)
 		{
 			int *type = va_arg(args, int *);
 			*type = gpio->type->type;
-			ret = 1;
+			ret = error_success();
 		}
 		break;
 
@@ -220,7 +221,7 @@ int gpio_ctl(struct gpio *gpio, int ctl, ...)
 		{
 			const char **usage = va_arg(args, const char **);
 			*usage = gpio->usage;
-			ret = 1;
+			ret = error_success();
 		}
 		break;
 
