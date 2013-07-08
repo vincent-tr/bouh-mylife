@@ -10,6 +10,7 @@
 #include <sys/time.h>
 
 #include "logger.h"
+#include "error.h"
 #include "loop.h"
 #include "list.h"
 #include "tools.h"
@@ -282,7 +283,7 @@ void ms2tv(struct timeval *result, unsigned long interval_ms)
 struct loop_handle *loop_register_tick(void (*callback)(void *ctx), void *ctx)
 {
 	if(!callback)
-		return NULL;
+		return error_failed_ptr(ERROR_CORE_INVAL);
 
 	struct loop_handle *handle;
 	malloc_nofail(handle);
@@ -292,15 +293,17 @@ struct loop_handle *loop_register_tick(void (*callback)(void *ctx), void *ctx)
 	handle->ctx = ctx;
 
 	list_add(&handles, handle);
+
+	error_success();
 	return handle;
 }
 
 struct loop_handle *loop_register_timer(void (*callback)(void *ctx), void *ctx, int period_ms)
 {
 	if(!callback)
-		return NULL;
+		return error_failed_ptr(ERROR_CORE_INVAL);
 	if(period_ms <= 0)
-		return NULL;
+		return error_failed_ptr(ERROR_CORE_INVAL);
 
 	struct loop_handle *handle;
 	malloc_nofail(handle);
@@ -315,15 +318,17 @@ struct loop_handle *loop_register_timer(void (*callback)(void *ctx), void *ctx, 
 	handle->ctx = ctx;
 
 	list_add(&handles, handle);
+
+	error_success();
 	return handle;
 }
 
 struct loop_handle *loop_register_listener(callback_select_add callback_add, callback_select_process callback_process, void *ctx)
 {
 	if(!callback_add)
-		return NULL;
+		return error_failed_ptr(ERROR_CORE_INVAL);
 	if(!callback_process)
-		return NULL;
+		return error_failed_ptr(ERROR_CORE_INVAL);
 
 	struct loop_handle *handle;
 	malloc_nofail(handle);
@@ -334,6 +339,8 @@ struct loop_handle *loop_register_listener(callback_select_add callback_add, cal
 	handle->ctx = ctx;
 
 	list_add(&handles, handle);
+
+	error_success();
 	return handle;
 }
 

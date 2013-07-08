@@ -72,10 +72,11 @@ extern int irc_bot_send_notice(struct irc_bot *bot, struct irc_component *comp, 
 extern int irc_bot_send_message_va(struct irc_bot *bot, struct irc_component *comp, int argc, ...); // comp NULL = broadcast -- thread unsafe
 extern int irc_bot_send_notice_va(struct irc_bot *bot, struct irc_component *comp, int argc, ...); // comp NULL = broadcast -- thread unsafe
 extern int irc_bot_send_reply(struct irc_bot *bot, struct irc_component *comp, const char *reply_fmt, ...); // thread unsafe
+extern int irc_bot_send_reply_from_error(struct irc_bot *bot, struct irc_component *comp, const char *cmdname); // thread unsafe
 
 #define irc_bot_read_parameters(bot, from, args, argc, ...) irc_bot_read_parameters_internal(bot, from, args, argc, INT_MAX, #__VA_ARGS__, __VA_ARGS__)
 #define irc_bot_read_parameters_opt(bot, from, mandatory_count, args, argc, ...) irc_bot_read_parameters_internal(bot, from, args, argc, mandatory_count, #__VA_ARGS__, __VA_ARGS__)
-extern int irc_bot_read_parameters_internal(struct irc_bot *bot, struct irc_component *from, const char **args, int argc, size_t mandatory_count, const char *va_names, ...); // thread unsafe
+extern int irc_bot_read_parameters_internal(struct irc_bot *bot, struct irc_component *from, const char **args, int argc, size_t mandatory_count, const char *va_names, ...); // no error set -- thread unsafe
 
 #else // CORE
 
@@ -106,6 +107,7 @@ extern int irc_bot_read_parameters_internal(struct irc_bot *bot, struct irc_comp
 #define irc_bot_send_message_va(bot, comp, argc, ...) (core_api->irc_bot_send_message_va(bot, comp, argc, __VA_ARGS__))
 #define irc_bot_send_notice_va(bot, comp, argc, ...) (core_api->irc_bot_send_notice_va(bot, comp, argc, __VA_ARGS__))
 #define irc_bot_send_reply(bot, comp, reply_fmt, ...) (core_api->irc_bot_send_reply(bot, comp, reply_fmt, ##__VA_ARGS__))
+#define irc_bot_send_reply_from_error(bot, comp, cmdname) (core_api->irc_bot_send_reply_from_error(bot, comp, cmdname))
 
 #define irc_bot_read_parameters(bot, from, args, argc, ...) (core_api->irc_bot_read_parameters_internal(bot, from, args, argc, (INT_MAX, #__VA_ARGS__, __VA_ARGS__))
 #define irc_bot_read_parameters_opt(bot, from, mandatory_count, args, argc, ...) (core_api->irc_bot_read_parameters_internal(bot, from, args, argc, mandatory_count, #__VA_ARGS__, __VA_ARGS__))

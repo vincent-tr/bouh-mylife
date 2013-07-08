@@ -663,13 +663,8 @@ void module_delete_handler(struct irc_bot *bot, struct irc_component *from, int 
 	if(!irc_bot_read_parameters(bot, from, args, argc, &file))
 		return;
 
-	if(!module_delete(file))
-	{
-		irc_bot_send_reply(bot, from, "error deleting file");
-		return;
-	}
-
-	irc_bot_send_reply(bot, from, "module file deleted");
+	module_delete(file);
+	irc_bot_send_reply_from_error(bot, from, "module delete");
 }
 
 void module_loaded_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx)
@@ -739,15 +734,10 @@ void module_load_handler(struct irc_bot *bot, struct irc_component *from, int is
 	if(!irc_bot_read_parameters(bot, from, args, argc, &file))
 		return;
 
-	if(!module_load(file))
-	{
-		irc_bot_send_reply(bot, from, "error loading module");
-		return;
-	}
+	if(module_load(file))
+		manager_add_startup_module(file);
 
-	manager_add_startup_module(file);
-
-	irc_bot_send_reply(bot, from, "module loaded");
+	irc_bot_send_reply_from_error(bot, from, "module load");
 }
 
 void module_unload_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx)
@@ -764,19 +754,20 @@ void module_unload_handler(struct irc_bot *bot, struct irc_component *from, int 
 	}
 
 	const char *modfile = module_get_file(mod);
+	if(!modfile)
+	{
+		// trying to unload core ...
+		irc_bot_send_reply(bot, from, "error cannot unload core");
+		return;
+	}
 	char *file;
 	strdup_nofail(file, modfile);
 
-	if(!module_unload(mod))
-	{
-		irc_bot_send_reply(bot, from, "error unloading module");
-		return;
-	}
+	if(module_unload(mod))
+		manager_remove_startup_module(file);
 
-	manager_remove_startup_module(file);
 	free(file);
-
-	irc_bot_send_reply(bot, from, "module unloaded");
+	irc_bot_send_reply_from_error(bot, from, "module unload");
 }
 
 void config_read_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx)
@@ -789,7 +780,7 @@ void config_read_handler(struct irc_bot *bot, struct irc_component *from, int is
 	enum config_type type;
 	if(!config_get_entry_type(section, name, &type))
 	{
-		irc_bot_send_reply(bot, from, "error reading entry");
+		irc_bot_send_reply_from_error(bot, from, "config read");
 		return;
 	}
 
@@ -1047,13 +1038,8 @@ void config_writechar_handler(struct irc_bot *bot, struct irc_component *from, i
 		return;
 	}
 
-	if(!config_write_char(section, name, val))
-	{
-		irc_bot_send_reply(bot, from, "error writing value");
-		return;
-	}
-
-	irc_bot_send_reply(bot, from, "value written");
+	config_write_char(section, name, val);
+	irc_bot_send_reply_from_error(bot, from, "config writechar");
 }
 
 void config_writeint_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx)
@@ -1071,13 +1057,8 @@ void config_writeint_handler(struct irc_bot *bot, struct irc_component *from, in
 		return;
 	}
 
-	if(!config_write_int(section, name, val))
-	{
-		irc_bot_send_reply(bot, from, "error writing value");
-		return;
-	}
-
-	irc_bot_send_reply(bot, from, "value written");
+	config_write_int(section, name, val);
+	irc_bot_send_reply_from_error(bot, from, "config writeint");
 }
 
 void config_writeint64_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx)
@@ -1095,13 +1076,8 @@ void config_writeint64_handler(struct irc_bot *bot, struct irc_component *from, 
 		return;
 	}
 
-	if(!config_write_int64(section, name, val))
-	{
-		irc_bot_send_reply(bot, from, "error writing value");
-		return;
-	}
-
-	irc_bot_send_reply(bot, from, "value written");
+	config_write_int64(section, name, val);
+	irc_bot_send_reply_from_error(bot, from, "config writeint64");
 }
 
 void config_writestring_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx)
@@ -1112,13 +1088,8 @@ void config_writestring_handler(struct irc_bot *bot, struct irc_component *from,
 	if(!irc_bot_read_parameters(bot, from, args, argc, &section, &name, &value))
 		return;
 
-	if(!config_write_string(section, name, value))
-	{
-		irc_bot_send_reply(bot, from, "error writing value");
-		return;
-	}
-
-	irc_bot_send_reply(bot, from, "value written");
+	config_write_string(section, name, value);
+	irc_bot_send_reply_from_error(bot, from, "config writestring");
 }
 
 void config_writebuffer_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx)
@@ -1247,13 +1218,8 @@ void config_deletesection_handler(struct irc_bot *bot, struct irc_component *fro
 	if(!irc_bot_read_parameters(bot, from, args, argc, &section))
 		return;
 
-	if(!config_delete_section(section))
-	{
-		irc_bot_send_reply(bot, from, "error deleting section");
-		return;
-	}
-
-	irc_bot_send_reply(bot, from, "section deleted");
+	config_delete_section(section);
+	irc_bot_send_reply_from_error(bot, from, "config deletesection");
 }
 
 void config_deleteentry_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx)
@@ -1263,11 +1229,6 @@ void config_deleteentry_handler(struct irc_bot *bot, struct irc_component *from,
 	if(!irc_bot_read_parameters(bot, from, args, argc, &section_name, &entry_name))
 		return;
 
-	if(!config_delete_entry(section_name, entry_name))
-	{
-		irc_bot_send_reply(bot, from, "error deleting entry");
-		return;
-	}
-
-	irc_bot_send_reply(bot, from, "entry deleted");
+	config_delete_entry(section_name, entry_name);
+	irc_bot_send_reply_from_error(bot, from, "config deleteentry");
 }

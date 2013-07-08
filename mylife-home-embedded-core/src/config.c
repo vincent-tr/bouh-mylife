@@ -22,6 +22,7 @@
 #include "list.h"
 #include "tools.h"
 #include "config_base.h"
+#include "error.h"
 
 struct file_header
 {
@@ -575,9 +576,9 @@ struct config_entry *read_entry(const char *section_name, const char *entry_name
 struct config_entry *prepare_write_entry(const char *section_name, const char *entry_name, enum config_type requested_type, struct config_section **sectionref)
 {
 	if(!validate_section(section_name))
-		return NULL;
+		return error_failed_ptr(ERROR_CORE_INVAL);
 	if(!validate_name(entry_name))
-		return NULL;
+		return error_failed_ptr(ERROR_CORE_INVAL);
 
 	struct config_section *section = get_section(section_name, 1);
 	if(sectionref)
@@ -587,7 +588,7 @@ struct config_entry *prepare_write_entry(const char *section_name, const char *e
 	if(entry)
 	{
 		if(entry->entry.type != requested_type)
-			return NULL;
+			return error_failed_ptr(ERROR_CORE_INVAL);
 		return entry;
 	}
 
@@ -658,50 +659,50 @@ void entry_free(void *node, void *ctx)
 int config_read_char(const char *section, const char *name, char *value)
 {
 	if(!value)
-		return 0;
+		return error_failed(ERROR_CORE_INVAL);
 
 	struct config_entry *entry = read_entry(section, name, CHAR);
 	if(!entry)
-		return 0;
+		return error_failed(ERROR_CORE_NOTFOUND);
 
 	*value = entry->entry.data.char_value;
-	return 1;
+	return error_success();
 }
 
 int config_read_int(const char *section, const char *name, int *value)
 {
 	if(!value)
-		return 0;
+		return error_failed(ERROR_CORE_INVAL);
 
 	struct config_entry *entry = read_entry(section, name, INT);
 	if(!entry)
-		return 0;
+		return error_failed(ERROR_CORE_NOTFOUND);
 
 	*value = entry->entry.data.int_value;
-	return 1;
+	return error_success();
 }
 
 int config_read_int64(const char *section, const char *name, long long *value)
 {
 	if(!value)
-		return 0;
+		return error_failed(ERROR_CORE_INVAL);
 
 	struct config_entry *entry = read_entry(section, name, INT64);
 	if(!entry)
-		return 0;
+		return error_failed(ERROR_CORE_NOTFOUND);
 
 	*value = entry->entry.data.int64_value;
-	return 1;
+	return error_success();
 }
 
 int config_read_string(const char *section, const char *name, char **value) // value allocated, free it after usage
 {
 	if(!value)
-		return 0;
+		return error_failed(ERROR_CORE_INVAL);
 
 	struct config_entry *entry = read_entry(section, name, STRING);
 	if(!entry)
-		return 0;
+		return error_failed(ERROR_CORE_NOTFOUND);
 
 	char *string_value = entry->entry.data.string_value;
 	*value = NULL;
@@ -709,17 +710,17 @@ int config_read_string(const char *section, const char *name, char **value) // v
 	{
 		strdup_nofail(*value, string_value);
 	}
-	return 1;
+	return error_success();
 }
 
 int config_read_buffer(const char *section, const char *name, void **buffer, size_t *buffer_len) // buffer allocated, free it after usage
 {
 	if(!buffer || !buffer_len)
-		return 0;
+		return error_failed(ERROR_CORE_INVAL);
 
 	struct config_entry *entry = read_entry(section, name, BUFFER);
 	if(!entry)
-		return 0;
+		return error_failed(ERROR_CORE_NOTFOUND);
 
 	size_t len;
 	void *buf;
@@ -735,17 +736,17 @@ int config_read_buffer(const char *section, const char *name, void **buffer, siz
 	*buffer_len = len;
 	*buffer = buf;
 
-	return 1;
+	return error_success();
 }
 
 int config_read_char_array(const char *section, const char *name, size_t *array_len, char **value) // array allocated, free it after range
 {
 	if(!array_len || !value)
-		return 0;
+		return error_failed(ERROR_CORE_INVAL);
 
 	struct config_entry *entry = read_entry(section, name, CHAR_ARRAY);
 	if(!entry)
-		return 0;
+		return error_failed(ERROR_CORE_NOTFOUND);
 
 	size_t count = entry->entry.data.char_array_value.count;
 	char *val = NULL;
@@ -758,17 +759,17 @@ int config_read_char_array(const char *section, const char *name, size_t *array_
 	*array_len = count;
 	*value = val;
 
-	return 1;
+	return error_success();
 }
 
 int config_read_int_array(const char *section, const char *name, size_t *array_len, int **value) // array allocated, free it after range
 {
 	if(!array_len || !value)
-		return 0;
+		return error_failed(ERROR_CORE_INVAL);
 
 	struct config_entry *entry = read_entry(section, name, INT_ARRAY);
 	if(!entry)
-		return 0;
+		return error_failed(ERROR_CORE_NOTFOUND);
 
 	size_t count = entry->entry.data.int_array_value.count;
 	int *val = NULL;
@@ -781,17 +782,17 @@ int config_read_int_array(const char *section, const char *name, size_t *array_l
 	*array_len = count;
 	*value = val;
 
-	return 1;
+	return error_success();
 }
 
 int config_read_int64_array(const char *section, const char *name, size_t *array_len, long long **value) // array allocated, free it after range
 {
 	if(!array_len || !value)
-		return 0;
+		return error_failed(ERROR_CORE_INVAL);
 
 	struct config_entry *entry = read_entry(section, name, INT_ARRAY);
 	if(!entry)
-		return 0;
+		return error_failed(ERROR_CORE_NOTFOUND);
 
 	size_t count = entry->entry.data.int64_array_value.count;
 	long long *val = NULL;
@@ -804,17 +805,17 @@ int config_read_int64_array(const char *section, const char *name, size_t *array
 	*array_len = count;
 	*value = val;
 
-	return 1;
+	return error_success();
 }
 
 int config_read_string_array(const char *section, const char *name, size_t *array_len, char ***value) // value allocated, free it after usage (1 buffer)
 {
 	if(!array_len || !value)
-		return 0;
+		return error_failed(ERROR_CORE_INVAL);
 
 	struct config_entry *entry = read_entry(section, name, STRING_ARRAY);
 	if(!entry)
-		return 0;
+		return error_failed(ERROR_CORE_NOTFOUND);
 
 	size_t count = entry->entry.data.string_array_value.count;
 	char **val = NULL;
@@ -849,7 +850,7 @@ int config_read_string_array(const char *section, const char *name, size_t *arra
 	*array_len = count;
 	*value = val;
 
-	return 1;
+	return error_success();
 }
 
 int config_write_char(const char *section, const char *name, char value)
@@ -857,12 +858,12 @@ int config_write_char(const char *section, const char *name, char value)
 	struct config_section *sec;
 	struct config_entry *entry = prepare_write_entry(section, name, CHAR, &sec);
 	if(!entry)
-		return 0;
+		return 0; // err already set in prepare_write_entry
 
 	entry->entry.data.char_value = value;
 
 	config_file_save(sec);
-	return 1;
+	return error_success();
 }
 
 int config_write_int(const char *section, const char *name, int value)
@@ -870,12 +871,12 @@ int config_write_int(const char *section, const char *name, int value)
 	struct config_section *sec;
 	struct config_entry *entry = prepare_write_entry(section, name, INT, &sec);
 	if(!entry)
-		return 0;
+		return 0; // err already set in prepare_write_entry
 
 	entry->entry.data.int_value = value;
 
 	config_file_save(sec);
-	return 1;
+	return error_success();
 }
 
 int config_write_int64(const char *section, const char *name, long long value)
@@ -883,12 +884,12 @@ int config_write_int64(const char *section, const char *name, long long value)
 	struct config_section *sec;
 	struct config_entry *entry = prepare_write_entry(section, name, INT64, &sec);
 	if(!entry)
-		return 0;
+		return 0; // err already set in prepare_write_entry
 
 	entry->entry.data.int64_value = value;
 
 	config_file_save(sec);
-	return 1;
+	return error_success();
 }
 
 int config_write_string(const char *section, const char *name, const char *value)
@@ -896,7 +897,7 @@ int config_write_string(const char *section, const char *name, const char *value
 	struct config_section *sec;
 	struct config_entry *entry = prepare_write_entry(section, name, STRING, &sec);
 	if(!entry)
-		return 0;
+		return 0; // err already set in prepare_write_entry
 
 	if(entry->entry.data.string_value)
 		free(entry->entry.data.string_value); // clean old value
@@ -908,18 +909,18 @@ int config_write_string(const char *section, const char *name, const char *value
 	}
 
 	config_file_save(sec);
-	return 1;
+	return error_success();
 }
 
 int config_write_buffer(const char *section, const char *name, const void *buffer, size_t buffer_len)
 {
 	if(buffer_len && !buffer)
-		return 0;
+		return error_failed(ERROR_CORE_INVAL);
 
 	struct config_section *sec;
 	struct config_entry *entry = prepare_write_entry(section, name, BUFFER, &sec);
 	if(!entry)
-		return 0;
+		return 0; // err already set in prepare_write_entry
 
 	if(entry->entry.data.buffer_value.data)
 		free(entry->entry.data.buffer_value.data); // clean old value
@@ -934,18 +935,18 @@ int config_write_buffer(const char *section, const char *name, const void *buffe
 	entry->entry.data.buffer_value.len = buffer_len;
 
 	config_file_save(sec);
-	return 1;
+	return error_success();
 }
 
 int config_write_char_array(const char *section, const char *name, size_t array_len, const char *value)
 {
 	if(array_len && !value)
-		return 0;
+		return error_failed(ERROR_CORE_INVAL);
 
 	struct config_section *sec;
 	struct config_entry *entry = prepare_write_entry(section, name, CHAR_ARRAY, &sec);
 	if(!entry)
-		return 0;
+		return 0; // err already set in prepare_write_entry
 
 	if(entry->entry.data.char_array_value.array)
 		free(entry->entry.data.char_array_value.array); // clean old value
@@ -960,18 +961,18 @@ int config_write_char_array(const char *section, const char *name, size_t array_
 	entry->entry.data.char_array_value.count = array_len;
 
 	config_file_save(sec);
-	return 1;
+	return error_success();
 }
 
 int config_write_int_array(const char *section, const char *name, size_t array_len, const int *value)
 {
 	if(array_len && !value)
-		return 0;
+		return error_failed(ERROR_CORE_INVAL);
 
 	struct config_section *sec;
 	struct config_entry *entry = prepare_write_entry(section, name, INT_ARRAY, &sec);
 	if(!entry)
-		return 0;
+		return 0; // err already set in prepare_write_entry
 
 	if(entry->entry.data.int_array_value.array)
 		free(entry->entry.data.int_array_value.array); // clean old value
@@ -986,18 +987,18 @@ int config_write_int_array(const char *section, const char *name, size_t array_l
 	entry->entry.data.int_array_value.count = array_len;
 
 	config_file_save(sec);
-	return 1;
+	return error_success();
 }
 
 int config_write_int64_array(const char *section, const char *name, size_t array_len, const long long *value)
 {
 	if(array_len && !value)
-		return 0;
+		return error_failed(ERROR_CORE_INVAL);
 
 	struct config_section *sec;
 	struct config_entry *entry = prepare_write_entry(section, name, INT64_ARRAY, &sec);
 	if(!entry)
-		return 0;
+		return 0; // err already set in prepare_write_entry
 
 	if(entry->entry.data.int64_array_value.array)
 		free(entry->entry.data.int64_array_value.array); // clean old value
@@ -1012,18 +1013,18 @@ int config_write_int64_array(const char *section, const char *name, size_t array
 	entry->entry.data.int64_array_value.count = array_len;
 
 	config_file_save(sec);
-	return 1;
+	return error_success();
 }
 
 int config_write_string_array(const char *section, const char *name, size_t array_len, const char **value)
 {
 	if(array_len && !value)
-		return 0;
+		return error_failed(ERROR_CORE_INVAL);
 
 	struct config_section *sec;
 	struct config_entry *entry = prepare_write_entry(section, name, STRING_ARRAY, &sec);
 	if(!entry)
-		return 0;
+		return 0; // err already set in prepare_write_entry
 
 	if(entry->entry.data.string_array_value.buffer)
 		free(entry->entry.data.string_array_value.buffer); // clean old value
@@ -1059,39 +1060,39 @@ int config_write_string_array(const char *section, const char *name, size_t arra
 	entry->entry.data.string_array_value.count = array_len;
 
 	config_file_save(sec);
-	return 1;
+	return error_success();
 }
 
 int config_delete_entry(const char *section, const char *name) // 1 if success 0 if error
 {
 	if(!validate_section(section))
-		return 0;
+		return error_failed(ERROR_CORE_INVAL);
 	if(!validate_name(name))
-		return 0;
+		return error_failed(ERROR_CORE_INVAL);
 
 	struct config_section *sec = get_section(section, 0);
 	if(!sec)
-		return 0;
+		return error_failed(ERROR_CORE_NOTFOUND);
 
 	struct config_entry *entry = get_entry(sec, name);
 	if(!entry)
-		return 0;
+		return error_failed(ERROR_CORE_NOTFOUND);
 
 	list_remove(&(sec->entries), entry);
 	entry_free(entry, NULL);
 
 	config_file_save(sec);
-	return 1;
+	return error_success();
 }
 
 int config_delete_section(const char *section) // 1 if success 0 if error
 {
 	if(!validate_section(section))
-		return 0;
+		return error_failed(ERROR_CORE_INVAL);
 
 	struct config_section *sec = get_section(section, 0);
 	if(!sec)
-		return 0;
+		return error_failed(ERROR_CORE_NOTFOUND);
 
 	// remove from list
 	list_remove(&sections, sec);
@@ -1101,7 +1102,7 @@ int config_delete_section(const char *section) // 1 if success 0 if error
 
 	section_free(sec, NULL);
 
-	return 1;
+	return error_success();
 }
 
 void config_enum_sections(int (*callback)(const char *section, void *ctx), void *ctx)
@@ -1123,18 +1124,18 @@ int config_enum_section_item(void *node, void *ctx)
 int config_enum_entries(const char *section, int (*callback)(const char *name, void *ctx), void *ctx) // 1 if success 0 if error
 {
 	if(!validate_section(section))
-		return 0;
+		return error_failed(ERROR_CORE_INVAL);
 
 	struct config_section *sec = get_section(section, 0);
 	if(!sec)
-		return 0;
+		return error_failed(ERROR_CORE_NOTFOUND);
 
 	struct enum_entry_data data;
 	data.callback = callback;
 	data.ctx = ctx;
 	list_foreach(&(sec->entries), config_enum_entry_item, &data);
 
-	return 1;
+	return error_success();
 }
 
 int config_enum_entry_item(void *node, void *ctx)
@@ -1148,20 +1149,20 @@ int config_enum_entry_item(void *node, void *ctx)
 int config_get_entry_type(const char *section, const char *name, enum config_type *type) // 1 if success 0 if error
 {
 	if(!validate_section(section))
-		return 0;
+		return error_failed(ERROR_CORE_INVAL);
 	if(!validate_name(name))
-		return 0;
+		return error_failed(ERROR_CORE_INVAL);
 	if(!type)
-		return 0;
+		return error_failed(ERROR_CORE_INVAL);
 
 	struct config_section *sec = get_section(section, 0);
 	if(!sec)
-		return 0;
+		return error_failed(ERROR_CORE_NOTFOUND);
 
 	struct config_entry *entry = get_entry(sec, name);
 	if(!entry)
-		return 0;
+		return error_failed(ERROR_CORE_NOTFOUND);
 
 	*type = entry->entry.type;
-	return 1;
+	return error_success();
 }

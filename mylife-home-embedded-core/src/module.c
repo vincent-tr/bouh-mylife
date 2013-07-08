@@ -22,6 +22,7 @@
 #include "core_api.h"
 #include "config_base.h"
 #include "logger.h"
+#include "error.h"
 #include "tools.h"
 #include "irc.h"
 #include "manager.h"
@@ -66,6 +67,15 @@ static struct core_api api =
 	.list_count = list_count,
 
 	.log_write = log_write,
+
+	.error_register_factory = error_register_factory,
+	.error_register_value = error_register_value,
+	.error_unregister_factory = error_unregister_factory, // unregister all descriptions
+	.error_description = error_description,
+	.error_factory_name = error_factory_name,
+	.error_internal_get_ptr = error_internal_get_ptr,
+	.error_internal_success = error_internal_success,
+	.error_internal_failed = error_internal_failed,
 
 	.module_enum_files = module_enum_files, // ret 0 = stop enum
 	.module_create = module_create,
@@ -112,6 +122,7 @@ static struct core_api api =
 	.irc_bot_send_message_va = irc_bot_send_message_va, // comp NULL = broadcast -- thread unsafe
 	.irc_bot_send_notice_va = irc_bot_send_notice_va, // comp NULL = broadcast -- thread unsafe
 	.irc_bot_send_reply = irc_bot_send_reply,
+	.irc_bot_send_reply_from_error = irc_bot_send_reply_from_error,
 	.irc_bot_read_parameters_internal = irc_bot_read_parameters_internal,
 
 	.config_read_char = config_read_char,
@@ -218,7 +229,7 @@ int module_create(const char *file, const void *content, size_t content_len)
 	char path[PATH_MAX];
 
 	if(!file || !content || !content_len)
-		return 0;
+		return error_failed(ERROR_CORE_INVAL);
 
 	snprintf(path, PATH_MAX, "%s/%s.so", CONFIG_MODULES_DIRECTORY, file);
 	path[PATH_MAX-1] = '\0';
@@ -226,16 +237,16 @@ int module_create(const char *file, const void *content, size_t content_len)
 	// check si déjà existant
 	int fd = open(path, O_WRONLY | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 	if(fd == -1)
-		return 0;
+		return error_failed(ERROR_CORE_EXISTS);
 
 	if(write(fd, content, content_len) == -1)
 	{
 		close(fd);
-		return 0;
+		return error_failed(ERROR_CORE_IOERROR);
 	}
 
 	close(fd);
-	return 1;
+	return error_success();
 }
 
 int module_delete(const char *file)
@@ -243,15 +254,15 @@ int module_delete(const char *file)
 	char path[PATH_MAX];
 
 	if(!file)
-		return 0;
+		return error_failed(ERROR_CORE_INVAL);
 
 	snprintf(path, PATH_MAX, "%s/%s.so", CONFIG_MODULES_DIRECTORY, file);
 	path[PATH_MAX-1] = '\0';
 
 	if(unlink(path) == -1)
-		return 0;
+		return error_failed(ERROR_CORE_IOERROR);
 
-	return 1;
+	return error_success();
 }
 
 void module_enum_loaded(int (*callback)(struct module *module, void *ctx), void *ctx) // ret 0 = stop enum
@@ -308,11 +319,11 @@ struct module *module_load(const char *file)
 	char path[PATH_MAX];
 
 	if(!file)
-		return 0;
+		return error_failed_ptr(ERROR_CORE_INVAL);
 
 	// si un module avec le fichier existe déjà
 	if(module_find_by_file(file))
-		return 0;
+		return error_failed_ptr(ERROR_CORE_EXISTS);
 
 	// chargement du .so
 	snprintf(path, PATH_MAX, "%s/%s.so", CONFIG_MODULES_DIRECTORY, file);
@@ -320,21 +331,21 @@ struct module *module_load(const char *file)
 
 	void *lib = dlopen(path, RTLD_NOW | RTLD_LOCAL);
 	if(!lib)
-		return 0;
+		return error_failed_ptr(ERROR_CORE_NOTFOUND);
 
 	// obtention des données du module
 	struct module_def *def = dlsym(lib, "module_def");
 	if(!def)
 	{
 		dlclose(lib);
-		return 0;
+		return error_failed_ptr(ERROR_CORE_BADMOD);
 	}
 
 	// si un module avec le nom existe déjà
 	if(module_find_by_name(def->name.name))
 	{
 		dlclose(lib);
-		return 0;
+		return error_failed_ptr(ERROR_CORE_EXISTS);
 	}
 
 	// on regarde si toutes les dépendances sont chargées
@@ -346,7 +357,7 @@ struct module *module_load(const char *file)
 		if(!module_find_by_name(*req))
 		{
 			dlclose(lib);
-			return 0;
+			return error_failed_ptr(ERROR_CORE_UNRESOLVEDDEP);
 		}
 	}
 
@@ -394,17 +405,18 @@ struct module *module_load(const char *file)
 
 	free(apis);
 
+	error_success();
 	return module;
 }
 
 int module_unload(struct module *module)
 {
 	if(!module)
-		return 0;
+		return error_failed(ERROR_CORE_INVAL);
 
 	// si le module est encore référencé on ne peut pas le décharger
 	if(!list_is_empty(&(module->referenced_by)))
-		return 0;
+		return error_failed(ERROR_CORE_EXISTINGDEP);
 
 	// exécution de terminate
 	void (*terminate)() = module->def->terminate;
@@ -417,7 +429,7 @@ int module_unload(struct module *module)
 	dlclose(module->lib);
 	free(module);
 
-	return 1;
+	return error_success();
 }
 
 const char *module_get_file(struct module *module)
