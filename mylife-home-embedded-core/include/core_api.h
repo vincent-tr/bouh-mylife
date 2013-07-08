@@ -10,6 +10,7 @@
 
 #include "list.h"
 #include "logger.h"
+#include "error.h"
 #include "module.h"
 #include "loop.h"
 #include "irc.h"
