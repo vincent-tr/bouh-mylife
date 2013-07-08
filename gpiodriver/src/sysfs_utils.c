@@ -66,6 +66,17 @@ void sysfs_write(struct sysfs_def *def, int gpio, const char *attr, const char *
 	write_value(path, value);
 }
 
+int sysfs_open(struct sysfs_def *def, int gpio, const char *attr, int open_flags)
+{
+	static char path[PATH_MAX];
+	snprintf(path, PATH_MAX, "/sys/class/%s/%s%d/%s", def->class, def->obj_prefix, gpio, attr);
+	path[PATH_MAX-1] = '\0';
+
+	int fd;
+	log_assert((fd = open(path, open_flags)) != -1);
+	return fd;
+}
+
 void write_value(const char *file, const char *value)
 {
 	int fd;

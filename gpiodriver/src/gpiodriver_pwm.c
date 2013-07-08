@@ -23,17 +23,17 @@ struct pwm
 	int pulses;
 };
 
-static int open(struct gpio *gpio, va_list args);
-static void close(struct gpio *gpio);
-static int ctl(struct gpio *gpio, int ctl, va_list args);
+static int pwm_open(struct gpio *gpio, va_list args);
+static void pwm_close(struct gpio *gpio);
+static int pwm_ctl(struct gpio *gpio, int ctl, va_list args);
 static char *itos_static(int value);
 
 static struct driver_type type =
 {
 	.type = GPIO_TYPE_PWM,
-	.open = open,
-	.close = close,
-	.ctl = ctl
+	.open = pwm_open,
+	.close = pwm_close,
+	.ctl = pwm_ctl
 };
 
 static struct sysfs_def sysfs =
@@ -52,7 +52,7 @@ void gpio_pwm_terminate()
 	unregister_type(&type);
 }
 
-int open(struct gpio *gpio, va_list args)
+int pwm_open(struct gpio *gpio, va_list args)
 {
 	int gpionb = gpio->gpio;
 	sysfs_export(&sysfs, gpionb);
@@ -65,10 +65,10 @@ int open(struct gpio *gpio, va_list args)
 	sscanf(sysfs_read(&sysfs, gpionb, "pulse"), "%d", &(pwm->pulse));
 	sscanf(sysfs_read(&sysfs, gpionb, "pulses"), "%d", &(pwm->pulses));
 
-	return 1;
+	return error_success();
 }
 
-void close(struct gpio *gpio)
+void pwm_close(struct gpio *gpio)
 {
 	int gpionb = gpio->gpio;
 
@@ -81,11 +81,11 @@ void close(struct gpio *gpio)
 	free(gpio->type_data);
 }
 
-int ctl(struct gpio *gpio, int ctl, va_list args)
+int pwm_ctl(struct gpio *gpio, int ctl, va_list args)
 {
 	int gpionb = gpio->gpio;
 	struct pwm *pwm = gpio->type_data;
-	int ret = 0;
+	int ret;
 
 	switch(ctl)
 	{
@@ -93,7 +93,7 @@ int ctl(struct gpio *gpio, int ctl, va_list args)
 		{
 			int *period = va_arg(args, int *);
 			*period = pwm->period;
-			ret = 1;
+			ret = error_success();
 		}
 		break;
 
@@ -102,7 +102,7 @@ int ctl(struct gpio *gpio, int ctl, va_list args)
 			int period = va_arg(args, int);
 			pwm->period = period;
 			sysfs_write(&sysfs, gpionb, "period", itos_static(pwm->period));
-			ret = 1;
+			ret = error_success();
 		}
 		break;
 
@@ -110,7 +110,7 @@ int ctl(struct gpio *gpio, int ctl, va_list args)
 		{
 			int *pulse = va_arg(args, int *);
 			*pulse = pwm->pulse;
-			ret = 1;
+			ret = error_success();
 		}
 		break;
 
@@ -119,7 +119,7 @@ int ctl(struct gpio *gpio, int ctl, va_list args)
 			int pulse = va_arg(args, int);
 			pwm->pulse = pulse;
 			sysfs_write(&sysfs, gpionb, "pulse", itos_static(pwm->pulse));
-			ret = 1;
+			ret = error_success();
 		}
 		break;
 
@@ -127,7 +127,7 @@ int ctl(struct gpio *gpio, int ctl, va_list args)
 		{
 			int *pulses = va_arg(args, int *);
 			*pulses = pwm->pulses;
-			ret = 1;
+			ret = error_success();
 		}
 		break;
 
@@ -136,10 +136,13 @@ int ctl(struct gpio *gpio, int ctl, va_list args)
 			int pulses = va_arg(args, int);
 			pwm->pulses = pulses;
 			sysfs_write(&sysfs, gpionb, "pulses", itos_static(pwm->pulses));
-			ret = 1;
+			ret = error_success();
 		}
 		break;
 
+	default:
+		ret = error_failed(ERROR_CORE_INVAL);
+		break;
 	}
 
 	return ret;
