@@ -19,6 +19,7 @@
 #include "irc.h"
 #include "loop.h"
 #include "logger.h"
+#include "error.h"
 #include "list.h"
 #include "tools.h"
 #include "config_base.h"
@@ -236,6 +237,7 @@ struct irc_bot *irc_bot_create(const char *id, const char *type, struct irc_bot_
 	bot->connected = 0;
 	connect(bot);
 
+	error_success();
 	return bot;
 }
 
@@ -1086,6 +1088,8 @@ struct irc_handler *handler_add(struct irc_bot *bot, int support_broadcast, stru
 	handler->command = handler_create_command(description);
 
 	list_add(&(bot->handlers), handler);
+
+	error_success();
 	return handler;
 }
 
@@ -1201,7 +1205,7 @@ int irc_bot_send(struct irc_bot *bot, struct irc_component *comp, enum handler_t
 	int idx;
 
 	if(!irc_bot_is_connected(bot))
-		return 0;
+		return error_failed(ERROR_CORE_DISCONNECTED);
 
 	if(comp)
 	{
@@ -1239,15 +1243,18 @@ int irc_bot_send(struct irc_bot *bot, struct irc_component *comp, enum handler_t
 	switch(type)
 	{
 	case MESSAGE:
-		ret = irc_cmd_msg(session, CONFIG_IRC_CHANNEL, buffer);
+		ret = !irc_cmd_msg(session, CONFIG_IRC_CHANNEL, buffer);
 		break;
 
 	case NOTICE:
-		ret = irc_cmd_notice(session, CONFIG_IRC_CHANNEL, buffer);
+		ret = !irc_cmd_notice(session, CONFIG_IRC_CHANNEL, buffer);
 		break;
 	}
 
-	return ret;
+	if(!ret)
+		return error_failed(ERROR_CORE_IOERROR);
+
+	return error_success();
 }
 
 int irc_bot_send_reply(struct irc_bot *bot, struct irc_component *comp, const char *reply_fmt, ...)
@@ -1261,6 +1268,15 @@ int irc_bot_send_reply(struct irc_bot *bot, struct irc_component *comp, const ch
 	va_end(ap);
 
 	return irc_bot_send_notice_va(bot, comp, 2, "reply", buffer);
+}
+
+int irc_bot_send_reply_from_error(struct irc_bot *bot, struct irc_component *comp, const char *cmdname)
+{
+	unsigned int err = error_last;
+	if(err == ERROR_SUCCESS)
+		return irc_bot_send_reply(bot, comp, "%s : success", "cmdname");
+	else
+		return irc_bot_send_reply(bot, comp, "%s : error : (%s) %s", "cmdname", error_factory_name(err), error_description(err));
 }
 
 int irc_bot_read_parameters_internal(struct irc_bot *bot, struct irc_component *from, const char **args, int argc, size_t mandatory_count, const char *va_names, ...)

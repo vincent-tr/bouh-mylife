@@ -28,6 +28,15 @@ struct core_api
 
 	void (*log_write)(const char *file, int line, int level, const char *format, ...);
 
+	void (*error_register_factory)(unsigned short factoryid, const char *name);
+	void (*error_register_value)(unsigned int err, const char *description);
+	void (*error_unregister_factory)(unsigned short factoryid); // unregister all descriptions
+	const char *(*error_description)(unsigned int err);
+	const char *(*error_factory_name)(unsigned int err);
+	int *(*error_internal_get_ptr)();
+	int (*error_internal_success)();
+	int (*error_internal_failed)(int err);
+
 	void (*module_enum_files)(int (*callback)(const char *file, void *ctx), void *ctx); // ret 0 = stop enum
 	int (*module_create)(const char *file, const void *content, size_t content_len);
 	int (*module_delete)(const char *file);
@@ -73,6 +82,7 @@ struct core_api
 	int (*irc_bot_send_message_va)(struct irc_bot *bot, struct irc_component *comp, int argc, ...); // comp NULL = broadcast -- thread unsafe
 	int (*irc_bot_send_notice_va)(struct irc_bot *bot, struct irc_component *comp, int argc, ...); // comp NULL = broadcast -- thread unsafe
 	int (*irc_bot_send_reply)(struct irc_bot *bot, struct irc_component *comp, const char *reply_fmt, ...); // thread unsafe
+	int (*irc_bot_send_reply_from_error)(struct irc_bot *bot, struct irc_component *comp, const char *cmdname);
 	int (*irc_bot_read_parameters_internal)(struct irc_bot *bot, struct irc_component *from, const char **args, int argc, size_t optcount, const char *va_names, ...);
 
 	int (*config_read_char)(const char *section, const char *name, char *value);

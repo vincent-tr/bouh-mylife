@@ -18,6 +18,7 @@
 
 #include "config_base.h"
 #include "logger.h"
+#include "error.h"
 #include "config.h"
 #include "module.h"
 #include "loop.h"
@@ -47,6 +48,7 @@ static int get_status(); // 1 = running, 0 = stopped
 void init()
 {
 	log_init(is_interactive);
+	error_init();
 	loop_init();
 	irc_init();
 	config_init();
@@ -61,6 +63,7 @@ void terminate()
 	config_terminate();
 	irc_terminate();
 	loop_terminate();
+	error_terminate();
 	log_terminate();
 }
 
