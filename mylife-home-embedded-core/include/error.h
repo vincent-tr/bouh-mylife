@@ -52,7 +52,7 @@ extern int error_internal_failed(int err);
 #define error_description(err) (core_api->error_description(err))
 #define error_factory_name(err) (core_api->error_factory_name(err))
 
-#define error_get_ptr_internal() (core_api->error_get_ptr_internal())
+#define error_internal_get_ptr() (core_api->error_internal_get_ptr())
 #define error_internal_success() (core_api->error_internal_success())
 #define error_internal_failed(err)  (core_api->error_internal_failed(err))
 
