@@ -5,11 +5,13 @@
  *      Author: pumbawoman
  */
 
+#define _BSD_SOURCE
 #include <stddef.h>
 #include <stdio.h>
 #include <sys/select.h>
 #include <stdarg.h>
 #include <limits.h>
+#include <string.h>
 
 #include "core_api.h"
 #include "tools.h"
@@ -62,7 +64,6 @@ static struct irc_command_description cmd_setvalue =
 	.callback = setvalue_handler,
 	.ctx = NULL
 };
-
 
 void component_init()
 {
@@ -171,6 +172,11 @@ void component_delete(struct component *comp, int delete_config)
 
 	free(comp->id);
 	free(comp);
+}
+
+const char *component_get_id(struct component *comp)
+{
+	return comp->id;
 }
 
 int change_status(struct component *comp, int r, int g, int b)
