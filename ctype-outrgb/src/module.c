@@ -18,7 +18,7 @@ static void mod_init(void **apis);
 static void mod_terminate();
 
 static const char *required_modules[] = { "core", "gpiodriver", NULL };
-MODULE_DEFINE("gpiodriver", 1, 0, required_modules, NULL, mod_init, mod_terminate);
+MODULE_DEFINE("ctype-outrgb", 1, 0, required_modules, NULL, mod_init, mod_terminate);
 
 struct core_api *core_api;
 struct gpiodriver_api *gpiodriver_api;
