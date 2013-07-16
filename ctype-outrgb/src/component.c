@@ -77,6 +77,8 @@ void component_terminate()
 
 struct component *component_create(const char *id, int pin_red, int pin_green, int pin_blue)
 {
+	char configentry[CONFIG_ENTRY_SIZE];
+
 	if(!id)
 		return error_failed_ptr(ERROR_CORE_INVAL);
 
@@ -84,6 +86,8 @@ struct component *component_create(const char *id, int pin_red, int pin_green, i
 	malloc_nofail(comp);
 	strdup_nofail(comp->id, id);
 
+	snprintf(configentry, CONFIG_ENTRY_SIZE, "%s.%s.red", ctype, comp->id);
+	configentry[CONFIG_ENTRY_SIZE-1] = '\0';
 	if(!(comp->gpio_red = gpio_open(pin_red, ctype, GPIO_TYPE_PWM)))
 	{
 		free(comp->id);
@@ -91,6 +95,8 @@ struct component *component_create(const char *id, int pin_red, int pin_green, i
 		return NULL;
 	}
 
+	snprintf(configentry, CONFIG_ENTRY_SIZE, "%s.%s.green", ctype, comp->id);
+	configentry[CONFIG_ENTRY_SIZE-1] = '\0';
 	if(!(comp->gpio_green = gpio_open(pin_green, ctype, GPIO_TYPE_PWM)))
 	{
 		gpio_close(comp->gpio_red);
@@ -99,6 +105,8 @@ struct component *component_create(const char *id, int pin_red, int pin_green, i
 		return NULL;
 	}
 
+	snprintf(configentry, CONFIG_ENTRY_SIZE, "%s.%s.blue", ctype, comp->id);
+	configentry[CONFIG_ENTRY_SIZE-1] = '\0';
 	if(!(comp->gpio_blue = gpio_open(pin_blue, ctype, GPIO_TYPE_PWM)))
 	{
 		gpio_close(comp->gpio_red);
@@ -112,7 +120,6 @@ struct component *component_create(const char *id, int pin_red, int pin_green, i
 	log_assert(gpio_ctl(comp->gpio_green, GPIO_CTL_SET_PERIOD, GPIO_PERIOD));
 	log_assert(gpio_ctl(comp->gpio_blue, GPIO_CTL_SET_PERIOD, GPIO_PERIOD));
 
-	char configentry[CONFIG_ENTRY_SIZE];
 	int r, g, b;
 
 	snprintf(configentry, CONFIG_ENTRY_SIZE, "%s.red", comp->id);
