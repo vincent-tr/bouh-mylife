@@ -30,11 +30,18 @@ static void manager_remove_startup_component(const char *id);
 
 static void free_comp(void *node, void *ctx);
 static int comp_id_lookup_item(void *node, void *ctx);
+static int comp_node_lookup_item(void *node, void *ctx);
 
 struct comp_id_lookup_data
 {
 	const char *id;
 	struct component *result;
+};
+
+struct comp_node_lookup_data
+{
+	struct component *comp;
+	struct comp_node *result;
 };
 
 #define CONFIG_SECTION "ctype-outrgb"
@@ -153,11 +160,14 @@ void ctypeoutrgb_delete_handler(struct irc_bot *bot, struct irc_component *from,
 	if(!irc_bot_read_parameters(bot, from, args, argc, &id))
 		return;
 
-	struct comp_id_lookup_data data;
-	data.id = id;
-	data.result = NULL;
-	list_foreach(&comp_list, comp_id_lookup_item, &data);
-	struct component *comp = data.result;
+	struct component *comp = NULL;
+	{
+		struct comp_id_lookup_data data;
+		data.id = id;
+		data.result = NULL;
+		list_foreach(&comp_list, comp_id_lookup_item, &data);
+		comp = data.result;
+	}
 
 	if(!comp)
 	{
@@ -168,7 +178,16 @@ void ctypeoutrgb_delete_handler(struct irc_bot *bot, struct irc_component *from,
 
 	component_delete(comp, 1);
 
-#error TODO : retrouver comp dans comp_list et le supprimer
+	struct comp_node *node;
+	{
+		struct comp_node_lookup_data data;
+		data.comp = comp;
+		data.result = NULL;
+		list_foreach(&comp_list, comp_node_lookup_item, &data);
+		node = data.result;
+	}
+
+	list_remove(&comp_list, node);
 
 	manager_remove_startup_component(id);
 }
@@ -177,6 +196,8 @@ void manager_load_startup_components()
 {
 	size_t count;
 	char **array;
+	char configentry[CONFIG_ENTRY_SIZE];
+	struct component *c;
 
 	if(!config_read_string_array(CONFIG_SECTION, CONFIG_ENTRY, &count, &array))
 		return; // no config => no components
@@ -184,7 +205,22 @@ void manager_load_startup_components()
 	for(size_t i=0; i<count; i++)
 	{
 		const char *id = array[i];
-#error TODO
+		int rpin, gpin, bpin;
+
+		snprintf(configentry, CONFIG_ENTRY_SIZE, "%s.red_pin", id);
+		configentry[CONFIG_ENTRY_SIZE-1] = '\0';
+		log_assert(config_read_int(ctype, configentry, &rpin));
+
+		snprintf(configentry, CONFIG_ENTRY_SIZE, "%s.green_pin", id);
+		configentry[CONFIG_ENTRY_SIZE-1] = '\0';
+		log_assert(config_read_int(ctype, configentry, &gpin));
+
+		snprintf(configentry, CONFIG_ENTRY_SIZE, "%s.blue_pin", id);
+		configentry[CONFIG_ENTRY_SIZE-1] = '\0';
+		log_assert(config_read_int(ctype, configentry, &bpin));
+
+		log_assert(c = component_create(id, rpin, gpin, bpin));
+		list_add(&comp_list, c);
 	}
 }
 
@@ -287,10 +323,23 @@ void free_comp(void *node, void *ctx)
 int comp_id_lookup_item(void *node, void *ctx)
 {
 	struct comp_id_lookup_data *data = ctx;
-	struct component *comp = node;
-	if(!strcasecmp(data->id, component_get_id(comp)))
+	struct comp_node *cn = node;
+	if(!strcasecmp(data->id, component_get_id(cn->comp)))
 	{
-		data->result = comp;
+		data->result = cn->comp;
+		return 0;
+	}
+
+	return 1;
+}
+
+int comp_node_lookup_item(void *node, void *ctx)
+{
+	struct comp_node_lookup_data *data = ctx;
+	struct comp_node *cn = node;
+	if(cn->comp == data->comp)
+	{
+		data->result = cn;
 		return 0;
 	}
 
