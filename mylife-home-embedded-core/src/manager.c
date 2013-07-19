@@ -46,8 +46,6 @@ static int config_enum_section_item(const char *section, void *ctx);
 static int config_enum_entry_item(const char *name, void *ctx);
 static void manager_load_startup_modules();
 static void manager_unload_startup_modules();
-static void manager_add_startup_module(const char *file);
-static void manager_remove_startup_module(const char *file);
 
 #define CONFIG_SECTION "manager"
 #define CONFIG_ENTRY "startup_modules"
@@ -549,65 +547,6 @@ void manager_unload_startup_modules()
 	}
 }
 
-void manager_add_startup_module(const char *file)
-{
-	size_t count;
-	char **array_old;
-	const char **array_new;
-
-	if(!config_read_string_array(CONFIG_SECTION, CONFIG_ENTRY, &count, &array_old))
-	{
-		count = 0;
-		array_old = NULL;
-	}
-
-	malloc_array_nofail(array_new, count+1);
-
-	if(array_old)
-		memcpy(array_new, array_old, count*sizeof(*array_new));
-	array_new[count++] = file; // last item
-
-	config_write_string_array(CONFIG_SECTION, CONFIG_ENTRY, count, array_new);
-
-	if(array_old)
-		free(array_old);
-	free(array_new);
-}
-
-void manager_remove_startup_module(const char *file)
-{
-	size_t count;
-	size_t idx = (size_t)(-1);
-	char **array;
-
-	if(!config_read_string_array(CONFIG_SECTION, CONFIG_ENTRY, &count, &array))
-		return; // no config => nothing to remove
-
-	for(size_t i=0; i<count; i++)
-	{
-		// find index
-		if(!strcasecmp(array[i], file))
-		{
-			idx = i;
-			break;
-		}
-	}
-
-	if(idx == (size_t)(-1))
-	{
-		free(array);
-		return; // not found
-	}
-
-	// moving the item after index
-	for(size_t i=idx+1; i<count; i++)
-		array[i-1] = array[i];
-
-	config_write_string_array(CONFIG_SECTION, CONFIG_ENTRY, count-1, (const char **)array);
-
-	free(array);
-}
-
 void debug_complist_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx)
 {
 	struct list_data data;
@@ -735,7 +674,7 @@ void module_load_handler(struct irc_bot *bot, struct irc_component *from, int is
 		return;
 
 	if(module_load(file))
-		manager_add_startup_module(file);
+		config_write_string_array_add_item(CONFIG_SECTION, CONFIG_ENTRY, file);
 
 	irc_bot_send_reply_from_error(bot, from, "module load");
 }
@@ -764,7 +703,7 @@ void module_unload_handler(struct irc_bot *bot, struct irc_component *from, int 
 	strdup_nofail(file, modfile);
 
 	if(module_unload(mod))
-		manager_remove_startup_module(file);
+		config_write_string_array_remove_item(CONFIG_SECTION, CONFIG_ENTRY, file);
 
 	free(file);
 	irc_bot_send_reply_from_error(bot, from, "module unload");

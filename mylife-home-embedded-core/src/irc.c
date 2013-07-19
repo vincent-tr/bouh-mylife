@@ -1274,9 +1274,9 @@ int irc_bot_send_reply_from_error(struct irc_bot *bot, struct irc_component *com
 {
 	unsigned int err = error_last;
 	if(err == ERROR_SUCCESS)
-		return irc_bot_send_reply(bot, comp, "%s : success", "cmdname");
+		return irc_bot_send_reply(bot, comp, "%s : success", cmdname);
 	else
-		return irc_bot_send_reply(bot, comp, "%s : error : (%s) %s", "cmdname", error_factory_name(err), error_description(err));
+		return irc_bot_send_reply(bot, comp, "%s : error : (%s) %s", cmdname, error_factory_name(err), error_description(err));
 }
 
 int irc_bot_read_parameters_internal(struct irc_bot *bot, struct irc_component *from, const char **args, int argc, size_t mandatory_count, const char *va_names, ...)

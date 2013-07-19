@@ -45,6 +45,8 @@ extern int config_write_char_array(const char *section, const char *name, size_t
 extern int config_write_int_array(const char *section, const char *name, size_t array_len, const int *value);
 extern int config_write_int64_array(const char *section, const char *name, size_t array_len, const long long *value);
 extern int config_write_string_array(const char *section, const char *name, size_t array_len, const char **value);
+extern int config_write_string_array_add_item(const char *section, const char *name, const char *item); // helper for config_write_string_array
+extern int config_write_string_array_remove_item(const char *section, const char *name, const char *item); // helper for config_write_string_array
 
 extern int config_delete_entry(const char *section, const char *name); // 1 if success 0 if error
 extern int config_delete_section(const char *section); // 1 if success 0 if error
@@ -74,6 +76,8 @@ extern int config_get_entry_type(const char *section, const char *name, enum con
 #define config_write_int_array(section, name, array_len, value) (core_api->config_write_int_array(section, name, array_len, value))
 #define config_write_int64_array(section, name, array_len, value) (core_api->config_write_int64_array(section, name, array_len, value))
 #define config_write_string_array(section, name, array_len, value) (core_api->config_write_string_array(section, name, array_len, value))
+#define config_write_string_array_add_item(section, name, item)  (core_api->config_write_string_array_add_item(section, name, item)) // helper for config_write_string_array
+#define config_write_string_array_remove_item(section, name, item)  (core_api->config_write_string_array_remove_item(section, name, item)) // helper for config_write_string_array
 
 #define config_delete_entry(section, name) (core_api->config_delete_entry(section, name)) // 1 if success 0 if error
 #define config_delete_section(section) (core_api->config_delete_section(section)) // 1 if success 0 if error
