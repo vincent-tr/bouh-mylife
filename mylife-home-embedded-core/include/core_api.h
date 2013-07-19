@@ -104,6 +104,8 @@ struct core_api
 	int (*config_write_int_array)(const char *section, const char *name, size_t array_len, const int *value);
 	int (*config_write_int64_array)(const char *section, const char *name, size_t array_len, const long long *value);
 	int (*config_write_string_array)(const char *section, const char *name, size_t array_len, const char **value);
+	int (*config_write_string_array_add_item)(const char *section, const char *name, const char *item); // helper for config_write_string_array
+	int (*config_write_string_array_remove_item)(const char *section, const char *name, const char *item); // helper for config_write_string_array
 	int (*config_delete_entry)(const char *section, const char *name); // 1 if success 0 if error
 	int (*config_delete_section)(const char *section); // 1 if success 0 if error
 	void (*config_enum_sections)(int (*callback)(const char *section, void *ctx), void *ctx);

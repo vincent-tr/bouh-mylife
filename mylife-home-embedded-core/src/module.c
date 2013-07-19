@@ -143,6 +143,8 @@ static struct core_api api =
 	.config_write_int_array = config_write_int_array,
 	.config_write_int64_array = config_write_int64_array,
 	.config_write_string_array = config_write_string_array,
+	.config_write_string_array_add_item = config_write_string_array_add_item, // helper for config_write_string_array
+	.config_write_string_array_remove_item = config_write_string_array_remove_item, // helper for config_write_string_array
 	.config_delete_entry = config_delete_entry, // 1 if success 0 if error
 	.config_delete_section = config_delete_section, // 1 if success 0 if error
 	.config_enum_sections = config_enum_sections,
@@ -179,9 +181,18 @@ struct lookup_data
 	struct module *result;
 };
 
+struct lookup_ref_data
+{
+	const struct module *target;
+	struct module_ref *result;
+};
+
 static int module_find_by_file_callback(struct module *module, void *ctx);
 static int module_find_by_name_callback(struct module *module, void *ctx);
 static int module_ref_callback(void *node, void *ctx);
+static void clear_ref(void *node, void *ctx);
+static struct module_ref *find_ref(struct list *reflist, const struct module *target);
+static int find_ref_callback(void *node, void *ctx);
 
 void module_init()
 {
@@ -423,6 +434,9 @@ int module_unload(struct module *module)
 	if(terminate)
 		terminate();
 
+	// suppression des references du module
+	list_clear(&(module->references), clear_ref, module);
+
 	// suppression des données du module
 	list_remove(&modules, module);
 	free(module->file);
@@ -430,6 +444,22 @@ int module_unload(struct module *module)
 	free(module);
 
 	return error_success();
+}
+
+void clear_ref(void *node, void *ctx)
+{
+	struct module *module = ctx;
+	struct module_ref *ref = node;
+
+	// on doit supprimer dans le module cible le refby*
+	struct module *parent = ref->ref;
+	struct module_ref *refby;
+	log_assert((refby = find_ref(&(parent->referenced_by), module)));
+	list_remove(&(parent->referenced_by), refby);
+	free(refby);
+
+	// suppression de la référence
+	free(ref);
 }
 
 const char *module_get_file(struct module *module)
@@ -464,4 +494,26 @@ int module_ref_callback(void *node, void *ctx)
 	struct module_ref *ref = node;
 	struct ref_enum_data *data = ctx;
 	return data->callback(ref->ref, data->ctx);
+}
+
+struct module_ref *find_ref(struct list *reflist, const struct module *target)
+{
+	struct lookup_ref_data data;
+	data.target = target;
+	data.result = NULL;
+	list_foreach(reflist, find_ref_callback, &data);
+	return data.result;
+}
+
+int find_ref_callback(void *node, void *ctx)
+{
+	struct lookup_ref_data *data = ctx;
+	struct module_ref *ref = node;
+	if(ref->ref == data->target)
+	{
+		data->result = ref;
+		return 0;
+	}
+
+	return 1;
 }

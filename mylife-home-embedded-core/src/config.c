@@ -829,7 +829,7 @@ int config_read_string_array(const char *section, const char *name, size_t *arra
 
 		log_assert(val = malloc(bufflen));
 
-		char *str = (char*)(val + count + 1);
+		char *str = (char*)(val + count);
 		for(size_t i=0; i<count; i++)
 		{
 			char isvalue = read_bit(srcbuf, i);
@@ -837,8 +837,7 @@ int config_read_string_array(const char *section, const char *name, size_t *arra
 			{
 				// read string
 				val[i] = str;
-				while(*src)
-					*(str++) = *(src++);
+				while((*(str++) = *(src++)));
 			}
 			else
 			{
@@ -1051,8 +1050,7 @@ int config_write_string_array(const char *section, const char *name, size_t arra
 			write_bit(buf, i, isvalue);
 			if(!isvalue)
 				continue;
-			while(*src)
-				*(str++) = *(src++);
+			while((*(str++) = *(src++)));
 		}
 	}
 
@@ -1061,6 +1059,69 @@ int config_write_string_array(const char *section, const char *name, size_t arra
 
 	config_file_save(sec);
 	return error_success();
+}
+
+int config_write_string_array_add_item(const char *section, const char *name, const char *item)
+{
+	size_t count;
+	char **array_old;
+	const char **array_new;
+
+	if(!config_read_string_array(section, name, &count, &array_old))
+	{
+		count = 0;
+		array_old = NULL;
+	}
+
+	malloc_array_nofail(array_new, count+1);
+
+	if(array_old)
+		memcpy(array_new, array_old, count*sizeof(*array_new));
+	array_new[count++] = item; // last item
+
+	int ret = config_write_string_array(section, name, count, array_new);
+
+	if(array_old)
+		free(array_old);
+	free(array_new);
+
+	return ret;
+}
+
+int config_write_string_array_remove_item(const char *section, const char *name, const char *item)
+{
+	size_t count;
+	size_t idx = (size_t)(-1);
+	char **array;
+
+	if(!config_read_string_array(section, name, &count, &array))
+		return error_failed(ERROR_CORE_INVAL); // no config => nothing to remove
+
+	for(size_t i=0; i<count; i++)
+	{
+		// find index
+		if(!strcasecmp(array[i], item))
+		{
+			idx = i;
+			break;
+		}
+	}
+
+	if(idx == (size_t)(-1))
+	{
+		free(array);
+		return error_failed(ERROR_CORE_INVAL); // not found
+	}
+
+	// moving the item after index
+	for(size_t i=idx+1; i<count; i++)
+		array[i-1] = array[i];
+
+	int ret = config_write_string_array(section, name, count-1, (const char **)array);
+
+	free(array);
+
+	return ret;
 }
 
 int config_delete_entry(const char *section, const char *name) // 1 if success 0 if error
