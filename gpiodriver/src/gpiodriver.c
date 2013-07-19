@@ -5,9 +5,11 @@
  *      Author: pumbawoman
  */
 
+#define _BSD_SOURCE
 #include <stddef.h>
 #include <stdarg.h>
 #include <sys/select.h>
+#include <string.h>
 
 #include "core_api.h"
 #include "tools.h"
