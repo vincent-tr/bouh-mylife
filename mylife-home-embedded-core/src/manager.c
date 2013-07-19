@@ -674,7 +674,9 @@ void module_load_handler(struct irc_bot *bot, struct irc_component *from, int is
 		return;
 
 	if(module_load(file))
-		config_write_string_array_add_item(CONFIG_SECTION, CONFIG_ENTRY, file);
+	{
+		log_assert(config_write_string_array_add_item(CONFIG_SECTION, CONFIG_ENTRY, file));
+	}
 
 	irc_bot_send_reply_from_error(bot, from, "module load");
 }
@@ -703,7 +705,9 @@ void module_unload_handler(struct irc_bot *bot, struct irc_component *from, int 
 	strdup_nofail(file, modfile);
 
 	if(module_unload(mod))
-		config_write_string_array_remove_item(CONFIG_SECTION, CONFIG_ENTRY, file);
+	{
+		log_assert(config_write_string_array_remove_item(CONFIG_SECTION, CONFIG_ENTRY, file));
+	}
 
 	free(file);
 	irc_bot_send_reply_from_error(bot, from, "module unload");

@@ -227,28 +227,9 @@ void manager_load_startup_components()
 void manager_add_startup_component(const char *id, int rpin, int gpin, int bpin)
 {
 	char configentry[CONFIG_ENTRY_SIZE];
-	size_t count;
-	char **array_old;
-	const char **array_new;
 
 	// add startup entry
-	if(!config_read_string_array(CONFIG_SECTION, CONFIG_ENTRY, &count, &array_old))
-	{
-		count = 0;
-		array_old = NULL;
-	}
-
-	malloc_array_nofail(array_new, count+1);
-
-	if(array_old)
-		memcpy(array_new, array_old, count*sizeof(*array_new));
-	array_new[count++] = id; // last item
-
-	config_write_string_array(CONFIG_SECTION, CONFIG_ENTRY, count, array_new);
-
-	if(array_old)
-		free(array_old);
-	free(array_new);
+	log_assert(config_write_string_array_add_item(CONFIG_SECTION, CONFIG_ENTRY, id));
 
 	// write red pin, green pin, blue pin
 	snprintf(configentry, CONFIG_ENTRY_SIZE, "%s.red_pin", id);
@@ -267,9 +248,6 @@ void manager_add_startup_component(const char *id, int rpin, int gpin, int bpin)
 void manager_remove_startup_component(const char *id)
 {
 	char configentry[CONFIG_ENTRY_SIZE];
-	size_t count;
-	size_t idx = (size_t)(-1);
-	char **array;
 
 	// remove red pin, green pin, blue pin
 	snprintf(configentry, CONFIG_ENTRY_SIZE, "%s.red_pin", id);
@@ -284,33 +262,7 @@ void manager_remove_startup_component(const char *id)
 	configentry[CONFIG_ENTRY_SIZE-1] = '\0';
 	config_delete_entry(ctype, configentry);
 
-	// remove startup entry
-	if(!config_read_string_array(CONFIG_SECTION, CONFIG_ENTRY, &count, &array))
-		return; // no config => nothing to remove
-
-	for(size_t i=0; i<count; i++)
-	{
-		// find index
-		if(!strcasecmp(array[i], id))
-		{
-			idx = i;
-			break;
-		}
-	}
-
-	if(idx == (size_t)(-1))
-	{
-		free(array);
-		return; // not found
-	}
-
-	// moving the item after index
-	for(size_t i=idx+1; i<count; i++)
-		array[i-1] = array[i];
-
-	config_write_string_array(CONFIG_SECTION, CONFIG_ENTRY, count-1, (const char **)array);
-
-	free(array);
+	log_assert(config_write_string_array_remove_item(CONFIG_SECTION, CONFIG_ENTRY, id));
 }
 
 void free_comp(void *node, void *ctx)

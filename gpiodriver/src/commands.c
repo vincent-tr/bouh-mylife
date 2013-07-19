@@ -92,5 +92,5 @@ void gpiodriver_list_handler(struct irc_bot *bot, struct irc_component *from, in
 
 void gpiodriver_status_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx)
 {
-	irc_bot_remove_handler(corebot, cmd_gpiodriver_handler);
+	irc_bot_send_reply(bot, from, "not implemented");
 }
