@@ -1,0 +1,5 @@
+set sysroot  D:\\Programmation\\C\\workspaces\\MyLife\\Debug\\sysroot
+## directory D:\\Programmation\\C\\workspaces\\MyLife\\gpiodriver\\src;D:\\Programmation\\C\\workspaces\\MyLife\\sysadmin\\src;D:\\Programmation\\C\\workspaces\\MyLife\\ctype-outrgb\\src
+## symbol-file D:\\Programmation\\C\\workspaces\\MyLife\\gpiodriver\\Debug\\gpiodriver.so
+## symbol-file D:\\Programmation\\C\\workspaces\\MyLife\\sysadmin\\Debug\\sysadmin.so
+## symbol-file D:\\Programmation\\C\\workspaces\\MyLife\\ctype-outrgb\\Debug\\ctype-outrgb.so
