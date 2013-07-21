@@ -22,6 +22,8 @@ struct driver_type
 
 struct gpio
 {
+	struct list_node node; // reserved
+
 	int pin;
 	int gpio;
 	char *usage;
