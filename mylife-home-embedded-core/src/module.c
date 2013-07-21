@@ -202,6 +202,7 @@ void module_init()
 
 void module_terminate()
 {
+	list_remove(&modules, &me);
 	// modules must be unloaded before
 	log_assert(list_is_empty(&modules));
 }

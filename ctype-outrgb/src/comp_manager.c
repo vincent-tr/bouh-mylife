@@ -149,7 +149,11 @@ void ctypeoutrgb_create_handler(struct irc_bot *bot, struct irc_component *from,
 	if(!(c = component_create(id, r, g, b)))
 		irc_bot_send_reply_from_error(bot, from, "create");
 
-	list_add(&comp_list, c);
+	struct comp_node *cn;
+	malloc_nofail(cn);
+	cn->comp = c;
+	list_add(&comp_list, cn);
+
 	manager_add_startup_component(id, r, g, b);
 	irc_bot_send_reply_from_error(bot, from, "create");
 }
@@ -210,18 +214,22 @@ void manager_load_startup_components()
 
 		snprintf(configentry, CONFIG_ENTRY_SIZE, "%s.red_pin", id);
 		configentry[CONFIG_ENTRY_SIZE-1] = '\0';
-		log_assert(config_read_int(ctype, configentry, &rpin));
+		log_assert(config_read_int(ctype_full, configentry, &rpin));
 
 		snprintf(configentry, CONFIG_ENTRY_SIZE, "%s.green_pin", id);
 		configentry[CONFIG_ENTRY_SIZE-1] = '\0';
-		log_assert(config_read_int(ctype, configentry, &gpin));
+		log_assert(config_read_int(ctype_full, configentry, &gpin));
 
 		snprintf(configentry, CONFIG_ENTRY_SIZE, "%s.blue_pin", id);
 		configentry[CONFIG_ENTRY_SIZE-1] = '\0';
-		log_assert(config_read_int(ctype, configentry, &bpin));
+		log_assert(config_read_int(ctype_full, configentry, &bpin));
 
 		log_assert(c = component_create(id, rpin, gpin, bpin));
-		list_add(&comp_list, c);
+
+		struct comp_node *cn;
+		malloc_nofail(cn);
+		cn->comp = c;
+		list_add(&comp_list, cn);
 	}
 }
 
@@ -235,15 +243,15 @@ void manager_add_startup_component(const char *id, int rpin, int gpin, int bpin)
 	// write red pin, green pin, blue pin
 	snprintf(configentry, CONFIG_ENTRY_SIZE, "%s.red_pin", id);
 	configentry[CONFIG_ENTRY_SIZE-1] = '\0';
-	log_assert(config_write_int(ctype, configentry, rpin));
+	log_assert(config_write_int(ctype_full, configentry, rpin));
 
 	snprintf(configentry, CONFIG_ENTRY_SIZE, "%s.green_pin", id);
 	configentry[CONFIG_ENTRY_SIZE-1] = '\0';
-	log_assert(config_write_int(ctype, configentry, gpin));
+	log_assert(config_write_int(ctype_full, configentry, gpin));
 
 	snprintf(configentry, CONFIG_ENTRY_SIZE, "%s.blue_pin", id);
 	configentry[CONFIG_ENTRY_SIZE-1] = '\0';
-	log_assert(config_write_int(ctype, configentry, bpin));
+	log_assert(config_write_int(ctype_full, configentry, bpin));
 }
 
 void manager_remove_startup_component(const char *id)
@@ -253,15 +261,15 @@ void manager_remove_startup_component(const char *id)
 	// remove red pin, green pin, blue pin
 	snprintf(configentry, CONFIG_ENTRY_SIZE, "%s.red_pin", id);
 	configentry[CONFIG_ENTRY_SIZE-1] = '\0';
-	config_delete_entry(ctype, configentry);
+	config_delete_entry(ctype_full, configentry);
 
 	snprintf(configentry, CONFIG_ENTRY_SIZE, "%s.green_pin", id);
 	configentry[CONFIG_ENTRY_SIZE-1] = '\0';
-	config_delete_entry(ctype, configentry);
+	config_delete_entry(ctype_full, configentry);
 
 	snprintf(configentry, CONFIG_ENTRY_SIZE, "%s.blue_pin", id);
 	configentry[CONFIG_ENTRY_SIZE-1] = '\0';
-	config_delete_entry(ctype, configentry);
+	config_delete_entry(ctype_full, configentry);
 
 	log_assert(config_write_string_array_remove_item(CONFIG_SECTION, CONFIG_ENTRY, id));
 }
