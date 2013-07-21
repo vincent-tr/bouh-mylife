@@ -227,7 +227,7 @@ struct irc_bot *irc_bot_create(const char *id, const char *type, struct irc_bot_
 	memcpy(&(bot->callbacks), callbacks, sizeof(*callbacks));
 	bot->ctx = ctx;
 
-	bot->listener = loop_register_listener(listener_callback_add, listener_callback_process, bot);
+	log_assert(bot->listener = loop_register_listener(listener_callback_add, listener_callback_process, bot));
 
 	list_init(&(bot->net));
 	bot->me = comp_create(bot, host, id, type, NULL, 0, 0);
