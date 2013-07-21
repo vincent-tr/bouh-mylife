@@ -3,6 +3,7 @@
 	<name>Debug</name>
 	<comment></comment>
 	<projects>
+		<project>ctype-mpd</project>
 		<project>ctype-outrgb</project>
 		<project>gpiodriver</project>
 		<project>mylife-home-embedded-core</project>
