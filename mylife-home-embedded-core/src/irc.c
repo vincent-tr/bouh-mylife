@@ -33,7 +33,7 @@
  * nick irc : host|id|type|status
  */
 
-#define NICK_MAX 30
+#define NICK_MAX 60
 #define BUFFER_MAX 1024
 #define ARGS_MAX 250
 
