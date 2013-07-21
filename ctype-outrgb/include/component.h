@@ -18,4 +18,6 @@ extern void component_delete(struct component *comp, int delete_config);
 
 extern const char *component_get_id(struct component *comp);
 
+#define CONFIG_SECTION "ctype-outrgb"
+
 #endif /* COMPONENT_H_ */

@@ -44,7 +44,6 @@ struct comp_node_lookup_data
 	struct comp_node *result;
 };
 
-#define CONFIG_SECTION "ctype-outrgb"
 #define CONFIG_ENTRY "startup_components"
 #define CONFIG_ENTRY_SIZE 128
 
