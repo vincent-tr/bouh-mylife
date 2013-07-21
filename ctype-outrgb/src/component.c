@@ -32,8 +32,7 @@ struct component
 	int value_blue; // 0 .. 255
 };
 
-#define CONFIG_SECTION "ctype-outrgb"
-const char *ctype_bot = "outrgb";
+static const char *ctype_bot = "outrgb";
 
 static struct irc_bot_callbacks callbacks =
 {
