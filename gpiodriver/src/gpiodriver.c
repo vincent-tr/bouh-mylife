@@ -273,7 +273,22 @@ int pin_lookup(void *node, void *ctx)
 	return 1;
 }
 
-void enum_gpios(int (*callback)(struct gpio *gpio, void *ctx), void *ctx)
+void enum_opened_gpios(int (*callback)(struct gpio *gpio, void *ctx), void *ctx)
 {
 	list_foreach(&gpios, (int (*)(void *, void *))callback, ctx);
+}
+
+void enum_all_gpios(int (*callback)(int pin, struct gpio *gpio, void *ctx), void *ctx)
+{
+	for(int i=0; i<PINS_COUNT; i++)
+	{
+		int pin = pins[i];
+		struct pin_lookup_data data_pin;
+		data_pin.pin = pin;
+		data_pin.result = NULL;
+		list_foreach(&gpios, pin_lookup, &data_pin);
+
+		if(!callback(pin, data_pin.result, ctx))
+			return;
+	}
 }

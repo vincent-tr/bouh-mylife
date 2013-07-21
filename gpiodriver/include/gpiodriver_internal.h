@@ -34,6 +34,7 @@ struct gpio
 extern void register_type(struct driver_type *type);
 extern void unregister_type(struct driver_type *type);
 
-extern void enum_gpios(int (*callback)(struct gpio *gpio, void *ctx), void *ctx);
+extern void enum_opened_gpios(int (*callback)(struct gpio *gpio, void *ctx), void *ctx);
+extern void enum_all_gpios(int (*callback)(int pin, struct gpio *gpio, void *ctx), void *ctx);
 
 #endif /* GPIODRIVER_INTERNAL_H_ */
