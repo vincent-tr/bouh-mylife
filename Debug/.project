@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<name>Debug</name>
+	<comment></comment>
+	<projects>
+		<project>ctype-outrgb</project>
+		<project>gpiodriver</project>
+		<project>mylife-home-embedded-core</project>
+		<project>sysadmin</project>
+	</projects>
+	<buildSpec>
+	</buildSpec>
+	<natures>
+		<nature>org.eclipse.cdt.core.cnature</nature>
+	</natures>
+	<linkedResources>
+		<link>
+			<name>ctype-outrgb.so</name>
+			<type>1</type>
+			<location>D:/Programmation/C/workspaces/MyLife/ctype-outrgb/Debug/ctype-outrgb.so</location>
+		</link>
+		<link>
+			<name>gpiodriver.so</name>
+			<type>1</type>
+			<location>D:/Programmation/C/workspaces/MyLife/gpiodriver/Debug/gpiodriver.so</location>
+		</link>
+		<link>
+			<name>mylife-home-embedded-core</name>
+			<type>1</type>
+			<locationURI>WORKSPACE_LOC/mylife-home-embedded-core/Debug/mylife-home-embedded-core</locationURI>
+		</link>
+		<link>
+			<name>sysadmin.so</name>
+			<type>1</type>
+			<location>D:/Programmation/C/workspaces/MyLife/sysadmin/Debug/sysadmin.so</location>
+		</link>
+	</linkedResources>
+</projectDescription>
