@@ -32,7 +32,7 @@ struct component
 	int value_blue; // 0 .. 255
 };
 
-const char *ctype_full = "ctype.outrgb";
+#define CONFIG_SECTION "ctype-outrgb"
 const char *ctype_bot = "outrgb";
 
 static struct irc_bot_callbacks callbacks =
@@ -87,18 +87,18 @@ struct component *component_create(const char *id, int pin_red, int pin_green, i
 	malloc_nofail(comp);
 	strdup_nofail(comp->id, id);
 
-	snprintf(configentry, CONFIG_ENTRY_SIZE, "%s.%s.red", ctype_full, comp->id);
+	snprintf(configentry, CONFIG_ENTRY_SIZE, "%s.%s.red", ctype_bot, comp->id);
 	configentry[CONFIG_ENTRY_SIZE-1] = '\0';
-	if(!(comp->gpio_red = gpio_open(pin_red, ctype_full, GPIO_TYPE_PWM)))
+	if(!(comp->gpio_red = gpio_open(pin_red, configentry, GPIO_TYPE_PWM)))
 	{
 		free(comp->id);
 		free(comp);
 		return NULL;
 	}
 
-	snprintf(configentry, CONFIG_ENTRY_SIZE, "%s.%s.green", ctype_full, comp->id);
+	snprintf(configentry, CONFIG_ENTRY_SIZE, "%s.%s.green", ctype_bot, comp->id);
 	configentry[CONFIG_ENTRY_SIZE-1] = '\0';
-	if(!(comp->gpio_green = gpio_open(pin_green, ctype_full, GPIO_TYPE_PWM)))
+	if(!(comp->gpio_green = gpio_open(pin_green, configentry, GPIO_TYPE_PWM)))
 	{
 		gpio_close(comp->gpio_red);
 		free(comp->id);
@@ -106,9 +106,9 @@ struct component *component_create(const char *id, int pin_red, int pin_green, i
 		return NULL;
 	}
 
-	snprintf(configentry, CONFIG_ENTRY_SIZE, "%s.%s.blue", ctype_full, comp->id);
+	snprintf(configentry, CONFIG_ENTRY_SIZE, "%s.%s.blue", ctype_bot, comp->id);
 	configentry[CONFIG_ENTRY_SIZE-1] = '\0';
-	if(!(comp->gpio_blue = gpio_open(pin_blue, ctype_full, GPIO_TYPE_PWM)))
+	if(!(comp->gpio_blue = gpio_open(pin_blue, configentry, GPIO_TYPE_PWM)))
 	{
 		gpio_close(comp->gpio_red);
 		gpio_close(comp->gpio_green);
@@ -125,17 +125,17 @@ struct component *component_create(const char *id, int pin_red, int pin_green, i
 
 	snprintf(configentry, CONFIG_ENTRY_SIZE, "%s.red", comp->id);
 	configentry[CONFIG_ENTRY_SIZE-1] = '\0';
-	if(!config_read_int(ctype_full, configentry, &r))
+	if(!config_read_int(CONFIG_SECTION, configentry, &r))
 		r = 0;
 
 	snprintf(configentry, CONFIG_ENTRY_SIZE, "%s.green", comp->id);
 	configentry[CONFIG_ENTRY_SIZE-1] = '\0';
-	if(!config_read_int(ctype_full, configentry, &g))
+	if(!config_read_int(CONFIG_SECTION, configentry, &g))
 		g = 0;
 
 	snprintf(configentry, CONFIG_ENTRY_SIZE, "%s.blue", comp->id);
 	configentry[CONFIG_ENTRY_SIZE-1] = '\0';
-	if(!config_read_int(ctype_full, configentry, &b))
+	if(!config_read_int(CONFIG_SECTION, configentry, &b))
 		b = 0;
 
 	log_assert(comp->bot = irc_bot_create(comp->id, ctype_bot, &callbacks, comp));
@@ -155,15 +155,15 @@ void component_delete(struct component *comp, int delete_config)
 	{
 		snprintf(configentry, CONFIG_ENTRY_SIZE, "%s.red", comp->id);
 		configentry[CONFIG_ENTRY_SIZE-1] = '\0';
-		config_delete_entry(ctype_full, configentry);
+		config_delete_entry(CONFIG_SECTION, configentry);
 
 		snprintf(configentry, CONFIG_ENTRY_SIZE, "%s.green", comp->id);
 		configentry[CONFIG_ENTRY_SIZE-1] = '\0';
-		config_delete_entry(ctype_full, configentry);
+		config_delete_entry(CONFIG_SECTION, configentry);
 
 		snprintf(configentry, CONFIG_ENTRY_SIZE, "%s.blue", comp->id);
 		configentry[CONFIG_ENTRY_SIZE-1] = '\0';
-		config_delete_entry(ctype_full, configentry);
+		config_delete_entry(CONFIG_SECTION, configentry);
 	}
 
 	log_assert(gpio_ctl(comp->gpio_red, GPIO_CTL_SET_PULSE, 0));
@@ -203,19 +203,19 @@ int change_status(struct component *comp, int r, int g, int b)
 	log_assert(gpio_ctl(comp->gpio_red, GPIO_CTL_SET_PULSE, (comp->value_red * GPIO_PERIOD / VALUE_MAX)));
 	snprintf(configentry, CONFIG_ENTRY_SIZE, "%s.red", comp->id);
 	configentry[CONFIG_ENTRY_SIZE-1] = '\0';
-	log_assert(config_write_int(ctype_full, configentry, comp->value_red));
+	log_assert(config_write_int(CONFIG_SECTION, configentry, comp->value_red));
 
 	comp->value_green = g;
 	log_assert(gpio_ctl(comp->gpio_green, GPIO_CTL_SET_PULSE, (comp->value_green * GPIO_PERIOD / VALUE_MAX)));
 	snprintf(configentry, CONFIG_ENTRY_SIZE, "%s.green", comp->id);
 	configentry[CONFIG_ENTRY_SIZE-1] = '\0';
-	log_assert(config_write_int(ctype_full, configentry, comp->value_green));
+	log_assert(config_write_int(CONFIG_SECTION, configentry, comp->value_green));
 
 	comp->value_blue = b;
 	log_assert(gpio_ctl(comp->gpio_blue, GPIO_CTL_SET_PULSE, (comp->value_blue * GPIO_PERIOD / VALUE_MAX)));
 	snprintf(configentry, CONFIG_ENTRY_SIZE, "%s.blue", comp->id);
 	configentry[CONFIG_ENTRY_SIZE-1] = '\0';
-	log_assert(config_write_int(ctype_full, configentry, comp->value_blue));
+	log_assert(config_write_int(CONFIG_SECTION, configentry, comp->value_blue));
 
 	snprintf(status, 20, "%03d-%03d-%03d", comp->value_red, comp->value_green, comp->value_blue);
 	irc_bot_set_comp_status(comp->bot, status);

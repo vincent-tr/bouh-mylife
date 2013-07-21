@@ -140,16 +140,16 @@ struct gpio *gpio_open(int pin, const char *usage, int type, ...)
 	struct pin_lookup_data data_pin;
 	data_pin.pin = pin;
 	data_pin.result = NULL;
-	list_foreach(&types, pin_lookup, &data_pin);
+	list_foreach(&gpios, pin_lookup, &data_pin);
 	if(data_pin.result)
-		return NULL; // already in use
+		return error_failed_ptr(ERROR_CORE_EXISTS); // already in use
 
 	struct type_lookup_data data;
 	data.type = type;
 	data.result = NULL;
 	list_foreach(&types, type_lookup, &data);
 	if(!data.result)
-		return error_failed_ptr(ERROR_CORE_INVAL); // type not found
+		return error_failed_ptr(ERROR_CORE_NOTFOUND); // type not found
 
 	struct gpio *gpio;
 	malloc_nofail(gpio);

@@ -10,8 +10,6 @@
 
 struct component;
 
-extern const char *ctype_full;
-
 extern void component_init();
 extern void component_terminate();
 
