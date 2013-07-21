@@ -151,6 +151,7 @@ void ctypeoutrgb_create_handler(struct irc_bot *bot, struct irc_component *from,
 
 	list_add(&comp_list, c);
 	manager_add_startup_component(id, r, g, b);
+	irc_bot_send_reply_from_error(bot, from, "create");
 }
 
 void ctypeoutrgb_delete_handler(struct irc_bot *bot, struct irc_component *from, int is_broadcast, const char **args, int argc, void *ctx)
@@ -188,8 +189,8 @@ void ctypeoutrgb_delete_handler(struct irc_bot *bot, struct irc_component *from,
 	}
 
 	list_remove(&comp_list, node);
-
 	manager_remove_startup_component(id);
+	irc_bot_send_reply_from_error(bot, from, "delete");
 }
 
 void manager_load_startup_components()

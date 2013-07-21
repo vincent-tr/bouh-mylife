@@ -153,6 +153,7 @@ struct gpio *gpio_open(int pin, const char *usage, int type, ...)
 
 	struct gpio *gpio;
 	malloc_nofail(gpio);
+	gpio->pin = pin;
 	strdup_nofail(gpio->usage, usage);
 	gpio->type = data.result;
 	gpio->gpio = gpio_from_pin[gpio->pin];
