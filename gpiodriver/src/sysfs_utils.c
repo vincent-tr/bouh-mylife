@@ -21,12 +21,19 @@
 
 static void write_value(const char *file, const char *value);
 static char *read_value(const char *file);
+static int directory_exists(const char *dir);
 
 #define BUFFER_SIZE 512
 
 void sysfs_export(struct sysfs_def *def, int gpio)
 {
 	static char path[PATH_MAX];
+
+	// ensure not already opened (soft_pwm crashes if reopen ??)
+	snprintf(path, PATH_MAX, "/sys/class/%s/%d", def->class, gpio);
+	path[PATH_MAX-1] = '\0';
+	log_assert(!directory_exists(path));
+
 	snprintf(path, PATH_MAX, "/sys/class/%s/export", def->class);
 	path[PATH_MAX-1] = '\0';
 
@@ -99,4 +106,12 @@ char *read_value(const char *file)
 	close(fd);
 
 	return buffer;
+}
+
+int directory_exists(const char *dir)
+{
+	DIR* d = opendir(dir);
+	if (dir)
+		closedir(d);
+	return d ? 1 : 0;
 }

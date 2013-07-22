@@ -111,7 +111,8 @@ static const char *types_string[] =
 {
 	"<invalid>",
 	"io",
-	"pwm"
+	"pwm",
+	"lock"
 };
 
 void commands_init()

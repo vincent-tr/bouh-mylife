@@ -15,6 +15,7 @@
 #include "gpiodriver_api.h"
 #include "gpiodriver_io.h"
 #include "gpiodriver_pwm.h"
+#include "gpiodriver_lock.h"
 
 static void mod_init(void **apis);
 static void mod_terminate();
@@ -39,6 +40,7 @@ void mod_init(void **apis)
 
 	gpio_pwm_init();
 	gpio_io_init();
+	gpio_lock_init();
 
 	commands_init();
 }
@@ -49,6 +51,7 @@ void mod_terminate()
 
 	gpio_pwm_terminate();
 	gpio_io_terminate();
+	gpio_lock_terminate();
 
 	gpio_terminate();
 }
