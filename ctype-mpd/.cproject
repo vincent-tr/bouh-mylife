@@ -52,9 +52,10 @@
 								<option id="gnu.c.link.option.paths.695616630" name="Library search path (-L)" superClass="gnu.c.link.option.paths" valueType="libPaths">
 									<listOptionValue builtIn="false" value="-L../libs"/>
 								</option>
-								<option id="gnu.c.link.option.userobjs.1579853859" superClass="gnu.c.link.option.userobjs" valueType="userObjs">
+								<option id="gnu.c.link.option.userobjs.1579853859" name="Other objects" superClass="gnu.c.link.option.userobjs" valueType="userObjs">
 									<listOptionValue builtIn="false" value="../libs/libmpdclient.a"/>
 								</option>
+								<option id="gnu.c.link.option.ldflags.696548051" name="Linker flags" superClass="gnu.c.link.option.ldflags" value="-Wl,--no-undefined" valueType="string"/>
 								<inputType id="cdt.managedbuild.tool.gnu.c.linker.input.848216667" superClass="cdt.managedbuild.tool.gnu.c.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
