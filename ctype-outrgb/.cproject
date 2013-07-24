@@ -46,6 +46,7 @@
 								<option id="gnu.c.link.option.shared.776384264" name="Shared (-shared)" superClass="gnu.c.link.option.shared" value="true" valueType="boolean"/>
 								<option id="gnu.c.link.option.paths.1189928852" name="Library search path (-L)" superClass="gnu.c.link.option.paths"/>
 								<option id="gnu.c.link.option.libs.1012558084" name="Libraries (-l)" superClass="gnu.c.link.option.libs"/>
+								<option id="gnu.c.link.option.ldflags.1869022385" name="Linker flags" superClass="gnu.c.link.option.ldflags" value="-Wl,--no-undefined" valueType="string"/>
 								<inputType id="cdt.managedbuild.tool.gnu.c.linker.input.1266997137" superClass="cdt.managedbuild.tool.gnu.c.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>

@@ -46,6 +46,7 @@
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.cross.c.linker.1144762516" name="Cross GCC Linker" superClass="cdt.managedbuild.tool.gnu.cross.c.linker">
 								<option defaultValue="true" id="gnu.c.link.option.shared.380619829" name="Shared (-shared)" superClass="gnu.c.link.option.shared" valueType="boolean"/>
+								<option id="gnu.c.link.option.ldflags.889267647" name="Linker flags" superClass="gnu.c.link.option.ldflags" value="-Wl,--no-undefined" valueType="string"/>
 								<inputType id="cdt.managedbuild.tool.gnu.c.linker.input.998468391" superClass="cdt.managedbuild.tool.gnu.c.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
