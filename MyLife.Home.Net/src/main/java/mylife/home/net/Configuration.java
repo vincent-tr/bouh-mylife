@@ -15,7 +15,7 @@ public final class Configuration {
 	/**
 	 * Logger
 	 */
-	private final static Logger log = Logger.getLogger(LocalConnector.class.getName());
+	private final static Logger log = Logger.getLogger(Configuration.class.getName());
 
 	private static final Configuration instance = new Configuration();
 	

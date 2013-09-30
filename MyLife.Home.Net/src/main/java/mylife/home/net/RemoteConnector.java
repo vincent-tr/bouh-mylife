@@ -12,7 +12,7 @@ class RemoteConnector implements Connector {
 	/**
 	 * Logger
 	 */
-	private final static Logger log = Logger.getLogger(LocalConnector.class.getName());
+	private final static Logger log = Logger.getLogger(RemoteConnector.class.getName());
 	
 	/**
 	 * Conteneur publié
