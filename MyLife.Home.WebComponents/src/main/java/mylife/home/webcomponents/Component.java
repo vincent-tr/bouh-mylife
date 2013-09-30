@@ -86,7 +86,7 @@ public class Component extends GenericServlet {
 	/**
 	 * A impl�menter sur cr�ation au lieu de init
 	 */
-	protected void create() {
+	protected void create() throws ServletException {
 	}
 	
 	/**

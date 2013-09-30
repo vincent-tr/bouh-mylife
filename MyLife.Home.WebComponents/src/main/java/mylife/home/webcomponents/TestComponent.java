@@ -22,7 +22,7 @@ public class TestComponent extends Component {
 	private static final long serialVersionUID = 7381777558729854013L;
 
 	/**
-	 * Cr�ation de l'objet
+	 * Création de l'objet
 	 */
 	@Override
 	protected void create() {

@@ -28,6 +28,16 @@
 	</servlet>
 
 	<servlet>
+		<servlet-name>MPDComponent</servlet-name>
+		<servlet-class>mylife.home.webcomponents.MPDComponent</servlet-class>
+		<init-param>
+			<param-name>serverAddress</param-name>
+			<param-value>rpi-mpd</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+	<servlet>
 		<servlet-name>WebReport</servlet-name>
 		<servlet-class>mylife.home.webcomponents.WebReport</servlet-class>
 		<load-on-startup>1</load-on-startup>
