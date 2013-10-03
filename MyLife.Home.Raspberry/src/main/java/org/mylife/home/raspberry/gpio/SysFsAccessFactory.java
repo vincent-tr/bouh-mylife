@@ -3,6 +3,8 @@ package org.mylife.home.raspberry.gpio;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Fabrique de SysFsAccess
@@ -10,6 +12,12 @@ import java.io.InputStream;
  *
  */
 public abstract class SysFsAccessFactory {
+
+	/**
+	 * Logger
+	 */
+	private final static Logger log = Logger.getLogger(SysFsAccessFactory.class
+			.getName());
 
 	/**
 	 * Obtention du chemin (ex : /sys/class/gpio/)
@@ -35,6 +43,7 @@ public abstract class SysFsAccessFactory {
 	 * @return
 	 */
 	public SysFsAccess openAccess(int pin) {
+		log.log(Level.INFO, String.format("opening pin #%d from factory '%s'", pin, this.getClass().toString()));
 		export(pin);
 		return createAccess(pin);
 	}
@@ -51,6 +60,7 @@ public abstract class SysFsAccessFactory {
 	 * @param access
 	 */
 	public void closeAccess(SysFsAccess access) {
+		log.log(Level.INFO, String.format("closing pin #%d from factory '%s'", access.getPin(), this.getClass().toString()));
 		cleanupAccess(access);
 		unexport(access.getPin());
 	}
@@ -83,6 +93,7 @@ public abstract class SysFsAccessFactory {
 		
 		// lancement du process
 		String[] cmd = new String[] { tool, export ? "export" : "unexport", Integer.toString(pin) };
+		log.log(Level.INFO, String.format("executing : '%s %s %s'", cmd[0], cmd[1], cmd[2]));
 		try {
 			process = Runtime.getRuntime().exec(cmd);
 		} catch (IOException e) {
