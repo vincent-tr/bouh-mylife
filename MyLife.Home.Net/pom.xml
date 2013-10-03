@@ -26,4 +26,13 @@
 
 		</plugins>
 	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.schwering</groupId>
+			<artifactId>irclib</artifactId>
+			<version>1.10</version>
+		</dependency>
+	</dependencies>
+
 </project>
