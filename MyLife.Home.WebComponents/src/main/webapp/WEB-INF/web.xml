@@ -15,7 +15,7 @@
 
 	<servlet>
 		<servlet-name>TestComponent</servlet-name>
-		<servlet-class>mylife.home.webcomponents.TestComponent</servlet-class>
+		<servlet-class>org.mylife.home.webcomponents.TestComponent</servlet-class>
 		<init-param>
 			<param-name>Name1</param-name>
 			<param-value>Value1</param-value>
@@ -29,7 +29,7 @@
 
 	<servlet>
 		<servlet-name>MPDComponent</servlet-name>
-		<servlet-class>mylife.home.webcomponents.MPDComponent</servlet-class>
+		<servlet-class>org.mylife.home.webcomponents.MPDComponent</servlet-class>
 		<init-param>
 			<param-name>serverAddress</param-name>
 			<param-value>rpi-mpd</param-value>
@@ -39,7 +39,7 @@
 
 	<servlet>
 		<servlet-name>WebReport</servlet-name>
-		<servlet-class>mylife.home.webcomponents.WebReport</servlet-class>
+		<servlet-class>org.mylife.home.webcomponents.WebReport</servlet-class>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 
