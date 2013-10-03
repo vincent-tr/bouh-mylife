@@ -30,7 +30,7 @@ public class NetClass {
 
 			@Override
 			public int compare(NetMember arg0, NetMember arg1) {
-				return Integer.compare(arg0.getIndex(), arg1.getIndex());
+				return new Integer(arg0.getIndex()).compareTo(arg1.getIndex());
 			}
 
 		});
