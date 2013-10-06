@@ -56,6 +56,26 @@
 	</servlet>
 
 	<servlet>
+		<servlet-name>GPIOPWMComponent</servlet-name>
+		<servlet-class>org.mylife.home.webcomponents.GPIOPWMComponent</servlet-class>
+		<init-param>
+			<param-name>pin</param-name>
+			<param-value>18</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+	<servlet>
+		<servlet-name>GPIOOutputComponent</servlet-name>
+		<servlet-class>org.mylife.home.webcomponents.GPIOOutputComponent</servlet-class>
+		<init-param>
+			<param-name>pin</param-name>
+			<param-value>15</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+	<servlet>
 		<servlet-name>WebReport</servlet-name>
 		<servlet-class>org.mylife.home.webcomponents.WebReport</servlet-class>
 		<load-on-startup>1</load-on-startup>
