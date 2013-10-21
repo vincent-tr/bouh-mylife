@@ -1,28 +1,35 @@
 package org.mylife.home.net;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.schwering.irc.lib.IRCConnection;
+import org.schwering.irc.lib.IRCConstants;
 import org.schwering.irc.lib.IRCEventListener;
 import org.schwering.irc.lib.IRCModeParser;
 import org.schwering.irc.lib.IRCUser;
 
 /**
  * Gestion de la surveillance des objets distants
+ * 
  * @author pumbawoman
- *
+ * 
  */
 class NetWatcher implements IRCEventListener {
 
 	/**
 	 * Logger
 	 */
-	private final static Logger log = Logger.getLogger(NetWatcher.class.getName());
+	private final static Logger log = Logger.getLogger(NetWatcher.class
+			.getName());
 
 	/**
 	 * Connexion irc
@@ -33,24 +40,49 @@ class NetWatcher implements IRCEventListener {
 	 * Fermeture
 	 */
 	private boolean closed;
-	
+
 	/**
 	 * Liste des salons à surveiller
 	 */
-	private final Set<String> channels = new HashSet<String>();
+	private final Map<String, Integer> channels = Collections.synchronizedMap(new HashMap<String, Integer>());
 
+	/**
+	 * Identifiant
+	 */
+	private final String id;
+	
+	/**
+	 * Construction de l'id
+	 * @return
+	 */
+	private static String buildId() {
+		try {
+			StringBuffer id = new StringBuffer();
+			id.append(InetAddress.getLocalHost().getHostName());
+			id.append('-');
+			id.append(System.currentTimeMillis());
+			id.append('-');
+			id.append("watcher");
+			return id.toString();
+		} catch (UnknownHostException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
 	/**
 	 * Constructeur par défaut
 	 */
-	public NetWatcher(String id) {
+	public NetWatcher() {
+		id = buildId();
 		String server = Configuration.getInstance().getProperty("ircserver");
-		connection = new IRCConnection(server, new int[] { 6667 }, null, id, id, id);
+		connection = new IRCConnection(server, new int[] { 6667 }, null, id,
+				id, id);
 		connection.addIRCEventListener(this);
 		connection.setDaemon(true);
 		connection.setPong(true);
 		doConnect();
 	}
-	
+
 	/**
 	 * Fermeture du watcher
 	 */
@@ -59,59 +91,87 @@ class NetWatcher implements IRCEventListener {
 		connection.doQuit();
 		connection.close();
 	}
-	
+
 	/**
 	 * Ajout d'un salon
+	 * 
 	 * @param name
 	 */
 	public void addChannel(String name) {
-		channels.add(name);
-		if(connection.isConnected())
+		Integer value = channels.get(name);
+		if (value == null)
+			value = 0;
+		++value;
+		channels.put(name, value);
+		if (value == 1 && connection.isConnected())
 			connection.doJoin("#" + name);
 	}
-	
+
 	/**
 	 * Suppression d'un salon
+	 * 
 	 * @param name
 	 */
 	public void removeChannel(String name) {
-		channels.remove(name);
-		if(connection.isConnected())
-			connection.doPart("#" + name);
+		Integer value = channels.get(name);
+		if (value == null)
+			return;
+		--value;
+		channels.put(name, value);
+		if (value == 0) {
+			channels.remove(name);
+			if (connection.isConnected())
+				connection.doPart("#" + name);
+		}
 	}
-	
+
 	/**
 	 * Liste des salons
+	 * 
 	 * @return
 	 */
 	public Set<String> getChannels() {
-		return Collections.unmodifiableSet(channels);
+		return Collections.unmodifiableSet(channels.keySet());
 	}
 
+	/**
+	 * Envoi d'un message
+	 * @param channel
+	 * @param target
+	 * @param message
+	 */
+	public void send(String channel, String target, String message) {
+		if(!connection.isConnected()) {
+			log.log(Level.SEVERE, "IRC connection not connected");
+			return;
+		}
+		connection.doPrivmsg("#" + channel, target + " " + message);
+	}
+	
 	/**
 	 * Connexion avec logging
 	 */
 	private void doConnect() {
-		if(closed)
+		if (closed)
 			return;
 		try {
 			connection.connect();
-		} catch(IOException ex) {
+		} catch (IOException ex) {
 			log.log(Level.SEVERE, "IRC connection error", ex);
 		}
 	}
-	
+
 	/**
 	 * Exécution de la déconnexion
 	 */
 	private void doDisconnect() {
-		// TODO : déconnecter tous les objets
 		connection.close();
+		RemoteConnector.nickPart(null);
 	}
 
 	@Override
 	public void onRegistered() {
-		for(String channel : channels) {
+		for (String channel : channels.keySet()) {
 			connection.doJoin("#" + channel);
 		}
 	}
@@ -140,12 +200,12 @@ class NetWatcher implements IRCEventListener {
 
 	@Override
 	public void onJoin(String chan, IRCUser user) {
-		// TODO
+		RemoteConnector.nickJoin(user.getNick());
 	}
 
 	@Override
 	public void onKick(String chan, IRCUser user, String passiveNick, String msg) {
-		// TODO
+		RemoteConnector.nickPart(passiveNick);
 	}
 
 	@Override
@@ -160,7 +220,7 @@ class NetWatcher implements IRCEventListener {
 
 	@Override
 	public void onNick(IRCUser user, String newNick) {
-		// TODO
+		RemoteConnector.nickChanged(user.getNick(), newNick);
 	}
 
 	@Override
@@ -170,7 +230,7 @@ class NetWatcher implements IRCEventListener {
 
 	@Override
 	public void onPart(String chan, IRCUser user, String msg) {
-		// TODO
+		RemoteConnector.nickPart(user.getNick());
 	}
 
 	@Override
@@ -185,12 +245,23 @@ class NetWatcher implements IRCEventListener {
 
 	@Override
 	public void onQuit(IRCUser user, String msg) {
-		// TODO
+		RemoteConnector.nickPart(user.getNick());
 	}
 
 	@Override
 	public void onReply(int num, String value, String msg) {
-		// TODO : names
+		switch(num) {
+		case IRCConstants.RPL_NAMREPLY:
+			StringTokenizer tokenizer = new StringTokenizer(msg);
+			while(tokenizer.hasMoreTokens()) {
+				String nick = tokenizer.nextToken();
+				if("~&@%+".indexOf(nick.charAt(0)) > -1)
+					nick = nick.substring(1);
+				
+				RemoteConnector.nickJoin(nick);
+			}
+			break;
+		}
 	}
 
 	@Override
