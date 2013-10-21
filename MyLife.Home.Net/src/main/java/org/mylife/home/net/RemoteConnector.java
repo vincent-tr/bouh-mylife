@@ -47,8 +47,33 @@ class RemoteConnector implements Connector {
 			connectors.add(this);
 			if(connectors.size() == 1)
 				watcher = new NetWatcher();
-			// TODO : add sur watcher
+			watcher.addChannel(container.getChannel());
 		}
+		// TODO : création des abonnemnts aux actions pour émission
+	}
+	
+	/**
+	 * Connexion
+	 * @param nick
+	 */
+	public static void nickJoin(String nick) {
+		// TODO
+	}
+	
+	/**
+	 * Changement de nick
+	 * @param oldNick
+	 * @param newNick
+	 */
+	public static void nickChanged(String oldNick, String newNick) {
+		// TODO
+	}
+	
+	/**
+	 * Déconnexion (si nick == null alors déco globale)
+	 * @param nick
+	 */
+	public static void nickPart(String nick) {
 		// TODO
 	}
 
@@ -59,7 +84,7 @@ class RemoteConnector implements Connector {
 	public void close() {
 
 		synchronized(connectors) {
-			// TODO : remove sur watcher
+			watcher.removeChannel(container.getChannel());
 			if(connectors.size() == 0) {
 				watcher.close();
 				watcher = null;
