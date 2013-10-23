@@ -1,5 +1,9 @@
 package org.mylife.home.net.exchange;
 
-public class XmlNetEnum {
+import javax.xml.bind.annotation.XmlType;
 
+@XmlType(name = "enum")
+public class XmlNetEnum extends XmlNetType {
+
+	public String[] values;
 }

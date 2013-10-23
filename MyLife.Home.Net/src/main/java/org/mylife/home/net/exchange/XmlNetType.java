@@ -1,8 +1,10 @@
 package org.mylife.home.net.exchange;
 
 import javax.xml.bind.annotation.XmlSeeAlso;
+import javax.xml.bind.annotation.XmlType;
 
-@XmlSeeAlso( {XmlNetEnum.class, XmlNetRange.class} )
+@XmlType(name = "type")
+@XmlSeeAlso({ XmlNetEnum.class, XmlNetRange.class })
 public class XmlNetType {
 
 }

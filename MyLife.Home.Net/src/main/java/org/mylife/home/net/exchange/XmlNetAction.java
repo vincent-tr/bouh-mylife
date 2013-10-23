@@ -1,5 +1,9 @@
 package org.mylife.home.net.exchange;
 
-public class XmlNetAction {
+import javax.xml.bind.annotation.XmlType;
 
+@XmlType(name = "action")
+public class XmlNetAction extends XmlNetMember {
+
+	public XmlNetType[] arguments;
 }
