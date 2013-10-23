@@ -42,7 +42,7 @@ public class ExchangeManager {
 			throws JAXBException {
 		JAXBContext jc = JAXBContext.newInstance(XmlContainer.class);
 		Unmarshaller u = jc.createUnmarshaller();
-		return (XmlContainer)u.unmarshal(stream);
+		return (XmlContainer) u.unmarshal(stream);
 	}
 
 }
