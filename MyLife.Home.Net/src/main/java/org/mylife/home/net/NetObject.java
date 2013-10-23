@@ -127,6 +127,14 @@ public class NetObject {
 				listener.attributeChanged(owner, attribute, value);
 		}
 
+		public void setAttributeValueAsString(String svalue)
+				throws InvalidValueException {
+			Object value = convertValue(attribute.getType(), svalue);
+			this.value = value;
+			for (AttributeChangeListener listener : listeners)
+				listener.attributeChanged(owner, attribute, value);
+		}
+
 		public void registerAttributeChange(AttributeChangeListener listener) {
 			listeners.add(listener);
 		}
@@ -253,13 +261,38 @@ public class NetObject {
 		action.executeActionAsString(arguments);
 	}
 	
+	/**
+	 * Obtention de la valeur d'un attribut
+	 * @param name
+	 * @return
+	 * @throws MemberNotFoundException
+	 */
 	public Object getAttributeValue(String name) throws MemberNotFoundException {
 		return getAttribute(name).getAttributeValue();
 	}
 
+	/**
+	 * Définition de la valeur d'un attribut
+	 * @param name
+	 * @param value
+	 * @throws MemberNotFoundException
+	 * @throws InvalidValueException
+	 */
 	public void setAttributeValue(String name, Object value)
 			throws MemberNotFoundException, InvalidValueException {
 		getAttribute(name).setAttributeValue(value);
+	}
+
+	/**
+	 * Définition de la valeur d'un attribut avec la valeur fournie comme une chaine
+	 * @param name
+	 * @param value
+	 * @throws MemberNotFoundException
+	 * @throws InvalidValueException
+	 */
+	public void setAttributeValueAsString(String name, String value)
+			throws MemberNotFoundException, InvalidValueException {
+		getAttribute(name).setAttributeValueAsString(value);
 	}
 
 	public void registerAttributeChange(String name,

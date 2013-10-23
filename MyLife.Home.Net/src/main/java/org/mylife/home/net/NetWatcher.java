@@ -166,9 +166,17 @@ class NetWatcher implements IRCEventListener {
 	 */
 	private void doDisconnect() {
 		connection.close();
-		RemoteConnector.nickPart(null);
+		RemoteConnector.nickPart(null, null);
 	}
 
+	private String getInternalChannel(String ircChannel) {
+		if(ircChannel == null || ircChannel.length() == 0)
+			return ircChannel;
+		if(ircChannel.charAt(0) != '#')
+			return ircChannel;
+		return ircChannel.substring(1);
+	}
+	
 	@Override
 	public void onRegistered() {
 		for (String channel : channels.keySet()) {
@@ -200,12 +208,12 @@ class NetWatcher implements IRCEventListener {
 
 	@Override
 	public void onJoin(String chan, IRCUser user) {
-		RemoteConnector.nickJoin(user.getNick());
+		RemoteConnector.nickJoin(user.getNick(), getInternalChannel(chan));
 	}
 
 	@Override
 	public void onKick(String chan, IRCUser user, String passiveNick, String msg) {
-		RemoteConnector.nickPart(passiveNick);
+		RemoteConnector.nickPart(passiveNick, getInternalChannel(chan));
 	}
 
 	@Override
@@ -230,7 +238,7 @@ class NetWatcher implements IRCEventListener {
 
 	@Override
 	public void onPart(String chan, IRCUser user, String msg) {
-		RemoteConnector.nickPart(user.getNick());
+		RemoteConnector.nickPart(user.getNick(), getInternalChannel(chan));
 	}
 
 	@Override
@@ -245,20 +253,21 @@ class NetWatcher implements IRCEventListener {
 
 	@Override
 	public void onQuit(IRCUser user, String msg) {
-		RemoteConnector.nickPart(user.getNick());
+		RemoteConnector.nickPart(user.getNick(), null);
 	}
 
 	@Override
 	public void onReply(int num, String value, String msg) {
 		switch(num) {
 		case IRCConstants.RPL_NAMREPLY:
+			String chan = getInternalChannel(value);
 			StringTokenizer tokenizer = new StringTokenizer(msg);
 			while(tokenizer.hasMoreTokens()) {
 				String nick = tokenizer.nextToken();
 				if("~&@%+".indexOf(nick.charAt(0)) > -1)
 					nick = nick.substring(1);
 				
-				RemoteConnector.nickJoin(nick);
+				RemoteConnector.nickJoin(nick, chan);
 			}
 			break;
 		}
