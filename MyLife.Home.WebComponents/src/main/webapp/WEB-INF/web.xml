@@ -26,7 +26,7 @@
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
-
+<!--  
 	<servlet>
 		<servlet-name>MPDComponent</servlet-name>
 		<servlet-class>org.mylife.home.webcomponents.MPDComponent</servlet-class>
@@ -74,15 +74,26 @@
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
-
+-->
 	<servlet>
 		<servlet-name>WebReport</servlet-name>
 		<servlet-class>org.mylife.home.webcomponents.WebReport</servlet-class>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 
+	<servlet>
+		<servlet-name>WebStructure</servlet-name>
+		<servlet-class>org.mylife.home.webcomponents.WebStructure</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
 	<servlet-mapping>
 		<servlet-name>WebReport</servlet-name>
 		<url-pattern>/</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>WebStructure</servlet-name>
+		<url-pattern>/WebStructure</url-pattern>
 	</servlet-mapping>
 </web-app>

@@ -13,7 +13,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.mylife.home.net.NetObject;
 import org.mylife.home.net.structure.NetAction;
 import org.mylife.home.net.structure.NetAttribute;
@@ -34,16 +33,6 @@ public class WebReport extends HttpServlet {
 	 * 
 	 */
 	private static final long serialVersionUID = -7893232454183432915L;
-
-	/**
-	 * HTML escape
-	 * 
-	 * @param input
-	 * @return
-	 */
-	private String htmlEscape(String input) {
-		return StringEscapeUtils.escapeHtml4(input);
-	}
 	
 	/**
 	 * Représentation d'un type
@@ -104,9 +93,7 @@ public class WebReport extends HttpServlet {
 	protected void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 
-		Properties meProperties = new Properties();
-		meProperties.load(getServletContext().getResourceAsStream(
-				"/WEB-INF/classes/me.properties"));
+		Properties meProperties = WebTools.getConfig(this);
 
 		String name = meProperties.getProperty("name");
 		String version = meProperties.getProperty("version");
@@ -118,11 +105,12 @@ public class WebReport extends HttpServlet {
 		out.println("<body>");
 		out.println("	<h1>MyLife.Home.WebComponents</h1>");
 		out.println("	<h2>Component List</h2>");
+		out.println("	<a href=\"" + req.getContextPath() + "/WebStructure\">[xml data]</a>");
 		out.println("	<ul>");
 		for (Component component : components) {
 			out.println("		<li><a href=\"#"
-					+ htmlEscape(component.getServletName()) + "\">"
-					+ htmlEscape(component.getServletName()) + "</a></li>");
+					+ WebTools.htmlEscape(component.getServletName()) + "\">"
+					+ WebTools.htmlEscape(component.getServletName()) + "</a></li>");
 		}
 		out.println("	</ul>");
 		for (Component component : components) {
@@ -130,9 +118,9 @@ public class WebReport extends HttpServlet {
 			NetObject object = component.getObject();
 			List<NetMember> members = object.getNetClass()
 					.getMembers();
-			out.println("	<a name=\"" + htmlEscape(component.getServletName())
-					+ "\"><h2>" + htmlEscape(component.getServletName())
-					+ " : " + htmlEscape(component.getClass().toString())
+			out.println("	<a name=\"" + WebTools.htmlEscape(component.getServletName())
+					+ "\"><h2>" + WebTools.htmlEscape(component.getServletName())
+					+ " : " + WebTools.htmlEscape(component.getClass().toString())
 					+ "</h2></a>");
 			out.println("	<h3>Servlet Config</h3>");
 			out.println("	<table border=\"1\">");
@@ -145,8 +133,8 @@ public class WebReport extends HttpServlet {
 				String configName = e.nextElement();
 				String configValue = config.getInitParameter(configName);
 				out.println("		<tr>");
-				out.println("			<td>" + htmlEscape(configName) + "</td>");
-				out.println("			<td>" + htmlEscape(configValue) + "</td>");
+				out.println("			<td>" + WebTools.htmlEscape(configName) + "</td>");
+				out.println("			<td>" + WebTools.htmlEscape(configValue) + "</td>");
 				out.println("		</tr>");
 			}
 			out.println("	</table>");
@@ -166,9 +154,9 @@ public class WebReport extends HttpServlet {
 				Object value = object.getAttributeValue(attribute.getName());
 				out.println("		<tr>");
 				out.println("			<td>" + attribute.getIndex() + "</td>");
-				out.println("			<td>" + htmlEscape(attribute.getName()) + "</td>");
-				out.println("			<td>" + htmlEscape(String.valueOf(value)) + "</td>");
-				out.println("			<td>" + htmlEscape(getTypeDisplay(attribute.getType())) + "</td>");
+				out.println("			<td>" + WebTools.htmlEscape(attribute.getName()) + "</td>");
+				out.println("			<td>" + WebTools.htmlEscape(String.valueOf(value)) + "</td>");
+				out.println("			<td>" + WebTools.htmlEscape(getTypeDisplay(attribute.getType())) + "</td>");
 				out.println("		</tr>");
 			}
 			out.println("	</table>");
@@ -185,15 +173,15 @@ public class WebReport extends HttpServlet {
 				NetAction action = (NetAction) member;
 				out.println("		<tr>");
 				out.println("			<td>" + action.getIndex() + "</td>");
-				out.println("			<td>" + htmlEscape(action.getName()) + "</td>");
-				out.println("			<td>" + htmlEscape(getTypesDisplay(action.getArguments())) + "</td>");
+				out.println("			<td>" + WebTools.htmlEscape(action.getName()) + "</td>");
+				out.println("			<td>" + WebTools.htmlEscape(getTypesDisplay(action.getArguments())) + "</td>");
 				out.println("		</tr>");
 			}
 			out.println("	</table>");
 			out.println("	<a href=\"#top\">[top]</a>");
 		}
 		out.println("<br/><br/>");
-		out.println(htmlEscape(String.format("%s %s (built : %s)", name, version, buildTimestamp)));
+		out.println(WebTools.htmlEscape(String.format("%s %s (built : %s)", name, version, buildTimestamp)));
 		out.println("</body></html>");
 	}
 }
