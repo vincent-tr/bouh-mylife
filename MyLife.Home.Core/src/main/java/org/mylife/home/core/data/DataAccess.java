@@ -32,6 +32,14 @@ public class DataAccess {
 
 	private final Connection con;
 
+	static {
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+		} catch (Exception e) {
+			throw new DataException(e);
+		}
+	}
+
 	/**
 	 * Constructeur et ouverture
 	 */
@@ -156,9 +164,11 @@ public class DataAccess {
 		ResultSet rs = null;
 		try {
 			pst = con
-					.prepareStatement("insert into core_configuration "
-							+ "(conf_type, conf_content, conf_active, conf_date, conf_comment) "
-							+ "values (?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+					.prepareStatement(
+							"insert into core_configuration "
+									+ "(conf_type, conf_content, conf_active, conf_date, conf_comment) "
+									+ "values (?, ?, ?, ?, ?)",
+							Statement.RETURN_GENERATED_KEYS);
 			Blob content = con.createBlob();
 			content.setBytes(1, item.getContent());
 
@@ -167,11 +177,11 @@ public class DataAccess {
 			pst.setBoolean(3, item.isActive());
 			pst.setDate(4, new Date(item.getDate().getTime()));
 			pst.setString(5, item.getComment());
-			
+
 			pst.executeUpdate();
-			
+
 			rs = pst.getGeneratedKeys();
-			if(!rs.next())
+			if (!rs.next())
 				throw new DataException("Cannot read inserted id");
 			item.setId(rs.getInt(1));
 
@@ -187,8 +197,7 @@ public class DataAccess {
 		PreparedStatement pst = null;
 		try {
 			pst = con.prepareStatement("update core_configuration "
-					+ "set conf_active = ? "
-					+ ", conf_comment = ? "
+					+ "set conf_active = ? " + ", conf_comment = ? "
 					+ "where conf_id = ?");
 			pst.setBoolean(1, item.isActive());
 			pst.setString(2, item.getComment());
@@ -221,7 +230,7 @@ public class DataAccess {
 		item.setId(rs.getInt("conf_id"));
 		item.setType(rs.getString("conf_type"));
 		Blob content = rs.getBlob("conf_content");
-		item.setContent(content.getBytes(1, (int)content.length()));
+		item.setContent(content.getBytes(1, (int) content.length()));
 		item.setActive(rs.getBoolean("conf_active"));
 		item.setDate(rs.getDate("conf_date"));
 		item.setComment(rs.getString("conf_comment"));
