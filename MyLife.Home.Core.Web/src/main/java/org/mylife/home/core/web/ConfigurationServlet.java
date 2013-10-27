@@ -33,7 +33,8 @@ public class ConfigurationServlet extends HttpServlet {
 			Set<DataConfiguration> data = access.getConfigurationsAll();
 			req.setAttribute("data", data);
 			
-			resp.sendRedirect("/jsp/config/List.jsp");
+			//resp.sendRedirect("/jsp/config/List.jsp");
+			req.getRequestDispatcher("/jsp/config/List.jsp").forward(req, resp);
 		}
 		finally {
 			access.close();
