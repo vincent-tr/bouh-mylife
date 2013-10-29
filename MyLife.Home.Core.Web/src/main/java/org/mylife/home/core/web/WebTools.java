@@ -3,6 +3,9 @@ package org.mylife.home.core.web;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.jsp.PageContext;
+
 import org.apache.commons.lang3.StringEscapeUtils;
 
 /**
@@ -39,5 +42,10 @@ public class WebTools {
 	 */
 	public static String formatDate(Date date) {
 		return formatDate(date, "yyyy-MM-dd HH:mm:ss");
+	}
+	
+	public static String image(PageContext context, String name) {
+		 String root = ((HttpServletRequest)context.getRequest()).getContextPath();
+		 return root + "/static/images/" + name;
 	}
 }

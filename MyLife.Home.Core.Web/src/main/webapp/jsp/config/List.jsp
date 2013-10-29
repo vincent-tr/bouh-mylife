@@ -12,7 +12,7 @@
 </head>
 <body>
 	<h1>MyLife.Home.Core : Gestion des configurations</h1>
-	<table>
+	<table border="1">
 		<tr>
 			<th>Type</th>
 			<th>Actif</th>
@@ -23,10 +23,22 @@
 <% for(DataConfiguration item : data) { %>
 		<tr>
 			<td><%= WebTools.htmlEscape(item.getType()) %></td>
-			<td></td>
+			<td>
+				<a href="?action=<%= item.isActive() ? "deactivate" : "activate" %>&id=<%= item.getId() %>">
+					<img src="<%= WebTools.image(pageContext, item.isActive() ? "apply.png" : "erase.png") %>" title="<%= item.isActive() ? "Oui" : "Non" %>" />
+				</a>
+			</td>
 			<td><%= WebTools.htmlEscape(WebTools.formatDate(item.getDate())) %></td>
-			<td><%= WebTools.htmlEscape(item.getComment()) %></td>
-			<td></td>
+			<td>
+				<form method="post" action="?action=comment&id=<%= item.getId() %>">
+					<textarea name="comment"><%= WebTools.htmlEscape(item.getComment()) %></textarea>
+					<input type="image" src="<%= WebTools.image(pageContext, "modify.png") %>" title="Mise à jour" />
+				</form>
+			</td>
+			<td>
+				<a href="?action=delete&id=<%= item.getId() %>"><img src="<%= WebTools.image(pageContext, "erase.png") %>" title="Supprimer" /></a>
+				<a href="?action=content&id=<%= item.getId() %>"><img src="<%= WebTools.image(pageContext, "view.png") %>" title="Contenu" /></a>
+			</td>
 		</tr>
 <% } %>		
 	</table>

@@ -216,6 +216,8 @@ public class DataAccess {
 		try {
 			pst = con
 					.prepareStatement("delete from core_configuration where conf_id = ?");
+			
+			pst.setInt(1, item.getId());
 			pst.executeUpdate();
 
 		} catch (SQLException e) {
