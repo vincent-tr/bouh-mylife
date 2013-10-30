@@ -19,8 +19,19 @@
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 
+	<servlet>
+		<servlet-name>PluginServlet</servlet-name>
+		<servlet-class>org.mylife.home.core.web.PluginServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	
 	<servlet-mapping>
 		<servlet-name>ConfigurationServlet</servlet-name>
 		<url-pattern>/configuration</url-pattern>
+	</servlet-mapping>
+		
+	<servlet-mapping>
+		<servlet-name>PluginServlet</servlet-name>
+		<url-pattern>/plugin</url-pattern>
 	</servlet-mapping>
 </web-app>
