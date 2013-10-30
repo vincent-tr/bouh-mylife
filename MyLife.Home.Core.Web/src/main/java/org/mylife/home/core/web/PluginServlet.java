@@ -8,21 +8,21 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mylife.home.core.data.DataConfiguration;
+import org.mylife.home.core.data.DataPlugin;
 import org.mylife.home.core.services.ServiceAccess;
 
 /**
- * Servlet de configuration
+ * Serlet de gestion des plugins
  * 
  * @author pumbawoman
  * 
  */
-public class ConfigurationServlet extends HttpServlet {
+public class PluginServlet extends HttpServlet {
 
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -8986836924739824605L;
+	private static final long serialVersionUID = 855594790262258400L;
 
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
@@ -60,7 +60,7 @@ public class ConfigurationServlet extends HttpServlet {
 
 		int id = Integer.parseInt(req.getParameter("id"));
 		String comment = req.getParameter("comment");
-		ServiceAccess.getConfigurationService().changeComment(id, comment);
+		ServiceAccess.getPluginService().changeComment(id, comment);
 
 		resp.sendRedirect(req.getRequestURI());
 	}
@@ -69,7 +69,7 @@ public class ConfigurationServlet extends HttpServlet {
 			throws ServletException, IOException {
 
 		int id = Integer.parseInt(req.getParameter("id"));
-		ServiceAccess.getConfigurationService().changeActive(id, true);
+		ServiceAccess.getPluginService().changeActive(id, true);
 
 		resp.sendRedirect(req.getRequestURI());
 	}
@@ -78,7 +78,7 @@ public class ConfigurationServlet extends HttpServlet {
 			throws ServletException, IOException {
 
 		int id = Integer.parseInt(req.getParameter("id"));
-		ServiceAccess.getConfigurationService().changeActive(id, false);
+		ServiceAccess.getPluginService().changeActive(id, false);
 
 		resp.sendRedirect(req.getRequestURI());
 	}
@@ -87,7 +87,7 @@ public class ConfigurationServlet extends HttpServlet {
 			throws ServletException, IOException {
 
 		int id = Integer.parseInt(req.getParameter("id"));
-		ServiceAccess.getConfigurationService().delete(id);
+		ServiceAccess.getPluginService().delete(id);
 
 		resp.sendRedirect(req.getRequestURI());
 	}
@@ -95,7 +95,7 @@ public class ConfigurationServlet extends HttpServlet {
 	private void content(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 
-		DataConfiguration item = ServiceAccess.getConfigurationService().get(
+		DataPlugin item = ServiceAccess.getPluginService().get(
 				Integer.parseInt(req.getParameter("id")));
 		resp.setContentType("text/xml");
 		byte[] content = item.getContent();
@@ -106,9 +106,8 @@ public class ConfigurationServlet extends HttpServlet {
 			throws ServletException, IOException {
 
 		// par défaut redirection vers la jsp
-		Set<DataConfiguration> data = ServiceAccess.getConfigurationService()
-				.list();
+		Set<DataPlugin> data = ServiceAccess.getPluginService().list();
 		req.setAttribute("data", data);
-		req.getRequestDispatcher("/jsp/Configuration.jsp").forward(req, resp);
+		req.getRequestDispatcher("/jsp/Plugin.jsp").forward(req, resp);
 	}
 }
