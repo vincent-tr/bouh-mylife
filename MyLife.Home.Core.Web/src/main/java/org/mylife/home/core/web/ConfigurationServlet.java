@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mylife.home.core.data.DataAccess;
 import org.mylife.home.core.data.DataConfiguration;
+import org.mylife.home.core.services.ServiceAccess;
 
 /**
  * Servlet de configuration
@@ -58,14 +59,9 @@ public class ConfigurationServlet extends HttpServlet {
 	private void comment(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		
-		DataAccess access = new DataAccess();
-		try {
-			DataConfiguration item = access.getConfigurationByKey(Integer.parseInt(req.getParameter("id")));
-			item.setComment(req.getParameter("comment"));
-			access.updateConfiguration(item);
-		} finally {
-			access.close();
-		}
+		int id = Integer.parseInt(req.getParameter("id"));
+		String comment = req.getParameter("comment");
+		ServiceAccess.getConfigurationService().changeComment(id, comment);
 		
 		resp.sendRedirect(req.getRequestURI());
 	}
@@ -73,14 +69,8 @@ public class ConfigurationServlet extends HttpServlet {
 	private void activate(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		
-		DataAccess access = new DataAccess();
-		try {
-			DataConfiguration item = access.getConfigurationByKey(Integer.parseInt(req.getParameter("id")));
-			item.setActive(true);
-			access.updateConfiguration(item);
-		} finally {
-			access.close();
-		}
+		int id = Integer.parseInt(req.getParameter("id"));
+		ServiceAccess.getConfigurationService().changeActive(id, true);
 		
 		resp.sendRedirect(req.getRequestURI());
 	}
@@ -88,14 +78,8 @@ public class ConfigurationServlet extends HttpServlet {
 	private void deactivate(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		
-		DataAccess access = new DataAccess();
-		try {
-			DataConfiguration item = access.getConfigurationByKey(Integer.parseInt(req.getParameter("id")));
-			item.setActive(false);
-			access.updateConfiguration(item);
-		} finally {
-			access.close();
-		}
+		int id = Integer.parseInt(req.getParameter("id"));
+		ServiceAccess.getConfigurationService().changeActive(id, false);
 		
 		resp.sendRedirect(req.getRequestURI());
 	}
@@ -103,14 +87,8 @@ public class ConfigurationServlet extends HttpServlet {
 	private void delete(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 
-		DataAccess access = new DataAccess();
-		try {
-			DataConfiguration item = new DataConfiguration();
-			item.setId(Integer.parseInt(req.getParameter("id")));
-			access.deleteConfiguration(item);
-		} finally {
-			access.close();
-		}
+		int id = Integer.parseInt(req.getParameter("id"));
+		ServiceAccess.getConfigurationService().delete(id);
 		
 		resp.sendRedirect(req.getRequestURI());
 	}
