@@ -3,42 +3,42 @@ package org.mylife.home.core.services;
 import java.util.Set;
 
 import org.mylife.home.core.data.DataAccess;
-import org.mylife.home.core.data.DataConfiguration;
+import org.mylife.home.core.data.DataPlugin;
 
 /**
- * Service de gestion des configurations
- * @author trumpffv
+ * Service de gestion des plugins
+ * @author pumbawoman
  *
  */
-public class ConfigurationService {
+public class PluginService {
 
-	/* internal */ ConfigurationService() {
+	/* internal */ PluginService() {
 		
 	}
 	
 
 	/**
-	 * Obtention de toutes les configurations
+	 * Obtention de tous les plugins
 	 * @return
 	 */
-	public Set<DataConfiguration> list() {
+	public Set<DataPlugin> list() {
 		DataAccess access = new DataAccess();
 		try {
-			return access.getConfigurationsAll();
+			return access.getPluginsAll();
 		} finally {
 			access.close();
 		}
 	}
 
 	/**
-	 * Obtention d'une configuration
+	 * Obtention d'un plugin
 	 * @param id
 	 * @return
 	 */
-	public DataConfiguration get(int id) {
+	public DataPlugin get(int id) {
 		DataAccess access = new DataAccess();
 		try {
-			return access.getConfigurationByKey(id);
+			return access.getPluginByKey(id);
 		} finally {
 			access.close();
 		}
@@ -46,70 +46,70 @@ public class ConfigurationService {
 	}
 
 	/**
-	 * Changement du commentaire d'une configuration
+	 * Changement du commentaire d'un plugin
 	 * @param id
 	 * @param comment
 	 */
 	public void changeComment(int id, String comment) {
 		DataAccess access = new DataAccess();
 		try {
-			DataConfiguration item = access.getConfigurationByKey(id);
+			DataPlugin item = access.getPluginByKey(id);
 			item.setComment(comment);
-			access.updateConfiguration(item);
+			access.updatePlugin(item);
 		} finally {
 			access.close();
 		}
 	}
 
 	/**
-	 * Changement de l'activation d'une configuration
+	 * Changement de l'activation d'un plugin
 	 * @param id
 	 * @param active
 	 */
 	public void changeActive(int id, boolean active) {
 		DataAccess access = new DataAccess();
 		try {
-			DataConfiguration item = access.getConfigurationByKey(id);
+			DataPlugin item = access.getPluginByKey(id);
 			item.setActive(active);
-			access.updateConfiguration(item);
+			access.updatePlugin(item);
 		} finally {
 			access.close();
 		}
 	}
 
 	/**
-	 * Suppression d'une configuration
+	 * Suppression d'un plugin
 	 * @param id
 	 */
 	public void delete(int id) {
 		DataAccess access = new DataAccess();
 		try {
-			DataConfiguration item = new DataConfiguration();
+			DataPlugin item = new DataPlugin();
 			item.setId(id);
-			access.deleteConfiguration(item);
-		} finally {
-			access.close();
-		}
-	}
-
-	/**
-	 * Création d'une configuration
-	 * @param config
-	 */
-	public void create(DataConfiguration config) {
-		DataAccess access = new DataAccess();
-		try {
-			access.createConfiguration(config);
+			access.deletePlugin(item);
 		} finally {
 			access.close();
 		}
 	}
 	
 	/**
-	 * Création d'une configuration à partir de l'export de structure d'un WebComponent
+	 * Création d'un plugin
+	 * @param plugin
+	 */
+	public void create(DataPlugin plugin) {
+		DataAccess access = new DataAccess();
+		try {
+			access.createPlugin(plugin);
+		} finally {
+			access.close();
+		}
+	}
+	
+	/**
+	 * Création d'un plugin à partir d'un jar uniquement
 	 * @param data
 	 */
-	public void createFromWebComponentStructure(byte[] data) {
+	public void createFromJar(byte[] data) {
 		throw new UnsupportedOperationException();
 	}
 }
