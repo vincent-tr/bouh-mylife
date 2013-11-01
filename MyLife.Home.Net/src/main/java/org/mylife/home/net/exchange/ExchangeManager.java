@@ -34,9 +34,9 @@ public class ExchangeManager {
 	 * @param stream
 	 * @throws JAXBException
 	 */
-	public static void exportContainer(XmlContainer container,
+	public static void exportContainer(XmlNetContainer container,
 			OutputStream stream) throws JAXBException {
-		JAXBContext jc = JAXBContext.newInstance(XmlContainer.class);
+		JAXBContext jc = JAXBContext.newInstance(XmlNetContainer.class);
 		Marshaller m = jc.createMarshaller();
 		m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 		m.marshal(container, stream);
@@ -49,11 +49,11 @@ public class ExchangeManager {
 	 * @return
 	 * @throws JAXBException
 	 */
-	public static XmlContainer importContainer(InputStream stream)
+	public static XmlNetContainer importContainer(InputStream stream)
 			throws JAXBException {
-		JAXBContext jc = JAXBContext.newInstance(XmlContainer.class);
+		JAXBContext jc = JAXBContext.newInstance(XmlNetContainer.class);
 		Unmarshaller u = jc.createUnmarshaller();
-		return (XmlContainer) u.unmarshal(stream);
+		return (XmlNetContainer) u.unmarshal(stream);
 	}
 
 	/**
