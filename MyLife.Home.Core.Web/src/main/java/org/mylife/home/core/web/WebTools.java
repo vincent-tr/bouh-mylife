@@ -56,6 +56,11 @@ public class WebTools {
 	
 	public static String style(PageContext context, String name) {
 		 String root = ((HttpServletRequest)context.getRequest()).getContextPath();
-		 return root + "/static/style/" + name;
+		 return root + "/static/styles/" + name;
+	}
+	
+	public static String script(PageContext context, String name) {
+		 String root = ((HttpServletRequest)context.getRequest()).getContextPath();
+		 return root + "/static/scripts/" + name;
 	}
 }

@@ -4,7 +4,7 @@ html,body {
 	padding: 0;
 }
 
-#header, #footer, #menu, #content {
+#header,#footer,#menu,#content {
 	border: 1px solid;
 	margin: 10px 10px 10px 10px;
 	border-radius: 15px;
@@ -15,8 +15,7 @@ html,body {
 	top: 130px;
 	bottom: 40px;
 	width: 200px;
-
-    background-color: #E6E6FF;
+	background-color: #E6E6FF;
 }
 
 #menu ul {
@@ -31,10 +30,8 @@ html,body {
 	margin-left: 0;
 	margin-top: 5px;
 	margin-bottom: 5px;
-
 	border: 1px solid;
 	border-radius: 15px;
-
 	background-color: #CCCCFF;
 }
 
@@ -42,19 +39,15 @@ html,body {
 	background-color: #FFFFFF;
 }
 
-#menu a:link,
-#menu a:visited,
-#menu a:hover,
-#menu a:active {
+#menu a:link,#menu a:visited,#menu a:hover,#menu a:active {
 	color: black;
 	font-style: normal;
 	text-decoration: none;
 }
 
-#menu ul li img {	
+#menu ul li img {
 	vertical-align: middle;
 	margin-right: 10px;
-
 	margin-left: 10px;
 	margin-top: 5px;
 	margin-bottom: 5px;
@@ -66,12 +59,11 @@ html,body {
 	bottom: 40px;
 	left: 220px;
 	right: 0;
-
-    background-color: #E6E6FF;
+	background-color: #E6E6FF;
 }
 
 #content_wrapper {
-	margin: 10px 10px 10px 10px; 
+	margin: 10px 10px 10px 10px;
 }
 
 #header,#footer {
@@ -109,6 +101,49 @@ h2 {
 	/*margin-left: 20px;*/
 }
 
+div.tabs>table {
+	width: 100%;
+	height: 100%;
+}
+
+div.tabs ul {
+	list-style-type: none;
+	padding: 0;
+	margin: 10px 10px 10px 10px;
+}
+
+div.tabs li {
+	float: left;
+	list-style-type: none;
+	padding: 0;
+	padding-right: 10px;
+	margin-left: 5px;
+	margin-right: 5px;
+	margin-top: 5px;
+	margin-bottom: 5px;
+	border: 1px solid;
+	border-radius: 15px;
+	background-color: #CCCCFF;
+}
+
+div.tabs li:hover {
+	background-color: #FFFFFF;
+}
+
+div.tabs a:link,div.tabs a:visited,div.tabs a:hover,div.tabs a:active {
+	color: black;
+	font-style: normal;
+	text-decoration: none;
+}
+
+div.tabs ul li img {
+	vertical-align: middle;
+	margin-right: 10px;
+	margin-left: 10px;
+	margin-top: 5px;
+	margin-bottom: 5px;
+}
+
 textarea {
 	background-color: transparent;
 }
@@ -117,12 +152,26 @@ textarea:focus {
 	background-color: #FFFFFF;
 }
 
-table.table_render {
-	width:100%;
-	border-collapse:collapse;
+div.table_render_outer {
+	position: relative;
 }
 
-table.table_render, table.table_render th, table.table_render td {
+div.table_render_inner {
+	border: 1px solid black;
+	overflow: auto;
+	width: 100%;
+	height: 450px;
+}
+
+table.table_render {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+table.table_render tbody {
+}
+
+table.table_render,table.table_render th,table.table_render td {
 	border: 1px solid black;
 }
 
@@ -132,7 +181,7 @@ table.table_render tr {
 }
 
 table.table_render thead tr {
-	background:#8080FF;
+	background: #8080FF;
 }
 
 table.table_render tbody tr:nth-child(even) {
@@ -141,4 +190,18 @@ table.table_render tbody tr:nth-child(even) {
 
 table.table_render tbody tr:nth-child(odd) {
 	background: #CCCCFF;
+}
+
+fieldset {
+	border: 1px solid;
+	margin: 10px 10px 10px 10px;
+	border-radius: 15px;
+}
+
+legend {
+	border: 1px solid;
+	padding: 2px 10px 2px 10px;
+	border: 1px solid;
+	border-radius: 15px;
+	background-color: #CCCCFF;
 }
