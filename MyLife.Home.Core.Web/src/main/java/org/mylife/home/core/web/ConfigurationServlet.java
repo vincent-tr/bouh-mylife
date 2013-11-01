@@ -127,11 +127,19 @@ public class ConfigurationServlet extends HttpServlet {
 	private void contentCreate(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		
+		byte[] data = readPart(req.getPart("content"));
+		ServiceAccess.getConfigurationService().createFromContents(data);
+		
+		resp.sendRedirect(req.getRequestURI());
 	}
 
 	private void downloadCreate(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		
+		String url = req.getParameter("url");
+		ServiceAccess.getConfigurationService().createFromContentsUrl(url);
+		
+		resp.sendRedirect(req.getRequestURI());
 	}
 	
 	private void index(HttpServletRequest req, HttpServletResponse resp)

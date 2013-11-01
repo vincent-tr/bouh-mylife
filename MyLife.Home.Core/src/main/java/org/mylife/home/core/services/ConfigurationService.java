@@ -115,4 +115,12 @@ public class ConfigurationService {
 	public void createFromContents(byte[] data) {
 		throw new UnsupportedOperationException();
 	}
+	
+	/**
+	 * Création d'une configuration à partir d'une url de contenu
+	 * @param url
+	 */
+	public void createFromContentsUrl(String url) {
+		throw new UnsupportedOperationException();
+	}
 }
