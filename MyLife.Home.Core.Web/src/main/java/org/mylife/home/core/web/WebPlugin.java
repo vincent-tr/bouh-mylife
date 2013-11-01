@@ -17,7 +17,7 @@ import org.mylife.home.core.services.ServiceAccess;
  * @author pumbawoman
  * 
  */
-public class PluginServlet extends HttpServlet {
+public class WebPlugin extends HttpServlet {
 
 	/**
 	 * 

@@ -21,7 +21,7 @@ import org.mylife.home.core.services.ServiceAccess;
  * 
  */
 @MultipartConfig
-public class ConfigurationServlet extends HttpServlet {
+public class WebConfiguration extends HttpServlet {
 
 	/**
 	 * 
