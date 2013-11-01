@@ -15,20 +15,22 @@
 	<div id="container">
 
 		<div id="header">
-			<img id="header_img" src="<%=WebTools.image(pageContext, "MyLife-96.png") %>" />
+			<img id="header_img"
+				src="<%=WebTools.image(pageContext, "MyLife-96.png")%>" />
 			<h1>MyLife.Home.Core</h1>
 			<h2><%=pageContext.getRequest().getAttribute("title")%></h2>
 		</div>
 
 		<div id="menu">
 			<ul>
-				<li><a href="<%=WebTools.servlet(pageContext, "console")%>">Console</a>
-				</li>
+				<li><a href="<%=WebTools.servlet(pageContext, "console")%>"><img
+						src="<%=WebTools.image(pageContext, "home.png")%>" />Console</a></li>
 				<li><a
-					href="<%=WebTools.servlet(pageContext, "configuration")%>">Configuration</a>
+					href="<%=WebTools.servlet(pageContext, "configuration")%>"><img
+						src="<%=WebTools.image(pageContext, "wrench.png")%>" />Configuration</a>
 				</li>
-				<li><a href="<%=WebTools.servlet(pageContext, "plugin")%>">Plugin</a>
-				</li>
+				<li><a href="<%=WebTools.servlet(pageContext, "plugin")%>"><img
+						src="<%=WebTools.image(pageContext, "application.png")%>" />Plugin</a></li>
 			</ul>
 		</div>
 

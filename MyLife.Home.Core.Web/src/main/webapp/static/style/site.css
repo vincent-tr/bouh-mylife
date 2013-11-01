@@ -19,6 +19,47 @@ html,body {
     background-color: #E6E6FF;
 }
 
+#menu ul {
+	list-style-type: none;
+	padding: 0;
+	margin: 10px 10px 10px 10px;
+}
+
+#menu li {
+	list-style-type: none;
+	padding: 0;
+	margin-left: 0;
+	margin-top: 5px;
+	margin-bottom: 5px;
+
+	border: 1px solid;
+	border-radius: 15px;
+
+	background-color: #CCCCFF;
+}
+
+#menu li:hover {
+	background-color: #FFFFFF;
+}
+
+#menu a:link,
+#menu a:visited,
+#menu a:hover,
+#menu a:active {
+	color: black;
+	font-style: normal;
+	text-decoration: none;
+}
+
+#menu ul li img {	
+	vertical-align: middle;
+	margin-right: 10px;
+
+	margin-left: 10px;
+	margin-top: 5px;
+	margin-bottom: 5px;
+}
+
 #content {
 	position: absolute;
 	top: 130px;
