@@ -108,6 +108,7 @@ public class WebPlugin extends HttpServlet {
 		// par défaut redirection vers la jsp
 		List<DataPlugin> data = ServiceAccess.getPluginService().list();
 		req.setAttribute("data", data);
+		req.setAttribute("title", "Gestion des plugins");
 		req.getRequestDispatcher("/jsp/Plugin.jsp").forward(req, resp);
 	}
 }

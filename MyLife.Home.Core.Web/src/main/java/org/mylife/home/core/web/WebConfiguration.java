@@ -149,6 +149,7 @@ public class WebConfiguration extends HttpServlet {
 		List<DataConfiguration> data = ServiceAccess.getConfigurationService()
 				.list();
 		req.setAttribute("data", data);
+		req.setAttribute("title", "Gestion des configurations");
 		req.getRequestDispatcher("/jsp/Configuration.jsp").forward(req, resp);
 	}
 	

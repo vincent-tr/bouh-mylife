@@ -7,7 +7,6 @@
 
 <%@include file="/jsp/template/Header.jsp" %>
 
-	<h2>Gestion des configurations</h2>
 	<table border="1">
 		<tr>
 			<th>Type</th>
