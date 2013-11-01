@@ -27,7 +27,7 @@
 			<td><%= WebTools.htmlEscape(WebTools.formatDate(item.getDate())) %></td>
 			<td>
 				<form method="post" action="?action=comment&id=<%= item.getId() %>">
-					<textarea name="comment"><%= WebTools.htmlEscape(item.getComment()) %></textarea>
+					<textarea name="comment" rows="4" cols="120"><%= WebTools.htmlEscape(item.getComment()) %></textarea>
 					<input type="image" src="<%= WebTools.image(pageContext, "modify.png") %>" title="Mise à jour" />
 				</form>
 			</td>
@@ -46,7 +46,7 @@
 					<option value="core" selected="selected">Core</option>
 					<option value="net">Net</option>
 				</select>
-				<textarea name="comment"></textarea>
+				<textarea name="comment" rows="4" cols="120"></textarea>
 				<input type="file" name="content" accept="application/xml" />
 				<input type="image" src="<%= WebTools.image(pageContext, "create.png") %>" title="Création" />
 			</form>

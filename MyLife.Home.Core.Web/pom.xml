@@ -95,7 +95,7 @@
 				<artifactId>maven-war-plugin</artifactId>
 				<version>2.1.1</version>
 				<configuration>
-					<warName>MyLife.Home.WebComponents</warName>
+					<warName>MyLife.Home.Core.Web</warName>
 				</configuration>
 			</plugin>
 
