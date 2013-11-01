@@ -70,6 +70,10 @@ html,body {
     background-color: #E6E6FF;
 }
 
+#content_wrapper {
+	margin: 10px 10px 10px 10px; 
+}
+
 #header,#footer {
 	position: fixed;
 	left: 0;
@@ -103,4 +107,38 @@ h2 {
 	margin-bottom: 0;
 	text-align: center;
 	/*margin-left: 20px;*/
+}
+
+textarea {
+	background-color: transparent;
+}
+
+textarea:focus {
+	background-color: #FFFFFF;
+}
+
+table.table_render {
+	width:100%;
+	border-collapse:collapse;
+}
+
+table.table_render, table.table_render th, table.table_render td {
+	border: 1px solid black;
+}
+
+table.table_render tr {
+	text-align: center;
+	vertical-align: middle;
+}
+
+table.table_render thead tr {
+	background:#8080FF;
+}
+
+table.table_render tbody tr:nth-child(even) {
+	background: #B2B2FF;
+}
+
+table.table_render tbody tr:nth-child(odd) {
+	background: #CCCCFF;
 }
