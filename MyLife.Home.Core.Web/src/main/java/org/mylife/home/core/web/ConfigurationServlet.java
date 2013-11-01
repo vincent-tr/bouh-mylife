@@ -1,13 +1,16 @@
 package org.mylife.home.core.web;
 
 import java.io.IOException;
-import java.util.Set;
+import java.util.List;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.Part;
 
+import org.apache.commons.io.IOUtils;
 import org.mylife.home.core.data.DataConfiguration;
 import org.mylife.home.core.services.ServiceAccess;
 
@@ -17,6 +20,7 @@ import org.mylife.home.core.services.ServiceAccess;
  * @author pumbawoman
  * 
  */
+@MultipartConfig
 public class ConfigurationServlet extends HttpServlet {
 
 	/**
@@ -50,6 +54,12 @@ public class ConfigurationServlet extends HttpServlet {
 			delete(req, resp);
 		} else if ("content".equals(action)) {
 			content(req, resp);
+		} else if ("create".equals(action)) {
+			create(req, resp);
+		} else if ("contentCreate".equals(action)) {
+			contentCreate(req, resp);
+		} else if ("downloadCreate".equals(action)) {
+			downloadCreate(req, resp);
 		} else {
 			index(req, resp);
 		}
@@ -97,18 +107,44 @@ public class ConfigurationServlet extends HttpServlet {
 
 		DataConfiguration item = ServiceAccess.getConfigurationService().get(
 				Integer.parseInt(req.getParameter("id")));
-		resp.setContentType("text/xml");
+		resp.setContentType("application/xml");
 		byte[] content = item.getContent();
 		resp.getOutputStream().write(content, 0, content.length);
 	}
 
+	private void create(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+		
+		DataConfiguration item = new DataConfiguration();
+		item.setType(req.getParameter("type"));
+		item.setComment(req.getParameter("comment"));
+		item.setContent(readPart(req.getPart("content")));
+		ServiceAccess.getConfigurationService().create(item);
+		
+		resp.sendRedirect(req.getRequestURI());
+	}
+
+	private void contentCreate(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+		
+	}
+
+	private void downloadCreate(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+		
+	}
+	
 	private void index(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 
 		// par défaut redirection vers la jsp
-		Set<DataConfiguration> data = ServiceAccess.getConfigurationService()
+		List<DataConfiguration> data = ServiceAccess.getConfigurationService()
 				.list();
 		req.setAttribute("data", data);
 		req.getRequestDispatcher("/jsp/Configuration.jsp").forward(req, resp);
+	}
+	
+	private byte[] readPart(Part part) throws IOException {
+		return IOUtils.toByteArray(part.getInputStream());
 	}
 }

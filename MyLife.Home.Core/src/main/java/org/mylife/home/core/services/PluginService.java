@@ -1,6 +1,6 @@
 package org.mylife.home.core.services;
 
-import java.util.Set;
+import java.util.List;
 
 import org.mylife.home.core.data.DataAccess;
 import org.mylife.home.core.data.DataPlugin;
@@ -21,7 +21,7 @@ public class PluginService {
 	 * Obtention de tous les plugins
 	 * @return
 	 */
-	public Set<DataPlugin> list() {
+	public List<DataPlugin> list() {
 		DataAccess access = new DataAccess();
 		try {
 			return access.getPluginsAll();

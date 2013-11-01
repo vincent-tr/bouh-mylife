@@ -1,9 +1,9 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
-<%@ page import="java.util.Set" %>
+<%@ page import="java.util.List" %>
 <%@ page import="org.mylife.home.core.web.WebTools" %>    
 <%@ page import="org.mylife.home.core.data.DataConfiguration" %>    
-<% Set<DataConfiguration> data = (Set<DataConfiguration>)pageContext.getRequest().getAttribute("data"); %>
+<% List<DataConfiguration> data = (List<DataConfiguration>)pageContext.getRequest().getAttribute("data"); %>
 
 <%@include file="/jsp/template/Header.jsp" %>
 
@@ -38,5 +38,31 @@
 		</tr>
 <% } %>		
 	</table>
+	
+	<div>
+		<div>
+			<form method="post" action="?action=create" enctype="multipart/form-data">
+				<select name="type">
+					<option value="core" selected="selected">Core</option>
+					<option value="net">Net</option>
+				</select>
+				<textarea name="comment"></textarea>
+				<input type="file" name="content" accept="application/xml" />
+				<input type="image" src="<%= WebTools.image(pageContext, "create.png") %>" title="Création" />
+			</form>
+		</div>
+		<div>
+			<form method="post" action="?action=contentCreate" enctype="multipart/form-data">
+				<input type="file" name="content" accept="application/xml" />
+				<input type="image" src="<%= WebTools.image(pageContext, "upload.png") %>" title="Télécharger" />
+			</form>
+		</div>
+		<div>
+			<form method="post" action="?action=downloadCreate">
+				<input type="text" name="url" />
+				<input type="image" src="<%= WebTools.image(pageContext, "download.png") %>" title="Télécharger" />
+			</form>
+		<div>
+	</div>
 
 <%@include file="/jsp/template/Footer.jsp" %>

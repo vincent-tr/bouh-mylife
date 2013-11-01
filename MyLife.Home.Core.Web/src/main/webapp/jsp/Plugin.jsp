@@ -1,9 +1,9 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
     pageEncoding="ISO-8859-1"%>
-<%@ page import="java.util.Set" %>
+<%@ page import="java.util.List" %>
 <%@ page import="org.mylife.home.core.web.WebTools" %>    
 <%@ page import="org.mylife.home.core.data.DataPlugin" %>    
-<% Set<DataPlugin> data = (Set<DataPlugin>)pageContext.getRequest().getAttribute("data"); %>
+<% List<DataPlugin> data = (List<DataPlugin>)pageContext.getRequest().getAttribute("data"); %>
 
 <%@include file="/jsp/template/Header.jsp" %>
 

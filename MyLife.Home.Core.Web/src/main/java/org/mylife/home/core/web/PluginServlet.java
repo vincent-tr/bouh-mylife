@@ -1,7 +1,7 @@
 package org.mylife.home.core.web;
 
 import java.io.IOException;
-import java.util.Set;
+import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -106,7 +106,7 @@ public class PluginServlet extends HttpServlet {
 			throws ServletException, IOException {
 
 		// par défaut redirection vers la jsp
-		Set<DataPlugin> data = ServiceAccess.getPluginService().list();
+		List<DataPlugin> data = ServiceAccess.getPluginService().list();
 		req.setAttribute("data", data);
 		req.getRequestDispatcher("/jsp/Plugin.jsp").forward(req, resp);
 	}

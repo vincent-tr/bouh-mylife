@@ -8,9 +8,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -114,22 +114,22 @@ public class DataAccess {
 		}
 	}
 
-	public Set<DataConfiguration> getConfigurationsActives() {
+	public List<DataConfiguration> getConfigurationsActives() {
 		log.log(level, "getConfigurationsActives()");
 		PreparedStatement pst = null;
 		ResultSet rs = null;
 		try {
 			pst = con
-					.prepareStatement("select * from core_configuration where conf_active = 1");
+					.prepareStatement("select * from core_configuration where conf_active = 1 order by conf_type, conf_date");
 			rs = pst.executeQuery();
 
-			Set<DataConfiguration> set = new HashSet<DataConfiguration>();
+			List<DataConfiguration> list = new ArrayList<DataConfiguration>();
 			while (rs.next()) {
 				DataConfiguration item = new DataConfiguration();
 				map(item, rs);
-				set.add(item);
+				list.add(item);
 			}
-			return set;
+			return list;
 
 		} catch (SQLException e) {
 			throw new DataException(e);
@@ -139,21 +139,21 @@ public class DataAccess {
 		}
 	}
 
-	public Set<DataConfiguration> getConfigurationsAll() {
+	public List<DataConfiguration> getConfigurationsAll() {
 		log.log(level, "getConfigurationsAll()");
 		PreparedStatement pst = null;
 		ResultSet rs = null;
 		try {
-			pst = con.prepareStatement("select * from core_configuration");
+			pst = con.prepareStatement("select * from core_configuration order by conf_type, conf_date");
 			rs = pst.executeQuery();
 
-			Set<DataConfiguration> set = new HashSet<DataConfiguration>();
+			List<DataConfiguration> list = new ArrayList<DataConfiguration>();
 			while (rs.next()) {
 				DataConfiguration item = new DataConfiguration();
 				map(item, rs);
-				set.add(item);
+				list.add(item);
 			}
-			return set;
+			return list;
 
 		} catch (SQLException e) {
 			throw new DataException(e);
@@ -269,22 +269,22 @@ public class DataAccess {
 		}
 	}
 
-	public Set<DataPlugin> getPluginsActives() {
+	public List<DataPlugin> getPluginsActives() {
 		log.log(level, "getPluginsActives()");
 		PreparedStatement pst = null;
 		ResultSet rs = null;
 		try {
 			pst = con
-					.prepareStatement("select * from core_plugin where plugin_active = 1");
+					.prepareStatement("select * from core_plugin where plugin_active = 1 order by plugin_date");
 			rs = pst.executeQuery();
 
-			Set<DataPlugin> set = new HashSet<DataPlugin>();
+			List<DataPlugin> list = new ArrayList<DataPlugin>();
 			while (rs.next()) {
 				DataPlugin item = new DataPlugin();
 				map(item, rs);
-				set.add(item);
+				list.add(item);
 			}
-			return set;
+			return list;
 
 		} catch (SQLException e) {
 			throw new DataException(e);
@@ -294,21 +294,21 @@ public class DataAccess {
 		}
 	}
 
-	public Set<DataPlugin> getPluginsAll() {
+	public List<DataPlugin> getPluginsAll() {
 		log.log(level, "getPluginsAll()");
 		PreparedStatement pst = null;
 		ResultSet rs = null;
 		try {
-			pst = con.prepareStatement("select * from core_plugin");
+			pst = con.prepareStatement("select * from core_plugin order by plugin_date");
 			rs = pst.executeQuery();
 
-			Set<DataPlugin> set = new HashSet<DataPlugin>();
+			List<DataPlugin> list = new ArrayList<DataPlugin>();
 			while (rs.next()) {
 				DataPlugin item = new DataPlugin();
 				map(item, rs);
-				set.add(item);
+				list.add(item);
 			}
-			return set;
+			return list;
 
 		} catch (SQLException e) {
 			throw new DataException(e);

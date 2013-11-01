@@ -1,6 +1,7 @@
 package org.mylife.home.core.services;
 
-import java.util.Set;
+import java.util.Date;
+import java.util.List;
 
 import org.mylife.home.core.data.DataAccess;
 import org.mylife.home.core.data.DataConfiguration;
@@ -21,7 +22,7 @@ public class ConfigurationService {
 	 * Obtention de toutes les configurations
 	 * @return
 	 */
-	public Set<DataConfiguration> list() {
+	public List<DataConfiguration> list() {
 		DataAccess access = new DataAccess();
 		try {
 			return access.getConfigurationsAll();
@@ -99,6 +100,8 @@ public class ConfigurationService {
 	public void create(DataConfiguration config) {
 		DataAccess access = new DataAccess();
 		try {
+			config.setDate(new Date());
+			config.setActive(false);
 			access.createConfiguration(config);
 		} finally {
 			access.close();
@@ -106,10 +109,10 @@ public class ConfigurationService {
 	}
 	
 	/**
-	 * Création d'une configuration à partir de l'export de structure d'un WebComponent
+	 * Création d'une configuration à partir du contenu uniquement
 	 * @param data
 	 */
-	public void createFromWebComponentStructure(byte[] data) {
+	public void createFromContents(byte[] data) {
 		throw new UnsupportedOperationException();
 	}
 }
