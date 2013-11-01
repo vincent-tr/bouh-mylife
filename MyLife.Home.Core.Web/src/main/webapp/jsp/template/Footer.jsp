@@ -13,6 +13,7 @@
 %>
 
 </div>
+</div>
 
 <div id="footer">
 	<%=WebTools.htmlEscape(String.format("%s %s (built : %s)",
