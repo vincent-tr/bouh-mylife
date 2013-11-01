@@ -14,24 +14,35 @@
 	</welcome-file-list>
 
 	<servlet>
-		<servlet-name>ConfigurationServlet</servlet-name>
-		<servlet-class>org.mylife.home.core.web.ConfigurationServlet</servlet-class>
+		<servlet-name>WebConsole</servlet-name>
+		<servlet-class>org.mylife.home.core.web.WebConsole</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	
+	<servlet>
+		<servlet-name>WebConfiguration</servlet-name>
+		<servlet-class>org.mylife.home.core.web.WebConfiguration</servlet-class>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 
 	<servlet>
-		<servlet-name>PluginServlet</servlet-name>
-		<servlet-class>org.mylife.home.core.web.PluginServlet</servlet-class>
+		<servlet-name>WebPlugin</servlet-name>
+		<servlet-class>org.mylife.home.core.web.WebPlugin</servlet-class>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 	
 	<servlet-mapping>
-		<servlet-name>ConfigurationServlet</servlet-name>
+		<servlet-name>WebConsole</servlet-name>
+		<url-pattern>/</url-pattern>
+	</servlet-mapping>
+		
+	<servlet-mapping>
+		<servlet-name>WebConfiguration</servlet-name>
 		<url-pattern>/configuration</url-pattern>
 	</servlet-mapping>
 		
 	<servlet-mapping>
-		<servlet-name>PluginServlet</servlet-name>
+		<servlet-name>WebPlugin</servlet-name>
 		<url-pattern>/plugin</url-pattern>
 	</servlet-mapping>
 </web-app>
