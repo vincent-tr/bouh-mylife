@@ -1,6 +1,7 @@
 package org.mylife.home.webcomponents;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -16,7 +17,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.JAXBException;
 
 import org.mylife.home.net.exchange.ExchangeManager;
-import org.mylife.home.net.exchange.XmlContainer;
+import org.mylife.home.net.exchange.XmlNetContainer;
 import org.mylife.home.net.exchange.XmlNetObject;
 
 /**
@@ -40,6 +41,7 @@ public class WebStructure extends HttpServlet {
 
 		Properties meProperties = WebTools.getConfig(this);
 		
+		String host = InetAddress.getLocalHost().getHostName();
 		String name = meProperties.getProperty("name");
 		String version = meProperties.getProperty("version");
 		String buildTimestamp = meProperties.getProperty("build.timestamp");
@@ -48,8 +50,8 @@ public class WebStructure extends HttpServlet {
 		Calendar cal = Calendar.getInstance();
 		String currentDate = dateFormat.format(cal.getTime());
 		
-		XmlContainer container = new XmlContainer();
-		container.componentsVersion = name + " " + version + " " + buildTimestamp;
+		XmlNetContainer container = new XmlNetContainer();
+		container.componentsVersion = name + " " + host + " " + version + " " + buildTimestamp;
 		container.documentVersion = currentDate;
 		
 		List<XmlNetObject> xmlComponents = new ArrayList<XmlNetObject>();
@@ -59,7 +61,7 @@ public class WebStructure extends HttpServlet {
 		}
 		container.components = xmlComponents.toArray(new XmlNetObject[xmlComponents.size()]);
 		
-		resp.setContentType("text/xml");
+		resp.setContentType("application/xml");
 		
 		try {
 			ExchangeManager.exportContainer(container, resp.getOutputStream());
