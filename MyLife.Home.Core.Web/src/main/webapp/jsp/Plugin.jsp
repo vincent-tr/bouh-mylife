@@ -7,7 +7,6 @@
 
 <%@include file="/jsp/template/Header.jsp" %>
 
-	<h2>Gestion des plugins</h2>
 	<table border="1">
 		<tr>
 			<th>Nom</th>

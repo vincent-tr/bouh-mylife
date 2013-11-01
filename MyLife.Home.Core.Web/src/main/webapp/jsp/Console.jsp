@@ -5,6 +5,4 @@
 
 <%@include file="/jsp/template/Header.jsp" %>
 
-	<h2>Console</h2>
-
 <%@include file="/jsp/template/Footer.jsp" %>

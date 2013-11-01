@@ -66,6 +66,7 @@ public class WebConsole extends HttpServlet {
 		//List<DataConfiguration> data = ServiceAccess.getConfigurationService()
 		//		.list();
 		//req.setAttribute("data", data);
+		req.setAttribute("title", "Console");
 		req.getRequestDispatcher("/jsp/Console.jsp").forward(req, resp);
 	}
 }

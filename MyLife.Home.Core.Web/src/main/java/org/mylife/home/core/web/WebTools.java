@@ -44,8 +44,18 @@ public class WebTools {
 		return formatDate(date, "yyyy-MM-dd HH:mm:ss");
 	}
 	
+	public static String servlet(PageContext context, String name) {
+		 String root = ((HttpServletRequest)context.getRequest()).getContextPath();
+		 return root + "/" + name;
+	}
+	
 	public static String image(PageContext context, String name) {
 		 String root = ((HttpServletRequest)context.getRequest()).getContextPath();
 		 return root + "/static/images/" + name;
+	}
+	
+	public static String style(PageContext context, String name) {
+		 String root = ((HttpServletRequest)context.getRequest()).getContextPath();
+		 return root + "/static/style/" + name;
 	}
 }

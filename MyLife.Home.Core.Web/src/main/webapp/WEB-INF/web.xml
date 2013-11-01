@@ -5,12 +5,7 @@
 	id="WebApp_ID" version="3.0">
 	<display-name>MyLife.Home.Core.Web</display-name>
 	<welcome-file-list>
-		<welcome-file>index.html</welcome-file>
-		<welcome-file>index.htm</welcome-file>
-		<welcome-file>index.jsp</welcome-file>
-		<welcome-file>default.html</welcome-file>
-		<welcome-file>default.htm</welcome-file>
-		<welcome-file>default.jsp</welcome-file>
+		<welcome-file>console</welcome-file>
 	</welcome-file-list>
 
 	<servlet>
@@ -33,7 +28,7 @@
 	
 	<servlet-mapping>
 		<servlet-name>WebConsole</servlet-name>
-		<url-pattern>/</url-pattern>
+		<url-pattern>/console</url-pattern>
 	</servlet-mapping>
 		
 	<servlet-mapping>
