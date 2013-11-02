@@ -169,6 +169,7 @@ table.table_render {
 }
 
 table.table_render tbody {
+	
 }
 
 table.table_render,table.table_render th,table.table_render td {
@@ -190,6 +191,32 @@ table.table_render tbody tr:nth-child(even) {
 
 table.table_render tbody tr:nth-child(odd) {
 	background: #CCCCFF;
+}
+
+table.form_format {
+	width: 100%;
+	border-collapse: collapse;
+}
+
+table.form_format,table.form_format td,table.form_format tr {
+	border: 0;
+}
+
+/* titre */
+table.form_format > tbody > tr > td:first-child {
+	width: 150px;
+}
+
+td.form_action {
+	height: 50px;
+	position: relative;
+}
+
+td.form_action > input {
+	position: absolute;
+	left: 50%;
+	margin-left: -12px;
+	bottom: 5px;
 }
 
 fieldset {
