@@ -43,7 +43,7 @@ public class WebTools {
 	 */
 	public static String formatError(Exception e) {
 		if(e == null)
-			return null;
+			return "";
 		return e.toString();
 	}
 	

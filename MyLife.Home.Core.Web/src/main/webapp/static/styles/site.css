@@ -207,6 +207,10 @@ table.form_format > tbody > tr > td:first-child {
 	width: 150px;
 }
 
+table.form_format > tbody > tr {
+	height: 30px;
+}
+
 td.form_action {
 	height: 50px;
 	position: relative;
