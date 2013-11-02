@@ -36,4 +36,18 @@ public class ServiceAccess {
 	public static PluginService getPluginService() {
 		return pluginService;
 	}
+
+	/**
+	 * Service de gestion du core
+	 */
+	private final static ManagerService managerService = new ManagerService();
+
+	/**
+	 * Service de gestion du core
+	 * 
+	 * @return
+	 */
+	public static ManagerService getManagerService() {
+		return managerService;
+	}
 }
