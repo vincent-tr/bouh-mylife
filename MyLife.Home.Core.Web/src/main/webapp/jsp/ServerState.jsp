@@ -3,6 +3,7 @@
 <%@ page import="java.util.Date"%>
 <%@ page import="org.mylife.home.core.web.WebTools"%>
 <%@ page import="org.mylife.home.core.web.model.ServerState"%>
+<%@ page import="org.mylife.home.core.web.model.Severity"%>
 <%
 	ServerState data = (ServerState) pageContext.getRequest()
 			.getAttribute("data");
@@ -33,6 +34,10 @@
 				title="Arrêt"><img
 					src="<%=WebTools.image(pageContext, data.isCanStop() ? "stop.png"
 					: "stop_disabled.png")%>" /></a></td>
+		</tr>
+		<tr>
+			<td>Dernière erreur :</td>
+			<td><span style="color: <%=WebTools.severityColor(Severity.ERROR)%>"><%=WebTools.formatError(data.getError())%></span></td>
 		</tr>
 	</tbody>
 </table>
