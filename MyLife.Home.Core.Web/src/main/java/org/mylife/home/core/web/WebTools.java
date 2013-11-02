@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.PageContext;
 
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.mylife.home.core.web.model.Severity;
 
 /**
  * Outils web
@@ -33,6 +34,58 @@ public class WebTools {
 	 */
 	public static String formatDate(Date date, String format) {
 		return new SimpleDateFormat(format).format(date);
+	}
+	
+	/**
+	 * Formattage d'erreur
+	 * @param e
+	 * @return
+	 */
+	public static String formatError(Exception e) {
+		if(e == null)
+			return null;
+		return e.toString();
+	}
+	
+	/**
+	 * Obtient le nom de l'image correspondant à la gravité donnée
+	 * @param context
+	 * @param severity
+	 * @return
+	 */
+	public static String severityImage(PageContext context, int severity) {
+		switch(severity) {
+		case Severity.HELP:
+			return image(context, "help.png");
+		case Severity.INFO:
+			return image(context, "info.png");
+		case Severity.WARNING:
+			return image(context, "warning.png");
+		case Severity.ERROR:
+			return image(context, "error.png");
+		default:
+			return null;
+		}
+	}
+	
+	/**
+	 * Obtient la couleur correspondant à la gravité donnée
+	 * @param severity
+	 * @return
+	 */
+	public static String severityColor(int severity) {
+		switch(severity) {
+		case Severity.HELP:
+			return "#0000FF";
+		case Severity.INFO:
+			return "#00CC00";
+		case Severity.WARNING:
+			return "#FF6600";
+		case Severity.ERROR:
+			return "#FF0000";
+		default:
+			return null;
+		}
 	}
 	
 	/**
