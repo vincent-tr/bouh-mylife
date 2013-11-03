@@ -22,6 +22,9 @@
 					<li><a href="#tabs-2"><img
 							src="<%=WebTools.image(pageContext, "application.png")%>" />Vue
 							des composants</a></li>
+					<li><a href="#tabs-3"><img
+							src="<%=WebTools.image(pageContext, "application.png")%>" />Vue
+							des plugins</a></li>
 				</ul>
 			</td>
 		</tr>
@@ -45,6 +48,22 @@
 
 						<div id="componentsState"></div>
 
+					</fieldset>
+				</div>
+				<div id="tabs-3">
+					<fieldset>
+						<legend>
+							<span>Vue des plugins</span>
+						</legend>
+
+						<div class="table_render_outer">
+							<div class="table_render_inner">
+								<table class="table_render">
+									<thead></thead>
+									<tbody></tbody>
+								</table>
+							</div>
+						</div>
 					</fieldset>
 				</div>
 			</td>
