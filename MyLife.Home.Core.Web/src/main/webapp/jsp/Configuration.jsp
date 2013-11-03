@@ -78,7 +78,7 @@
 															style="position: absolute; top: 2px; bottom: 8px; left: 2px; right: 40px;">
 															<textarea
 																style="resize: none; margin: 0; width: 100%; height: 100%;"
-																name="comment"><%=WebTools.htmlEscape(item.getComment())%></textarea>
+																name="comment"><%=WebTools.htmlEscape(item.getComment(), false)%></textarea>
 														</div>
 														<input
 															style="position: absolute; top: 50%; margin-top: -12px; right: 5px;"

@@ -31,7 +31,7 @@
 					<form method="post" action="?action=comment&id=<%= item.getId() %>">
 						<div style="position: relative; height: 70px; vertical-align: middle;">
 							<div style="position: absolute; top: 2px; bottom: 8px; left: 2px; right: 40px;">
-								<textarea style="resize: none; margin: 0; width: 100%; height: 100%;" name="comment"><%= WebTools.htmlEscape(item.getComment()) %></textarea>
+								<textarea style="resize: none; margin: 0; width: 100%; height: 100%;" name="comment"><%= WebTools.htmlEscape(item.getComment(), false) %></textarea>
 							</div>
 							<input style="position:absolute; top:50%; margin-top:-12px; right: 5px;" type="image" src="<%= WebTools.image(pageContext, "modify.png") %>" title="Mise à jour" />
 						</div>
