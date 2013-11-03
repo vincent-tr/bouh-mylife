@@ -19,12 +19,15 @@ import org.mylife.home.net.exchange.XmlNetContainer;
  * @author trumpffv
  *
  */
-public class ConfigurationService {
+public class ConfigurationService implements Service {
 
 	/* internal */ ConfigurationService() {
 		
 	}
 	
+	public void terminate() {
+		
+	}
 
 	/**
 	 * Obtention de toutes les configurations

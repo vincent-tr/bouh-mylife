@@ -1,5 +1,7 @@
 package org.mylife.home.core.services;
 
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Accès aux services
@@ -10,9 +12,38 @@ package org.mylife.home.core.services;
 public class ServiceAccess {
 
 	/**
+	 * Liste des services utilisés
+	 */
+	private static List<Service> services;
+
+	/**
+	 * Enregistrement des services
+	 * 
+	 * @param service
+	 * @return
+	 */
+	private synchronized static <T extends Service> T register(T service) {
+		if (services == null)
+			services = new ArrayList<Service>();
+		services.add(service);
+		return service;
+	}
+
+	/**
+	 * Fin d'utilisation
+	 */
+	public synchronized static void terminate() {
+		if (services != null) {
+			for (Service service : services) {
+				service.terminate();
+			}
+		}
+	}
+
+	/**
 	 * Service de gestion des configurations
 	 */
-	private final static ConfigurationService configurationService = new ConfigurationService();
+	private final static ConfigurationService configurationService = register(new ConfigurationService());
 
 	/**
 	 * Service de gestion des configurations
@@ -26,7 +57,7 @@ public class ServiceAccess {
 	/**
 	 * Service de gestion des plugins
 	 */
-	private final static PluginService pluginService = new PluginService();
+	private final static PluginService pluginService = register(new PluginService());
 
 	/**
 	 * Service de gestion des plugins
@@ -40,7 +71,7 @@ public class ServiceAccess {
 	/**
 	 * Service de gestion du core
 	 */
-	private final static ManagerService managerService = new ManagerService();
+	private final static ManagerService managerService = register(new ManagerService());
 
 	/**
 	 * Service de gestion du core

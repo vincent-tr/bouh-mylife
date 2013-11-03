@@ -9,6 +9,12 @@
 	</welcome-file-list>
 
 	<servlet>
+		<servlet-name>AutoStartStopManagerService</servlet-name>
+		<servlet-class>org.mylife.home.core.web.AutoStartStopManagerService</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	
+	<servlet>
 		<servlet-name>WebConsole</servlet-name>
 		<servlet-class>org.mylife.home.core.web.WebConsole</servlet-class>
 		<load-on-startup>1</load-on-startup>
