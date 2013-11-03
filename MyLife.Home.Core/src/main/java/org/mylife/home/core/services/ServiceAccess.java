@@ -69,6 +69,20 @@ public class ServiceAccess {
 	}
 
 	/**
+	 * Service de gestion de la persistance des plugins
+	 */
+	private final static PluginPersistanceService pluginPersistanceService = register(new PluginPersistanceService());
+
+	/**
+	 * Service de gestion de la persistance des plugins
+	 * 
+	 * @return
+	 */
+	public static PluginPersistanceService getPluginPersistanceService() {
+		return pluginPersistanceService;
+	}
+
+	/**
 	 * Service de gestion du core
 	 */
 	private final static ManagerService managerService = register(new ManagerService());

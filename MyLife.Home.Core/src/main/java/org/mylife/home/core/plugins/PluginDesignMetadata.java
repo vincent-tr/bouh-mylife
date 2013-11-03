@@ -6,5 +6,6 @@ package org.mylife.home.core.plugins;
  *
  */
 public class PluginDesignMetadata {
+	// TODO
 
 }

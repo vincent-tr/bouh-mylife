@@ -1,5 +1,7 @@
 package org.mylife.home.core.web;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -7,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.PageContext;
 
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.mylife.home.core.web.model.Severity;
 
 /**
@@ -23,7 +26,11 @@ public class WebTools {
 	 * @return
 	 */
 	public static String htmlEscape(String input) {
-		return StringEscapeUtils.escapeHtml4(input);
+		String value = input;
+		value = StringEscapeUtils.escapeHtml4(value);
+		value = value.replace("\n", "<br />\n");
+		value = value.replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;");
+		return value;
 	}
 	
 	/**
@@ -44,7 +51,10 @@ public class WebTools {
 	public static String formatError(Exception e) {
 		if(e == null)
 			return "";
-		return e.toString();
+		
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		ExceptionUtils.printRootCauseStackTrace(e, new PrintStream(baos));
+		return htmlEscape(baos.toString());
 	}
 	
 	/**
