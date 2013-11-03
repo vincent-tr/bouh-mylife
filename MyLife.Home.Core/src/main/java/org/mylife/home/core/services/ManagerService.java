@@ -79,6 +79,29 @@ public class ManagerService implements Service {
 
 	private void setState(int state) {
 		this.state = state;
+		log.info("Setting level to : " + getStateString());
+	}
+
+	/**
+	 * Obtention de l'état en chaine
+	 * 
+	 * @return
+	 */
+	public String getStateString() {
+		switch (state) {
+		case STATE_STOPPED:
+			return "STOPPED";
+		case STATE_ERROR:
+			return "ERROR";
+		case STATE_RUNNING:
+			return "RUNNING";
+		case STATE_STARTING:
+			return "STARTING";
+		case STATE_STOPPING:
+			return "STOPPING";
+		default:
+			throw new UnsupportedOperationException();
+		}
 	}
 
 	/**

@@ -260,8 +260,11 @@ class NetWatcher implements IRCEventListener {
 	public void onReply(int num, String value, String msg) {
 		switch(num) {
 		case IRCConstants.RPL_NAMREPLY:
-			String chan = getInternalChannel(value);
-			StringTokenizer tokenizer = new StringTokenizer(msg);
+			StringTokenizer tokenizer = new StringTokenizer(value);
+			tokenizer.nextToken(); // nick
+			tokenizer.nextToken(); // type de channel, = pour public channel
+			String chan = getInternalChannel(tokenizer.nextToken()); // nom du chan
+			tokenizer = new StringTokenizer(msg);
 			while(tokenizer.hasMoreTokens()) {
 				String nick = tokenizer.nextToken();
 				if("~&@%+".indexOf(nick.charAt(0)) > -1)

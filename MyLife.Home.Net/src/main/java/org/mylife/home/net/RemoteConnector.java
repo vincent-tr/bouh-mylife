@@ -2,6 +2,7 @@ package org.mylife.home.net;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringTokenizer;
 import java.util.logging.Logger;
 
 import org.mylife.home.net.structure.NetAction;
@@ -155,6 +156,22 @@ class RemoteConnector implements Connector, ActionExecutor {
 		return null;
 	}
 
+	private static void setNickAttributes(String nick, RemoteConnector connector) {
+		
+		// parsing des éléménts du nouveau nick
+		StringTokenizer tokenizer = new StringTokenizer(nick, "|");
+		
+		// le 1er token est l'id, le reste les attributs
+		tokenizer.nextToken();
+		List<String> attributes = new ArrayList<String>();
+		while(tokenizer.hasMoreTokens()) {
+			attributes.add(tokenizer.nextToken());
+		}
+		
+		if (attributes.size() > 0)
+			connector.setAttributes(attributes);
+	}
+	
 	/**
 	 * Connexion
 	 * 
@@ -166,7 +183,9 @@ class RemoteConnector implements Connector, ActionExecutor {
 			RemoteConnector connector = findByNickChannel(nick, channel);
 			if (connector == null)
 				return;
+			
 			connector.container.setConnected(true);
+			setNickAttributes(nick, connector);
 		}
 	}
 
@@ -181,17 +200,8 @@ class RemoteConnector implements Connector, ActionExecutor {
 			RemoteConnector connector = findByNickChannel(oldNick, null);
 			if (connector == null)
 				return;
-
-			// parsing des éléménts du nouveau nick
-			String[] split = newNick.split("|");
-			List<String> attributes = new ArrayList<String>();
-			// le 1er token est l'id, le reste les attributs
-			for (int i = 1; i < split.length; i++) {
-				attributes.add(split[i]);
-			}
-
-			if (attributes.size() > 0)
-				connector.setAttributes(attributes);
+			
+			setNickAttributes(newNick, connector);
 		}
 	}
 
