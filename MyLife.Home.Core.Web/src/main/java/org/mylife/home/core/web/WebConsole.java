@@ -43,6 +43,8 @@ public class WebConsole extends HttpServlet {
 		String action = req.getParameter("action");
 		if ("serverState".equals(action)) {
 			serverState(req, resp);
+		} else if ("componentsState".equals(action)) {
+			componentsState(req, resp);
 		} else if ("start".equals(action)) {
 			start(req, resp);
 		} else if ("stop".equals(action)) {
@@ -98,20 +100,29 @@ public class WebConsole extends HttpServlet {
 		req.setAttribute("data", serverState);
 		req.getRequestDispatcher("/jsp/ServerState.jsp").forward(req, resp);
 	}
+	
+	private void componentsState(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+		
+		//req.setAttribute("data", serverState);
+		req.getRequestDispatcher("/jsp/ComponentsState.jsp").forward(req, resp);
+	}
 
 	private void start(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		
+
 		ServiceAccess.getManagerService().start();
-		
-		resp.sendRedirect(req.getRequestURI());	}
+
+		resp.sendRedirect(req.getRequestURI());
+	}
 
 	private void stop(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		
+
 		ServiceAccess.getManagerService().stop();
-		
-		resp.sendRedirect(req.getRequestURI());	}
+
+		resp.sendRedirect(req.getRequestURI());
+	}
 
 	private void index(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {

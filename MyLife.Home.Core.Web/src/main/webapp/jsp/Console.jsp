@@ -5,6 +5,12 @@
 
 <%@include file="/jsp/template/Header.jsp"%>
 
+<script>
+	$(function() {
+		$(".tabs").tabs();
+	});
+</script>
+
 <div class="tabs">
 	<table>
 		<tr>
@@ -13,6 +19,9 @@
 					<li><a href="#tabs-1"><img
 							src="<%=WebTools.image(pageContext, "view.png")%>" />Etat du
 							serveur</a></li>
+					<li><a href="#tabs-2"><img
+							src="<%=WebTools.image(pageContext, "application.png")%>" />Vue
+							des composants</a></li>
 				</ul>
 			</td>
 		</tr>
@@ -28,16 +37,28 @@
 
 					</fieldset>
 				</div>
+				<div id="tabs-2">
+					<fieldset>
+						<legend>
+							<span>Vue des composants</span>
+						</legend>
+
+						<div id="componentsState"></div>
+
+					</fieldset>
+				</div>
 			</td>
 		</tr>
 	</table>
 </div>
 
 <script>
-$('#serverState').load('<%= WebTools.servlet(pageContext, "console") %>?action=serverState');
+$('#serverState').load('<%=WebTools.servlet(pageContext, "console")%>?action=serverState');
+$('#componentsState').load('<%=WebTools.servlet(pageContext, "console")%>?action=componentsState');
 self.setInterval(function() {
-	$('#serverState').load('<%= WebTools.servlet(pageContext, "console") %>?action=serverState');
-}, 5000);
+	$('#serverState').load('<%=WebTools.servlet(pageContext, "console")%>?action=serverState');
+	$('#componentsState').load('<%=WebTools.servlet(pageContext, "console")%>?action=componentsState');
+					}, 5000);
 </script>
 
 <%@include file="/jsp/template/Footer.jsp"%>
