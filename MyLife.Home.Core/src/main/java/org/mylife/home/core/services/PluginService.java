@@ -10,12 +10,15 @@ import org.mylife.home.core.data.DataPlugin;
  * @author pumbawoman
  *
  */
-public class PluginService {
+public class PluginService implements Service {
 
 	/* internal */ PluginService() {
 		
 	}
 	
+	public void terminate() {
+		
+	}
 
 	/**
 	 * Obtention de tous les plugins

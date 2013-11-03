@@ -17,10 +17,12 @@ public interface Plugin {
 
 	/**
 	 * Fin d'utilisation
-	 * @param context
 	 */
-	public void terminate(PluginContext context);
+	public void terminate();
 
-	// TODO : obtention des metadata de config au design
-	
+	/**
+	 * Obtention des metadata de config au design
+	 * @return
+	 */
+	public PluginDesignMetadata getDesignMetadata();
 }

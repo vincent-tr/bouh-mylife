@@ -18,12 +18,6 @@ public interface PluginContext {
 	public String getId();
 	
 	/**
-	 * Publication d'un objet
-	 * @param obj
-	 */
-	public void publishNetObject(NetObject obj);
-	
-	/**
 	 * Le plugin a été instancié pour servir à l'exécution
 	 */
 	public final static int PURPOSE_RUNTIME = 1;
@@ -38,6 +32,12 @@ public interface PluginContext {
 	 * @return
 	 */
 	public int getPurpose();
+	
+	/**
+	 * Publication d'un objet
+	 * @param obj
+	 */
+	public void publishObject(NetObject obj);
 	
 	/**
 	 * Obtention de la configuration du plugin
