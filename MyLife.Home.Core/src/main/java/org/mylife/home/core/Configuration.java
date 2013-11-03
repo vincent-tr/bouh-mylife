@@ -28,7 +28,7 @@ public final class Configuration {
 	private Configuration() {
 		props = new Properties();
 		try {
-			props.load(this.getClass().getClassLoader().getResourceAsStream("config.properties"));
+			props.load(this.getClass().getClassLoader().getResourceAsStream("core.properties"));
 		} catch (IOException e) {
 			log.log(Level.SEVERE, "Configuration read error", e);
 		}
