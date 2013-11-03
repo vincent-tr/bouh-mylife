@@ -147,11 +147,15 @@ public class ExchangeManager {
 
 	private static NetMember unmarshal(XmlNetMember xml) {
 		if (xml instanceof XmlNetAttribute) {
-			return new NetAttribute(xml.index, xml.name, unmarshal(((XmlNetAttribute) xml).type)); 
+			return new NetAttribute(xml.index, xml.name,
+					unmarshal(((XmlNetAttribute) xml).type));
 		} else if (xml instanceof XmlNetAction) {
 			List<NetType> netArgs = new ArrayList<NetType>();
-			for (XmlNetType xmlArg : ((XmlNetAction) xml).arguments)
-				netArgs.add(unmarshal(xmlArg));
+			XmlNetType[] arguments = ((XmlNetAction) xml).arguments;
+			if (arguments != null) {
+				for (XmlNetType xmlArg : arguments)
+					netArgs.add(unmarshal(xmlArg));
+			}
 			return new NetAction(xml.index, xml.name, netArgs);
 		} else {
 			throw new UnsupportedOperationException();
@@ -160,7 +164,7 @@ public class ExchangeManager {
 
 	private static NetType unmarshal(XmlNetType xml) {
 		if (xml instanceof XmlNetRange) {
-			XmlNetRange xmlRange = (XmlNetRange)xml;
+			XmlNetRange xmlRange = (XmlNetRange) xml;
 			return new NetRange(xmlRange.min, xmlRange.max);
 		} else if (xml instanceof XmlNetEnum) {
 			return new NetEnum(((XmlNetEnum) xml).values);

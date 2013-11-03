@@ -16,6 +16,7 @@ public final class NetRepository {
 	
 	public static final String CHANNEL_HARDWARE = "mylife-home";
 	public static final String CHANNL_UI = "mylife-home-ui";
+	public static final String CHANNEL_DEBUG = "mylife-home-debug";
 	
 	private final static Collection<NetContainer> objects = new ArrayList<NetContainer>();
 	
