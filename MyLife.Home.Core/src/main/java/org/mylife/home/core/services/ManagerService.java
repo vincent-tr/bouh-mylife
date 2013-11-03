@@ -1,10 +1,24 @@
 package org.mylife.home.core.services;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.mylife.home.core.data.DataPluginPersistance;
+import org.mylife.home.core.exchange.XmlCoreComponent;
+import org.mylife.home.core.exchange.XmlCoreContainer;
+import org.mylife.home.core.plugins.PluginRuntimeContext;
+import org.mylife.home.net.NetContainer;
+import org.mylife.home.net.NetObject;
+import org.mylife.home.net.NetRepository;
+import org.mylife.home.net.exchange.XmlNetContainer;
+import org.mylife.home.net.exchange.XmlNetObject;
 
 /**
  * Service de gestion
@@ -31,6 +45,7 @@ public class ManagerService implements Service {
 
 	}
 
+	@Override
 	public void terminate() {
 		stop();
 		commandExecution.shutdown();
@@ -159,19 +174,121 @@ public class ManagerService implements Service {
 		setState(STATE_STOPPED);
 	}
 
+	private final List<NetContainer> remoteObjects = new ArrayList<NetContainer>();
+	private final List<NetContainer> internalObjects = new ArrayList<NetContainer>();
+
+	private final List<PluginRuntimeContext> plugins = new ArrayList<PluginRuntimeContext>();
+
+	// TODO : links
+
 	private void executeStart() {
-		try {
-			Thread.sleep(10000);
-		} catch (InterruptedException e) {
+		// Lecture de la configuration
+		List<XmlNetContainer> netList = new ArrayList<XmlNetContainer>();
+		List<XmlCoreContainer> coreList = new ArrayList<XmlCoreContainer>();
+		ServiceAccess.getConfigurationService().loadActives(netList, coreList);
+
+		// Création des objets distants
+		for (XmlNetContainer net : netList) {
+			for (XmlNetObject netComp : net.components) {
+				NetObject obj = org.mylife.home.net.exchange.ExchangeManager
+						.unmarshal(netComp);
+				NetContainer container = NetRepository.register(obj,
+						NetRepository.CHANNEL_HARDWARE, false);
+				remoteObjects.add(container);
+			}
 		}
 
+		// Création des plugins
+		for (XmlCoreContainer core : coreList) {
+			for (XmlCoreComponent coreComp : core.components) {
+				PluginRuntimeContext context = new PluginRuntimeContext(
+						coreComp);
+				plugins.add(context);
+			}
+		}
+
+		// TODO : create links
 	}
 
 	private void executeStop() {
-		try {
-			Thread.sleep(10000);
-		} catch (InterruptedException e) {
+
+		// TODO : unload links
+
+		// Déchargement des plugins
+		for (PluginRuntimeContext plugin : plugins) {
+			plugin.terminate();
+		}
+		// normalement il ne doit plus rester d'objets après
+		for (NetContainer container : internalObjects) {
+			log.severe("Internal NetObject remaining : "
+					+ container.getObject().getId());
+			NetRepository.unregister(container);
 		}
 
+		// Déchargement des objets distants
+		for (NetContainer container : remoteObjects) {
+			NetRepository.unregister(container);
+		}
+	}
+
+	/**
+	 * Réservé à PluginRuntimeContext
+	 * 
+	 * @param context
+	 * @param obj
+	 */
+	public NetContainer registerPluginObject(PluginRuntimeContext context,
+			NetObject obj) {
+		return NetRepository.register(obj, NetRepository.CHANNEL_DEBUG, true);
+	}
+
+	/**
+	 * Réservé à PluginRuntimeContext
+	 * 
+	 * @param context
+	 * @param obj
+	 */
+	public void unregisterPluginObject(PluginRuntimeContext context,
+			NetContainer obj) {
+		NetRepository.unregister(obj);
+	}
+
+	/**
+	 * Réservé à PluginRuntimeContext
+	 * 
+	 * @param context
+	 * @return
+	 */
+	public Map<String, String> getPluginPersistance(PluginRuntimeContext context) {
+		List<DataPluginPersistance> list = ServiceAccess
+				.getPluginPersistanceService().getPersistanceByComponentId(
+						context.getId());
+		Map<String, String> map = new HashMap<String, String>();
+		for (DataPluginPersistance item : list) {
+			map.put(item.getKey(), item.getValue());
+		}
+		return map;
+	}
+
+	/**
+	 * Réservé à PluginRuntimeContext
+	 * 
+	 * @param context
+	 * @param data
+	 */
+	public void savePluginPersistance(PluginRuntimeContext context,
+			Map<String, String> data) {
+		List<DataPluginPersistance> list = null;
+		if (data != null) {
+			list = new ArrayList<DataPluginPersistance>();
+			for (Map.Entry<String, String> item : data.entrySet()) {
+				DataPluginPersistance pp = new DataPluginPersistance();
+				pp.setKey(item.getKey());
+				pp.setValue(pp.getValue());
+				list.add(pp);
+			}
+		}
+		ServiceAccess.getPluginPersistanceService().updateByComponentId(
+				context.getId(), list);
 	}
 }

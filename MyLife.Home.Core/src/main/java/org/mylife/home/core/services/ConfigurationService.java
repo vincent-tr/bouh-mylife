@@ -16,21 +16,79 @@ import org.mylife.home.net.exchange.XmlNetContainer;
 
 /**
  * Service de gestion des configurations
+ * 
  * @author trumpffv
- *
+ * 
  */
 public class ConfigurationService implements Service {
 
-	/* internal */ ConfigurationService() {
-		
+	/* internal */ConfigurationService() {
+
 	}
-	
+
+	@Override
 	public void terminate() {
-		
+
+	}
+
+	/**
+	 * Lecture des configurations actives
+	 * 
+	 * @param netList
+	 * @param coreList
+	 */
+	public void loadActives(List<XmlNetContainer> netList,
+			List<XmlCoreContainer> coreList) {
+		List<DataConfiguration> list = listActives();
+		for (DataConfiguration item : list) {
+			if (tryReadNet(item.getContent(), netList))
+				continue;
+			if (tryReadCore(item.getContent(), coreList))
+				continue;
+			throw new UnsupportedOperationException(
+					"Invalid configuration content wirth id : " + item.getId());
+		}
+	}
+
+	private boolean tryReadNet(byte[] data, List<XmlNetContainer> netList) {
+		try {
+			XmlNetContainer container = org.mylife.home.net.exchange.ExchangeManager
+					.importContainer(new ByteArrayInputStream(data));
+			netList.add(container);
+			return true;
+		} catch (JAXBException e) {
+			return false;
+		}
+	}
+
+	private boolean tryReadCore(byte[] data, List<XmlCoreContainer> coreList) {
+		try {
+			XmlCoreContainer container = org.mylife.home.core.exchange.ExchangeManager
+					.importContainer(new ByteArrayInputStream(data));
+			coreList.add(container);
+			return true;
+		} catch (JAXBException e) {
+			return false;
+		}
+	}
+
+	/**
+	 * Obtention des configurations actives
+	 * 
+	 * @return
+	 */
+	private List<DataConfiguration> listActives() {
+		DataAccess access = new DataAccess();
+		try {
+			return access.getConfigurationsActives();
+		} finally {
+			access.close();
+		}
 	}
 
 	/**
 	 * Obtention de toutes les configurations
+	 * 
 	 * @return
 	 */
 	public List<DataConfiguration> list() {
@@ -44,6 +102,7 @@ public class ConfigurationService implements Service {
 
 	/**
 	 * Obtention d'une configuration
+	 * 
 	 * @param id
 	 * @return
 	 */
@@ -59,6 +118,7 @@ public class ConfigurationService implements Service {
 
 	/**
 	 * Changement du commentaire d'une configuration
+	 * 
 	 * @param id
 	 * @param comment
 	 */
@@ -75,6 +135,7 @@ public class ConfigurationService implements Service {
 
 	/**
 	 * Changement de l'activation d'une configuration
+	 * 
 	 * @param id
 	 * @param active
 	 */
@@ -91,6 +152,7 @@ public class ConfigurationService implements Service {
 
 	/**
 	 * Suppression d'une configuration
+	 * 
 	 * @param id
 	 */
 	public void delete(int id) {
@@ -106,6 +168,7 @@ public class ConfigurationService implements Service {
 
 	/**
 	 * Création d'une configuration
+	 * 
 	 * @param config
 	 */
 	public void create(DataConfiguration config) {
@@ -118,63 +181,70 @@ public class ConfigurationService implements Service {
 			access.close();
 		}
 	}
-	
+
 	/**
 	 * Création d'une configuration à partir du contenu uniquement
+	 * 
 	 * @param data
 	 */
 	public void createFromContents(byte[] data) {
 		// tentative de création en net
 		DataConfiguration config = null;
-		
+
 		config = tryReadNet(data);
-		if(config != null) {
+		if (config != null) {
 			create(config);
 			return;
 		}
 
 		config = tryReadCore(data);
-		if(config != null) {
+		if (config != null) {
 			create(config);
 			return;
 		}
-		
+
 		throw new UnsupportedOperationException("Invalid file");
 	}
-	
+
 	private DataConfiguration tryReadNet(byte[] data) {
 		try {
-			XmlNetContainer container = org.mylife.home.net.exchange.ExchangeManager.importContainer(new ByteArrayInputStream(data));
-			
+			XmlNetContainer container = org.mylife.home.net.exchange.ExchangeManager
+					.importContainer(new ByteArrayInputStream(data));
+
 			DataConfiguration config = new DataConfiguration();
 			config.setType("net");
 			config.setContent(data);
-			config.setComment("componentsVersion : " + container.componentsVersion + "\ndocumentVersion : " + container.documentVersion);
+			config.setComment("componentsVersion : "
+					+ container.componentsVersion + "\ndocumentVersion : "
+					+ container.documentVersion);
 			return config;
-			
-		} catch(JAXBException e) {
+
+		} catch (JAXBException e) {
 			return null;
 		}
 	}
-	
+
 	private DataConfiguration tryReadCore(byte[] data) {
 		try {
-			XmlCoreContainer container = org.mylife.home.core.exchange.ExchangeManager.importContainer(new ByteArrayInputStream(data));
+			XmlCoreContainer container = org.mylife.home.core.exchange.ExchangeManager
+					.importContainer(new ByteArrayInputStream(data));
 
 			DataConfiguration config = new DataConfiguration();
 			config.setType("core");
 			config.setContent(data);
-			config.setComment("documentName : " + container.documentName + "\ndocumentVersion : " + container.documentVersion);
+			config.setComment("documentName : " + container.documentName
+					+ "\ndocumentVersion : " + container.documentVersion);
 			return config;
-		} catch(JAXBException e) {
+		} catch (JAXBException e) {
 			return null;
 		}
 	}
-	
+
 	/**
 	 * Création d'une configuration à partir d'une url de contenu
+	 * 
 	 * @param url
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public void createFromContentsUrl(String url) throws IOException {
 		byte[] data = IOUtils.toByteArray(new URL(url).openStream());
