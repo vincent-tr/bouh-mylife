@@ -2,8 +2,10 @@ package org.mylife.home.core.services;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -204,11 +206,30 @@ public class ManagerService implements Service {
 
 	// TODO : links
 
+	private void checkId(Set<String> ids, String id) {
+		if (!ids.add(id))
+			throw new UnsupportedOperationException("An object with id '" + id
+					+ "' already exists");
+	}
+
 	private void executeStart() {
 		// Lecture de la configuration
 		List<XmlNetContainer> netList = new ArrayList<XmlNetContainer>();
 		List<XmlCoreContainer> coreList = new ArrayList<XmlCoreContainer>();
 		ServiceAccess.getConfigurationService().loadActives(netList, coreList);
+
+		// Vérification que chaque id soit unique
+		Set<String> ids = new HashSet<String>();
+		for (XmlNetContainer net : netList) {
+			for (XmlNetObject netComp : net.components) {
+				checkId(ids, netComp.id);
+			}
+		}
+		for (XmlCoreContainer core : coreList) {
+			for (XmlCoreComponent coreComp : core.components) {
+				checkId(ids, coreComp.id);
+			}
+		}
 
 		// Création des objets distants
 		for (XmlNetContainer net : netList) {
