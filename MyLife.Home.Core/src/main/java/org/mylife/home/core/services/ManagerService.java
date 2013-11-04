@@ -207,9 +207,10 @@ public class ManagerService implements Service {
 	// TODO : links
 
 	private void checkId(Set<String> ids, String id) {
-		if (!ids.add(id))
-			throw new UnsupportedOperationException("An object with id '" + id
-					+ "' already exists");
+		if (!ids.add(id)) {
+			String message = "An object with id '" + id + "' already exists";
+			throw new UnsupportedOperationException(message);
+		}
 	}
 
 	private void executeStart() {
