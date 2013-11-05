@@ -30,7 +30,7 @@ import org.mylife.home.net.hub.irc_p10.Util;
 /**
  * @author markhale
  */
-public class PrivMsg extends jircd.irc.commands.PrivMsg {
+public class PrivMsg extends org.mylife.home.net.hub.irc.commands.PrivMsg {
 	protected User findUser(Network network, String nick) {
 		return (User_P10) Util.findSource(network, nick);
 	}

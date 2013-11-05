@@ -36,7 +36,7 @@ import org.mylife.home.net.hub.irc_p10.Util;
 /**
  * @author markhale
  */
-public class UserCommand extends jircd.irc.commands.UserCommand {
+public class UserCommand extends org.mylife.home.net.hub.irc.commands.UserCommand {
 	public UserCommand(jIRCdMBean jircd) {
 		super(jircd);
 	}

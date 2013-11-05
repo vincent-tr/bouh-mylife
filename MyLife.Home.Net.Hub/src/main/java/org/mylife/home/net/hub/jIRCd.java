@@ -42,6 +42,7 @@ import java.util.Properties;
 import java.util.Timer;
 import java.util.jar.JarFile;
 import java.util.jar.JarEntry;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.net.ServerSocketFactory;
@@ -155,7 +156,7 @@ public class jIRCd implements jIRCdMBean {
 		network = new Network(settings.getProperty("jircd.networkName"));
 		final String serverName = settings.getProperty("jircd.serverName", "dumb.admin");
 		if(serverName.indexOf('.') == -1)
-			logger.warn("The server name should contain at least one dot, e.g. "+serverName+".net");
+			logger.log(Level.WARNING, "The server name should contain at least one dot, e.g. "+serverName+".net");
 		final String desc = settings.getProperty("jircd.description", "dumb.admin");
 		String tokenProperty = settings.getProperty("jircd.token");
 		int token = 0;
@@ -163,12 +164,12 @@ public class jIRCd implements jIRCdMBean {
 			try {
 				token = Integer.parseInt(tokenProperty);
 			} catch(NumberFormatException nfe) {
-				logger.warn("Invalid server token", nfe);
+				logger.log(Level.WARNING, "Invalid server token", nfe);
 				tokenProperty = null;
 			}
 		}
 		if(tokenProperty == null) {
-			token = jircd.irc_p10.Util.randomServerToken();
+			token = org.mylife.home.net.hub.irc_p10.Util.randomServerToken();
 			logger.info("Generated server token: "+token);
 		}
 		thisServer = new Server_P10(serverName, token, desc, network);
@@ -200,13 +201,13 @@ public class jIRCd implements jIRCdMBean {
 					try {
 						port = Integer.parseInt(addressPort.substring(pos+1));
 					} catch(NumberFormatException nfe) {
-						logger.warn("Invalid port: "+port, nfe);
+						logger.log(Level.WARNING, "Invalid port: "+port, nfe);
 						continue;
 					}
 				} else {
 					address = addressPort;
 				}
-				String[] params = jircd.irc.Util.split((String) entry.getValue(), ',');
+				String[] params = org.mylife.home.net.hub.irc.Util.split((String) entry.getValue(), ',');
 				if(params.length > 0) {
 					if(params[0].equals("jircd.irc.Listener")) {
 						ServerSocketFactory factory;
@@ -217,7 +218,7 @@ public class jIRCd implements jIRCdMBean {
 								try {
 									factory = (ServerSocketFactory) Class.forName(params[1]).newInstance();
 								} catch(Exception e) {
-									logger.warn("Could not instantiate factory: "+params[1], e);
+									logger.log(Level.WARNING, "Could not instantiate factory: "+params[1], e);
 									continue;
 								}
 							}
@@ -226,10 +227,10 @@ public class jIRCd implements jIRCdMBean {
 						}
 						listeners.add(new Listener(this, address, port, factory));
 					} else {
-						logger.warn("Unrecognised listener class: "+params[0]);
+						logger.log(Level.WARNING, "Unrecognised listener class: "+params[0]);
 					}
 				} else {
-					logger.warn("No listener specified");
+					logger.log(Level.WARNING, "No listener specified");
 				}
 			} else if(key.startsWith("jircd.oper.")) {
 				String nameHost = key.substring("jircd.oper.".length());
@@ -260,7 +261,7 @@ public class jIRCd implements jIRCdMBean {
 				URLClassLoader loader = URLClassLoader.newInstance(new URL[] {jarFile.toURL()});
 				loadPlugin(new JarFile(jarFile), loader);
 			} catch(IOException ioe) {
-				logger.warn("Could not load plugin "+jarFile, ioe);
+				logger.log(Level.WARNING, "Could not load plugin "+jarFile, ioe);
 			}
 		}
 	}
@@ -286,7 +287,7 @@ public class jIRCd implements jIRCdMBean {
 						logger.info("...installed "+command.getName()+" ("+className+")");
 					}
 				} catch(Exception ex) {
-					logger.warn("Could not load class "+className, ex);
+					logger.log(Level.WARNING, "Could not load class "+className, ex);
 				}
 			}
 		}
@@ -319,7 +320,7 @@ public class jIRCd implements jIRCdMBean {
 				logger.info("..." + listener.toString() + "...");
 			} else {
 				iter.remove();
-				logger.warn("..." + listener.toString() + " (FAILED)...");
+				logger.log(Level.WARNING, "..." + listener.toString() + " (FAILED)...");
 			}
 		}
 		logger.info("...complete");
@@ -421,7 +422,7 @@ public class jIRCd implements jIRCdMBean {
 		if (command == null) {
 			// Unknown command
 			Util.sendUnknownCommandError(src, cmdName);
-			logger.debug("Unknown command: " + message.toString());
+			logger.finest("Unknown command: " + message.toString());
 			return;
 		}
 
@@ -439,7 +440,7 @@ public class jIRCd implements jIRCdMBean {
 			Util.checkCommandPermission(command);
 			command.invoke(src, params);
 		} catch (RuntimeException e) {
-			logger.warn("Error invoking method in " + command.getClass() + " for command " + cmdName, e);
+			logger.log(Level.WARNING, "Error invoking method in " + command.getClass() + " for command " + cmdName, e);
 		}
 	}
 

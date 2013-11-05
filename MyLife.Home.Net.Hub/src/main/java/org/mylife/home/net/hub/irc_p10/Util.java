@@ -87,10 +87,10 @@ public final class Util {
 	private Util() {}
 
 	public static int randomServerToken() {
-		return (jircd.irc.Util.RANDOM.nextInt() & SERVER_TOKEN_MASK);
+		return (org.mylife.home.net.hub.irc.Util.RANDOM.nextInt() & SERVER_TOKEN_MASK);
 	}
 	public static int randomUserToken(Server server) {
-		return (server.getToken() << 18) + (jircd.irc.Util.RANDOM.nextInt() & USER_TOKEN_MASK);
+		return (server.getToken() << 18) + (org.mylife.home.net.hub.irc.Util.RANDOM.nextInt() & USER_TOKEN_MASK);
 	}
 	public static int parseBase64(String s) {
 		int value = 0;

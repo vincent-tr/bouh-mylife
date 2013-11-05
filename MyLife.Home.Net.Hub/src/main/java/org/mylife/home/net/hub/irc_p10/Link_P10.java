@@ -33,7 +33,7 @@ import org.mylife.home.net.hub.irc.Unknown;
 /**
  * @author markhale
  */
-public class Link_P10 extends jircd.irc.Link {
+public class Link_P10 extends org.mylife.home.net.hub.irc.Link {
 	public Link_P10(jIRCdMBean jircd, Connector connection) {
 		super(jircd, connection);
 	}

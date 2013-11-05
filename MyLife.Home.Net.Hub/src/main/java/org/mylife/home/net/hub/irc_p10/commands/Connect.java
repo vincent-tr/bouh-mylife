@@ -32,7 +32,7 @@ import org.mylife.home.net.hub.irc_p10.Link_P10;
 /**
  * @author markhale
  */
-public class Connect extends jircd.irc.commands.Connect {
+public class Connect extends org.mylife.home.net.hub.irc.commands.Connect {
 	public Connect(jIRCdMBean jircd) {
 		super(jircd);
 	}

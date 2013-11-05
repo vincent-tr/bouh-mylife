@@ -28,7 +28,7 @@ import org.mylife.home.net.hub.ircx.ChannelX;
 /**
  * @author markhale
  */
-public class Join extends jircd.irc.commands.Join {
+public class Join extends org.mylife.home.net.hub.irc.commands.Join {
 	protected Channel createChannel(String name) {
 		return new ChannelX(name);
 	}
