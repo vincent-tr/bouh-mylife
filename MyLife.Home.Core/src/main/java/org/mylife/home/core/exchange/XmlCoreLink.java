@@ -10,5 +10,5 @@ public class XmlCoreLink {
 	public String sourceComponent;
 	public String sourceAttribute;
 	public String targetComponent;
-	public String targetMethod;
+	public String targetAction;
 }

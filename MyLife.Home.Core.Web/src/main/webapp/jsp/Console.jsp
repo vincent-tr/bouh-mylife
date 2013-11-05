@@ -25,6 +25,9 @@
 					<li><a href="#tabs-3"><img
 							src="<%=WebTools.image(pageContext, "application.png")%>" />Vue
 							des plugins</a></li>
+					<li><a href="#tabs-4"><img
+							src="<%=WebTools.image(pageContext, "lightning.png")%>" />Vue
+							des liens</a></li>
 				</ul>
 			</td>
 		</tr>
@@ -54,6 +57,22 @@
 					<fieldset>
 						<legend>
 							<span>Vue des plugins</span>
+						</legend>
+
+						<div class="table_render_outer">
+							<div class="table_render_inner">
+								<table class="table_render">
+									<thead></thead>
+									<tbody></tbody>
+								</table>
+							</div>
+						</div>
+					</fieldset>
+				</div>
+				<div id="tabs-4">
+					<fieldset>
+						<legend>
+							<span>Vue des liens</span>
 						</legend>
 
 						<div class="table_render_outer">

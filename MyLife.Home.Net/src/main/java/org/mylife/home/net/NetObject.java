@@ -25,6 +25,8 @@ public class NetObject {
 
 	private static void checkValue(NetType type, Object value)
 			throws InvalidValueException {
+		if(value == null)
+			return;
 		if (type instanceof NetRange) {
 			NetRange nrange = (NetRange) type;
 			if (!(value instanceof Integer))
@@ -63,6 +65,8 @@ public class NetObject {
 
 	private static Object convertValue(NetType type, String value)
 			throws InvalidValueException {
+		if(value == null)
+			return null;
 		if (type instanceof NetRange) {
 			NetRange nrange = (NetRange) type;
 			Integer cvalue;
