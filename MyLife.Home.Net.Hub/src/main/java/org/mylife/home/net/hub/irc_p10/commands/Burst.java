@@ -76,7 +76,7 @@ public class Burst implements Command {
 			tokenB64 = nick;
 			modes = "";
 		}
-		chan.addUser((User_P10) jircd.irc_p10.Util.findSource(network, tokenB64));
+		chan.addUser((User_P10) org.mylife.home.net.hub.irc_p10.Util.findSource(network, tokenB64));
 	}
 	public String getName() {
 		return "B";

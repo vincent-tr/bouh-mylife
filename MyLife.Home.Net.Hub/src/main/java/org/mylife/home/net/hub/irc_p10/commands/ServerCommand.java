@@ -36,7 +36,7 @@ import org.mylife.home.net.hub.irc_p10.*;
 /**
  * @author markhale
  */
-public class ServerCommand extends jircd.irc.commands.ServerCommand {
+public class ServerCommand extends org.mylife.home.net.hub.irc.commands.ServerCommand {
 	public ServerCommand(jIRCdMBean jircd) {
 		super(jircd);
 	}

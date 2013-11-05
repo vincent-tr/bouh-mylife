@@ -43,9 +43,9 @@ public final class Util {
 		Message msg = new Message(src.getServer(), Constants.IRCRPL_IRCX);
 		msg.appendParameter(nick);
 		msg.appendParameter(isIRCX ? "1" : "0");
-		msg.appendParameter(jircd.ircx.Constants.VERSION);
+		msg.appendParameter(org.mylife.home.net.hub.ircx.Constants.VERSION);
 		msg.appendParameter("ANON");
-		msg.appendParameter(Integer.toString(jircd.irc.Constants.MAX_MESSAGE_SIZE));
+		msg.appendParameter(Integer.toString(org.mylife.home.net.hub.irc.Constants.MAX_MESSAGE_SIZE));
 		msg.appendParameter("*");
 		src.send(msg);
 	}

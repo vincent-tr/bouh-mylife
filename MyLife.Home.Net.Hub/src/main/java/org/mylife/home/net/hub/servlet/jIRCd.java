@@ -122,13 +122,13 @@ public class jIRCd extends jircd.jIRCd {
 					if(path.indexOf(",isnick") != -1) {
 						deployServlet(path, name, webAppDescriptor, context, loader);
 					} else {
-						logger.warn("Unsupported mapping "+path+" for servlet "+name);
+						logger.log(Level.WARNING, "Unsupported mapping "+path+" for servlet "+name);
 					}
 				}
 			} catch(SAXException saxe) {
-				logger.warn("Could not deploy webapp "+warFile, saxe);
+				logger.log(Level.WARNING, "Could not deploy webapp "+warFile, saxe);
 			} catch(IOException ioe) {
-				logger.warn("Could not deploy webapp "+warFile, ioe);
+				logger.log(Level.WARNING, "Could not deploy webapp "+warFile, ioe);
 			}
 		}
 	}
@@ -172,7 +172,7 @@ public class jIRCd extends jircd.jIRCd {
 			thisServer.addUser(user);
 			logger.info("...path "+path+" assigned to "+name+" ("+className+")");
 		} catch(Exception ex) {
-			logger.warn("Could not load class "+className, ex);
+			logger.log(Level.WARNING, "Could not load class "+className, ex);
 		}
 	}
 	private void undeployServlets() {

@@ -31,10 +31,12 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import javax.net.ServerSocketFactory;
 
 import org.mylife.home.net.hub.jIRCdMBean;
-import org.apache.log4j.Logger;
 
 /**
  * Listens on a port and accepts new clients.
@@ -44,7 +46,7 @@ import org.apache.log4j.Logger;
 public class Listener implements Runnable {
 	private static final int BACKLOG = 16535;
 
-	private static final Logger logger = Logger.getLogger(Listener.class);
+	private static final Logger logger = Logger.getLogger(Listener.class.getName());
 
 	private final jIRCdMBean jircd;
 	private final String boundAddress;
@@ -78,7 +80,7 @@ public class Listener implements Runnable {
 			try {
 				doAccept();
 			} catch (IOException e) {
-				logger.warn("IOException in thread " + Thread.currentThread().toString() + ": " + e.toString());
+				logger.log(Level.WARNING, "IOException in thread " + Thread.currentThread().toString() + ": " + e.toString());
 			}
 		}
 	}
@@ -103,7 +105,7 @@ public class Listener implements Runnable {
 		try {
 			serverSocket = factory.createServerSocket(boundPort, BACKLOG, InetAddress.getByName(boundAddress));
 		} catch (Exception e) {
-			logger.warn("Bind exception", e);
+			logger.log(Level.WARNING, "Bind exception", e);
 			return false;
 		}
 		return true;
@@ -113,7 +115,7 @@ public class Listener implements Runnable {
 		try {
 			serverSocket.close();
 		} catch(IOException e) {
-			logger.warn("Server socket close exception", e);
+			logger.log(Level.WARNING, "Server socket close exception", e);
 		}
 	}
 
@@ -135,7 +137,7 @@ public class Listener implements Runnable {
 			input = new BufferedReader(new InputStreamReader(socket.getInputStream(), Constants.CHARSET), Constants.MAX_MESSAGE_SIZE);
 			output = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), Constants.CHARSET), Constants.MAX_MESSAGE_SIZE);
 			client = new Client(jircd, this);
-			logger.debug("Initiating connection "+toString());
+			logger.finest("Initiating connection "+toString());
 		}
 		public final Client getClient() {
 			return client;
@@ -151,7 +153,7 @@ public class Listener implements Runnable {
 			while (inputThread == currentThread) {
 				try {
 					String line = input.readLine();
-					logger.debug("Message received from " + toString() + "\n\t" + line);
+					logger.finest("Message received from " + toString() + "\n\t" + line);
 					if (line != null && line.length() > 0) {
 						bytesRead += line.length()+2;
 						linesRead++;
@@ -164,7 +166,7 @@ public class Listener implements Runnable {
 					jircd.disconnectClient(client, e.getMessage());
 					return;
 				} catch (Exception e) {
-					logger.warn("Exception occured in thread " + Thread.currentThread().toString(), e);
+					logger.log(Level.WARNING, "Exception occured in thread " + Thread.currentThread().toString(), e);
 					return;
 				}
 			}
@@ -185,19 +187,19 @@ public class Listener implements Runnable {
 				output.flush();
 				bytesSent += text.length()+2;
 				linesSent++;
-				if(logger.isDebugEnabled())
-					logger.debug("Message sent to " + toString() + "\n\t" + text);
+				if(logger.isLoggable(Level.FINEST))
+					logger.finest("Message sent to " + toString() + "\n\t" + text);
 			} catch(IOException e) {
-				logger.debug("Exception occurred while sending message", e);
+				logger.log(Level.FINEST, "Exception occurred while sending message", e);
 			}
 		}
 		public void close() {
-			logger.debug("Closing connection "+toString());
+			logger.finest("Closing connection "+toString());
 			stop();
 			try {
 				socket.close();
 			} catch(IOException e) {
-				logger.debug("Exception on socket close", e);
+				logger.log(Level.FINEST, "Exception on socket close", e);
 			} finally {
 				connections--;
 			}

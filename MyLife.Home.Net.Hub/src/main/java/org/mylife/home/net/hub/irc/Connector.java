@@ -29,9 +29,10 @@ import java.io.OutputStreamWriter;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.mylife.home.net.hub.jIRCdMBean;
-import org.apache.log4j.Logger;
 
 /**
  * An outbound socket connection to another server.
@@ -39,7 +40,7 @@ import org.apache.log4j.Logger;
  * @author markhale
  */
 public class Connector extends Connection implements Runnable {
-	private static final Logger logger = Logger.getLogger(Connector.class);
+	private static final Logger logger = Logger.getLogger(Connector.class.getName());
 
 	protected final jIRCdMBean jircd;
 	private final BufferedReader input;
@@ -47,7 +48,7 @@ public class Connector extends Connection implements Runnable {
 	private final Link link;
 	private volatile boolean dontDie;
 
-	public Connector(jIRCdMBean jircd, String host, int port, jircd.irc.commands.Connect connectFactory) throws IOException {
+	public Connector(jIRCdMBean jircd, String host, int port, org.mylife.home.net.hub.irc.commands.Connect connectFactory) throws IOException {
 		super(new Socket(host, port));
 		this.jircd = jircd;
 		input = new BufferedReader(new InputStreamReader(socket.getInputStream(), Constants.CHARSET), Constants.MAX_MESSAGE_SIZE);
@@ -62,7 +63,7 @@ public class Connector extends Connection implements Runnable {
 		while(dontDie) {
 			try {
 				String line = input.readLine();
-				logger.debug("Message received from " + toString() + "\n\t" + line);
+				logger.finest("Message received from " + toString() + "\n\t" + line);
 				if (line != null && line.length() > 0) {
 					bytesRead += line.length()+2;
 					linesRead++;
@@ -75,7 +76,7 @@ public class Connector extends Connection implements Runnable {
 				jircd.disconnectLink(link);
 				return;
 			} catch (Exception e) {
-				logger.warn("Exception occured in thread " + Thread.currentThread().toString(), e);
+				logger.log(Level.WARNING, "Exception occured in thread " + Thread.currentThread().toString(), e);
 				return;
 			}
 		}
@@ -89,10 +90,10 @@ public class Connector extends Connection implements Runnable {
 			output.flush();
 			bytesSent += text.length()+2;
 			linesSent++;
-			if(logger.isDebugEnabled())
-				logger.debug("Message sent to " + toString() + "\n\t" + text);
+			if(logger.isLoggable(Level.FINEST))
+				logger.finest("Message sent to " + toString() + "\n\t" + text);
 		} catch(IOException e) {
-			logger.debug("Exception occurred while sending message", e);
+			logger.log(Level.FINEST, "Exception occurred while sending message", e);
 		}
 	}
 	public void close() {
@@ -100,7 +101,7 @@ public class Connector extends Connection implements Runnable {
 		try {
 			socket.close();
 		} catch(IOException e) {
-			logger.debug("Exception on socket close", e);
+			logger.log(Level.FINEST, "Exception on socket close", e);
 		}
 	}
 	public String toString() {

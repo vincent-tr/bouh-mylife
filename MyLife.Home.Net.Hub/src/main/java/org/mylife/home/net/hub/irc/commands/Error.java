@@ -22,17 +22,20 @@
 
 package org.mylife.home.net.hub.irc.commands;
 
-import org.mylife.home.net.hub.irc.*;
-import org.apache.log4j.Logger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.mylife.home.net.hub.irc.Command;
+import org.mylife.home.net.hub.irc.Source;
 
 /**
  * @author markhale
  */
 public class Error implements Command {
-	private static final Logger logger = Logger.getLogger(Error.class);
+	private static final Logger logger = Logger.getLogger(Error.class.getName());
 
 	public void invoke(Source src, String[] params) {
-		logger.warn(params[0]);
+		logger.log(Level.WARNING, params[0]);
 	}
 	public String getName() {
 		return "ERROR";

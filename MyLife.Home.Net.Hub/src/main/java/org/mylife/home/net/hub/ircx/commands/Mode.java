@@ -29,7 +29,7 @@ import org.mylife.home.net.hub.ircx.Util;
 /**
  * @author markhale
  */
-public class Mode extends jircd.irc.commands.Mode {
+public class Mode extends org.mylife.home.net.hub.irc.commands.Mode {
 	public void invoke(Source src, String[] params) {
 		if(src instanceof Unknown && "ISIRCX".equals(params[0])) {
 			Util.sendIRCXReply(src);
