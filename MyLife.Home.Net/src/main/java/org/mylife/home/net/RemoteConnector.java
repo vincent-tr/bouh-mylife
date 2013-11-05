@@ -55,22 +55,22 @@ class RemoteConnector implements Connector, ActionExecutor {
 				watcher = new NetWatcher();
 			watcher.addChannel(container.getChannel());
 		}
-		
+
 		NetObject obj = container.getObject();
 		List<String> attributes = new ArrayList<String>();
-		
-		for(NetMember member : obj.getNetClass().getMembers()) {
+
+		for (NetMember member : obj.getNetClass().getMembers()) {
 			String name = member.getName();
-			
-			if(member instanceof NetAttribute) {
+
+			if (member instanceof NetAttribute) {
 				attributes.add(name);
 			}
-			
-			if(member instanceof NetAction) {
+
+			if (member instanceof NetAction) {
 				obj.setActionExecutor(name, this);
 			}
 		}
-		
+
 		attributesByIndexes = attributes.toArray(new String[attributes.size()]);
 	}
 
@@ -100,25 +100,40 @@ class RemoteConnector implements Connector, ActionExecutor {
 	}
 
 	private void setAttributes(List<String> attributes) {
-		
+
 		NetObject obj = container.getObject();
-		
-		if(attributes.size() != attributesByIndexes.length)
+
+		if (attributes.size() != attributesByIndexes.length)
 			log.warning("The count of attributes on net is different than the count of attributes on the object class !");
 		int len = Math.min(attributes.size(), attributesByIndexes.length);
-		
-		for(int i=0; i<len; i++) {
-			obj.setAttributeValueAsString(attributesByIndexes[i], attributes.get(i));
+
+		for (int i = 0; i < len; i++) {
+			obj.setAttributeValueAsString(attributesByIndexes[i],
+					attributes.get(i));
 		}
 	}
-	
+
+	private void setConnected() {
+		container.setConnected(true);
+	}
+
+	private void setDisconnected() {
+		// déconnexion et marquage de tous les attributs à false
+		container.setConnected(false);
+
+		for (int i = 0; i < attributesByIndexes.length; i++) {
+			container.getObject().setAttributeValue(attributesByIndexes[i],
+					null);
+		}
+	}
+
 	/**
 	 * Implémentation de ActionExecutor
 	 */
 	public void execute(NetObject obj, NetAction action, Object[] arguments) {
 		StringBuffer buffer = new StringBuffer();
-		for(Object arg : arguments) {
-			if(buffer.length() > 0)
+		for (Object arg : arguments) {
+			if (buffer.length() > 0)
 				buffer.append(' ');
 			buffer.append(String.valueOf(arg));
 		}
@@ -157,21 +172,21 @@ class RemoteConnector implements Connector, ActionExecutor {
 	}
 
 	private static void setNickAttributes(String nick, RemoteConnector connector) {
-		
+
 		// parsing des éléménts du nouveau nick
 		StringTokenizer tokenizer = new StringTokenizer(nick, "|");
-		
+
 		// le 1er token est l'id, le reste les attributs
 		tokenizer.nextToken();
 		List<String> attributes = new ArrayList<String>();
-		while(tokenizer.hasMoreTokens()) {
+		while (tokenizer.hasMoreTokens()) {
 			attributes.add(tokenizer.nextToken());
 		}
-		
+
 		if (attributes.size() > 0)
 			connector.setAttributes(attributes);
 	}
-	
+
 	/**
 	 * Connexion
 	 * 
@@ -183,8 +198,8 @@ class RemoteConnector implements Connector, ActionExecutor {
 			RemoteConnector connector = findByNickChannel(nick, channel);
 			if (connector == null)
 				return;
-			
-			connector.container.setConnected(true);
+
+			connector.setConnected();
 			setNickAttributes(nick, connector);
 		}
 	}
@@ -200,7 +215,7 @@ class RemoteConnector implements Connector, ActionExecutor {
 			RemoteConnector connector = findByNickChannel(oldNick, null);
 			if (connector == null)
 				return;
-			
+
 			setNickAttributes(newNick, connector);
 		}
 	}
@@ -216,13 +231,13 @@ class RemoteConnector implements Connector, ActionExecutor {
 			if (nick == null) {
 				// déconnexion globale
 				for (RemoteConnector connector : connectors) {
-					connector.container.setConnected(false);
+					connector.setDisconnected();
 				}
 			} else {
 				RemoteConnector connector = findByNickChannel(nick, null);
 				if (connector == null)
 					return;
-				connector.container.setConnected(false);
+				connector.setDisconnected();
 			}
 		}
 	}

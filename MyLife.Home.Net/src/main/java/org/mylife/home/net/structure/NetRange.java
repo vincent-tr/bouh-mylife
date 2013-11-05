@@ -24,4 +24,17 @@ public class NetRange extends NetType {
 		return max;
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		if (!(obj instanceof NetRange))
+			return false;
+		NetRange other = (NetRange) obj;
+
+		if (other.min != min)
+			return false;
+		if (other.max != max)
+			return false;
+		return true;
+	}
+
 }

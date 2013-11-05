@@ -15,6 +15,9 @@ import java.util.logging.Logger;
 import org.mylife.home.core.data.DataPluginPersistance;
 import org.mylife.home.core.exchange.XmlCoreComponent;
 import org.mylife.home.core.exchange.XmlCoreContainer;
+import org.mylife.home.core.exchange.XmlCoreLink;
+import org.mylife.home.core.links.Link;
+import org.mylife.home.core.links.LinkFactory;
 import org.mylife.home.core.plugins.PluginRuntimeContext;
 import org.mylife.home.net.NetContainer;
 import org.mylife.home.net.NetObject;
@@ -201,10 +204,8 @@ public class ManagerService implements Service {
 
 	private final List<NetContainer> remoteObjects = new ArrayList<NetContainer>();
 	private final List<NetContainer> internalObjects = new ArrayList<NetContainer>();
-
 	private final List<PluginRuntimeContext> plugins = new ArrayList<PluginRuntimeContext>();
-
-	// TODO : links
+	private final List<Link> links = new ArrayList<Link>();
 
 	private void checkId(Set<String> ids, String id) {
 		if (!ids.add(id)) {
@@ -252,28 +253,41 @@ public class ManagerService implements Service {
 			}
 		}
 
-		// TODO : create links
+		// Création des liens
+		for (XmlCoreContainer core : coreList) {
+			for (XmlCoreLink coreLink : core.links) {
+				Link link = LinkFactory.getInstance().createFromXml(coreLink);
+				links.add(link);
+			}
+		}
 	}
 
 	private void executeStop() {
 
-		// TODO : unload links
+		for (Link link : links) {
+			link.close();
+		}
+		links.clear();
 
 		// Déchargement des plugins
 		for (PluginRuntimeContext plugin : plugins) {
 			plugin.terminate();
 		}
+		plugins.clear();
+
 		// normalement il ne doit plus rester d'objets après
 		for (NetContainer container : internalObjects) {
 			log.severe("Internal NetObject remaining : "
 					+ container.getObject().getId());
 			NetRepository.unregister(container);
 		}
+		internalObjects.clear();
 
 		// Déchargement des objets distants
 		for (NetContainer container : remoteObjects) {
 			NetRepository.unregister(container);
 		}
+		remoteObjects.clear();
 	}
 
 	/**
