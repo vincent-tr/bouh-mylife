@@ -22,16 +22,16 @@
 
 package org.mylife.home.net.hub.irc.commands;
 
-import org.mylife.home.net.hub.jIRCdMBean;
+import org.mylife.home.net.hub.IrcServerMBean;
 import org.mylife.home.net.hub.irc.*;
 
 /**
  * @author markhale
  */
 public class Die implements Command {
-	private final jIRCdMBean jircd;
+	private final IrcServerMBean jircd;
 
-	public Die(jIRCdMBean jircd) {
+	public Die(IrcServerMBean jircd) {
 		this.jircd = jircd;
 	}
 	public void invoke(Source src, String[] params) {

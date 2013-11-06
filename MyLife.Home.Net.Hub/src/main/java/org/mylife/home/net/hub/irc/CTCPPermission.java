@@ -28,6 +28,10 @@ import java.security.Permission;
  * @author markhale
  */
 public final class CTCPPermission extends Permission {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -4737873423948194982L;
 	private final String action;
 
 	/**

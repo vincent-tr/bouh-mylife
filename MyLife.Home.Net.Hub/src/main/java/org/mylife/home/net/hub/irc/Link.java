@@ -22,7 +22,9 @@
 
 package org.mylife.home.net.hub.irc;
 
-import org.mylife.home.net.hub.jIRCdMBean;
+import org.mylife.home.net.hub.IrcServerMBean;
+import org.mylife.home.net.hub.configuration.IrcLinkAccept;
+import org.mylife.home.net.hub.configuration.IrcLinkConnect;
 
 /**
  * An outbound socket connection to another server.
@@ -30,12 +32,12 @@ import org.mylife.home.net.hub.jIRCdMBean;
  * @author markhale
  */
 public class Link {
-	protected final jIRCdMBean jircd;
+	protected final IrcServerMBean jircd;
 	protected final Connection connection;
 	protected MessageFactory messageFactory = new MessageFactory();
 	protected Source server; // the server on the other end of this link
 
-	public Link(jIRCdMBean jircd, Connector connection) {
+	public Link(IrcServerMBean jircd, Connector connection) {
 		if(connection == null)
 			throw new IllegalArgumentException("The connection cannot be null");
 		this.jircd = jircd;
@@ -50,7 +52,8 @@ public class Link {
 		this.messageFactory = messageFactory;
 	}
 	protected void login(Server thisServer) {
-		String linkPassword = jircd.getProperty("jircd.connect."+connection.getRemoteAddress()+'#'+connection.getRemotePort());
+		IrcLinkConnect configLink = jircd.findLinkConnect(connection.getRemoteAddress(), connection.getRemotePort());
+		String linkPassword = configLink.getPassword();
 		connection.writeLine("PASS "+linkPassword+" 0210 IRC|");
 		connection.writeLine("SERVER "+thisServer.getName()+" 1 "+thisServer.getToken()+" :"+thisServer.getDescription());
 	}
@@ -72,7 +75,8 @@ public class Link {
 		}
 	}
 	private boolean checkPassword(String password) {
-		String expectedPassword = jircd.getProperty("jircd.accept."+connection.getRemoteAddress()+'#'+connection.getLocalPort());
+		IrcLinkAccept configLink = jircd.findLinkAccept(connection.getRemoteAddress(), connection.getLocalPort());
+		String expectedPassword = configLink.getPassword();
 		return password.equals(expectedPassword);
 	}
 	protected void loginServer(Message loginMsg) {
@@ -81,7 +85,7 @@ public class Link {
 			connection.writeLine(':' + thisServer.getName() + " 462 :You may not reregister");
 		} else {
 			String name = loginMsg.getParameter(0);
-			int hopCount = Integer.parseInt(loginMsg.getParameter(1));
+			/*int hopCount = */Integer.parseInt(loginMsg.getParameter(1));
 			int token = Integer.parseInt(loginMsg.getParameter(2));
 			String desc = loginMsg.getParameter(3);
 			server = new Server(name, token, desc, thisServer, connection, this);

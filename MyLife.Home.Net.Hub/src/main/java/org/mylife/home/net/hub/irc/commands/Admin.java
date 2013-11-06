@@ -22,7 +22,7 @@
 
 package org.mylife.home.net.hub.irc.commands;
 
-import org.mylife.home.net.hub.jIRCdMBean;
+import org.mylife.home.net.hub.IrcServerMBean;
 import org.mylife.home.net.hub.irc.*;
 
 /**
@@ -34,11 +34,11 @@ public class Admin implements Command {
 	private final String location2;
 	private final String email;
 
-	public Admin(jIRCdMBean jircd) {
-		server = jircd.getProperty("jircd.hostName");
-		location1 = jircd.getProperty("jircd.admin.location.1", "");
-		location2 = jircd.getProperty("jircd.admin.location.2", "");
-		email = jircd.getProperty("jircd.admin.email", "");
+	public Admin(IrcServerMBean jircd) {
+		server = jircd.getHostName();
+		location1 = jircd.getConfiguration().getLocation1();
+		location2 = jircd.getConfiguration().getLocation2();
+		email = jircd.getConfiguration().getEmail();
 	}
 	public void invoke(Source src, String[] params) {
 		if(src instanceof Unknown)

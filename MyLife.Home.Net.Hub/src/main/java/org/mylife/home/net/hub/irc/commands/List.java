@@ -22,9 +22,13 @@
 
 package org.mylife.home.net.hub.irc.commands;
 
-import java.util.Iterator;
-
-import org.mylife.home.net.hub.irc.*;
+import org.mylife.home.net.hub.irc.Channel;
+import org.mylife.home.net.hub.irc.Command;
+import org.mylife.home.net.hub.irc.Constants;
+import org.mylife.home.net.hub.irc.Message;
+import org.mylife.home.net.hub.irc.Source;
+import org.mylife.home.net.hub.irc.User;
+import org.mylife.home.net.hub.irc.Util;
 
 /**
  * @author markhale
@@ -39,8 +43,7 @@ public class List implements Command {
 		message.appendParameter("Users  Name");
 		src.send(message);
 
-		for(Iterator iter = src.getServer().getNetwork().channels.values().iterator(); iter.hasNext();) {
-			Channel channel = (Channel) iter.next();
+		for(Channel channel : src.getServer().getNetwork().channels.values()) {
 			final boolean isOn = channel.isOn(user);
 			final boolean isSecret = channel.isModeSet(Channel.CHANMODE_SECRET);
 			if (!isSecret || (isSecret && isOn)) {

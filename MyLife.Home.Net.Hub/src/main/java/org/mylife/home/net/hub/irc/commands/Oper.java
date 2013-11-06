@@ -22,18 +22,21 @@
 
 package org.mylife.home.net.hub.irc.commands;
 
-import java.util.Iterator;
-
-import org.mylife.home.net.hub.jIRCdMBean;
-import org.mylife.home.net.hub.irc.*;
+import org.mylife.home.net.hub.IrcServerMBean;
+import org.mylife.home.net.hub.irc.Command;
+import org.mylife.home.net.hub.irc.Constants;
+import org.mylife.home.net.hub.irc.Message;
+import org.mylife.home.net.hub.irc.Operator;
+import org.mylife.home.net.hub.irc.Source;
+import org.mylife.home.net.hub.irc.User;
 
 /**
  * @author markhale
  */
 public class Oper implements Command {
-	protected final jIRCdMBean jircd;
+	protected final IrcServerMBean jircd;
 
-	public Oper(jIRCdMBean jircd) {
+	public Oper(IrcServerMBean jircd) {
 		this.jircd = jircd;
 	}
 	/**
@@ -42,8 +45,7 @@ public class Oper implements Command {
 	public void invoke(Source src, String[] params) {
 		String name = params[0];
 		String pass = params[1];
-		for(Iterator iter = jircd.getOperators().iterator(); iter.hasNext();) {
-			Operator oper = (Operator) iter.next();
+		for(Operator oper : jircd.getOperators()) {
 			if (oper.isGood(name, pass, src.toString())) {
 				((User)src).processModes("+o",true);
 				Message message = new Message(Constants.RPL_YOUREOPER, src);

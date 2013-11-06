@@ -22,16 +22,16 @@
 
 package org.mylife.home.net.hub.irc.commands;
 
-import org.mylife.home.net.hub.jIRCdMBean;
+import org.mylife.home.net.hub.IrcServerMBean;
 import org.mylife.home.net.hub.irc.*;
 
 /**
  * @author markhale
  */
 public class Kill implements Command {
-	protected final jIRCdMBean jircd;
+	protected final IrcServerMBean jircd;
 
-	public Kill(jIRCdMBean jircd) {
+	public Kill(IrcServerMBean jircd) {
 		this.jircd = jircd;
 	}
 	public void invoke(Source src, String[] params) {

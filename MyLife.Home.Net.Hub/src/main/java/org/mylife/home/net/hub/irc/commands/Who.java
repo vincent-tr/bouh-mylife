@@ -22,9 +22,13 @@
 
 package org.mylife.home.net.hub.irc.commands;
 
-import java.util.Iterator;
-
-import org.mylife.home.net.hub.irc.*;
+import org.mylife.home.net.hub.irc.Channel;
+import org.mylife.home.net.hub.irc.Command;
+import org.mylife.home.net.hub.irc.Constants;
+import org.mylife.home.net.hub.irc.Message;
+import org.mylife.home.net.hub.irc.Source;
+import org.mylife.home.net.hub.irc.User;
+import org.mylife.home.net.hub.irc.Util;
 
 /**
  * @author markhale
@@ -41,8 +45,7 @@ public class Who implements Command {
 		}
 		if(chan != null) {
 			// list channel
-			for(Iterator iter = chan.getUsers().iterator(); iter.hasNext();) {
-				User usr = (User) iter.next();
+			for(User usr : chan.getUsers())  {
 				if (!usr.isModeSet(User.UMODE_INVISIBLE) || usr.equals(src)) {
 					Message message = new Message(Constants.RPL_WHOREPLY, src);
 					message.appendParameter(chan.getName());
@@ -57,8 +60,7 @@ public class Who implements Command {
 			}
 		} else {
 			// list server
-			for(Iterator iter = src.getServer().getUsers().iterator(); iter.hasNext();) {
-				User usr = (User) iter.next();
+			for(User usr : src.getServer().getUsers()) {
 				// TODO: also check for in same channel
 				if (Util.match(name, usr.getNick()) && (!usr.isModeSet(User.UMODE_INVISIBLE) || usr.equals(src))) {
 					String chanName = "*";
@@ -82,9 +84,11 @@ public class Who implements Command {
 		message.appendParameter("End of /WHO list");
 		src.send(message);
 	}
+
 	public String getName() {
 		return "WHO";
 	}
+
 	public int getMinimumParameterCount() {
 		return 0;
 	}

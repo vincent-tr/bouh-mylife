@@ -32,7 +32,7 @@ import java.net.SocketException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.mylife.home.net.hub.jIRCdMBean;
+import org.mylife.home.net.hub.IrcServerMBean;
 
 /**
  * An outbound socket connection to another server.
@@ -42,13 +42,13 @@ import org.mylife.home.net.hub.jIRCdMBean;
 public class Connector extends Connection implements Runnable {
 	private static final Logger logger = Logger.getLogger(Connector.class.getName());
 
-	protected final jIRCdMBean jircd;
+	protected final IrcServerMBean jircd;
 	private final BufferedReader input;
 	private final BufferedWriter output;
 	private final Link link;
 	private volatile boolean dontDie;
 
-	public Connector(jIRCdMBean jircd, String host, int port, org.mylife.home.net.hub.irc.commands.Connect connectFactory) throws IOException {
+	public Connector(IrcServerMBean jircd, String host, int port, org.mylife.home.net.hub.irc.commands.Connect connectFactory) throws IOException {
 		super(new Socket(host, port));
 		this.jircd = jircd;
 		input = new BufferedReader(new InputStreamReader(socket.getInputStream(), Constants.CHARSET), Constants.MAX_MESSAGE_SIZE);

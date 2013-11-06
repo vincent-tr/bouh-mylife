@@ -29,6 +29,11 @@ import java.security.Permission;
  */
 public final class CommandPermission extends Permission {
 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -4063549236234143509L;
+	
+	/**
 	 * @param name IRC command name, can be the wildcard "*".
 	 */
 	public CommandPermission(String name) {

@@ -22,9 +22,13 @@
 
 package org.mylife.home.net.hub.irc.commands;
 
-import java.util.Iterator;
-
-import org.mylife.home.net.hub.irc.*;
+import org.mylife.home.net.hub.irc.Channel;
+import org.mylife.home.net.hub.irc.Client;
+import org.mylife.home.net.hub.irc.Command;
+import org.mylife.home.net.hub.irc.Constants;
+import org.mylife.home.net.hub.irc.Message;
+import org.mylife.home.net.hub.irc.Source;
+import org.mylife.home.net.hub.irc.User;
 
 /**
  * @author markhale
@@ -55,8 +59,7 @@ public class WhoIs implements Command {
 				src.send(message);
 
 				StringBuffer chanlist = new StringBuffer();
-				for(Iterator iter = who.getChannels().iterator(); iter.hasNext();) {
-					Channel chan = (Channel) iter.next();
+				for(Channel chan : who.getChannels()) {
 					if (chan.isModeSet(Channel.CHANMODE_SECRET) || chan.isOn((User)src)) {
 						chanlist.append(' ');
 						if (chan.isOp(who)) chanlist.append("@");

@@ -26,28 +26,36 @@ import java.util.*;
 
 /**
  * An IRC network.
+ * 
  * @author markhale
  */
 public class Network {
 	private String name;
 
-	/** Servers on this network.
-	 * (String host, Server server) */
-	public final Map servers = Collections.synchronizedMap(new HashMap());
+	/**
+	 * Servers on this network. (String host, Server server)
+	 */
+	public final Map<String, Server> servers = Collections
+			.synchronizedMap(new HashMap<String, Server>());
 
 	/** (Integer token, Server server) */
-	public final Map tokens = Collections.synchronizedMap(new HashMap());
+	public final Map<Integer, Server> tokens = Collections
+			.synchronizedMap(new HashMap<Integer, Server>());
 
-	/** All channels on this network.
-	 * (String name, Channel channel) */
-	public final Map channels = Collections.synchronizedMap(new HashMap());
+	/**
+	 * All channels on this network. (String name, Channel channel)
+	 */
+	public final Map<String, Channel> channels = Collections
+			.synchronizedMap(new HashMap<String, Channel>());
 
 	public Network(String name) {
 		setName(name);
 	}
+
 	public final void setName(String name) {
 		this.name = name;
 	}
+
 	public final String getName() {
 		return name;
 	}
@@ -59,9 +67,11 @@ public class Network {
 		servers.put(server.getNick().toLowerCase(), server);
 		tokens.put(new Integer(server.getToken()), server);
 	}
+
 	public Server getServer(String nick) {
 		return (Server) servers.get(nick.toLowerCase());
 	}
+
 	public void removeServer(Server ic) {
 		servers.remove(ic.getNick().toLowerCase());
 		tokens.remove(new Integer(ic.getToken()));
@@ -73,36 +83,37 @@ public class Network {
 	public void addChannel(Channel channel) {
 		channels.put(channel.getName().toLowerCase(), channel);
 	}
+
 	public Channel getChannel(String name) {
 		return (Channel) channels.get(name.toLowerCase());
 	}
+
 	public void removeChannel(Channel channel) {
 		channels.remove(channel.getName().toLowerCase());
 	}
 
 	/**
 	 * Gets a user on this network.
+	 * 
 	 * @return null if nick does not exist on the network.
 	 */
 	public User getUser(String nick) {
-		synchronized(servers) {
-		for(Iterator iter = servers.values().iterator(); iter.hasNext();) {
-			Server server = (Server) iter.next();
-			User user = server.getUser(nick);
-			if(user != null)
-				return user;
-		}
+		synchronized (servers) {
+			for (Server server : servers.values()) {
+				User user = server.getUser(nick);
+				if (user != null)
+					return user;
+			}
 		}
 		return null;
 	}
 
 	public final int getUserCount(char mode, boolean isSet) {
 		int count = 0;
-		synchronized(servers) {
-		for(Iterator iter = servers.values().iterator(); iter.hasNext();) {
-			Server server = (Server) iter.next();
-			count += server.getUserCount(mode, isSet);
-		}
+		synchronized (servers) {
+			for (Server server : servers.values()) {
+				count += server.getUserCount(mode, isSet);
+			}
 		}
 		return count;
 	}

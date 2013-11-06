@@ -22,9 +22,11 @@
 
 package org.mylife.home.net.hub.irc.commands;
 
-import java.util.Iterator;
-
-import org.mylife.home.net.hub.irc.*;
+import org.mylife.home.net.hub.irc.Command;
+import org.mylife.home.net.hub.irc.Constants;
+import org.mylife.home.net.hub.irc.Message;
+import org.mylife.home.net.hub.irc.Server;
+import org.mylife.home.net.hub.irc.Source;
 
 /**
  * @author markhale
@@ -33,8 +35,7 @@ public class Links implements Command {
 	public void invoke(Source src, String[] params) {
 		// TODO: wildcards and things, Iterator should be synchronized
 		String mask = "*";
-		for(Iterator iter = src.getServer().getNetwork().servers.values().iterator(); iter.hasNext();) {
-			Server server = (Server) iter.next();
+		for(Server  server : src.getServer().getNetwork().servers.values()) {
 			Message message = new Message(Constants.RPL_LINKS, src);
 			message.appendParameter(mask);
 			message.appendParameter(server.getName());

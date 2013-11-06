@@ -24,16 +24,16 @@ package org.mylife.home.net.hub.irc.commands;
 
 import java.io.IOException;
 
-import org.mylife.home.net.hub.jIRCdMBean;
+import org.mylife.home.net.hub.IrcServerMBean;
 import org.mylife.home.net.hub.irc.*;
 
 /**
  * @author markhale
  */
 public class Connect implements Command {
-	private final jIRCdMBean jircd;
+	private final IrcServerMBean jircd;
 
-	public Connect(jIRCdMBean jircd) {
+	public Connect(IrcServerMBean jircd) {
 		this.jircd = jircd;
 	}
 	public final void invoke(Source src, String[] params) {
@@ -62,7 +62,7 @@ public class Connect implements Command {
 		return user.isModeSet(User.UMODE_OPER);
 	}
 	/** Connect factory */
-	public Link newLink(jIRCdMBean jircd, Connector connection) {
+	public Link newLink(IrcServerMBean jircd, Connector connection) {
 		return new Link(jircd, connection);
 	}
 	public String getName() {

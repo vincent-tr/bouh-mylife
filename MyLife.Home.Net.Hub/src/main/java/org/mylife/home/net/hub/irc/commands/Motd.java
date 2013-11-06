@@ -24,7 +24,7 @@ package org.mylife.home.net.hub.irc.commands;
 
 import java.io.IOException;
 
-import org.mylife.home.net.hub.jIRCdMBean;
+import org.mylife.home.net.hub.IrcServerMBean;
 import org.mylife.home.net.hub.irc.*;
 
 /**
@@ -33,12 +33,15 @@ import org.mylife.home.net.hub.irc.*;
 public class Motd implements Command {
 	private String[] motd;
 
-	public Motd(jIRCdMBean jircd) throws IOException {
-		motd = Util.loadTextFile(jircd.getProperty("jircd.motd", "motd.txt"), 500);
+	public Motd(IrcServerMBean jircd) throws IOException {
+		motd = Util.loadTextString(jircd.getConfiguration()
+				.getServerMotdContent(), 500);
 	}
+
 	public void invoke(Source src, String[] params) {
 		Message msg = new Message(Constants.RPL_MOTDSTART, src);
-		msg.appendParameter("- " + src.getServer().getName() + " Message of the Day -");
+		msg.appendParameter("- " + src.getServer().getName()
+				+ " Message of the Day -");
 		src.send(msg);
 		for (int i = 0; i < motd.length; i++) {
 			msg = new Message(Constants.RPL_MOTD, src);
@@ -49,9 +52,11 @@ public class Motd implements Command {
 		msg.appendParameter("End of /MOTD command.");
 		src.send(msg);
 	}
+
 	public String getName() {
 		return "MOTD";
 	}
+
 	public int getMinimumParameterCount() {
 		return 0;
 	}
