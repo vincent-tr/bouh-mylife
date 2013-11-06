@@ -23,18 +23,26 @@
 package org.mylife.home.net.hub.irc.commands;
 
 import java.util.Date;
-import java.util.Iterator;
 
-import org.mylife.home.net.hub.jIRCdMBean;
-import org.mylife.home.net.hub.irc.*;
+import org.mylife.home.net.hub.IrcServerMBean;
+import org.mylife.home.net.hub.irc.Client;
+import org.mylife.home.net.hub.irc.Command;
+import org.mylife.home.net.hub.irc.Connection;
+import org.mylife.home.net.hub.irc.Constants;
+import org.mylife.home.net.hub.irc.Message;
+import org.mylife.home.net.hub.irc.Server;
+import org.mylife.home.net.hub.irc.Source;
+import org.mylife.home.net.hub.irc.Unknown;
+import org.mylife.home.net.hub.irc.User;
+import org.mylife.home.net.hub.irc.Util;
 
 /**
  * @author markhale
  */
 public class UserCommand implements Command {
-	protected final jIRCdMBean jircd;
+	protected final IrcServerMBean jircd;
 
-	public UserCommand(jIRCdMBean jircd) {
+	public UserCommand(IrcServerMBean jircd) {
 		this.jircd = jircd;
 	}
 	public final void invoke(final Source src, String[] params) {
@@ -57,8 +65,8 @@ public class UserCommand implements Command {
 			final Connection connection = client.getConnection();
 			if(checkPassword(connection, src.getPassword())) {
 				String username = params[0];
-				String hostname = params[1];
-				String servername = params[2];
+				//String hostname = params[1];
+				//String servername = params[2];
 				String desc = params[3];
 				Server thisServer = src.getServer();
 				User user = createUser(nick, username, connection.getRemoteHost(), desc, thisServer, client);
@@ -105,10 +113,10 @@ public class UserCommand implements Command {
 		}
 	}
 	private boolean checkPassword(Connection connection, String password) {
-		String expectedPassword = jircd.getProperty("jircd.accept."+connection.getRemoteAddress()+'#'+connection.getLocalPort());
-		if(expectedPassword != null)
-			return expectedPassword.equals(password);
-		else
+		//String expectedPassword = jircd.getProperty("jircd.accept."+connection.getRemoteAddress()+'#'+connection.getLocalPort());
+		//if(expectedPassword != null)
+		//	return expectedPassword.equals(password);
+		//else
 			return true;
 	}
 	protected User createUser(String nick, String username, String hostname, String desc, Server thisServer, Client client) {
@@ -120,8 +128,7 @@ public class UserCommand implements Command {
 	 * @param thisServer the server the user is connected to
 	 */
 	protected void broadcastNewUser(User user, Server thisServer) {
-		for(Iterator iter = thisServer.getNetwork().servers.values().iterator(); iter.hasNext(); ) {
-			Server server = (Server) iter.next();
+		for(Server server : thisServer.getNetwork().servers.values()) {
 			if(server != thisServer) {
 				Message message = new Message(thisServer, "NICK");
 				message.appendParameter(user.getNick());

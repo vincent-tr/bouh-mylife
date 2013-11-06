@@ -22,26 +22,27 @@
 
 package org.mylife.home.net.hub.irc.commands;
 
-import java.util.Iterator;
-
-import org.mylife.home.net.hub.jIRCdMBean;
-import org.mylife.home.net.hub.irc.*;
+import org.mylife.home.net.hub.IrcServerMBean;
+import org.mylife.home.net.hub.irc.Command;
+import org.mylife.home.net.hub.irc.Message;
+import org.mylife.home.net.hub.irc.Server;
+import org.mylife.home.net.hub.irc.Source;
+import org.mylife.home.net.hub.irc.User;
 
 /**
  * @author markhale
  */
 public class Wallops implements Command {
-	private final jIRCdMBean jircd;
+	private final IrcServerMBean jircd;
 
-	public Wallops(jIRCdMBean jircd) {
+	public Wallops(IrcServerMBean jircd) {
 		this.jircd = jircd;
 	}
 	public void invoke(Source src, String[] params) {
 		if(src instanceof Server) {
 			Server server = (Server) src;
 			String msg = params[0];
-			for(Iterator iter = jircd.getServer().getUsers().iterator(); iter.hasNext(); ) {
-				User user = (User) iter.next();
+			for(User user : jircd.getServer().getUsers()) {
 				if(user.isModeSet(User.UMODE_WALLOPS)) {
 					Message message = new Message(server, "WALLOPS");
 					message.appendParameter(msg);

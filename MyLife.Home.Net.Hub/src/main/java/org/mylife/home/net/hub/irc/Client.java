@@ -22,7 +22,7 @@
 
 package org.mylife.home.net.hub.irc;
 
-import org.mylife.home.net.hub.jIRCdMBean;
+import org.mylife.home.net.hub.IrcServerMBean;
 
 /**
  * An inbound socket connection to a server.
@@ -33,21 +33,22 @@ import org.mylife.home.net.hub.jIRCdMBean;
  * @author markhale
  */
 public class Client {
-	private final jIRCdMBean jircd; // the server we are connected to
+	private final IrcServerMBean jircd; // the server we are connected to
 	private final Connection connection;
 	private MessageFactory messageFactory = new MessageFactory();
 	private Source source;
 	private long lastPing = 0; // millis
 	private long lastPong = 0; // millis
+	@SuppressWarnings("unused")
 	private long latency = 0; // millis
 	private final long pingTimeout; // millis
 	
-	public Client(jIRCdMBean jircd, Connection connection) {
+	public Client(IrcServerMBean jircd, Connection connection) {
 		if(connection == null)
 			throw new NullPointerException("The connection cannot be null");
 		this.jircd = jircd;
 		this.connection = connection;
-		pingTimeout = 1000 * Integer.parseInt(jircd.getProperty("jircd.ping.timeout", "120"));
+		pingTimeout = jircd.getConfiguration().getPingTimeoutMs();
 		lastPing = System.currentTimeMillis();
 		lastPong = lastPing;
 		source = new Unknown(connection, this, jircd.getServer());

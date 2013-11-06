@@ -36,7 +36,7 @@ import java.util.logging.Logger;
 
 import javax.net.ServerSocketFactory;
 
-import org.mylife.home.net.hub.jIRCdMBean;
+import org.mylife.home.net.hub.IrcServerMBean;
 
 /**
  * Listens on a port and accepts new clients.
@@ -48,7 +48,7 @@ public class Listener implements Runnable {
 
 	private static final Logger logger = Logger.getLogger(Listener.class.getName());
 
-	private final jIRCdMBean jircd;
+	private final IrcServerMBean jircd;
 	private final String boundAddress;
 	private final int boundPort;
 	private final ServerSocketFactory factory;
@@ -57,7 +57,7 @@ public class Listener implements Runnable {
 	private int connections;
 	private int maxConnections;
 
-	public Listener(jIRCdMBean jircd, String address, int port, ServerSocketFactory factory) {
+	public Listener(IrcServerMBean jircd, String address, int port, ServerSocketFactory factory) {
 		this.jircd = jircd;
 		boundAddress = address;
 		boundPort = port;

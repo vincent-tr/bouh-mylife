@@ -22,16 +22,16 @@
 
 package org.mylife.home.net.hub.irc.commands;
 
-import org.mylife.home.net.hub.jIRCdMBean;
+import org.mylife.home.net.hub.IrcServerMBean;
 import org.mylife.home.net.hub.irc.*;
 
 /**
  * @author markhale
  */
 public class Nick implements Command {
-	protected final jIRCdMBean jircd;
+	protected final IrcServerMBean jircd;
 
-	public Nick(jIRCdMBean jircd) {
+	public Nick(IrcServerMBean jircd) {
 		this.jircd = jircd;
 	}
 	public void invoke(final Source src, String[] params) {
@@ -52,11 +52,11 @@ public class Nick implements Command {
 		} else if (src instanceof Server) {
 			if (params.length == 7) {
 				String nick = params[0];
-				String hopcount = params[1];
+				//String hopcount = params[1];
 				String ident = params[2];
 				String host = params[3];
-				String token = params[4];
-				String modes = params[5];
+				//String token = params[4];
+				//String modes = params[5];
 				String desc = params[6];
 				User user = new User(nick, ident, host, desc, (Server)src);
 				((Server)src).getServer().addUser(user);

@@ -22,16 +22,16 @@
 
 package org.mylife.home.net.hub.irc.commands;
 
-import org.mylife.home.net.hub.jIRCdMBean;
+import org.mylife.home.net.hub.IrcServerMBean;
 import org.mylife.home.net.hub.irc.*;
 
 /**
  * @author markhale
  */
 public class Quit implements Command {
-	private final jIRCdMBean jircd;
+	private final IrcServerMBean jircd;
 
-	public Quit(jIRCdMBean jircd) {
+	public Quit(IrcServerMBean jircd) {
 		this.jircd = jircd;
 	}
 	public void invoke(Source src, String[] params) {

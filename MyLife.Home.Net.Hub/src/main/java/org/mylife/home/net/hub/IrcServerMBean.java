@@ -24,18 +24,23 @@ package org.mylife.home.net.hub;
 
 import java.io.IOException;
 import java.util.Set;
+
+import org.mylife.home.net.hub.configuration.IrcConfiguration;
+import org.mylife.home.net.hub.configuration.IrcLinkAccept;
+import org.mylife.home.net.hub.configuration.IrcLinkConnect;
 import org.mylife.home.net.hub.irc.Client;
-import org.mylife.home.net.hub.irc.Source;
-import org.mylife.home.net.hub.irc.Server;
 import org.mylife.home.net.hub.irc.Command;
-import org.mylife.home.net.hub.irc.Message;
 import org.mylife.home.net.hub.irc.Link;
+import org.mylife.home.net.hub.irc.Message;
+import org.mylife.home.net.hub.irc.Operator;
+import org.mylife.home.net.hub.irc.Server;
+import org.mylife.home.net.hub.irc.Source;
 
 /**
  * JMX management interface.
  * @author markhale
  */
-public interface jIRCdMBean {
+public interface IrcServerMBean {
 	long getUptimeMillis();
 	long getStartTimeMillis();
 	String getVersion();
@@ -46,14 +51,16 @@ public interface jIRCdMBean {
 	int getChannelCount();
 	int getServerCount();
 	Server getServer();
-	String getProperty(String key);
-	String getProperty(String key, String defaultValue);
+	IrcConfiguration getConfiguration();
+	IrcLinkAccept findLinkAccept(String remoteAddress, int localPort);
+	IrcLinkConnect findLinkConnect(String remoteAddress, int remotePort);
+	String getHostName();
 	void reloadConfiguration() throws IOException;
-	void reloadPlugins();
+	void reloadPlugins() throws IOException;
 	void reloadPolicy();
 	void start();
 	void stop();
-	Set getOperators();
+	Set<Operator> getOperators();
 
 	void invokeCommand(Source src, Message message);
 	Command getCommand(String name);

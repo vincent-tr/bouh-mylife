@@ -22,20 +22,24 @@
 
 package org.mylife.home.net.hub.irc.commands;
 
-import java.util.Iterator;
 import java.text.DecimalFormat;
 
-import org.mylife.home.net.hub.jIRCdMBean;
-import org.mylife.home.net.hub.irc.*;
+import org.mylife.home.net.hub.IrcServerMBean;
+import org.mylife.home.net.hub.irc.Command;
+import org.mylife.home.net.hub.irc.Constants;
+import org.mylife.home.net.hub.irc.Message;
+import org.mylife.home.net.hub.irc.Operator;
+import org.mylife.home.net.hub.irc.Source;
+import org.mylife.home.net.hub.irc.Util;
 
 /**
  * @author markhale
  */
 public class Stats implements Command {
 	private static final DecimalFormat TWO_PLACES = new DecimalFormat("00");
-	private final jIRCdMBean jircd;
+	private final IrcServerMBean jircd;
 
-	public Stats(jIRCdMBean jircd) {
+	public Stats(IrcServerMBean jircd) {
 		this.jircd = jircd;
 	}
 	public void invoke(Source src, String[] params) {
@@ -54,8 +58,7 @@ public class Stats implements Command {
 		src.send(message);
 	}
 	private void sendOperators(Source src) {
-		for(Iterator iter = jircd.getOperators().iterator(); iter.hasNext();) {
-			Operator oper = (Operator) iter.next();
+		for(Operator oper : jircd.getOperators()) {
 			Message message = new Message(Constants.RPL_STATSOLINE, src);
 			message.appendParameter("O");
 			message.appendParameter(oper.getHost());

@@ -22,36 +22,33 @@
 
 package org.mylife.home.net.hub.irc;
 
-import java.util.Iterator;
-import java.util.Set;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.TimerTask;
 
-import org.mylife.home.net.hub.jIRCd;
+import org.mylife.home.net.hub.IrcServer;
 
 /**
  * @author thaveman
  * @author markhale
  */
 public class PingTimerTask extends TimerTask {
-	private final jIRCd jircd;
+	private final IrcServer jircd;
 
-	public PingTimerTask(jIRCd jircd) {
+	public PingTimerTask(IrcServer jircd) {
 		this.jircd = jircd;
 	}
 	public void run() {
 		// PING? PONG!
-		Set clients = jircd.getClients();
-		Set timedOut = new HashSet();
-		for(Iterator iter = clients.iterator(); iter.hasNext();) {
-			Client client = (Client) iter.next();
+		Set<Client> clients = jircd.getClients();
+		Set<Client> timedOut = new HashSet<Client>();
+		for(Client client : clients) {
 			if(!client.pingMe()) {
 				// should have had PONG a long time ago, timeout please!
 				timedOut.add(client);
 			}
 		}
-		for(Iterator iter = timedOut.iterator(); iter.hasNext();) {
-			Client client = (Client) iter.next();
+		for(Client client : timedOut) {
 			jircd.disconnectClient(client, "Ping timeout");
 		}
 	}

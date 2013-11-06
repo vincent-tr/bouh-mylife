@@ -24,7 +24,7 @@ package org.mylife.home.net.hub.irc.commands;
 
 import java.io.IOException;
 
-import org.mylife.home.net.hub.jIRCdMBean;
+import org.mylife.home.net.hub.IrcServerMBean;
 import org.mylife.home.net.hub.irc.*;
 
 /**
@@ -33,8 +33,9 @@ import org.mylife.home.net.hub.irc.*;
 public class Info implements Command {
 	private String[] info;
 
-	public Info(jIRCdMBean jircd) throws IOException {
-		info = Util.loadTextFile(jircd.getProperty("jircd.info", "info.txt"), 100);
+	public Info(IrcServerMBean jircd) throws IOException {
+		info = Util.loadTextString(jircd.getConfiguration()
+				.getServerInfoContent(), 100);
 	}
 	public void invoke(Source src, String[] params) {
 		for(int i=0; i<info.length; i++) {

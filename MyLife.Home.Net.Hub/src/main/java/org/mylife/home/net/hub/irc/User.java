@@ -22,11 +22,8 @@
 
 package org.mylife.home.net.hub.irc;
 
-import java.util.Iterator;
-import java.util.Set;
 import java.util.HashSet;
-
-import org.mylife.home.net.hub.jIRCd;
+import java.util.Set;
 
 /**
  * A user on a server.
@@ -50,7 +47,7 @@ public class User extends Source {
 	protected Server server;
 	protected final Client client; // used only for local users
 	/** set of Channel */
-	private final Set channels = new HashSet();
+	private final Set<Channel> channels = new HashSet<Channel>();
 	private final Modes modes = new Modes();
 
 	/**
@@ -189,7 +186,7 @@ public class User extends Source {
 		return awayMsg;
 	}
 
-	public synchronized Set getChannels() {
+	public synchronized Set<Channel> getChannels() {
 		return channels;
 	}
 

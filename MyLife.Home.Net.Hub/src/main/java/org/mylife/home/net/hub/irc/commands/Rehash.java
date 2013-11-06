@@ -23,7 +23,7 @@
 package org.mylife.home.net.hub.irc.commands;
 
 import java.io.IOException;
-import org.mylife.home.net.hub.jIRCdMBean;
+import org.mylife.home.net.hub.IrcServerMBean;
 import org.mylife.home.net.hub.irc.*;
 
 /**
@@ -32,9 +32,9 @@ import org.mylife.home.net.hub.irc.*;
  * @author markhale
  */
 public class Rehash implements Command {
-	private final jIRCdMBean jircd;
+	private final IrcServerMBean jircd;
 
-	public Rehash(jIRCdMBean jircd) {
+	public Rehash(IrcServerMBean jircd) {
 		this.jircd = jircd;
 	}
 	public void invoke(Source src, String[] params) {
@@ -48,18 +48,18 @@ public class Rehash implements Command {
 	private void handleCommand(User user, String[] params) {
 		if(hasPermission(user)) {
 			Message msg = new Message(Constants.RPL_REHASHING, user);
-			msg.appendParameter(jircd.getProperty("jircd.configFile"));
+			//msg.appendParameter(jircd.getProperty("jircd.configFile"));
 			msg.appendParameter("Rehashing");
 			user.send(msg);
 			jircd.reloadPolicy();
 			try {
 				jircd.reloadConfiguration();
+				jircd.reloadPlugins();
 			} catch(IOException ioe) {
 				msg = new Message("ERROR", user);
 				msg.appendParameter(ioe.toString());
 				user.send(msg);
 			}
-			jircd.reloadPlugins();
 		} else {
 			Message msg = new Message(Constants.ERR_NOPRIVILEGES, user);
 			msg.appendParameter("Permission Denied- You're not an IRC operator");

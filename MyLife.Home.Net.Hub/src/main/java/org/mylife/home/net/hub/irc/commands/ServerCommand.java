@@ -22,16 +22,18 @@
 
 package org.mylife.home.net.hub.irc.commands;
 
-import org.mylife.home.net.hub.jIRCdMBean;
+import org.mylife.home.net.hub.IrcServerMBean;
+import org.mylife.home.net.hub.configuration.IrcLinkAccept;
+import org.mylife.home.net.hub.configuration.IrcLinkConnect;
 import org.mylife.home.net.hub.irc.*;
 
 /**
  * @author markhale
  */
 public class ServerCommand implements Command {
-	protected final jIRCdMBean jircd;
+	protected final IrcServerMBean jircd;
 
-	public ServerCommand(jIRCdMBean jircd) {
+	public ServerCommand(IrcServerMBean jircd) {
 		this.jircd = jircd;
 	}
 	public final void invoke(Source src, String[] params) {
@@ -48,7 +50,7 @@ public class ServerCommand implements Command {
 		final Connection connection = client.getConnection();
 		if(checkPassword(connection, src.getPassword())) {
 			String name = params[0];
-			String hopcount = params[1];
+			//String hopcount = params[1];
 			String token = params[2];
 			String desc = params[3];
 			Server thisServer = jircd.getServer();
@@ -56,7 +58,8 @@ public class ServerCommand implements Command {
 			client.login(server);
 			thisServer.getNetwork().addServer(server);
 
-			String linkPassword = jircd.getProperty("jircd.connect."+connection.getRemoteAddress()+'#'+connection.getRemotePort());
+			IrcLinkConnect configLink = jircd.findLinkConnect(connection.getRemoteAddress(), connection.getRemotePort());
+			String linkPassword = configLink.getPassword();
 			Message message = new Message("PASS");
 			message.appendParameter(linkPassword);
 			message.appendParameter("0210");
@@ -76,7 +79,8 @@ public class ServerCommand implements Command {
 		}
 	}
 	protected boolean checkPassword(Connection connection, String password) {
-		String expectedPassword = jircd.getProperty("jircd.accept."+connection.getRemoteAddress()+'#'+connection.getLocalPort());
+		IrcLinkAccept configLink = jircd.findLinkAccept(connection.getRemoteAddress(), connection.getLocalPort());
+		String expectedPassword = configLink.getPassword();
 		return expectedPassword != null && expectedPassword.equals(password);
 	}
 	public String getName() {

@@ -22,7 +22,8 @@
 
 package org.mylife.home.net.hub.irc.commands;
 
-import org.mylife.home.net.hub.jIRCdMBean;
+import org.mylife.home.net.hub.IrcServer;
+import org.mylife.home.net.hub.IrcServerMBean;
 import org.mylife.home.net.hub.irc.*;
 
 /**
@@ -33,10 +34,10 @@ public class Version implements Command {
 	private final String serverName;
 	private final String comments;
 
-	public Version(jIRCdMBean jircd) {
+	public Version(IrcServerMBean jircd) {
 		version = jircd.getVersion();
-		serverName = jircd.getProperty("jircd.hostName");
-		comments = jircd.getProperty("jircd.version.url");
+		serverName = jircd.getHostName();
+		comments = IrcServer.VERSION_URL;
 	}
 	public void invoke(Source src, String[] params) {
 		Message message = new Message(Constants.RPL_VERSION, src);

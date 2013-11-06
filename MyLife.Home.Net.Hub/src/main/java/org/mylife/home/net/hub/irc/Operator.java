@@ -33,6 +33,10 @@ import java.security.NoSuchAlgorithmException;
  * @author markhale
  */
 public final class Operator implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 733516478053247911L;
 	private transient final byte[] pass;
 	private final String name;
 	private final String host;
