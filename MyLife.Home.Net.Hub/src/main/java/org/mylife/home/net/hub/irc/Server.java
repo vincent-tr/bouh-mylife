@@ -25,6 +25,7 @@ package org.mylife.home.net.hub.irc;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -148,7 +149,8 @@ public class Server extends Source {
 		String nick = usr.getNick().toLowerCase();
 		if (users.containsKey(nick)) {
 			// first remove the user from any channels he/she may be in
-			for (Channel channel : usr.getChannels()) {
+			for (Iterator<Channel> it = usr.getChannels().iterator(); it.hasNext();) {
+				Channel channel = it.next();
 				Message message = new Message(usr, "QUIT");
 				message.appendLastParameter(reason);
 				channel.send(message, usr);

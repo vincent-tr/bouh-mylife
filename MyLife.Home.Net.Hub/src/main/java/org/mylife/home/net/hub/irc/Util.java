@@ -34,6 +34,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
+import org.mylife.home.net.hub.IrcServer;
+
 /**
  * @author thaveman
  * @author markhale
@@ -149,8 +151,9 @@ public final class Util {
 	}
 
 	public static String getResourceString(Source src, String key) {
-		return ResourceBundle.getBundle("jircd.irc.Bundle", src.getLocale())
-				.getString(key);
+		return ResourceBundle.getBundle(
+				IrcServer.class.getPackage().getName() + ".Bundle",
+				src.getLocale()).getString(key);
 	}
 
 	public static void sendNoSuchNickError(Source src, String nick) {

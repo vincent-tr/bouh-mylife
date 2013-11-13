@@ -42,6 +42,7 @@ import java.util.logging.Logger;
 import javax.net.ServerSocketFactory;
 import javax.net.ssl.SSLServerSocketFactory;
 
+import org.apache.commons.lang3.StringUtils;
 import org.mylife.home.net.hub.configuration.IrcBinding;
 import org.mylife.home.net.hub.configuration.IrcConfiguration;
 import org.mylife.home.net.hub.configuration.IrcLinkAccept;
@@ -107,53 +108,6 @@ public class IrcServer implements IrcServerMBean {
 	private final Timer timer = new Timer(true);
 	private PingTimerTask pingTimerTask;
 
-	public static void main(String[] args) {
-		// program must be executed using: jircd.jIRCd <configuration file>
-		if ((args == null) || (args.length < 1)) {
-			System.err.println("Usage: jircd.jIRCd <configuration file>");
-			System.exit(1);
-		}
-		final String configFile = args[0];
-
-		System.out.println();
-		System.out
-				.println("Welcome to jIRCd: The world's first full-featured multiplatform Java-powered IRC"
-						+ " server. Created and maintained by Tyrel L. Haveman and Mark Hale.");
-		System.out
-				.println("jIRCd uses a TCP protocol based on the Internet Relay Chat Protocol (RFC 1459), "
-						+ "by Jarkko Oikarinen (May 1993). Portions may also be based on the IRC version 2 "
-						+ "protocol (RFC 2810, RFC 2811, RFC 2812, RFC 2813) by C. Kalt (April 2000).");
-		System.out.println("Please visit " + VERSION_URL
-				+ " for the latest information and releases.");
-		System.out.println();
-
-		IrcServer jircd = null;
-		// attempt to read the specified configuration file
-		try {
-			jircd = new IrcServer(configFile);
-		} catch (IOException ioe) {
-			System.err.println(ioe
-					+ " occured while reading configuration file.");
-			System.exit(1);
-		}
-
-		jircd.start();
-
-		// now just hang out forever
-		System.out.println("Press enter to terminate.");
-		try {
-			System.in.read();
-		} catch (IOException e) {
-			System.err.println(e
-					+ " occured while waiting for program termination.");
-			System.exit(1);
-		}
-
-		System.out.println("Shutting down...");
-		jircd.stop();
-		// System.exit(0);
-	}
-
 	public IrcServer(IrcConfiguration config) throws IOException {
 		this.config = config;
 		this.hostName = InetAddress.getLocalHost().getHostName();
@@ -163,12 +117,16 @@ public class IrcServer implements IrcServerMBean {
 				.getLinksConnect());
 
 		network = new Network(config.getNetworkName());
-		final String serverName = config.getServerName();
+		String serverName = config.getServerName();
+		if(StringUtils.isEmpty(serverName))
+			serverName = hostName + "." + network.getName();
 		if (serverName.indexOf('.') == -1)
 			logger.log(Level.WARNING,
 					"The server name should contain at least one dot, e.g. "
 							+ serverName + ".net");
-		final String desc = config.getServerDescription();
+		String desc = config.getServerDescription();
+		if(StringUtils.isEmpty(desc))
+			desc = serverName;
 		int token = config.getServerToken();
 		if (token <= 0) {
 			token = serverName.hashCode();
