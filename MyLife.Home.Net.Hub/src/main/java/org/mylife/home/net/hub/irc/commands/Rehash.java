@@ -54,7 +54,6 @@ public class Rehash implements Command {
 			jircd.reloadPolicy();
 			try {
 				jircd.reloadConfiguration();
-				jircd.reloadPlugins();
 			} catch(IOException ioe) {
 				msg = new Message("ERROR", user);
 				msg.appendParameter(ioe.toString());

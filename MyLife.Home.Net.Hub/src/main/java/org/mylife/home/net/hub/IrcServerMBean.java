@@ -56,7 +56,6 @@ public interface IrcServerMBean {
 	IrcLinkConnect findLinkConnect(String remoteAddress, int remotePort);
 	String getHostName();
 	void reloadConfiguration() throws IOException;
-	void reloadPlugins() throws IOException;
 	void reloadPolicy();
 	void start();
 	void stop();
