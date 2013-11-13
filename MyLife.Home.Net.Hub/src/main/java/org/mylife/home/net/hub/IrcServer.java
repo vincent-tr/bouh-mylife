@@ -135,8 +135,11 @@ public class IrcServer implements IrcServerMBean {
 		thisServer = new Server(serverName, token, desc, network);
 		network.addServer(thisServer);
 
+		for (Class<?> clazz : CommandFactory.getInstance().listClasses()) {
+			loadPlugin(clazz);
+		}
+		
 		initConfiguration();
-		reloadPlugins();
 	}
 
 	private void initConfiguration() {
@@ -164,15 +167,6 @@ public class IrcServer implements IrcServerMBean {
 		operators.clear();
 		initConfiguration();
 		startListeners();
-	}
-
-	public void reloadPlugins() throws IOException {
-
-		commands.clear();
-
-		for (Class<?> clazz : CommandFactory.getInstance().listClasses()) {
-			loadPlugin(clazz);
-		}
 	}
 
 	protected void loadPlugin(Class<?> cls) {
