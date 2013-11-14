@@ -7,10 +7,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.mylife.home.common.web.model.ServerState;
+import org.mylife.home.common.web.model.Severity;
 import org.mylife.home.core.services.ManagerService;
 import org.mylife.home.core.services.ServiceAccess;
-import org.mylife.home.core.web.model.ServerState;
-import org.mylife.home.core.web.model.Severity;
 
 /**
  * Servlet console

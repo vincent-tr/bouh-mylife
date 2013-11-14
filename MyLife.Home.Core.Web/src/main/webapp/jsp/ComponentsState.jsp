@@ -1,6 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
 	pageEncoding="ISO-8859-1"%>
-<%@ page import="org.mylife.home.core.web.WebTools"%>
+<%@ page import="org.mylife.home.common.web.WebTools"%>
 <%@ page import="org.mylife.home.net.*"%>
 <%@ page import="org.mylife.home.net.structure.*"%>
 <%!/**
