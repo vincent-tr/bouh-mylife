@@ -10,6 +10,9 @@
         <dependent-module archiveName="MyLife.Home.Net-1.0.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/MyLife.Home.Net/MyLife.Home.Net">
             <dependency-type>uses</dependency-type>
         </dependent-module>
+        <dependent-module archiveName="MyLife.Home.Common.Web-1.0.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/MyLife.Home.Common.Web/MyLife.Home.Common.Web">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
         <property name="java-output-path" value="/MyLife.Home.Core.Web/target/classes"/>
         <property name="context-root" value="MyLife.Home.Core.Web"/>
     </wb-module>

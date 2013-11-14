@@ -23,7 +23,7 @@
 		<div id="header">
 			<img id="header_img"
 				src="<%=WebTools.image(pageContext, "MyLife-96.png")%>" />
-			<h1>MyLife.Home.Core</h1>
+			<h1><%=pageContext.getRequest().getAttribute("app")%></h1>
 			<h2><%=pageContext.getRequest().getAttribute("title")%></h2>
 		</div>
 
