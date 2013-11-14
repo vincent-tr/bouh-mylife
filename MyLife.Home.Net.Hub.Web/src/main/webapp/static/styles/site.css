@@ -1,0 +1,15 @@
+#menu,#content,#header,#footer {
+	background-color: #FFFFE6;
+}
+
+#menu li,div.tabs li,table.table_render tbody tr:nth-child(odd),legend {
+	background-color: #FFFFCC;
+}
+
+table.table_render thead tr {
+	background: #FFFF80;
+}
+
+table.table_render tbody tr:nth-child(even) {
+	background: #FFFFB2;
+}
