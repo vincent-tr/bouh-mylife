@@ -2,6 +2,11 @@ package org.mylife.home.net.hub.configuration;
 
 import java.util.Collection;
 
+/**
+ * Interface à implémenter pour configuration
+ * @author trumpffv
+ *
+ */
 public interface IrcConfiguration {
 
 	String getNetworkName();
