@@ -60,7 +60,7 @@ public class WebPlugin extends HttpServlet {
 
 		int id = Integer.parseInt(req.getParameter("id"));
 		String comment = req.getParameter("comment");
-		ServiceAccess.getPluginService().changeComment(id, comment);
+		ServiceAccess.getInstance().getPluginService().changeComment(id, comment);
 
 		resp.sendRedirect(req.getRequestURI());
 	}
@@ -69,7 +69,7 @@ public class WebPlugin extends HttpServlet {
 			throws ServletException, IOException {
 
 		int id = Integer.parseInt(req.getParameter("id"));
-		ServiceAccess.getPluginService().changeActive(id, true);
+		ServiceAccess.getInstance().getPluginService().changeActive(id, true);
 
 		resp.sendRedirect(req.getRequestURI());
 	}
@@ -78,7 +78,7 @@ public class WebPlugin extends HttpServlet {
 			throws ServletException, IOException {
 
 		int id = Integer.parseInt(req.getParameter("id"));
-		ServiceAccess.getPluginService().changeActive(id, false);
+		ServiceAccess.getInstance().getPluginService().changeActive(id, false);
 
 		resp.sendRedirect(req.getRequestURI());
 	}
@@ -87,7 +87,7 @@ public class WebPlugin extends HttpServlet {
 			throws ServletException, IOException {
 
 		int id = Integer.parseInt(req.getParameter("id"));
-		ServiceAccess.getPluginService().delete(id);
+		ServiceAccess.getInstance().getPluginService().delete(id);
 
 		resp.sendRedirect(req.getRequestURI());
 	}
@@ -95,7 +95,7 @@ public class WebPlugin extends HttpServlet {
 	private void content(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 
-		DataPlugin item = ServiceAccess.getPluginService().get(
+		DataPlugin item = ServiceAccess.getInstance().getPluginService().get(
 				Integer.parseInt(req.getParameter("id")));
 		resp.setContentType("text/xml");
 		byte[] content = item.getContent();
@@ -106,7 +106,7 @@ public class WebPlugin extends HttpServlet {
 			throws ServletException, IOException {
 
 		// par défaut redirection vers la jsp
-		List<DataPlugin> data = ServiceAccess.getPluginService().list();
+		List<DataPlugin> data = ServiceAccess.getInstance().getPluginService().list();
 		req.setAttribute("data", data);
 		req.setAttribute("title", "Gestion des plugins");
 		req.getRequestDispatcher("/jsp/Plugin.jsp").forward(req, resp);
