@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ircConfiguration>
+	<networkName></networkName>
+	<serverName></serverName>
+	<serverDescription></serverDescription>
+	<serverToken>0</serverToken>
+	<pingIntervalMs>30000</pingIntervalMs>
+	<pingTimeoutMs>60000</pingTimeoutMs>
+	<location1>location1</location1>
+	<location2>location2</location2>
+	<email>email</email>
+	<serverInfoContent>info</serverInfoContent>
+	<serverMotdContent>motd</serverMotdContent>
+	<bindings>
+		<address>@host</address>
+		<port>6667</port>
+		<ssl>false</ssl>
+	</bindings>
+	<bindings>
+		<address></address>
+		<port>6667</port>
+		<ssl>false</ssl>
+	</bindings>
+	<operators>
+		<name>bouh</name>
+		<host>*</host>
+		<pass>toto</pass>
+	</operators>
+</ircConfiguration>
