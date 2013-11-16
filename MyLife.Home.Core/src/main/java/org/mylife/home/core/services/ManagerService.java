@@ -6,13 +6,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.mylife.home.common.services.Service;
+import org.mylife.home.common.services.BaseManagerService;
 import org.mylife.home.core.data.DataPluginPersistance;
 import org.mylife.home.core.exchange.XmlCoreComponent;
 import org.mylife.home.core.exchange.XmlCoreContainer;
@@ -32,7 +28,7 @@ import org.mylife.home.net.exchange.XmlNetObject;
  * @author pumbawoman
  * 
  */
-public class ManagerService implements Service {
+public class ManagerService extends BaseManagerService {
 
 	/**
 	 * Logger
@@ -40,167 +36,7 @@ public class ManagerService implements Service {
 	private final static Logger log = Logger.getLogger(ManagerService.class
 			.getName());
 
-	public static final int STATE_STOPPED = 0;
-	public static final int STATE_ERROR = -1;
-	public static final int STATE_RUNNING = 1;
-
-	public static final int STATE_STARTING = 2;
-	public static final int STATE_STOPPING = 3;
-
 	/* internal */ManagerService() {
-
-	}
-
-	@Override
-	public void terminate() {
-		stop();
-		commandExecution.shutdown();
-		try {
-			commandExecution.awaitTermination(Long.MAX_VALUE,
-					TimeUnit.NANOSECONDS);
-		} catch (InterruptedException e) {
-			log.log(Level.SEVERE,
-					"commandExecution.awaitTermination interrupted on terminate",
-					e);
-		}
-	}
-
-	private int state;
-	private Exception error;
-
-	/**
-	 * Gestion de l'exécution de start/stop
-	 */
-	private final ExecutorService commandExecution = Executors
-			.newSingleThreadExecutor();
-
-	/**
-	 * Obtention de l'état
-	 * 
-	 * @return
-	 */
-	public int getState() {
-		return state;
-	}
-
-	private void setState(int state) {
-		this.state = state;
-		log.info("Setting level to : " + getStateString());
-	}
-
-	/**
-	 * Obtention de l'état en chaine
-	 * 
-	 * @return
-	 */
-	public String getStateString() {
-		switch (state) {
-		case STATE_STOPPED:
-			return "STOPPED";
-		case STATE_ERROR:
-			return "ERROR";
-		case STATE_RUNNING:
-			return "RUNNING";
-		case STATE_STARTING:
-			return "STARTING";
-		case STATE_STOPPING:
-			return "STOPPING";
-		default:
-			throw new UnsupportedOperationException();
-		}
-	}
-
-	/**
-	 * Si l'état est à error, obtient l'erreur qui s'est produite, sinon null
-	 * 
-	 * @return
-	 */
-	public Exception getError() {
-		return error;
-	}
-
-	private void handleError(Exception e) {
-		setState(STATE_ERROR);
-		error = e;
-		log.log(Level.SEVERE, "Severe error in manager service", e);
-	}
-
-	/**
-	 * Démarrage
-	 */
-	public void start() {
-		commandExecution.submit(new Start());
-	}
-
-	/**
-	 * Arrêt
-	 */
-	public void stop() {
-		commandExecution.submit(new Stop());
-	}
-
-	private class Start implements Runnable {
-		@Override
-		public void run() {
-			startImpl();
-		}
-	}
-
-	private class Stop implements Runnable {
-		@Override
-		public void run() {
-			stopImpl();
-		}
-	}
-
-	private synchronized void startImpl() {
-
-		switch (state) {
-		case STATE_STARTING:
-		case STATE_RUNNING:
-		case STATE_STOPPING:
-			log.warning("Invalid state, ignored");
-			return;
-		}
-
-		setState(STATE_STARTING);
-
-		try {
-			executeStart();
-		} catch (Exception e) {
-			handleError(e);
-			return;
-		}
-
-		setState(STATE_RUNNING);
-	}
-
-	private synchronized void stopImpl() {
-
-		switch (state) {
-		case STATE_STARTING:
-		case STATE_STOPPED:
-		case STATE_STOPPING:
-			log.warning("Invalid state, ignored");
-			return;
-
-		case STATE_ERROR:
-			// seulement clear pour passer de error à stopped
-			error = null;
-			setState(STATE_STOPPED);
-			return;
-		}
-
-		setState(STATE_STOPPING);
-
-		try {
-			executeStop();
-		} catch (Exception e) {
-			handleError(e);
-			return;
-		}
-
-		setState(STATE_STOPPED);
 	}
 
 	private final List<NetContainer> remoteObjects = new ArrayList<NetContainer>();
@@ -215,7 +51,11 @@ public class ManagerService implements Service {
 		}
 	}
 
-	private void executeStart() {
+	/**
+	 * Démarrage du service
+	 */
+	@Override
+	protected void executeStart() throws Exception {
 		// Lecture de la configuration
 		List<XmlNetContainer> netList = new ArrayList<XmlNetContainer>();
 		List<XmlCoreContainer> coreList = new ArrayList<XmlCoreContainer>();
@@ -264,7 +104,11 @@ public class ManagerService implements Service {
 		}
 	}
 
-	private void executeStop() {
+	/**
+	 * Arrêt du service
+	 */
+	@Override
+	protected void executeStop() throws Exception {
 
 		for (Link link : links) {
 			link.close();

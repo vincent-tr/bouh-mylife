@@ -7,6 +7,8 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
+import org.mylife.home.net.hub.services.ServiceAccess;
+
 /**
  * Démarrage automatique du gestionnaire du core
  * @author pumbawoman
@@ -27,11 +29,11 @@ public class AutoStartStopManagerService extends GenericServlet {
 
 	@Override
 	public void init() throws ServletException {
-		//ServiceAccess.getManagerService().start();
+		ServiceAccess.getInstance().getManagerService().start();
 	}
 
 	@Override
 	public void destroy() {
-		//ServiceAccess.terminate();
+		ServiceAccess.getInstance().terminate();
 	}
 }
