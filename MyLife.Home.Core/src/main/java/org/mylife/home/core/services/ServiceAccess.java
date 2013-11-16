@@ -1,6 +1,6 @@
 package org.mylife.home.core.services;
 
-import org.mylife.home.common.services.ServiceAccessBase;
+import org.mylife.home.common.services.BaseServiceAccess;
 
 /**
  * Accès aux services
@@ -8,7 +8,7 @@ import org.mylife.home.common.services.ServiceAccessBase;
  * @author trumpffv
  * 
  */
-public class ServiceAccess extends ServiceAccessBase {
+public class ServiceAccess extends BaseServiceAccess {
 
 	/**
 	 * Singleton

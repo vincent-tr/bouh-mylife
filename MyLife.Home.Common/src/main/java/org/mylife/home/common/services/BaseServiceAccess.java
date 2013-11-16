@@ -9,7 +9,7 @@ import java.util.List;
  * @author pumbawoman
  * 
  */
-public class ServiceAccessBase {
+public class BaseServiceAccess {
 
 	/**
 	 * Liste des services utilisés
