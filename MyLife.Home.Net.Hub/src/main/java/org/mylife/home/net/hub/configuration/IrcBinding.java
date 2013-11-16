@@ -7,18 +7,18 @@ package org.mylife.home.net.hub.configuration;
  */
 public class IrcBinding {
 
-	private final String adress;
+	private final String address;
 	private final int port;
 	private final boolean ssl;
 	
-	public IrcBinding(String adress, int port, boolean ssl) {
-		this.adress = adress;
+	public IrcBinding(String address, int port, boolean ssl) {
+		this.address = address;
 		this.port = port;
 		this.ssl = ssl;
 	}
 
-	public String getAdress() {
-		return adress;
+	public String getAddress() {
+		return address;
 	}
 
 	public int getPort() {

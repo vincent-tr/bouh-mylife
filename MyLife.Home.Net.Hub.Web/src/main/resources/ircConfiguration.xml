@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <ircConfiguration>
-	<networkName></networkName>
+	<networkName>mti-team2.dyndns.org</networkName>
 	<serverName></serverName>
 	<serverDescription></serverDescription>
 	<serverToken>0</serverToken>
