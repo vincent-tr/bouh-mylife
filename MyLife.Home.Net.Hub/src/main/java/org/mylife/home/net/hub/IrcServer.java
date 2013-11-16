@@ -152,7 +152,7 @@ public class IrcServer implements IrcServerMBean {
 				factory = SSLServerSocketFactory.getDefault();
 			else
 				factory = ServerSocketFactory.getDefault();
-			listeners.add(new Listener(this, confBinding.getAdress(),
+			listeners.add(new Listener(this, confBinding.getAddress(),
 					confBinding.getPort(), factory));
 		}
 

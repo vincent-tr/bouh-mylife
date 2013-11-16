@@ -1,11 +1,23 @@
 package org.mylife.home.net.hub.web;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.lang3.StringUtils;
+import org.mylife.home.common.web.model.Severity;
+import org.mylife.home.net.hub.IrcServerMBean;
+import org.mylife.home.net.hub.configuration.IrcBinding;
+import org.mylife.home.net.hub.configuration.IrcConfiguration;
+import org.mylife.home.net.hub.configuration.IrcOperator;
+import org.mylife.home.net.hub.irc.Server;
+import org.mylife.home.net.hub.services.ManagerService;
+import org.mylife.home.net.hub.services.ServiceAccess;
+import org.mylife.home.net.hub.web.model.IrcServerState;
 
 /**
  * Servlet console
@@ -38,8 +50,10 @@ public class WebConsole extends HttpServlet {
 		String action = req.getParameter("action");
 		if ("serverState".equals(action)) {
 			serverState(req, resp);
-		} else if ("componentsState".equals(action)) {
-			componentsState(req, resp);
+		} else if ("networkState".equals(action)) {
+			networkState(req, resp);
+		} else if ("linksState".equals(action)) {
+			linksState(req, resp);
 		} else if ("start".equals(action)) {
 			start(req, resp);
 		} else if ("stop".equals(action)) {
@@ -51,9 +65,9 @@ public class WebConsole extends HttpServlet {
 
 	private void serverState(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		/*
-		ServerState serverState = new ServerState();
-		int state = ServiceAccess.getManagerService().getState();
+
+		IrcServerState serverState = new IrcServerState();
+		int state = ServiceAccess.getInstance().getManagerService().getState();
 		switch (state) {
 		case ManagerService.STATE_STOPPED:
 			serverState.setState("STOPPED");
@@ -65,7 +79,7 @@ public class WebConsole extends HttpServlet {
 		case ManagerService.STATE_ERROR:
 			serverState.setState("ERROR");
 			serverState.setSeverity(Severity.ERROR);
-			serverState.setError(ServiceAccess.getManagerService().getError());
+			serverState.setError(ServiceAccess.getInstance().getManagerService().getError());
 			serverState.setCanStop(true);
 			serverState.setCanStart(true);
 			break;
@@ -92,21 +106,59 @@ public class WebConsole extends HttpServlet {
 			break;
 
 		}
-		req.setAttribute("data", serverState);*/
+		
+		IrcServerMBean server = ServiceAccess.getInstance().getManagerService().getServer();
+		serverState.setIrcServer(server != null);
+		if (server != null) {
+			IrcConfiguration config = server.getConfiguration();
+			Server ircServer = server.getServer();
+			
+			serverState.setIrcServerName(ircServer.getName());
+			serverState.setIrcNetworkName(ircServer.getNetwork().getName());
+			
+			serverState.setIrcBindings(new ArrayList<String>());
+			for (IrcBinding binding : config.getBindings()) {
+				String address = binding.getAddress();
+				if(StringUtils.isEmpty(address))
+					address = "localhost";
+				String ssl = binding.isSsl() ? "yes" : "no";
+				
+				serverState.getIrcBindings().add(address + ":" + binding.getPort() + " (ssl:" + ssl + ")");
+			}			
+
+			StringBuffer operators = new StringBuffer();
+			for(IrcOperator op : config.getOperators()) {
+				if(operators.length() > 0)
+					operators.append(", ");
+				operators.append(op.getName());
+			}
+			serverState.setIrcOperators(operators.toString());
+		}
+		
+		req.setAttribute("data", serverState);
 		req.getRequestDispatcher("/jsp/ServerState.jsp").forward(req, resp);
 	}
 	
-	private void componentsState(HttpServletRequest req, HttpServletResponse resp)
+	private void networkState(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+		
+		IrcServerMBean server = ServiceAccess.getInstance().getManagerService().getServer();
+		if(server != null) 
+			req.setAttribute("data", server.getServer().getNetwork());
+		req.getRequestDispatcher("/jsp/NetworkState.jsp").forward(req, resp);
+	}
+	
+	private void linksState(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		
 		//req.setAttribute("data", serverState);
-		req.getRequestDispatcher("/jsp/ComponentsState.jsp").forward(req, resp);
+		req.getRequestDispatcher("/jsp/LinksState.jsp").forward(req, resp);
 	}
 
 	private void start(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 
-		//ServiceAccess.getManagerService().start();
+		ServiceAccess.getInstance().getManagerService().start();
 
 		resp.sendRedirect(req.getRequestURI());
 	}
@@ -114,7 +166,7 @@ public class WebConsole extends HttpServlet {
 	private void stop(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 
-		//ServiceAccess.getManagerService().stop();
+		ServiceAccess.getInstance().getManagerService().stop();
 
 		resp.sendRedirect(req.getRequestURI());
 	}

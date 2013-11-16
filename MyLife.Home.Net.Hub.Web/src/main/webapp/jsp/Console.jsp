@@ -21,11 +21,8 @@
 							serveur</a></li>
 					<li><a href="#tabs-2"><img
 							src="<%=WebTools.image(pageContext, "application.png")%>" />Vue
-							des composants</a></li>
+							du réseau</a></li>
 					<li><a href="#tabs-3"><img
-							src="<%=WebTools.image(pageContext, "application.png")%>" />Vue
-							des plugins</a></li>
-					<li><a href="#tabs-4"><img
 							src="<%=WebTools.image(pageContext, "lightning.png")%>" />Vue
 							des liens</a></li>
 				</ul>
@@ -46,43 +43,20 @@
 				<div id="tabs-2">
 					<fieldset>
 						<legend>
-							<span>Vue des composants</span>
+							<span>Vue du réseau</span>
 						</legend>
 
-						<div id="componentsState"></div>
+						<div id="networkState"></div>
 
 					</fieldset>
 				</div>
 				<div id="tabs-3">
 					<fieldset>
 						<legend>
-							<span>Vue des plugins</span>
-						</legend>
-
-						<div class="table_render_outer">
-							<div class="table_render_inner">
-								<table class="table_render">
-									<thead></thead>
-									<tbody></tbody>
-								</table>
-							</div>
-						</div>
-					</fieldset>
-				</div>
-				<div id="tabs-4">
-					<fieldset>
-						<legend>
 							<span>Vue des liens</span>
 						</legend>
 
-						<div class="table_render_outer">
-							<div class="table_render_inner">
-								<table class="table_render">
-									<thead></thead>
-									<tbody></tbody>
-								</table>
-							</div>
-						</div>
+						<div id="linksState"></div>
 					</fieldset>
 				</div>
 			</td>
@@ -92,10 +66,12 @@
 
 <script>
 $('#serverState').load('<%=WebTools.servlet(pageContext, "console")%>?action=serverState');
-$('#componentsState').load('<%=WebTools.servlet(pageContext, "console")%>?action=componentsState');
+$('#networkState').load('<%=WebTools.servlet(pageContext, "console")%>?action=networkState');
+$('#linksState').load('<%=WebTools.servlet(pageContext, "console")%>?action=linksState');
 self.setInterval(function() {
 	$('#serverState').load('<%=WebTools.servlet(pageContext, "console")%>?action=serverState');
-	$('#componentsState').load('<%=WebTools.servlet(pageContext, "console")%>?action=componentsState');
+	$('#networkState').load('<%=WebTools.servlet(pageContext, "console")%>?action=networkState');
+	$('#linksState').load('<%=WebTools.servlet(pageContext, "console")%>?action=linksState');
 					}, 5000);
 </script>
 
