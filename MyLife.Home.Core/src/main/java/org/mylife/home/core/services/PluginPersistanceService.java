@@ -2,7 +2,7 @@ package org.mylife.home.core.services;
 
 import java.util.List;
 
-import org.mylife.home.core.data.DataAccess;
+import org.mylife.home.core.data.DataPluginPersistanceAccess;
 import org.mylife.home.core.data.DataPluginPersistance;
 
 /**
@@ -29,7 +29,7 @@ public class PluginPersistanceService implements Service {
 	 * @return
 	 */
 	public List<DataPluginPersistance> getPersistanceByComponentId(String id) {
-		DataAccess access = new DataAccess();
+		DataPluginPersistanceAccess access = new DataPluginPersistanceAccess();
 		try {
 			return access.getPluginPersistanceByComponentId(id);
 		} finally {
@@ -46,7 +46,7 @@ public class PluginPersistanceService implements Service {
 	 */
 	public void updateByComponentId(String id,
 			List<DataPluginPersistance> persistance) {
-		DataAccess access = new DataAccess();
+		DataPluginPersistanceAccess access = new DataPluginPersistanceAccess();
 		try {
 
 			access.deletePluginPersistanceByComponentId(id);

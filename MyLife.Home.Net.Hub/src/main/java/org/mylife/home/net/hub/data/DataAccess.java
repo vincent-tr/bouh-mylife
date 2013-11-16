@@ -1,4 +1,4 @@
-package org.mylife.home.core.data;
+package org.mylife.home.net.hub.data;
 
 import java.sql.Blob;
 import java.sql.Connection;
@@ -13,8 +13,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import org.mylife.home.core.Configuration;
 
 /**
  * Accès aux données

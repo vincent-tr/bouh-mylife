@@ -9,7 +9,7 @@ import java.util.List;
 import javax.xml.bind.JAXBException;
 
 import org.apache.commons.io.IOUtils;
-import org.mylife.home.core.data.DataAccess;
+import org.mylife.home.core.data.DataConfigurationAccess;
 import org.mylife.home.core.data.DataConfiguration;
 import org.mylife.home.core.exchange.XmlCoreContainer;
 import org.mylife.home.net.exchange.XmlNetContainer;
@@ -78,7 +78,7 @@ public class ConfigurationService implements Service {
 	 * @return
 	 */
 	private List<DataConfiguration> listActives() {
-		DataAccess access = new DataAccess();
+		DataConfigurationAccess access = new DataConfigurationAccess();
 		try {
 			return access.getConfigurationsActives();
 		} finally {
@@ -92,7 +92,7 @@ public class ConfigurationService implements Service {
 	 * @return
 	 */
 	public List<DataConfiguration> list() {
-		DataAccess access = new DataAccess();
+		DataConfigurationAccess access = new DataConfigurationAccess();
 		try {
 			return access.getConfigurationsAll();
 		} finally {
@@ -107,7 +107,7 @@ public class ConfigurationService implements Service {
 	 * @return
 	 */
 	public DataConfiguration get(int id) {
-		DataAccess access = new DataAccess();
+		DataConfigurationAccess access = new DataConfigurationAccess();
 		try {
 			return access.getConfigurationByKey(id);
 		} finally {
@@ -123,7 +123,7 @@ public class ConfigurationService implements Service {
 	 * @param comment
 	 */
 	public void changeComment(int id, String comment) {
-		DataAccess access = new DataAccess();
+		DataConfigurationAccess access = new DataConfigurationAccess();
 		try {
 			DataConfiguration item = access.getConfigurationByKey(id);
 			item.setComment(comment);
@@ -140,7 +140,7 @@ public class ConfigurationService implements Service {
 	 * @param active
 	 */
 	public void changeActive(int id, boolean active) {
-		DataAccess access = new DataAccess();
+		DataConfigurationAccess access = new DataConfigurationAccess();
 		try {
 			DataConfiguration item = access.getConfigurationByKey(id);
 			item.setActive(active);
@@ -156,7 +156,7 @@ public class ConfigurationService implements Service {
 	 * @param id
 	 */
 	public void delete(int id) {
-		DataAccess access = new DataAccess();
+		DataConfigurationAccess access = new DataConfigurationAccess();
 		try {
 			DataConfiguration item = new DataConfiguration();
 			item.setId(id);
@@ -172,7 +172,7 @@ public class ConfigurationService implements Service {
 	 * @param config
 	 */
 	public void create(DataConfiguration config) {
-		DataAccess access = new DataAccess();
+		DataConfigurationAccess access = new DataConfigurationAccess();
 		try {
 			config.setDate(new Date());
 			config.setActive(false);
