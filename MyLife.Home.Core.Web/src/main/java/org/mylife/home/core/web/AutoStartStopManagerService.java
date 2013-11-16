@@ -29,11 +29,11 @@ public class AutoStartStopManagerService extends GenericServlet {
 
 	@Override
 	public void init() throws ServletException {
-		ServiceAccess.getManagerService().start();
+		ServiceAccess.getInstance().getManagerService().start();
 	}
 
 	@Override
 	public void destroy() {
-		ServiceAccess.terminate();
+		ServiceAccess.getInstance().terminate();
 	}
 }
