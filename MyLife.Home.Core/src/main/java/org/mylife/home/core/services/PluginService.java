@@ -2,7 +2,7 @@ package org.mylife.home.core.services;
 
 import java.util.List;
 
-import org.mylife.home.core.data.DataAccess;
+import org.mylife.home.core.data.DataPluginAccess;
 import org.mylife.home.core.data.DataPlugin;
 
 /**
@@ -26,7 +26,7 @@ public class PluginService implements Service {
 	 * @return
 	 */
 	public List<DataPlugin> list() {
-		DataAccess access = new DataAccess();
+		DataPluginAccess access = new DataPluginAccess();
 		try {
 			return access.getPluginsAll();
 		} finally {
@@ -40,7 +40,7 @@ public class PluginService implements Service {
 	 * @return
 	 */
 	public DataPlugin get(int id) {
-		DataAccess access = new DataAccess();
+		DataPluginAccess access = new DataPluginAccess();
 		try {
 			return access.getPluginByKey(id);
 		} finally {
@@ -55,7 +55,7 @@ public class PluginService implements Service {
 	 * @param comment
 	 */
 	public void changeComment(int id, String comment) {
-		DataAccess access = new DataAccess();
+		DataPluginAccess access = new DataPluginAccess();
 		try {
 			DataPlugin item = access.getPluginByKey(id);
 			item.setComment(comment);
@@ -71,7 +71,7 @@ public class PluginService implements Service {
 	 * @param active
 	 */
 	public void changeActive(int id, boolean active) {
-		DataAccess access = new DataAccess();
+		DataPluginAccess access = new DataPluginAccess();
 		try {
 			DataPlugin item = access.getPluginByKey(id);
 			item.setActive(active);
@@ -86,7 +86,7 @@ public class PluginService implements Service {
 	 * @param id
 	 */
 	public void delete(int id) {
-		DataAccess access = new DataAccess();
+		DataPluginAccess access = new DataPluginAccess();
 		try {
 			DataPlugin item = new DataPlugin();
 			item.setId(id);
@@ -101,7 +101,7 @@ public class PluginService implements Service {
 	 * @param plugin
 	 */
 	public void create(DataPlugin plugin) {
-		DataAccess access = new DataAccess();
+		DataPluginAccess access = new DataPluginAccess();
 		try {
 			access.createPlugin(plugin);
 		} finally {

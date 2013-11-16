@@ -24,7 +24,7 @@ public class BaseDataAccess {
 	 */
 	private final static Logger log = Logger.getLogger(BaseDataAccess.class
 			.getName());
-	private final static Level level = Level.INFO;
+	protected final static Level level = Level.INFO;
 
 	protected final Connection con;
 
