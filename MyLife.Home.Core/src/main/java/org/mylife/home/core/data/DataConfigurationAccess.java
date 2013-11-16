@@ -132,7 +132,7 @@ public class DataConfigurationAccess extends BaseDataAccess {
 	}
 
 	public void updateConfiguration(DataConfiguration item) {
-		log.log(level, "createConfiguration(%d)", item.getId());
+		log.log(level, "updateConfiguration(%d)", item.getId());
 		PreparedStatement pst = null;
 		try {
 			pst = con.prepareStatement("update core_configuration "
@@ -151,7 +151,7 @@ public class DataConfigurationAccess extends BaseDataAccess {
 	}
 
 	public void deleteConfiguration(DataConfiguration item) {
-		log.log(level, "createConfiguration(%d)", item.getId());
+		log.log(level, "deleteConfiguration(%d)", item.getId());
 		PreparedStatement pst = null;
 		try {
 			pst = con
