@@ -15,8 +15,9 @@ import org.mylife.home.net.NetObject;
 
 /**
  * Gestion d'un contexte d'exécution de plugin
+ * 
  * @author pumbawoman
- *
+ * 
  */
 public class PluginRuntimeContext implements PluginContext {
 
@@ -24,44 +25,49 @@ public class PluginRuntimeContext implements PluginContext {
 	private final Plugin plugin;
 	private final Map<String, String> configuration;
 	private final List<NetContainer> publishedObjects = new ArrayList<NetContainer>();
-	
-	private static Map<String, String> mapFromXml(XmlCoreComponentConfigurationItem[] data) {
-		if(data == null)
+
+	private static Map<String, String> mapFromXml(
+			XmlCoreComponentConfigurationItem[] data) {
+		if (data == null)
 			return null;
 		Map<String, String> map = new HashMap<String, String>();
-		for(XmlCoreComponentConfigurationItem item : data) {
+		for (XmlCoreComponentConfigurationItem item : data) {
 			map.put(item.key, item.value);
 		}
 		return map;
 	}
-	
+
 	private static Plugin instanciatePlugin(String pluginClass) {
 		try {
 			Class<?> clazz = Class.forName(pluginClass);
-			return (Plugin)clazz.newInstance();
-		} catch(Exception e) {
+			return (Plugin) clazz.newInstance();
+		} catch (Exception e) {
 			throw new PluginInstanciateException(e);
 		}
 	}
-	
+
 	/**
 	 * Contexte à partir de configuration
+	 * 
 	 * @param data
 	 */
 	public PluginRuntimeContext(XmlCoreComponent data) {
 		this(data.id, data.pluginClass, mapFromXml(data.configuration));
 	}
-	
+
 	/**
 	 * Contexte avec données
+	 * 
 	 * @param id
 	 * @param pluginClass
 	 * @param configuration
 	 */
-	public PluginRuntimeContext(String id, String pluginClass, Map<String, String> configuration) {
+	public PluginRuntimeContext(String id, String pluginClass,
+			Map<String, String> configuration) {
 		this.id = id;
 		this.plugin = instanciatePlugin(pluginClass);
-		this.configuration = configuration != null ? Collections.unmodifiableMap(configuration) : null;
+		this.configuration = configuration != null ? Collections
+				.unmodifiableMap(configuration) : null;
 		this.plugin.initialize(this);
 	}
 
@@ -77,7 +83,8 @@ public class PluginRuntimeContext implements PluginContext {
 
 	@Override
 	public void publishObject(NetObject obj) {
-		NetContainer container = ServiceAccess.getManagerService().registerPluginObject(this, obj);
+		NetContainer container = ServiceAccess.getInstance()
+				.getManagerService().registerPluginObject(this, obj);
 		publishedObjects.add(container);
 	}
 
@@ -88,21 +95,24 @@ public class PluginRuntimeContext implements PluginContext {
 
 	@Override
 	public Map<String, String> getPersistance() {
-		return ServiceAccess.getManagerService().getPluginPersistance(this);
+		return ServiceAccess.getInstance().getManagerService()
+				.getPluginPersistance(this);
 	}
 
 	@Override
 	public void savePersistance(Map<String, String> data) {
-		ServiceAccess.getManagerService().savePluginPersistance(this, data);
+		ServiceAccess.getInstance().getManagerService()
+				.savePluginPersistance(this, data);
 	}
-	
+
 	/**
 	 * Fin d'utilisation
 	 */
 	public void terminate() {
 		plugin.terminate();
-		ManagerService service = ServiceAccess.getManagerService();
-		for(NetContainer obj : publishedObjects) {
+		ManagerService service = ServiceAccess.getInstance()
+				.getManagerService();
+		for (NetContainer obj : publishedObjects) {
 			service.unregisterPluginObject(this, obj);
 		}
 	}
