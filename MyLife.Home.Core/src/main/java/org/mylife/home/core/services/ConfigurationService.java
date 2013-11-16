@@ -9,6 +9,7 @@ import java.util.List;
 import javax.xml.bind.JAXBException;
 
 import org.apache.commons.io.IOUtils;
+import org.mylife.home.common.services.Service;
 import org.mylife.home.core.data.DataConfigurationAccess;
 import org.mylife.home.core.data.DataConfiguration;
 import org.mylife.home.core.exchange.XmlCoreContainer;

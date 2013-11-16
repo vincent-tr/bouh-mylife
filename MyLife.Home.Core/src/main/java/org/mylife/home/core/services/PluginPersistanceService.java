@@ -2,6 +2,7 @@ package org.mylife.home.core.services;
 
 import java.util.List;
 
+import org.mylife.home.common.services.Service;
 import org.mylife.home.core.data.DataPluginPersistanceAccess;
 import org.mylife.home.core.data.DataPluginPersistance;
 

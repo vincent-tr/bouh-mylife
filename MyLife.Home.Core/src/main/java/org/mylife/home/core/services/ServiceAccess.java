@@ -1,7 +1,6 @@
 package org.mylife.home.core.services;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.mylife.home.common.services.ServiceAccessBase;
 
 /**
  * Accès aux services
@@ -9,90 +8,82 @@ import java.util.List;
  * @author trumpffv
  * 
  */
-public class ServiceAccess {
+public class ServiceAccess extends ServiceAccessBase {
 
 	/**
-	 * Liste des services utilisés
+	 * Singleton
 	 */
-	private static List<Service> services;
+	private final static ServiceAccess instance = new ServiceAccess();
 
 	/**
-	 * Enregistrement des services
+	 * Singleton
 	 * 
-	 * @param service
 	 * @return
 	 */
-	private synchronized static <T extends Service> T register(T service) {
-		if (services == null)
-			services = new ArrayList<Service>();
-		services.add(service);
-		return service;
+	public final static ServiceAccess getInstance() {
+		return instance;
 	}
 
 	/**
-	 * Fin d'utilisation
+	 * Singleton
 	 */
-	public synchronized static void terminate() {
-		if (services != null) {
-			for (Service service : services) {
-				service.terminate();
-			}
-		}
+	private ServiceAccess() {
+
 	}
 
 	/**
 	 * Service de gestion des configurations
 	 */
-	private final static ConfigurationService configurationService = register(new ConfigurationService());
+	private final ConfigurationService configurationService = register(new ConfigurationService());
 
 	/**
 	 * Service de gestion des configurations
 	 * 
 	 * @return
 	 */
-	public static ConfigurationService getConfigurationService() {
+	public ConfigurationService getConfigurationService() {
 		return configurationService;
 	}
 
 	/**
 	 * Service de gestion des plugins
 	 */
-	private final static PluginService pluginService = register(new PluginService());
+	private final PluginService pluginService = register(new PluginService());
 
 	/**
 	 * Service de gestion des plugins
 	 * 
 	 * @return
 	 */
-	public static PluginService getPluginService() {
+	public PluginService getPluginService() {
 		return pluginService;
 	}
 
 	/**
 	 * Service de gestion de la persistance des plugins
 	 */
-	private final static PluginPersistanceService pluginPersistanceService = register(new PluginPersistanceService());
+	private final PluginPersistanceService pluginPersistanceService = register(new PluginPersistanceService());
 
 	/**
 	 * Service de gestion de la persistance des plugins
 	 * 
 	 * @return
 	 */
-	public static PluginPersistanceService getPluginPersistanceService() {
+	public PluginPersistanceService getPluginPersistanceService() {
 		return pluginPersistanceService;
 	}
 
 	/**
 	 * Service de gestion du core
 	 */
-	private final static ManagerService managerService = register(new ManagerService());
+	private final ManagerService managerService = register(new ManagerService());
 
 	/**
 	 * Service de gestion du core
 	 * 
 	 * @return
 	 */
-	public static ManagerService getManagerService() {
+	public ManagerService getManagerService() {
 		return managerService;
 	}
 }

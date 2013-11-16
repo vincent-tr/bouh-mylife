@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.mylife.home.common.services.Service;
 import org.mylife.home.core.data.DataPluginPersistance;
 import org.mylife.home.core.exchange.XmlCoreComponent;
 import org.mylife.home.core.exchange.XmlCoreContainer;
@@ -218,7 +219,8 @@ public class ManagerService implements Service {
 		// Lecture de la configuration
 		List<XmlNetContainer> netList = new ArrayList<XmlNetContainer>();
 		List<XmlCoreContainer> coreList = new ArrayList<XmlCoreContainer>();
-		ServiceAccess.getConfigurationService().loadActives(netList, coreList);
+		ServiceAccess.getInstance().getConfigurationService()
+				.loadActives(netList, coreList);
 
 		// Vérification que chaque id soit unique
 		Set<String> ids = new HashSet<String>();
@@ -319,9 +321,9 @@ public class ManagerService implements Service {
 	 * @return
 	 */
 	public Map<String, String> getPluginPersistance(PluginRuntimeContext context) {
-		List<DataPluginPersistance> list = ServiceAccess
-				.getPluginPersistanceService().getPersistanceByComponentId(
-						context.getId());
+		List<DataPluginPersistance> list = ServiceAccess.getInstance()
+				.getPluginPersistanceService()
+				.getPersistanceByComponentId(context.getId());
 		Map<String, String> map = new HashMap<String, String>();
 		for (DataPluginPersistance item : list) {
 			map.put(item.getKey(), item.getValue());
@@ -347,7 +349,7 @@ public class ManagerService implements Service {
 				list.add(pp);
 			}
 		}
-		ServiceAccess.getPluginPersistanceService().updateByComponentId(
-				context.getId(), list);
+		ServiceAccess.getInstance().getPluginPersistanceService()
+				.updateByComponentId(context.getId(), list);
 	}
 }

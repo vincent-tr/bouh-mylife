@@ -1,4 +1,4 @@
-package org.mylife.home.core.services;
+package org.mylife.home.common.services;
 
 /**
  * Interface d'un service
