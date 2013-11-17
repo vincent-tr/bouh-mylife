@@ -22,37 +22,34 @@
 
 package org.mylife.home.net.hub.irc;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * An IRC network.
  * 
  * @author markhale
  */
-public class Network {
+public final class Network implements Entity {
 	private String name;
 
 	/**
-	 * Servers on this network. (String host, Server server)
+	 * Servers on this network. (String name, Server server)
 	 */
-	public final Map<String, Server> servers = Collections
-			.synchronizedMap(new HashMap<String, Server>());
+	private final Map<String, Server> servers = new ConcurrentHashMap<String, Server>();
 
 	/** (Integer token, Server server) */
-	public final Map<Integer, Server> tokens = Collections
-			.synchronizedMap(new HashMap<Integer, Server>());
+	private final Map<Integer, Server> serverTokens = new ConcurrentHashMap<Integer, Server>();
 
 	/**
 	 * All channels on this network. (String name, Channel channel)
 	 */
-	public final Map<String, Channel> channels = Collections
-			.synchronizedMap(new HashMap<String, Channel>());
+	private final Map<String, Channel> channels = new ConcurrentHashMap<String, Channel>();
 
 	public Network(String name) {
-		setName(name);
-	}
-
-	public final void setName(String name) {
 		this.name = name;
 	}
 
@@ -60,27 +57,39 @@ public class Network {
 		return name;
 	}
 
+	public Collection<Server> getServers() {
+		return Collections.unmodifiableCollection(servers.values());
+	}
+
 	/**
 	 * Adds a server to this network.
 	 */
-	public void addServer(Server server) {
-		servers.put(server.getNick().toLowerCase(), server);
-		tokens.put(new Integer(server.getToken()), server);
+	void addServer(Server server) {
+		servers.put(server.getName().toLowerCase(), server);
+		serverTokens.put(new Integer(server.getToken()), server);
 	}
 
-	public Server getServer(String nick) {
-		return (Server) servers.get(nick.toLowerCase());
+	public Server getServer(String name) {
+		return (Server) servers.get(name.toLowerCase());
 	}
 
-	public void removeServer(Server ic) {
-		servers.remove(ic.getNick().toLowerCase());
-		tokens.remove(new Integer(ic.getToken()));
+	public Server getServer(int token) {
+		return (Server) serverTokens.get(new Integer(token));
+	}
+
+	void removeServer(Server server) {
+		servers.remove(server.getName().toLowerCase());
+		serverTokens.remove(new Integer(server.getToken()));
+	}
+
+	public Collection<Channel> getChannels() {
+		return Collections.unmodifiableCollection(channels.values());
 	}
 
 	/**
 	 * Adds a channel to this network.
 	 */
-	public void addChannel(Channel channel) {
+	void addChannel(Channel channel) {
 		channels.put(channel.getName().toLowerCase(), channel);
 	}
 
@@ -88,7 +97,7 @@ public class Network {
 		return (Channel) channels.get(name.toLowerCase());
 	}
 
-	public void removeChannel(Channel channel) {
+	void removeChannel(Channel channel) {
 		channels.remove(channel.getName().toLowerCase());
 	}
 
@@ -98,24 +107,45 @@ public class Network {
 	 * @return null if nick does not exist on the network.
 	 */
 	public User getUser(String nick) {
-		synchronized (servers) {
-			for (Server server : servers.values()) {
-				User user = server.getUser(nick);
-				if (user != null)
-					return user;
-			}
+		for (Iterator<Server> iter = servers.values().iterator(); iter
+				.hasNext();) {
+			Server server = iter.next();
+			User user = server.getUser(nick);
+			if (user != null)
+				return user;
 		}
 		return null;
 	}
 
-	public final int getUserCount(char mode, boolean isSet) {
+	public int getUserCount(char mode, boolean isSet) {
 		int count = 0;
-		synchronized (servers) {
-			for (Server server : servers.values()) {
-				count += server.getUserCount(mode, isSet);
-			}
+		for (Iterator<Server> iter = servers.values().iterator(); iter
+				.hasNext();) {
+			Server server = iter.next();
+			count += server.getUserCount(mode, isSet);
 		}
 		return count;
+	}
+
+	public void send(Message message, Server excluded) {
+		Connection.Handler handler = excluded.getHandler();
+		ConnectedEntity excludedPeer = (handler != null ? handler.getEntity()
+				: null);
+		for (Iterator<Server> iter = servers.values().iterator(); iter
+				.hasNext();) {
+			Server server = iter.next();
+			if (server.isPeer() && !server.equals(excludedPeer)) {
+				// send to local servers for forwarding
+				server.send(message);
+			}
+		}
+	}
+
+	/**
+	 * Sends a message to all the servers on this network.
+	 */
+	public void send(Message message) {
+		send(message, null);
 	}
 
 	public String toString() {

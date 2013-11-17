@@ -24,52 +24,81 @@ package org.mylife.home.net.hub.irc;
 
 /**
  * Message factory.
+ * 
  * @author markhale
  */
 public class MessageFactory {
+	protected final Network network;
+
+	public MessageFactory(Network network) {
+		this.network = network;
+	}
+
 	/**
 	 * Parses a message string.
 	 */
-	public Message createMessage(String str) {
+	public Message createMessage(ConnectedEntity from, String str) {
 		int startPos = 0;
 
 		// parse prefix
-		String from = null;
-		if(str.charAt(0) == ':') {
+		if (str.charAt(0) == ':') {
 			int endPos = str.indexOf(' ', 2);
-			from = str.substring(1, endPos);
+			String sender = str.substring(1, endPos);
 			startPos = endPos + 1;
-		}
 
+			if (sender.indexOf('@') != -1 || sender.indexOf('!') != -1)
+				throw new IllegalArgumentException(
+						"Unexpected extended prefix (only allowed in server to client messages)");
+
+			if (from instanceof Server) {
+				if (sender.indexOf('.') == -1) {
+					// no '.', so must be a user
+					from = network.getUser(sender);
+				} else {
+					// found a '.', must be a server
+					from = network.getServer(sender);
+				}
+				if (from == null)
+					throw new IllegalArgumentException("Unknown sender: "
+							+ sender);
+			} else {
+				if (from != network.getUser(sender))
+					throw new IllegalArgumentException(
+							"Sender mismatch: received from " + from.getName()
+									+ " but sender is " + sender);
+			}
+		}
+		return parseMessage(from, str, startPos);
+	}
+
+	protected final Message parseMessage(ConnectedEntity from, String str,
+			int startPos) {
 		// parse command
-		String command;
 		int endPos = str.indexOf(' ', startPos);
-		if(endPos == -1) {
+		if (endPos == -1) {
 			// no parameters
-			command = str.substring(startPos);
+			String command = str.substring(startPos);
+			return new Message(from, command);
 		} else {
-			command = str.substring(startPos, endPos);
-		}
+			String command = str.substring(startPos, endPos);
+			Message message = new Message(from, command);
 
-		Message message = new Message(from, command);
-
-		if(endPos != -1) {
 			// parse parameters
 			int trailingPos = str.indexOf(" :", endPos);
-			if(trailingPos == -1)
+			if (trailingPos == -1)
 				trailingPos = str.length();
-			while(endPos != -1 && endPos < trailingPos) {
+			while (endPos != -1 && endPos < trailingPos) {
 				startPos = endPos + 1;
 				endPos = str.indexOf(' ', startPos);
-				if(endPos != -1)
+				if (endPos != -1 && endPos - startPos > 0)
 					message.appendParameter(str.substring(startPos, endPos));
 			}
-			if(endPos == -1 && startPos < str.length()) { // ignore zero length parameters
+			if (endPos == -1) {
 				message.appendParameter(str.substring(startPos));
-			} else if(trailingPos+2 < str.length()) { // ignore zero length parameters
-				message.appendParameter(str.substring(trailingPos+2));
+			} else {
+				message.appendLastParameter(str.substring(trailingPos + 2));
 			}
+			return message;
 		}
-		return message;
 	}
 }

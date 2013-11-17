@@ -1,5 +1,4 @@
 /*
- * jIRCd - Java Internet Relay Chat Daemon
  * Copyright 2003 Tyrel L. Haveman <tyrel@haveman.net>
  *
  * This file is part of jIRCd.
@@ -20,33 +19,35 @@
  *
  */
 
-package org.mylife.home.net.hub.irc.commands;
+package org.mylife.home.net.hub.irc;
 
-import org.mylife.home.net.hub.irc.Command;
-import org.mylife.home.net.hub.irc.Message;
-import org.mylife.home.net.hub.irc.RegisteredEntity;
-import org.mylife.home.net.hub.irc.Server;
+import java.io.FilterOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
- * @author markhale
+ * 
+ * @author Mark
  */
-public class Ping implements Command {
-	/**
-	 * If we are pinged, return a pong.
-	 */
-	public void invoke(RegisteredEntity src, String[] params) {
-		Server server = src.getServer();
-		Message message = new Message(server, "PONG");
-		message.appendParameter(server.getName());
-		message.appendLastParameter(params[0]);
-		src.send(message);
+public final class StatisticsOutputStream extends FilterOutputStream {
+	private long bytesWritten;
+
+	/** Creates a new instance of StatisticsOutputStream */
+	public StatisticsOutputStream(OutputStream out) {
+		super(out);
 	}
 
-	public String getName() {
-		return "PING";
+	public long getBytesWritten() {
+		return bytesWritten;
 	}
 
-	public int getMinimumParameterCount() {
-		return 1;
+	public void write(int b) throws IOException {
+		out.write(b);
+		bytesWritten++;
+	}
+
+	public void write(byte[] b, int offset, int len) throws IOException {
+		out.write(b, offset, len);
+		bytesWritten += len;
 	}
 }

@@ -22,13 +22,17 @@
 
 package org.mylife.home.net.hub.irc.commands;
 
-import org.mylife.home.net.hub.irc.*;
+import org.mylife.home.net.hub.irc.Command;
+import org.mylife.home.net.hub.irc.Constants;
+import org.mylife.home.net.hub.irc.Message;
+import org.mylife.home.net.hub.irc.RegisteredEntity;
+import org.mylife.home.net.hub.irc.User;
 
 /**
  * @author markhale
  */
 public class UserHost implements Command {
-	public void invoke(Source src, String[] params) {
+	public void invoke(RegisteredEntity src, String[] params) {
 		StringBuffer reply = new StringBuffer();
 		for (int i = 0; i < params.length; i++) {
 			User luser = src.getServer().getNetwork().getUser(params[i]);
@@ -50,12 +54,16 @@ public class UserHost implements Command {
 		}
 		Message message = new Message(Constants.RPL_USERHOST, src);
 		if (reply.length() > 0)
-			message.appendParameter(reply.substring(1)); // get rid of leading space ' '
+			message.appendLastParameter(reply.substring(1)); // get rid of
+																// leading space
+																// ' '
 		src.send(message);
 	}
+
 	public String getName() {
 		return "USERHOST";
 	}
+
 	public int getMinimumParameterCount() {
 		return 1;
 	}

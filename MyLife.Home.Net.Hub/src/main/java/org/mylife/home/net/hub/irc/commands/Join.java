@@ -22,37 +22,49 @@
 
 package org.mylife.home.net.hub.irc.commands;
 
-import org.mylife.home.net.hub.irc.*;
+import org.mylife.home.net.hub.irc.Channel;
+import org.mylife.home.net.hub.irc.Command;
+import org.mylife.home.net.hub.irc.Network;
+import org.mylife.home.net.hub.irc.RegisteredEntity;
+import org.mylife.home.net.hub.irc.User;
+import org.mylife.home.net.hub.irc.Util;
 
 /**
  * @author markhale
  */
 public class Join implements Command {
-	public void invoke(Source src, String[] params) {
+	public void invoke(RegisteredEntity src, String[] params) {
 		String[] chanNames = Util.split(params[0], ',');
-		for(int i=0; i<chanNames.length; i++) {
-			final String channame = chanNames[i];
-			if (Util.isChannelIdentifier(channame)) {
-				Channel chan = src.getServer().getNetwork().getChannel(channame);
-				User user = (User) src;
-				if (chan == null) {
-					chan = createChannel(channame);
-					src.getServer().getNetwork().addChannel(chan);
-					chan.joinUser(user, null);
-				} else {
-					chan.joinUser(user, params);
-				}
-			} else {
-				Util.sendNoSuchChannelError(src, channame);
-			}
+		String[] keys = (params.length > 1 ? Util.split(params[1], ',') : null);
+		User user = (User) src;
+		for (int i = 0; i < chanNames.length; i++) {
+			// final String channame = chanNames[i];
+			String key = (keys != null && i < keys.length ? keys[i] : null);
+			join(chanNames[i], user, key);
 		}
 	}
-	protected Channel createChannel(String name) {
-		return new Channel(name);
+
+	private void join(String channame, User user, String key) {
+		if (Util.isChannelIdentifier(channame)) {
+			Network network = user.getServer().getNetwork();
+			Channel chan = network.getChannel(channame);
+			if (chan == null) {
+				chan = createChannel(channame, network);
+			}
+			chan.joinUser(user, key);
+		} else {
+			Util.sendNoSuchChannelError(user, channame);
+		}
 	}
+
+	protected Channel createChannel(String name, Network network) {
+		return new Channel(name, network);
+	}
+
 	public String getName() {
 		return "JOIN";
 	}
+
 	public int getMinimumParameterCount() {
 		return 1;
 	}

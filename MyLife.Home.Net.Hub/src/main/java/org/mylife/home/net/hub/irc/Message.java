@@ -23,145 +23,134 @@
 package org.mylife.home.net.hub.irc;
 
 /**
- * IRC message format.
- * A message consists of three parts: a sender, a command, and zero or more parameters.
+ * IRC message format. A message consists of three parts: a sender, a command,
+ * and zero or more parameters.
+ * 
  * @author markhale
  */
-public class Message {
-	protected final String from;
+public final class Message {
+	protected final ConnectedEntity from;
 	protected final String command;
-	protected final String[] params = new String[Constants.MAX_MESSAGE_PARAMETERS];
+	protected String[] params = new String[3];
 	protected int paramCount = 0;
 	protected boolean hasLast = false;
 
-	public Message(String from, String command) {
+	/**
+	 * Creates a message.
+	 * 
+	 * @param from
+	 *            can be null
+	 */
+	public Message(ConnectedEntity from, String command) {
+		if (!Util.isCommandIdentifier(command))
+			throw new IllegalArgumentException("Invalid command name");
 		this.from = from;
 		this.command = command;
 	}
+
 	public Message(String command) {
-		this.from = null;
-		this.command = command;
+		this(null, command);
 	}
-	/**
-	 * Creates a message sent from a server.
-	 * @param from can be null
-	 */
-	public Message(Server from, String command) {
-		this(from != null ? from.getName() : null, command);
-	}
-	/**
-	 * Creates a message sent from a user.
-	 * @param from can be null
-	 */
-	public Message(User from, String command) {
-		this(from != null ? from.toString() : null, command);
-	}
+
 	/**
 	 * Constructs a "numeric reply" type of message.
 	 */
-	public Message(User from, String command, Source target) {
-		this(from, command);
-		appendParameter(target.getNick());
-	}
-	public Message(Server from, String command, Source target) {
-		this(from, command);
-		appendParameter(target.getNick());
-	}
-	/**
-	 * Creates a message sent from a user to a channel.
-	 */
-	public Message(User from, String command, Channel target) {
+	public Message(ConnectedEntity from, String command, ConnectedEntity target) {
 		this(from, command);
 		appendParameter(target.getName());
 	}
-	/**
-	 * Creates a message sent from a server to a channel.
-	 */
-	public Message(Server from, String command, Channel target) {
-		this(from, command);
-		appendParameter(target.getName());
-	}
+
 	/**
 	 * Constructs a "numeric reply" type of message.
 	 */
-	public Message(String command, Source target) {
+	public Message(String command, ConnectedEntity target) {
 		this(target.getServer(), command, target);
 	}
+
+	/**
+	 * Creates a message sent to a channel.
+	 */
+	public Message(ConnectedEntity from, String command, Channel target) {
+		this(from, command);
+		appendParameter(target.getName());
+	}
+
 	/**
 	 * Returns the sender of this message.
 	 */
-	public String getSender() {
+	public ConnectedEntity getSender() {
 		return from;
 	}
-	/**
-	 * Attempts to resolve the sender as a Source.
-	 * @return null if the sender cannot be resolved.
-	 */
-	public Source resolveSender(Network network) {
-		if(from != null) {
-			Source src;
-			final int pos = from.indexOf('!');
-			if (pos < 0) { // can't find *!*, so must be server
-				src = network.getServer(from);
-			} else { // found a *!* in string, must be a user
-				String userName = from.substring(0, pos);
-				src = network.getUser(userName);
-			}
-			return src;
-		} else
-			return null;
-	}
+
 	/**
 	 * Returns the command of this message.
 	 */
 	public String getCommand() {
 		return command;
 	}
-	public void appendParameter(String param) {
-		if(hasLast)
-			throw new IllegalStateException("The last parameter has already been appended");
-		if(param != null && param.length() > 0) {
-			params[paramCount] = param;
-			paramCount++;
+
+	private void addParam(String param) {
+		if (paramCount == params.length) {
+			int newLength = 2 * (paramCount + 1);
+			if (newLength > Constants.MAX_MESSAGE_PARAMETERS)
+				newLength = Constants.MAX_MESSAGE_PARAMETERS;
+			String[] old = params;
+			params = new String[newLength];
+			System.arraycopy(old, 0, params, 0, paramCount);
 		}
+		params[paramCount++] = param;
 	}
+
 	/**
-	 * Appends a parameter forcefully prefixed with a colon.
+	 * Appends a parameter.
 	 */
-	public void appendLastParameter(String param) {
-		if(param != null) {
-			params[paramCount] = param;
-			paramCount++;
-			hasLast = true;
-		}
+	public Message appendParameter(String param) {
+		if (hasLast)
+			throw new IllegalStateException(
+					"The last parameter has already been appended");
+		if (!Util.isParameter(param))
+			throw new IllegalArgumentException(
+					"Use appendLastParameter() instead");
+		addParam(param);
+		return this;
 	}
+
+	/**
+	 * Explicitly appends the last parameter.
+	 */
+	public Message appendLastParameter(String param) {
+		if (hasLast)
+			throw new IllegalStateException(
+					"The last parameter has already been appended");
+		addParam(param);
+		hasLast = true;
+		return this;
+	}
+
 	public String getParameter(int n) {
 		return params[n];
 	}
+
 	public int getParameterCount() {
 		return paramCount;
 	}
+
+	/**
+	 * Returns true if there is an explicit last parameter.
+	 */
+	public boolean hasLastParameter() {
+		return hasLast;
+	}
+
 	public String toString() {
 		StringBuffer buf = new StringBuffer();
-		// append prefix
-		if(from != null)
-			buf.append(':').append(from).append(' ');
-
-		// append command
-		buf.append(command);
-
-		// append parameters
-		if(paramCount > 0) {
-			final int lastParamIndex = paramCount - 1;
-			for(int i=0; i<lastParamIndex; i++)
-				buf.append(' ').append(params[i]);
-			final String lastParam = params[lastParamIndex];
-			// if the last parameter contains spaces or starts with a ':'
-			if(hasLast || lastParam.indexOf(' ') != -1 || lastParam.charAt(0) == ':')
-				buf.append(" :").append(lastParam);
-			else
-				buf.append(' ').append(lastParam);
-		}
+		buf.append('[').append(from);
+		buf.append(", ").append(command).append(", [");
+		int lastIndex = paramCount - 1;
+		for (int i = 0; i < lastIndex; i++)
+			buf.append(params[i]).append(", ");
+		buf.append(params[lastIndex]).append("], ");
+		buf.append(hasLast).append(']');
 		return buf.toString();
 	}
 }

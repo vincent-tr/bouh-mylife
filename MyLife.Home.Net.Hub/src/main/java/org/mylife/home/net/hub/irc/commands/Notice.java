@@ -22,13 +22,19 @@
 
 package org.mylife.home.net.hub.irc.commands;
 
-import org.mylife.home.net.hub.irc.*;
+import org.mylife.home.net.hub.irc.Channel;
+import org.mylife.home.net.hub.irc.Command;
+import org.mylife.home.net.hub.irc.Message;
+import org.mylife.home.net.hub.irc.Network;
+import org.mylife.home.net.hub.irc.RegisteredEntity;
+import org.mylife.home.net.hub.irc.User;
+import org.mylife.home.net.hub.irc.Util;
 
 /**
  * @author markhale
  */
 public class Notice implements Command {
-	public void invoke(Source src, String[] params) {
+	public void invoke(RegisteredEntity src, String[] params) {
 		String msgdest = params[0];
 		String msg = params[1];
 		if (msgdest.charAt(0) == '#') {
@@ -37,17 +43,9 @@ public class Notice implements Command {
 			if (chan == null) {
 				Util.sendNoSuchChannelError(src, msgdest);
 			} else {
-				if(src instanceof User) {
-					User user = (User) src;
-					Message message = new Message(user, "NOTICE", chan);
-					message.appendLastParameter(msg);
-					chan.send(message, user);
-				} else {
-					Server server = (Server) src;
-					Message message = new Message(server, "NOTICE", chan);
-					message.appendLastParameter(msg);
-					chan.send(message);
-				}
+				Message message = new Message(src, "NOTICE", chan);
+				message.appendLastParameter(msg);
+				chan.send(message, src);
 			}
 		} else if (msgdest.charAt(0) == '&') {
 			// message to local channel
@@ -58,24 +56,21 @@ public class Notice implements Command {
 			if (target == null) {
 				Util.sendNoSuchNickError(src, msgdest);
 			} else {
-				if(src instanceof User) {
-					Message message = new Message((User)src, "NOTICE", target);
-					message.appendLastParameter(msg);
-					target.send(message);
-				} else {
-					Message message = new Message((Server)src, "NOTICE", target);
-					message.appendLastParameter(msg);
-					target.send(message);
-				}
+				Message message = new Message(src, "NOTICE", target);
+				message.appendLastParameter(msg);
+				target.send(message);
 			}
 		}
 	}
+
 	protected User findUser(Network network, String nick) {
 		return network.getUser(nick);
 	}
+
 	public String getName() {
 		return "NOTICE";
 	}
+
 	public int getMinimumParameterCount() {
 		return 2;
 	}

@@ -22,27 +22,27 @@
 
 package org.mylife.home.net.hub.irc.commands;
 
-import org.mylife.home.net.hub.irc.*;
+import org.mylife.home.net.hub.irc.RegisteredEntity;
+import org.mylife.home.net.hub.irc.RegistrationCommand;
+import org.mylife.home.net.hub.irc.UnregisteredEntity;
+import org.mylife.home.net.hub.irc.Util;
 
 /**
  * @author markhale
  */
-public class Pass implements Command {
-	public final void invoke(Source src, String[] params) {
-		if(src instanceof Unknown) {
-			handleCommand((Unknown)src, params);
-		} else {
-			Message message = new Message(Constants.ERR_ALREADYREGISTRED, src);
-			message.appendParameter("Unauthorized command (already registered)");
-			src.send(message);
-		}
+public class Pass implements RegistrationCommand {
+	public final void invoke(RegisteredEntity src, String[] params) {
+		Util.sendAlreadyRegisteredError(src);
 	}
-	protected void handleCommand(Unknown src, String[] params) {
-		src.setPassword(params[0]);
+
+	public final void invoke(final UnregisteredEntity src, String[] params) {
+		src.setPass(params);
 	}
+
 	public String getName() {
 		return "PASS";
 	}
+
 	public int getMinimumParameterCount() {
 		return 1;
 	}

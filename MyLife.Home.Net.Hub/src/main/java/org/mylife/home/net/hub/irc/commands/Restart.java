@@ -22,8 +22,13 @@
 
 package org.mylife.home.net.hub.irc.commands;
 
+import java.io.IOException;
+
 import org.mylife.home.net.hub.IrcServerMBean;
-import org.mylife.home.net.hub.irc.*;
+import org.mylife.home.net.hub.irc.Command;
+import org.mylife.home.net.hub.irc.RegisteredEntity;
+import org.mylife.home.net.hub.irc.User;
+import org.mylife.home.net.hub.irc.Util;
 
 /**
  * @author markhale
@@ -34,21 +39,34 @@ public class Restart implements Command {
 	public Restart(IrcServerMBean jircd) {
 		this.jircd = jircd;
 	}
-	public void invoke(Source src, String[] params) {
-		User user = (User) src;
-		if(hasPermission(user)) {
-			jircd.stop();
-			jircd.start();
-		} else {
-			Util.sendNoPrivilegesError(src);
+
+	public void invoke(RegisteredEntity src, String[] params) {
+		if (src instanceof User) {
+			User user = (User) src;
+			invoke(user, params);
 		}
 	}
-	private boolean hasPermission(User user) {
-		return user.isModeSet(User.UMODE_OPER);
+
+	private void invoke(User user, String[] params) {
+		try {
+			Util.checkOperatorPermission(user);
+			jircd.stop();
+			jircd.reloadPolicy();
+			try {
+				jircd.reloadConfiguration();
+			} catch (IOException ioe) {
+				ioe.printStackTrace();
+			}
+			jircd.start();
+		} catch (SecurityException se) {
+			Util.sendNoPrivilegesError(user);
+		}
 	}
+
 	public String getName() {
 		return "RESTART";
 	}
+
 	public int getMinimumParameterCount() {
 		return 0;
 	}

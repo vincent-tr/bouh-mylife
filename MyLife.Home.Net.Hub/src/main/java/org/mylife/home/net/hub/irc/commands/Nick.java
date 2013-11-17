@@ -23,82 +23,111 @@
 package org.mylife.home.net.hub.irc.commands;
 
 import org.mylife.home.net.hub.IrcServerMBean;
-import org.mylife.home.net.hub.irc.*;
+import org.mylife.home.net.hub.irc.CommandContext;
+import org.mylife.home.net.hub.irc.ConnectedEntity;
+import org.mylife.home.net.hub.irc.Constants;
+import org.mylife.home.net.hub.irc.Message;
+import org.mylife.home.net.hub.irc.RegisteredEntity;
+import org.mylife.home.net.hub.irc.RegistrationCommand;
+import org.mylife.home.net.hub.irc.Server;
+import org.mylife.home.net.hub.irc.UnregisteredEntity;
+import org.mylife.home.net.hub.irc.User;
+import org.mylife.home.net.hub.irc.Util;
 
 /**
  * @author markhale
  */
-public class Nick implements Command {
+public class Nick implements RegistrationCommand {
+	private static final int MINIMUM_PARAM_COUNT_SERVER = 7;
 	protected final IrcServerMBean jircd;
 
 	public Nick(IrcServerMBean jircd) {
 		this.jircd = jircd;
 	}
-	public void invoke(final Source src, String[] params) {
+
+	public final void invoke(final RegisteredEntity src, String[] params) {
 		if (src instanceof User) {
-			// user is requesting a change of nick
-			User user = (User) src;
-			String newNick = params[0];
-			if (Util.isNickName(newNick)) {
-				User newUser = src.getServer().getNetwork().getUser(newNick);
-				if (newUser != null) {
-					sendNickNameInUseError(src, newNick);
-				} else {
-					user.changeNick(newNick);
-				}
-			} else {
-				sendErroneousNickNameError(src, newNick);
-			}
+			invoke((User) src, params);
 		} else if (src instanceof Server) {
-			if (params.length == 7) {
-				String nick = params[0];
-				//String hopcount = params[1];
-				String ident = params[2];
-				String host = params[3];
-				//String token = params[4];
-				//String modes = params[5];
-				String desc = params[6];
-				User user = new User(nick, ident, host, desc, (Server)src);
-				((Server)src).getServer().addUser(user);
-			} else {
-				// too few parameters
-				Util.sendNeedMoreParamsError(src, getName());
-			}
-		} else if (src instanceof Unknown) {
-			String newNick = params[0];
-			if (Util.isNickName(newNick)) {
-				if (src.getServer().getNetwork().getUser(newNick) == null) {
-					Unknown unknown = (Unknown) src;
-					unknown.setNick(newNick);
-					String[] userParams = unknown.getParameters();
-					if (userParams != null) {
-						// re-invoke USER command
-						Command command = jircd.getCommand("USER");
-						command.invoke(src, userParams);
-					}
-				} else {
-					sendNickNameInUseError(src, newNick);
-				}
-			} else {
-				sendErroneousNickNameError(src, newNick);
-			}
+			invoke((Server) src, params);
 		}
 	}
-	private static void sendNickNameInUseError(Source src, String nick) {
+
+	public final void invoke(final UnregisteredEntity src, String[] params) {
+		String newNick = params[0];
+		if (Util.isNickName(newNick)) {
+			if (src.getServer().getNetwork().getUser(newNick) == null) {
+				src.setName(newNick);
+				String[] userParams = src.getParameters();
+				if (userParams != null) {
+					// re-invoke USER command if received USER before NICK
+					CommandContext ctx = (CommandContext) jircd
+							.getCommandContext("USER");
+					RegistrationCommand command = (RegistrationCommand) ctx
+							.getCommand();
+					command.invoke(src, userParams);
+				}
+			} else {
+				sendNickNameInUseError(src, newNick);
+			}
+		} else {
+			sendErroneousNickNameError(src, newNick);
+		}
+	}
+
+	private void invoke(User src, String[] params) {
+		// user is requesting a change of nick
+		String newNick = params[0];
+		if (Util.isNickName(newNick)) {
+			User newUser = src.getServer().getNetwork().getUser(newNick);
+			if (newUser != null) {
+				sendNickNameInUseError(src, newNick);
+			} else {
+				src.changeNick(newNick);
+			}
+		} else {
+			sendErroneousNickNameError(src, newNick);
+		}
+	}
+
+	private void invoke(Server src, String[] params) {
+		if (params.length == MINIMUM_PARAM_COUNT_SERVER) {
+			String nick = params[0];
+			int hopcount = Integer.parseInt(params[1]);
+			String ident = params[2];
+			String host = params[3];
+			int token = Integer.parseInt(params[4]);
+			//String modes = params[5];
+			String desc = params[6];
+			Server userServer = src.getNetwork().getServer(token);
+			/*User user = */new User(nick, hopcount, ident, host, desc, userServer);
+		} else {
+			// too few parameters
+			Util.sendNeedMoreParamsError(src, getName());
+		}
+	}
+
+	private static void sendNickNameInUseError(ConnectedEntity src, String nick) {
 		Message message = new Message(Constants.ERR_NICKNAMEINUSE, src);
 		message.appendParameter(nick);
-		message.appendParameter(Util.getResourceString(src, "ERR_NICKNAMEINUSE"));
+		message.appendLastParameter(Util.getResourceString(src,
+				"ERR_NICKNAMEINUSE"));
 		src.send(message);
 	}
-	private static void sendErroneousNickNameError(Source src, String nick) {
+
+	private static void sendErroneousNickNameError(ConnectedEntity src,
+			String nick) {
 		Message message = new Message(Constants.ERR_ERRONEUSNICKNAME, src);
 		message.appendParameter(nick);
-		message.appendParameter(Util.getResourceString(src, "ERR_ERRONEUSNICKNAME"));
+		message.appendLastParameter(Util.getResourceString(src,
+				"ERR_ERRONEUSNICKNAME"));
 		src.send(message);
 	}
+
 	public String getName() {
 		return "NICK";
 	}
+
 	public int getMinimumParameterCount() {
 		return 1;
 	}

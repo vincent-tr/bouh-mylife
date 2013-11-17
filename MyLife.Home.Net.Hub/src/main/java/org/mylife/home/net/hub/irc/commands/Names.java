@@ -22,26 +22,32 @@
 
 package org.mylife.home.net.hub.irc.commands;
 
-import org.mylife.home.net.hub.irc.*;
+import org.mylife.home.net.hub.irc.Channel;
+import org.mylife.home.net.hub.irc.Command;
+import org.mylife.home.net.hub.irc.RegisteredEntity;
+import org.mylife.home.net.hub.irc.User;
+import org.mylife.home.net.hub.irc.Util;
 
 /**
  * @author markhale
  */
 public class Names implements Command {
-	public void invoke(Source src, String[] params) {
+	public void invoke(RegisteredEntity src, String[] params) {
 		String channame = params[0];
-		if(Util.isChannelIdentifier(channame)) {
+		if (Util.isChannelIdentifier(channame)) {
 			Channel chan = src.getServer().getNetwork().getChannel(channame);
 			if (chan == null) {
 				Util.sendNoSuchChannelError(src, channame);
 			} else {
-				chan.sendNames((User)src);
+				chan.sendNames((User) src);
 			}
 		}
 	}
+
 	public String getName() {
 		return "NAMES";
 	}
+
 	public int getMinimumParameterCount() {
 		return 1;
 	}

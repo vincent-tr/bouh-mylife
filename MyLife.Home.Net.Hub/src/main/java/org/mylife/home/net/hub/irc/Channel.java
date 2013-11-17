@@ -25,19 +25,20 @@ package org.mylife.home.net.hub.irc;
 import java.text.DateFormat;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
- * IRC channel.
+ * IRC channel. Inner class pattern of Network.
  * 
  * @author thaveman
  * @author markhale
  */
-public class Channel {
+public class Channel implements Entity {
 	public static final char CHANMODE_PRIVATE = 'p';
 	public static final char CHANMODE_SECRET = 's';
 	public static final char CHANMODE_INVITEONLY = 'i';
@@ -55,58 +56,21 @@ public class Channel {
 	private final String name;
 	private final long creationTime;
 	private final Modes modes = new Modes();
+	protected final Object topicLock = new Object();
 	protected String topic = "";
 	protected String topicAuthor = "";
 	protected long topicTime; // millis
 	private String key; // null if none
 	private int limit; // 0 if none
-	/** (User user, Member member) */
-	private final Map<User, Member> members = Collections
-			.synchronizedMap(new HashMap<User, Member>());
+	protected final Network network;
+	/** (User user, Modes modes) */
+	private final Map<User, Modes> members = new ConcurrentHashMap<User, Modes>();
+	/** (Server peerServer, Set linkedMembers) */
+	private final Map<Server, Set<User>> peerServers = new ConcurrentHashMap<Server, Set<User>>();
 	/** set of Bans */
-	private final Set<Ban> bans = Collections
-			.synchronizedSet(new HashSet<Ban>());
+	private final Set<Ban> bans = new CopyOnWriteArraySet<Ban>();
 	/** set of invited Users */
-	private final Set<User> invites = Collections
-			.synchronizedSet(new HashSet<User>());
-
-	/**
-	 * Channel member.
-	 */
-	private class Member {
-		private final User user;
-		private final Modes chanModes = new Modes();
-
-		public Member(User user) {
-			this.user = user;
-		}
-
-		public User getUser() {
-			return user;
-		}
-
-		public boolean isChanOp() {
-			return chanModes.contains(Channel.CHANMODE_OPERATOR);
-		}
-
-		public void setOp(boolean state) {
-			if (state)
-				chanModes.add(Channel.CHANMODE_OPERATOR);
-			else
-				chanModes.remove(Channel.CHANMODE_OPERATOR);
-		}
-
-		public boolean isChanVoice() {
-			return chanModes.contains(Channel.CHANMODE_VOICE);
-		}
-
-		public void setVoice(boolean state) {
-			if (state)
-				chanModes.add(Channel.CHANMODE_VOICE);
-			else
-				chanModes.remove(Channel.CHANMODE_VOICE);
-		}
-	}
+	private final Set<User> invites = new CopyOnWriteArraySet<User>();
 
 	/**
 	 * Channel ban.
@@ -126,11 +90,13 @@ public class Channel {
 	/**
 	 * Constructs a new IRC channel.
 	 */
-	public Channel(String name) {
+	public Channel(String name, Network network) {
 		if (name == null)
 			throw new NullPointerException("Channel name cannot be null");
 		this.name = name;
 		this.creationTime = System.currentTimeMillis();
+		this.network = network;
+		network.addChannel(this);
 	}
 
 	public String getName() {
@@ -157,29 +123,26 @@ public class Channel {
 		return members.containsKey(usr);
 	}
 
-	private Member getMember(User usr) {
-		return (Member) members.get(usr);
+	private Modes getModes(User usr) {
+		return members.get(usr);
 	}
 
-	public void joinUser(User us, String[] params) {
+	public void joinUser(User us, String usKey) {
 		// check for bans
 		if (isBanned(us.toString())) {
 			Message message = new Message(Constants.ERR_BANNEDFROMCHAN, us);
 			message.appendParameter(name);
-			message.appendParameter(Util.getResourceString(us,
+			message.appendLastParameter(Util.getResourceString(us,
 					"ERR_BANNEDFROMCHAN"));
 			us.send(message);
 			return;
 		}
 		// check for key
-		if (this.key != null && !this.key.equals("")) {
-			String providedKey = "";
-			if (params.length > 1)
-				providedKey = params[1];
-			if (!providedKey.equals(this.key)) {
+		if (this.key != null && this.key.length() > 0) {
+			if (!this.key.equals(usKey)) {
 				Message message = new Message(Constants.ERR_BADCHANNELKEY, us);
 				message.appendParameter(name);
-				message.appendParameter(Util.getResourceString(us,
+				message.appendLastParameter(Util.getResourceString(us,
 						"ERR_BADCHANNELKEY"));
 				us.send(message);
 				return;
@@ -190,7 +153,8 @@ public class Channel {
 			if (members.size() >= this.limit) {
 				Message message = new Message(Constants.ERR_CHANNELISFULL, us);
 				message.appendParameter(name);
-				message.appendParameter("Cannot join channel (+l)");
+				message.appendLastParameter(Util.getResourceString(us,
+						"ERR_CHANNELISFULL"));
 				us.send(message);
 				return;
 			}
@@ -199,155 +163,163 @@ public class Channel {
 		if (this.isModeSet(CHANMODE_INVITEONLY) && !invites.contains(us)) {
 			Message message = new Message(Constants.ERR_INVITEONLYCHAN, us);
 			message.appendParameter(name);
-			message.appendParameter("Cannot join channel (+i)");
+			message.appendLastParameter(Util.getResourceString(us,
+					"ERR_INVITEONLYCHAN"));
 			us.send(message);
 			return;
 		}
 
 		addUser(us);
 		Message message = new Message(us, "JOIN", this);
-		send(message);
-		if (us.getClient() != null) {
+		sendLocal(message);
+		network.send(message, us.getServer());
+		if (us.isLocal()) {
 			sendNames(us);
 			sendTopicInfo(us);
 		}
 	}
 
 	public void addUser(User user) {
-		synchronized (members) {
-			user.addChannel(this);
-			Member member = new Member(user);
-			if (members.isEmpty())
-				member.setOp(true);
-			members.put(user, member);
+		// concurrent - ordering important
+		final boolean makeOp = members.isEmpty();
+		user.addChannel(this);
+		if (!user.isLocal()) {
+			Server peerServer = (Server) user.getHandler().getEntity();
+			Set<User> linkedMembers = peerServers.get(peerServer);
+			if (linkedMembers == null) {
+				linkedMembers = Collections
+						.synchronizedSet(new HashSet<User>());
+				peerServers.put(peerServer, linkedMembers);
+			}
+			linkedMembers.add(user);
 		}
+		Modes memberModes = new Modes();
+		members.put(user, memberModes);
+		if (makeOp)
+			memberModes.add(Channel.CHANMODE_OPERATOR);
+	}
+
+	public void removeUser(User user) {
+		members.remove(user);
+		if (!user.isLocal()) {
+			Server peerServer = (Server) user.getHandler().getEntity();
+			Set<User> linkedMembers = peerServers.get(peerServer);
+			linkedMembers.remove(user);
+			if (linkedMembers.isEmpty())
+				peerServers.remove(peerServer);
+		}
+		user.removeChannel(this);
+		if (members.isEmpty())
+			remove();
+	}
+
+	protected void remove() {
+		network.removeChannel(this);
 	}
 
 	public void addBan(String mask, String who) {
 		bans.add(new Ban(mask, who));
 	}
 
-	public boolean isBanned(String user) {
-		synchronized (this.bans) {
-			for (Ban ban : bans) {
-				if (Util.match(ban.mask, user)) {
-					return true;
-				}
+	private boolean isBanned(String user) {
+		for (Iterator<Ban> iter = bans.iterator(); iter.hasNext();) {
+			Ban ban = iter.next();
+			if (Util.match(ban.mask, user)) {
+				return true;
 			}
 		}
 		return false;
 	}
 
 	public void listBans(User towho) {
-		synchronized (this.bans) {
-			for (Ban ban : bans) {
-				Message message = new Message(Constants.RPL_BANLIST, towho);
-				message.appendParameter(name);
-				message.appendParameter(ban.mask);
-				message.appendParameter(ban.who);
-				DateFormat df = DateFormat.getDateTimeInstance(
-						DateFormat.SHORT, DateFormat.SHORT, towho.getLocale());
-				message.appendParameter(df.format(new Date(ban.when)));
-				towho.send(message);
-			}
+		for (Iterator<Ban> iter = bans.iterator(); iter.hasNext();) {
+			Ban ban = iter.next();
+			Message message = new Message(Constants.RPL_BANLIST, towho);
+			message.appendParameter(name);
+			message.appendParameter(ban.mask);
+			message.appendParameter(ban.who);
+			DateFormat df = DateFormat.getDateTimeInstance(DateFormat.SHORT,
+					DateFormat.SHORT, towho.getLocale());
+			message.appendParameter(df.format(new Date(ban.when)));
+			towho.send(message);
 		}
 		Message message = new Message(Constants.RPL_ENDOFBANLIST, towho);
 		message.appendParameter(name);
-		message.appendParameter("End of channel ban list");
+		message.appendLastParameter(Util.getResourceString(towho,
+				"RPL_ENDOFBANLIST"));
 		towho.send(message);
 	}
 
 	public boolean removeBan(String mask) {
-		synchronized (this.bans) {
-			for (Iterator<Ban> iter = bans.iterator(); iter.hasNext();) {
-				Ban ban = iter.next();
-				if (ban.mask.equals(mask)) {
-					iter.remove();
-					return true;
-				}
+		for (Iterator<Ban> iter = bans.iterator(); iter.hasNext();) {
+			Ban ban = iter.next();
+			if (ban.mask.equals(mask)) {
+				iter.remove();
+				return true;
 			}
 		}
 		return false;
 	}
 
-	public void invite(User usr) {
-		invites.add(usr);
+	public void invite(User user) {
+		invites.add(user);
 	}
 
-	public void removeUser(User usr) {
-		synchronized (members) {
-			members.remove(usr);
-			usr.removeChannel(this);
-			if (members.isEmpty())
-				usr.getServer().getNetwork().removeChannel(this);
-		}
+	public final boolean isOp(User usr) {
+		Modes memberModes = getModes(usr);
+		return (memberModes != null && memberModes
+				.contains(Channel.CHANMODE_OPERATOR));
 	}
 
-	public boolean isOp(User usr) {
-		Member member = getMember(usr);
-		return (member != null && member.isChanOp());
-	}
-
-	public boolean isVoice(User usr) {
-		Member member = getMember(usr);
-		return (member != null && member.isChanVoice());
+	public final boolean isVoice(User usr) {
+		Modes memberModes = getModes(usr);
+		return (memberModes != null && memberModes
+				.contains(Channel.CHANMODE_VOICE));
 	}
 
 	public void sendTopicInfo(User usr) {
-		String t, tAuthor;
-		long tTime;
-		synchronized (this.topic) {
-			t = topic;
-			tAuthor = topicAuthor;
-			tTime = topicTime;
+		String tmpTopic, tmpAuthor;
+		long tmpTime;
+		// safely read topic information
+		synchronized (topicLock) {
+			tmpTopic = topic;
+			tmpAuthor = topicAuthor;
+			tmpTime = topicTime;
 		}
-		if (t.length() == 0) {
+		if (tmpTopic.length() == 0) {
 			Message message = new Message(Constants.RPL_NOTOPIC, usr);
 			message.appendParameter(name);
-			message.appendParameter("No topic is set");
+			message.appendLastParameter(Util.getResourceString(usr,
+					"RPL_NOTOPIC"));
 			usr.send(message);
 		} else {
 			Message message = new Message(Constants.RPL_TOPIC, usr);
 			message.appendParameter(name);
-			message.appendParameter(t);
+			message.appendLastParameter(tmpTopic);
 			usr.send(message);
 			message = new Message(Constants.RPL_TOPICWHOTIME, usr);
 			message.appendParameter(name);
-			message.appendParameter(tAuthor);
-			message.appendParameter(Long.toString(tTime / 1000));
+			message.appendParameter(tmpAuthor);
+			message.appendParameter(Long.toString(tmpTime
+					/ Constants.SECS_TO_MILLIS));
 			usr.send(message);
 		}
-	}
-
-	public String getNamesList() {
-		StringBuffer sb = new StringBuffer();
-		synchronized (members) {
-			for (Member member : members.values()) {
-				if (member.isChanOp())
-					sb.append(",@");
-				else if (member.isChanVoice())
-					sb.append(",+");
-				else
-					sb.append(',');
-				sb.append(member.getUser().getNick());
-			}
-		}
-		return (sb.length() > 0 ? sb.substring(1) : ""); // get rid of leading
-															// comma
 	}
 
 	public void sendNames(User usr) {
 		StringBuffer sb = new StringBuffer();
-		synchronized (members) {
-			for (Member member : members.values()) {
-				if (member.isChanOp())
-					sb.append(" @");
-				else if (member.isChanVoice())
-					sb.append(" +");
-				else
-					sb.append(' ');
-				sb.append(member.getUser().getNick());
-			}
+		for (Iterator<Map.Entry<User, Modes>> iter = members.entrySet()
+				.iterator(); iter.hasNext();) {
+			Map.Entry<User, Modes> entry = iter.next();
+			User member = entry.getKey();
+			Modes memberModes = entry.getValue();
+			if (memberModes.contains(Channel.CHANMODE_OPERATOR))
+				sb.append(" @");
+			else if (memberModes.contains(Channel.CHANMODE_VOICE))
+				sb.append(" +");
+			else
+				sb.append(' ');
+			sb.append(member.getNick());
 		}
 
 		String ournames = (sb.length() > 0 ? sb.substring(1) : ""); // get rid
@@ -369,19 +341,42 @@ public class Channel {
 
 		message = new Message(Constants.RPL_ENDOFNAMES, usr);
 		message.appendParameter(name);
-		message.appendParameter("End of /NAMES list");
+		message.appendLastParameter(Util.getResourceString(usr,
+				"RPL_ENDOFNAMES"));
 		usr.send(message);
+	}
+
+	public void sendLocal(Message message, RegisteredEntity excluded) {
+		for (Iterator<User> iter = members.keySet().iterator(); iter.hasNext();) {
+			User user = iter.next();
+			if (user.isLocal() && !user.equals(excluded)) {
+				user.send(message);
+			}
+		}
+	}
+
+	public void sendLocal(Message message) {
+		sendLocal(message, null);
 	}
 
 	/**
 	 * Sends a message to this channel, excluding a specified user.
 	 */
-	public void send(Message message, User userExcluded) {
-		synchronized (members) {
-			for (User user : members.keySet()) {
-				if (!(user.equals(userExcluded))) {
-					user.send(message);
-				}
+	public void send(Message message, RegisteredEntity excluded) {
+		sendLocal(message, excluded);
+		Connection.Handler handler = excluded.getHandler();
+		ConnectedEntity excludedPeer = (handler != null ? handler.getEntity()
+				: null);
+		for (Iterator<Server> iter = peerServers.keySet().iterator(); iter
+				.hasNext();) {
+			Server server = iter.next();
+			if (!server.equals(excludedPeer)) {
+				server.send(message);
+			} else {
+				Set<User> linkedMembers = peerServers.get(excludedPeer);
+				if (linkedMembers.size() > 1
+						|| !linkedMembers.contains(excluded))
+					server.send(message);
 			}
 		}
 	}
@@ -390,22 +385,20 @@ public class Channel {
 	 * Sends a message to all the users in this channel.
 	 */
 	public void send(Message message) {
-		synchronized (members) {
-			for (User user : members.keySet()) {
-				user.send(message);
-			}
-		}
+		send(message, null);
 	}
 
 	public void setTopic(User sender, String newTopic) {
-		synchronized (this.topic) {
+		// safely write topic information
+		synchronized (topicLock) {
 			topic = newTopic;
 			topicAuthor = sender.getNick();
 			topicTime = System.currentTimeMillis();
 		}
 		Message message = new Message(sender, "TOPIC", this);
-		message.appendParameter(newTopic);
-		send(message);
+		message.appendLastParameter(newTopic);
+		sendLocal(message);
+		network.send(message, sender.getServer());
 	}
 
 	public String getModesList() {
@@ -423,12 +416,12 @@ public class Channel {
 	}
 
 	public void processModes(User sender, String modeString, String[] modeParams) {
-		if (modeString.equals("+b") && modeParams.length == 0) {
+		if ("+b".equals(modeString) && modeParams.length == 0) {
 			this.listBans(sender);
 			return;
 		}
 
-		boolean addingMode = true; // are we adding modes (+) or subtracting (-)
+		boolean addingMode = true; // are we adding modes (+) or removing (-)
 
 		StringBuffer goodModes = new StringBuffer();
 		String[] goodParams = new String[modeParams.length];
@@ -456,8 +449,7 @@ public class Channel {
 					try {
 						int tryLimit = Integer.parseInt(modeParams[n]);
 						limit = tryLimit;
-						goodParams[goodParamsCount] = modeParams[n];
-						goodParamsCount++;
+						goodParams[goodParamsCount++] = modeParams[n];
 						doDo = true;
 					} catch (NumberFormatException nfe) {
 					} finally {
@@ -476,8 +468,7 @@ public class Channel {
 					n++;
 					if (Util.isIRCString(tryKey)) {
 						key = tryKey;
-						goodParams[goodParamsCount] = tryKey;
-						goodParamsCount++;
+						goodParams[goodParamsCount++] = tryKey;
 						doDo = true;
 					}
 				} else {
@@ -487,31 +478,9 @@ public class Channel {
 					n++;
 					if (key.equalsIgnoreCase(tryKey)) {
 						key = null;
-						goodParams[goodParamsCount] = tryKey;
-						goodParamsCount++;
+						goodParams[goodParamsCount++] = tryKey;
 						doDo = true;
 					}
-				}
-				break;
-			case CHANMODE_OPERATOR:
-				if (n >= modeParams.length)
-					break;
-				String opName = modeParams[n];
-				n++;
-				User opWho = sender.getServer().getNetwork().getUser(opName);
-				if (opWho != null) {
-					Member opMe = this.getMember(opWho);
-					if (opMe != null) {
-						doDo = true;
-						goodParams[goodParamsCount] = opName;
-						goodParamsCount++;
-						opMe.setOp(addingMode);
-					} else {
-						Util.sendUserNotInChannelError(sender, opName,
-								this.name);
-					}
-				} else {
-					Util.sendNoSuchNickError(sender, opName);
 				}
 				break;
 			case CHANMODE_BAN:
@@ -522,35 +491,36 @@ public class Channel {
 				if (addingMode) {
 					this.addBan(banMask, sender.getNick());
 					doDo = true;
-					goodParams[goodParamsCount] = banMask;
-					goodParamsCount++;
+					goodParams[goodParamsCount++] = banMask;
 				} else {
 					if (this.removeBan(banMask)) {
 						doDo = true;
-						goodParams[goodParamsCount] = banMask;
-						goodParamsCount++;
+						goodParams[goodParamsCount++] = banMask;
 					} else
 						break;
 				}
 				break;
+			case CHANMODE_OPERATOR:
 			case CHANMODE_VOICE:
 				if (n >= modeParams.length)
 					break;
-				String vName = modeParams[n];
+				String nick = modeParams[n];
 				n++;
-				User vWho = sender.getServer().getNetwork().getUser(vName);
-				if (vWho != null) {
-					Member vMe = this.getMember(vWho);
-					if (vMe != null) {
+				User member = network.getUser(nick);
+				if (member != null) {
+					Modes memberModes = this.getModes(member);
+					if (memberModes != null) {
 						doDo = true;
-						goodParams[goodParamsCount] = vName;
-						goodParamsCount++;
-						vMe.setVoice(addingMode);
+						goodParams[goodParamsCount++] = nick;
+						if (addingMode)
+							memberModes.add(modeChar);
+						else
+							memberModes.remove(modeChar);
 					} else {
-						Util.sendUserNotInChannelError(sender, vName, this.name);
+						Util.sendUserNotInChannelError(sender, nick, this.name);
 					}
 				} else {
-					Util.sendNoSuchNickError(sender, vName);
+					Util.sendNoSuchNickError(sender, nick);
 				}
 				break;
 			default:
@@ -569,7 +539,7 @@ public class Channel {
 					Message message = new Message(Constants.ERR_UNKNOWNMODE,
 							sender);
 					message.appendParameter(Character.toString(modeChar));
-					message.appendParameter("is unknown mode char to me for "
+					message.appendLastParameter("is unknown mode char to me for "
 							+ name);
 					sender.send(message);
 				}
@@ -581,11 +551,16 @@ public class Channel {
 			message.appendParameter(goodModes.toString());
 			for (int i = 0; i < goodParamsCount; i++)
 				message.appendParameter(goodParams[i]);
-			send(message);
+			sendLocal(message);
+			network.send(message, sender.getServer());
 		}
 	}
 
 	public boolean isModeSet(char mode) {
 		return modes.contains(mode);
+	}
+
+	public String toString() {
+		return name + ": " + topic;
 	}
 }

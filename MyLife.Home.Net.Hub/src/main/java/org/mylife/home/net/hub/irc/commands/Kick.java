@@ -22,39 +22,45 @@
 
 package org.mylife.home.net.hub.irc.commands;
 
-import org.mylife.home.net.hub.irc.*;
+import org.mylife.home.net.hub.irc.Channel;
+import org.mylife.home.net.hub.irc.Command;
+import org.mylife.home.net.hub.irc.Message;
+import org.mylife.home.net.hub.irc.Network;
+import org.mylife.home.net.hub.irc.RegisteredEntity;
+import org.mylife.home.net.hub.irc.User;
+import org.mylife.home.net.hub.irc.Util;
 
 /**
  * @author markhale
  */
 public class Kick implements Command {
-	public void invoke(Source src, String[] params) {
+	public void invoke(RegisteredEntity src, String[] params) {
 		final String channame = params[0];
 		final String nickname = params[1];
 		if (Util.isChannelIdentifier(channame)) {
 			// check channel exists
-			Channel chan = src.getServer().getNetwork().getChannel(channame);
+			Network network = src.getServer().getNetwork();
+			Channel chan = network.getChannel(channame);
 			if (chan == null) {
 				Util.sendNoSuchChannelError(src, channame);
 			} else {
-				if(Util.isNickName(nickname)) {
+				if (Util.isNickName(nickname)) {
 					// check nick exists
-					User user = src.getServer().getNetwork().getUser(nickname);
-					if(user == null) {
+					User user = network.getUser(nickname);
+					if (user == null) {
 						Util.sendNoSuchNickError(src, nickname);
 					} else {
-						if(chan.isOp((User)src)) {
-							Message message = new Message((User)src, "KICK", chan);
+						if (chan.isOp((User) src)) {
+							Message message = new Message(src, "KICK", chan);
 							message.appendParameter(user.getNick());
-							if(params.length == 3)
-								message.appendParameter(params[2]);
-							chan.send(message);
+							if (params.length == 3)
+								message.appendLastParameter(params[2]);
+							chan.sendLocal(message);
+							network.send(message, src.getServer());
 							chan.removeUser(user);
 						} else {
-							Message message = new Message(Constants.ERR_CHANOPRIVSNEEDED, src);
-							message.appendParameter(channame);
-							message.appendParameter("You're not channel operator");
-							src.send(message);
+							Util.sendChannelOpPrivilegesNeededError(src,
+									channame);
 						}
 					}
 				}
@@ -63,9 +69,11 @@ public class Kick implements Command {
 			Util.sendNoSuchChannelError(src, channame);
 		}
 	}
+
 	public String getName() {
 		return "KICK";
 	}
+
 	public int getMinimumParameterCount() {
 		return 2;
 	}

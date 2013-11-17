@@ -22,29 +22,35 @@
 
 package org.mylife.home.net.hub.irc.commands;
 
-import org.mylife.home.net.hub.IrcServerMBean;
-import org.mylife.home.net.hub.irc.*;
+import org.mylife.home.net.hub.irc.ConnectedEntity;
+import org.mylife.home.net.hub.irc.RegisteredEntity;
+import org.mylife.home.net.hub.irc.RegistrationCommand;
+import org.mylife.home.net.hub.irc.UnregisteredEntity;
 
 /**
  * @author markhale
  */
-public class Quit implements Command {
-	private final IrcServerMBean jircd;
-
-	public Quit(IrcServerMBean jircd) {
-		this.jircd = jircd;
+public class Quit implements RegistrationCommand {
+	public void invoke(UnregisteredEntity src, String[] params) {
+		handle(src, params);
 	}
-	public void invoke(Source src, String[] params) {
+
+	public void invoke(RegisteredEntity src, String[] params) {
+		handle(src, params);
+	}
+
+	private void handle(ConnectedEntity src, String[] params) {
 		String qm = "Quit";
 		if (params != null && params.length > 0) {
 			qm = "Quit: " + params[0];
 		}
-		if(src.getClient() instanceof Client)
-			jircd.disconnectClient((Client)src.getClient(), qm);
+		src.disconnect(qm);
 	}
+
 	public String getName() {
 		return "QUIT";
 	}
+
 	public int getMinimumParameterCount() {
 		return 0;
 	}

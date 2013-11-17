@@ -23,7 +23,10 @@
 package org.mylife.home.net.hub.irc.commands;
 
 import org.mylife.home.net.hub.IrcServerMBean;
-import org.mylife.home.net.hub.irc.*;
+import org.mylife.home.net.hub.irc.Command;
+import org.mylife.home.net.hub.irc.RegisteredEntity;
+import org.mylife.home.net.hub.irc.User;
+import org.mylife.home.net.hub.irc.Util;
 
 /**
  * @author markhale
@@ -34,20 +37,21 @@ public class Die implements Command {
 	public Die(IrcServerMBean jircd) {
 		this.jircd = jircd;
 	}
-	public void invoke(Source src, String[] params) {
+
+	public void invoke(RegisteredEntity src, String[] params) {
 		User user = (User) src;
-		if(hasPermission(user)) {
+		try {
+			Util.checkOperatorPermission(user);
 			jircd.stop();
-		} else {
+		} catch (SecurityException se) {
 			Util.sendNoPrivilegesError(src);
 		}
 	}
-	private boolean hasPermission(User user) {
-		return user.isModeSet(User.UMODE_OPER);
-	}
+
 	public String getName() {
 		return "DIE";
 	}
+
 	public int getMinimumParameterCount() {
 		return 0;
 	}

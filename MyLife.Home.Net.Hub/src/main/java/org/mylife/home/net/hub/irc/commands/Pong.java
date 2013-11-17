@@ -22,19 +22,21 @@
 
 package org.mylife.home.net.hub.irc.commands;
 
-import org.mylife.home.net.hub.irc.*;
+import org.mylife.home.net.hub.irc.Command;
+import org.mylife.home.net.hub.irc.RegisteredEntity;
 
 /**
  * @author markhale
  */
 public class Pong implements Command {
-	public void invoke(Source src, String[] params) {
-		if(src.getClient() instanceof Client)
-			((Client)src.getClient()).processPong();
+	public void invoke(RegisteredEntity src, String[] params) {
+		src.getHandler().pong();
 	}
+
 	public String getName() {
 		return "PONG";
 	}
+
 	public int getMinimumParameterCount() {
 		return 1;
 	}

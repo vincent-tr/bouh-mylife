@@ -25,22 +25,28 @@ package org.mylife.home.net.hub.irc.commands;
 import java.text.DateFormat;
 import java.util.Date;
 
-import org.mylife.home.net.hub.irc.*;
+import org.mylife.home.net.hub.irc.Command;
+import org.mylife.home.net.hub.irc.Constants;
+import org.mylife.home.net.hub.irc.Message;
+import org.mylife.home.net.hub.irc.RegisteredEntity;
 
 /**
  * @author markhale
  */
 public class Time implements Command {
-	public void invoke(Source src, String[] params) {
+	public void invoke(RegisteredEntity src, String[] params) {
 		Message msg = new Message(Constants.RPL_TIME, src);
 		msg.appendParameter(src.getServer().getName());
-		DateFormat df = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, src.getLocale());
+		DateFormat df = DateFormat.getDateTimeInstance(DateFormat.SHORT,
+				DateFormat.SHORT, src.getLocale());
 		msg.appendParameter(df.format(new Date()));
 		src.send(msg);
 	}
+
 	public String getName() {
 		return "TIME";
 	}
+
 	public int getMinimumParameterCount() {
 		return 0;
 	}

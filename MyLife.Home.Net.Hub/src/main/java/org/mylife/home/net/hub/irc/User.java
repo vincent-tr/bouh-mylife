@@ -22,20 +22,25 @@
 
 package org.mylife.home.net.hub.irc;
 
-import java.util.HashSet;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
+
+import org.mylife.home.net.hub.IrcServerMBean;
 
 /**
- * A user on a server.
+ * A user on a server. Inner class pattern of Server.
+ * 
  * @author thaveman
  * @author markhale
  */
-public class User extends Source {
+public class User extends RegisteredEntity {
 	public static final char UMODE_INVISIBLE = 'i';
-	public static final char UMODE_SNOTICE   = 's';
-	public static final char UMODE_WALLOPS   = 'w';
-	public static final char UMODE_OPER      = 'o';
-	public static final char UMODE_AWAY      = 'a';
+	public static final char UMODE_SNOTICE = 's';
+	public static final char UMODE_WALLOPS = 'w';
+	public static final char UMODE_OPER = 'o';
+	public static final char UMODE_AWAY = 'a';
 
 	private String nickName;
 	private long nickTimestamp;
@@ -44,24 +49,37 @@ public class User extends Source {
 	private final String hostName;
 	private final String description;
 	private String awayMsg;
-	protected Server server;
-	protected final Client client; // used only for local users
+	protected final Server server;
 	/** set of Channel */
-	private final Set<Channel> channels = new HashSet<Channel>();
+	private final Set<Channel> channels = new CopyOnWriteArraySet<Channel>();
 	private final Modes modes = new Modes();
 
 	/**
-	 * Constructor for remote users (i.e. attached via another server).
+	 * Constructor for remote users (i.e. attached via another server). This
+	 * user is added to the server.
 	 */
-	public User(String nickname, String ident, String hostname, String description, Server server) {
-		this(nickname, ident, hostname, description, server, null);
+	public User(String nickname, int hopcount, String ident, String hostname,
+			String description, Server server) {
+		this(nickname, hopcount, ident, hostname, description, server, server
+				.getHandler());
 	}
+
 	/**
-	 * Constructs a user.
-	 * @param client must not be null for local users
+	 * Constructor for local users (0 hops). This user is added to the server.
 	 */
-	public User(String nickname, String ident, String hostname, String description, Server server, Client client) {
-		if(server == null)
+	public User(UnregisteredEntity unk, String ident, String desc) {
+		this(unk.getName(), 0, ident, unk.getHandler().getConnection()
+				.getRemoteHost(), desc, unk.getServer(), unk.getHandler());
+		setLocale(unk.getLocale());
+	}
+
+	/**
+	 * Constructs a user. This user is added to the server.
+	 */
+	private User(String nickname, int hopcount, String ident, String hostname,
+			String description, Server server, Connection.Handler handler) {
+		super(handler, hopcount);
+		if (server == null)
 			throw new NullPointerException("The server cannot be null");
 		setNick(nickname);
 		this.ident = ident;
@@ -69,8 +87,9 @@ public class User extends Source {
 		this.hostName = hostname;
 		this.description = description;
 		this.server = server;
-		this.client = client;
+		this.server.addUser(this);
 	}
+
 	protected void setNick(String nick) {
 		nickName = nick;
 		nickTimestamp = System.currentTimeMillis();
@@ -80,18 +99,21 @@ public class User extends Source {
 		// first see if it's an IP or name
 		String[] dotnames = Util.split(host, '.');
 		boolean isIP = (dotnames.length == 4);
-		if(isIP) {
-			for(int i=0; i<dotnames.length; i++) {
-				try {
-					Integer.parseInt(dotnames[i]);
-				} catch (NumberFormatException e) {
-					isIP = false;
-					break;
+		if (isIP) {
+			for (int i = 0; i < dotnames.length; i++) {
+				String s = dotnames[i];
+				for (int j = 0; j < s.length(); j++) {
+					char ch = s.charAt(j);
+					if (!(ch >= '0' && ch <= '9')) {
+						isIP = false;
+						break;
+					}
 				}
 			}
 		}
 
-		String appendage = Integer.toHexString(Util.RANDOM.nextInt(0xEFFFFF) + 0x100000);
+		String appendage = Integer
+				.toHexString(Util.RANDOM.nextInt(0xEFFFFF) + 0x100000);
 		String maskedHost;
 		if (isIP) {
 			// IP
@@ -109,18 +131,15 @@ public class User extends Source {
 	}
 
 	public void processModes(String modeString) {
-		processModes(modeString,false);
-	}
-	public void processModes(String modeString, boolean isAllowed) {
-		boolean addingMode = true; // are we adding modes (+) or subtracting (-)
-		
+		boolean addingMode = true; // are we adding modes (+) or removing (-)
+
 		StringBuffer goodModes = new StringBuffer();
-		
+
 		for (int i = 0; i < modeString.length(); i++) {
 			boolean doDo = false;
 
 			char modeChar = modeString.charAt(i);
-			switch(modeChar) {
+			switch (modeChar) {
 			case '+':
 				addingMode = true;
 				goodModes.append('+');
@@ -129,24 +148,21 @@ public class User extends Source {
 				addingMode = false;
 				goodModes.append('-');
 				break;
-				
+
 			// add other processing here for modes that may not want to be
 			// set under certain conditions, etc.
 			case UMODE_OPER: // user can't set himself +o, the server must do it
-				if (!isAllowed && addingMode) break;
-				else doDo = true;
+				if (!addingMode) {
+					doDo = true;
+				}
 				break;
-			case UMODE_AWAY: // user can't set himself +/-a, the server must do it
-				if (!isAllowed) break;
-				else doDo = true;
+			case UMODE_AWAY: // user can't set himself +/-a, the server must do
+								// it
 				break;
-			case ':':
-				break;
-				
 			default:
 				doDo = true;
 			}
-			
+
 			if (doDo) {
 				try {
 					if (addingMode)
@@ -154,15 +170,15 @@ public class User extends Source {
 					else
 						modes.remove(modeChar);
 					goodModes.append(modeChar);
-				} catch(IllegalArgumentException e) {
-					//Invalid Mode Character Detected!
+				} catch (IllegalArgumentException e) {
+					// Invalid Mode Character Detected!
 					Util.sendUserModeUnknownFlagError(this);
 				}
 			}
 		}
-		
-		if (goodModes.length() > 1) {
-			Message message = new Message(server, "MODE", this);
+
+		if (goodModes.length() > 1 && isLocal()) {
+			Message message = new Message(this, "MODE", this);
 			message.appendParameter(goodModes.toString());
 			send(message);
 		}
@@ -171,33 +187,57 @@ public class User extends Source {
 	public boolean isModeSet(char mode) {
 		return modes.contains(mode);
 	}
-	public String getModesList() {
+
+	public final String getModeList() {
 		return modes.toString();
+	}
+
+	private boolean tryLoginOperator(IrcServerMBean jircd, String name, String pass) {
+	    for(Operator oper : jircd.getOperators()) {
+	        if (oper.isGood(name, pass, this.getHostName())) {
+	        	return true;
+	        }
+	    }
+	    return false;
+	}
+	
+	public final void loginOperator(IrcServerMBean jircd, String name, String pass) {
+		
+		if(tryLoginOperator(jircd, name, pass)) {
+			modes.add(UMODE_OPER);
+			Message message = new Message(Constants.RPL_YOUREOPER, this);
+			message.appendLastParameter(Util.getResourceString(this,
+					"RPL_YOUREOPER"));
+			send(message);
+		} else {
+			Message message = new Message(Constants.ERR_NOOPERHOST, this);
+			message.appendLastParameter(Util.getResourceString(this,
+					"ERR_NOOPERHOST"));
+			send(message);
+		}
 	}
 
 	public void setAwayMessage(String msg) {
 		awayMsg = msg;
-		if(awayMsg != null)
+		if (awayMsg != null)
 			modes.add(UMODE_AWAY);
 		else
 			modes.remove(UMODE_AWAY);
 	}
+
 	public String getAwayMessage() {
 		return awayMsg;
 	}
 
-	public synchronized Set<Channel> getChannels() {
-		return channels;
+	public final Set<Channel> getChannels() {
+		return Collections.unmodifiableSet(channels);
 	}
 
-	/** @return Client */
-	public final Object getClient() {
-		return client;
-	}
 	/** ID */
 	public String toString() {
 		return getNick() + '!' + getIdent() + '@' + getDisplayHostName();
 	}
+
 	/**
 	 * Returns the server this user is connected to.
 	 */
@@ -205,8 +245,19 @@ public class User extends Source {
 		return server;
 	}
 
+	public String getName() {
+		return getNick();
+	}
+
 	public synchronized String getNick() {
 		return nickName;
+	}
+
+	/**
+	 * Returns true if this user is local (0 hops).
+	 */
+	public final boolean isLocal() {
+		return (hopCount == 0);
 	}
 
 	public synchronized long getNickTimestamp() {
@@ -216,7 +267,7 @@ public class User extends Source {
 	public String getDisplayHostName() {
 		return displayHostName;
 	}
-	
+
 	public String getHostName() {
 		return hostName;
 	}
@@ -233,19 +284,60 @@ public class User extends Source {
 		server.changeUserNick(this, nickName, newnick);
 		setNick(newnick);
 	}
-	
-	protected synchronized void addChannel(Channel chan) {
+
+	/** Channel hook */
+	void addChannel(Channel chan) {
 		channels.add(chan);
 	}
 
-	protected synchronized void removeChannel(Channel chan) {
+	/** Channel hook */
+	void removeChannel(Channel chan) {
 		channels.remove(chan);
 	}
 
 	public void send(Message msg) {
-		if (client != null)
-			client.getConnection().writeLine(msg.toString());
-		else
-			server.send(msg);
+		StringBuffer buf = new StringBuffer();
+		ConnectedEntity sender = msg.getSender();
+		// append prefix
+		if (sender != null) {
+			buf.append(':').append(sender.getName());
+			if (sender instanceof User) {
+				User user = (User) sender;
+				buf.append('!').append(user.getIdent()).append('@')
+						.append(user.getDisplayHostName());
+			}
+			buf.append(' ');
+		}
+
+		// append command
+		buf.append(msg.getCommand());
+
+		// append parameters
+		final int paramCount = msg.getParameterCount();
+		if (paramCount > 0) {
+			final int lastParamIndex = paramCount - 1;
+			for (int i = 0; i < lastParamIndex; i++)
+				buf.append(' ').append(msg.getParameter(i));
+			if (msg.hasLastParameter())
+				buf.append(" :").append(msg.getParameter(lastParamIndex));
+			else
+				buf.append(' ').append(msg.getParameter(lastParamIndex));
+		}
+		handler.sendMessage(buf.toString());
+	}
+
+	public void disconnect(String reason) {
+		Message message = new Message(this, "QUIT").appendLastParameter(reason);
+		// first remove the user from any channels he/she may be in
+		for (Iterator<Channel> iter = channels.iterator(); iter.hasNext();) {
+			Channel channel = iter.next();
+			channel.sendLocal(message, this);
+			channel.removeUser(this);
+		}
+		server.getNetwork().send(message, server);
+		server.removeUser(this);
+		if (isLocal() && handler != null) {
+			handler.disconnect();
+		}
 	}
 }

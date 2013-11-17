@@ -22,80 +22,97 @@
 
 package org.mylife.home.net.hub.irc.commands;
 
-import org.mylife.home.net.hub.irc.*;
+import org.mylife.home.net.hub.irc.Channel;
+import org.mylife.home.net.hub.irc.Command;
+import org.mylife.home.net.hub.irc.Constants;
+import org.mylife.home.net.hub.irc.Message;
+import org.mylife.home.net.hub.irc.RegisteredEntity;
+import org.mylife.home.net.hub.irc.User;
+import org.mylife.home.net.hub.irc.Util;
 
 /**
  * @author markhale
  */
 public class Mode implements Command {
-	public void invoke(Source src, String[] params) {
+	public void invoke(RegisteredEntity src, String[] params) {
 		String modeDest = params[0];
+		String newModes = (params.length > 1 ? params[1] : null);
 
 		if (Util.isChannelIdentifier(modeDest)) {
 			// channel mode
-			Channel chanDest = src.getServer().getNetwork().getChannel(modeDest);
+			Channel chanDest = src.getServer().getNetwork()
+					.getChannel(modeDest);
 			if (chanDest == null) {
 				Util.sendNoSuchChannelError(src, modeDest);
 			} else {
-				User user = (User) src;
-				if (chanDest.isOn(user)) {
-					if (params.length > 1) {
-						if (hasPermission(user, chanDest)) {
-							String modeString = params[1];
-							String[] modeParams = new String[params.length-2];
-							for (int i = 0; i < modeParams.length; i++) {
-								modeParams[i] = params[i+2];
-							}
-							chanDest.processModes(user, modeString, modeParams);
-						} else {
-							Message message = new Message(Constants.ERR_CHANOPRIVSNEEDED, src);
-							message.appendParameter(modeDest);
-							message.appendParameter(Util.getResourceString(src, "ERR_CHANOPRIVSNEEDED"));
-							src.send(message);
+				User sender = (User) src;
+				if (chanDest.isOn(sender)) {
+					String[] modeParams = null;
+					if (newModes != null) {
+						modeParams = new String[params.length - 2];
+						for (int i = 0; i < modeParams.length; i++) {
+							modeParams[i] = params[i + 2];
 						}
-					} else {
-						Message message = new Message(Constants.RPL_CHANNELMODEIS, src);
-						message.appendParameter(modeDest);
-						message.appendParameter(chanDest.getModesList());
-						src.send(message);
 					}
+					channelMode(sender, chanDest, newModes, modeParams);
 				} else {
 					// not on channel
-					Message message = new Message(Constants.ERR_NOTONCHANNEL, src);
-					message.appendParameter(modeDest);
-					message.appendParameter(Util.getResourceString(src, "ERR_NOTONCHANNEL"));
-					src.send(message);
+					Util.sendNotOnChannelError(src, modeDest);
 				}
 			}
 		} else {
 			// user mode
 			User sender = (User) src;
 			User userDest = src.getServer().getNetwork().getUser(modeDest);
-			if (hasPermission(sender, userDest)) {
-				if (params.length > 1 && params[1].length() > 0) {
-					userDest.processModes(params[1]);
-				} else {
-					Message message = new Message(Constants.RPL_UMODEIS, userDest);
-					message.appendParameter(userDest.getModesList());
-					userDest.send(message);
-				}
-			} else {
-				Message message = new Message(Constants.ERR_USERSDONTMATCH, src);
-				message.appendParameter(modeDest);
-				message.appendParameter(Util.getResourceString(src, "ERR_USERSDONTMATCH"));
-				src.send(message);
-			}
+			userMode(sender, userDest, newModes);
 		}
 	}
+
+	private void channelMode(User src, Channel chanDest, String newModes,
+			String[] modeParams) {
+		if (newModes != null) {
+			if (hasPermission(src, chanDest)) {
+				chanDest.processModes(src, newModes, modeParams);
+			} else {
+				Util.sendChannelOpPrivilegesNeededError(src, chanDest.getName());
+			}
+		} else {
+			Message message = new Message(Constants.RPL_CHANNELMODEIS, src);
+			message.appendParameter(chanDest.getName());
+			message.appendParameter(chanDest.getModesList());
+			src.send(message);
+		}
+	}
+
+	private void userMode(User src, User userDest, String newModes) {
+		if (hasPermission(src, userDest)) {
+			if (newModes != null) {
+				userDest.processModes(newModes);
+			} else {
+				Message message = new Message(Constants.RPL_UMODEIS, userDest);
+				message.appendParameter(userDest.getModeList());
+				src.send(message);
+			}
+		} else {
+			Message message = new Message(Constants.ERR_USERSDONTMATCH, src);
+			message.appendLastParameter(Util.getResourceString(src,
+					"ERR_USERSDONTMATCH"));
+			src.send(message);
+		}
+	}
+
 	private boolean hasPermission(User user, Channel context) {
 		return context.isOp(user) || user.isModeSet(User.UMODE_OPER);
 	}
+
 	private boolean hasPermission(User user, User context) {
 		return (user == context) || user.isModeSet(User.UMODE_OPER);
 	}
+
 	public String getName() {
 		return "MODE";
 	}
+
 	public int getMinimumParameterCount() {
 		return 1;
 	}

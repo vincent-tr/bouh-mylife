@@ -22,28 +22,31 @@
 
 package org.mylife.home.net.hub.irc.commands;
 
-import org.mylife.home.net.hub.irc.*;
+import org.mylife.home.net.hub.irc.Channel;
+import org.mylife.home.net.hub.irc.Command;
+import org.mylife.home.net.hub.irc.RegisteredEntity;
+import org.mylife.home.net.hub.irc.User;
+import org.mylife.home.net.hub.irc.Util;
 
 /**
  * @author markhale
  */
 public class Topic implements Command {
-	public void invoke(Source src, String[] params) {
+	public void invoke(RegisteredEntity src, String[] params) {
 		final String channame = params[0];
-		final Channel channel = src.getServer().getNetwork().getChannel(channame);
+		final Channel channel = src.getServer().getNetwork()
+				.getChannel(channame);
 		if (channel == null) {
 			Util.sendNoSuchChannelError(src, channame);
 		} else {
 			User user = (User) src;
 			if (channel.isOn(user)) {
 				if (params.length > 1) {
-					if (channel.isOp(user) || !channel.isModeSet(Channel.CHANMODE_TOPICOPS)) {
+					if (channel.isOp(user)
+							|| !channel.isModeSet(Channel.CHANMODE_TOPICOPS)) {
 						channel.setTopic(user, params[1]);
 					} else {
-						Message message = new Message(Constants.ERR_CHANOPRIVSNEEDED, src);
-						message.appendParameter(channame);
-						message.appendParameter(Util.getResourceString(src, "ERR_CHANOPRIVSNEEDED"));
-						src.send(message);
+						Util.sendChannelOpPrivilegesNeededError(src, channame);
 					}
 				} else {
 					channel.sendTopicInfo(user);
@@ -53,9 +56,11 @@ public class Topic implements Command {
 			}
 		}
 	}
+
 	public String getName() {
 		return "TOPIC";
 	}
+
 	public int getMinimumParameterCount() {
 		return 1;
 	}

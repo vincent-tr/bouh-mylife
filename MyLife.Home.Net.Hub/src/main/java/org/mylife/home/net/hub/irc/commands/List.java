@@ -22,11 +22,13 @@
 
 package org.mylife.home.net.hub.irc.commands;
 
+import java.util.Iterator;
+
 import org.mylife.home.net.hub.irc.Channel;
 import org.mylife.home.net.hub.irc.Command;
 import org.mylife.home.net.hub.irc.Constants;
 import org.mylife.home.net.hub.irc.Message;
-import org.mylife.home.net.hub.irc.Source;
+import org.mylife.home.net.hub.irc.RegisteredEntity;
 import org.mylife.home.net.hub.irc.User;
 import org.mylife.home.net.hub.irc.Util;
 
@@ -34,21 +36,23 @@ import org.mylife.home.net.hub.irc.Util;
  * @author markhale
  */
 public class List implements Command {
-	public void invoke(Source src, String[] params) {
+	public void invoke(RegisteredEntity src, String[] params) {
 		// TODO: wildcards and things, Iterator should be synchronized
 		User user = (User) src;
 
 		Message message = new Message(Constants.RPL_LISTSTART, src);
 		message.appendParameter("Channel");
-		message.appendParameter("Users  Name");
+		message.appendLastParameter("Users  Name");
 		src.send(message);
 
-		for(Channel channel : src.getServer().getNetwork().channels.values()) {
+		for (Iterator<Channel> iter = src.getServer().getNetwork()
+				.getChannels().iterator(); iter.hasNext();) {
+			Channel channel = iter.next();
 			final boolean isOn = channel.isOn(user);
 			final boolean isSecret = channel.isModeSet(Channel.CHANMODE_SECRET);
 			if (!isSecret || (isSecret && isOn)) {
 				String topic = channel.getTopic();
-				if(channel.isModeSet(Channel.CHANMODE_PRIVATE) && !isOn) {
+				if (channel.isModeSet(Channel.CHANMODE_PRIVATE) && !isOn) {
 					topic = "Prv";
 				}
 				message = new Message(Constants.RPL_LIST, src);
@@ -60,12 +64,14 @@ public class List implements Command {
 		}
 
 		message = new Message(Constants.RPL_LISTEND, src);
-		message.appendParameter(Util.getResourceString(src, "RPL_LISTEND"));
+		message.appendLastParameter(Util.getResourceString(src, "RPL_LISTEND"));
 		src.send(message);
 	}
+
 	public String getName() {
 		return "LIST";
 	}
+
 	public int getMinimumParameterCount() {
 		return 0;
 	}

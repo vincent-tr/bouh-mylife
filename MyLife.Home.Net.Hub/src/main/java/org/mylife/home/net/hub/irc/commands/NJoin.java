@@ -22,13 +22,18 @@
 
 package org.mylife.home.net.hub.irc.commands;
 
-import org.mylife.home.net.hub.irc.*;
+import org.mylife.home.net.hub.irc.Channel;
+import org.mylife.home.net.hub.irc.Command;
+import org.mylife.home.net.hub.irc.Network;
+import org.mylife.home.net.hub.irc.RegisteredEntity;
+import org.mylife.home.net.hub.irc.Server;
+import org.mylife.home.net.hub.irc.Util;
 
 /**
  * @author markhale
  */
 public class NJoin implements Command {
-	public void invoke(Source src, String[] params) {
+	public void invoke(RegisteredEntity src, String[] params) {
 		if (src instanceof Server) {
 			Server server = (Server) src;
 			Network network = server.getNetwork();
@@ -36,32 +41,31 @@ public class NJoin implements Command {
 			if (Util.isChannelIdentifier(channame)) {
 				Channel chan = network.getChannel(channame);
 				if (chan == null) {
-					chan = new Channel(channame);
-					network.addChannel(chan);
+					chan = new Channel(channame, network);
 				}
 				String members[] = Util.split(params[1], ',');
-				for(int i=0; i<members.length; i++)
+				for (int i = 0; i < members.length; i++)
 					addUser(network, chan, members[i]);
 			} else {
-				Message message = new Message(Constants.ERR_NOSUCHCHANNEL, src);
-				message.appendParameter(channame);
-				message.appendParameter("No such channel");
-				src.send(message);
+				Util.sendNoSuchChannelError(src, channame);
 			}
 		}
 	}
+
 	private void addUser(Network network, Channel chan, String nick) {
-		if(nick.startsWith("@@"))
+		if (nick.startsWith("@@"))
 			nick = nick.substring(2);
-		else if(nick.charAt(0) == '@')
+		else if (nick.charAt(0) == '@')
 			nick = nick.substring(1);
-		else if(nick.charAt(0) == '+')
+		else if (nick.charAt(0) == '+')
 			nick = nick.substring(1);
 		chan.addUser(network.getUser(nick));
 	}
+
 	public String getName() {
 		return "NJOIN";
 	}
+
 	public int getMinimumParameterCount() {
 		return 2;
 	}

@@ -26,7 +26,8 @@ package org.mylife.home.net.hub.irc;
  * @author markhale
  */
 public final class Constants {
-	private Constants() {}
+	private Constants() {
+	}
 
 	public static final int DEFAULT_PORT = 6667;
 	public static final int DEFAULT_SSL_PORT = 994;
@@ -35,13 +36,18 @@ public final class Constants {
 	/** Maximum message length including CR-LF. */
 	public static final int MAX_MESSAGE_SIZE = 512;
 	/** Maximum message length excluding CR-LF. */
-	public static final int MAX_MESSAGE_LENGTH = MAX_MESSAGE_SIZE-2;
+	public static final int MAX_MESSAGE_LENGTH = MAX_MESSAGE_SIZE - 2;
+	/** Use \r\n for maximum compatibility */
+	public static final String MESSAGE_TERMINATOR = "\r\n";
 	public static final int MAX_NICK_LENGTH = 50;
 	public static final int MAX_CHANNEL_LENGTH = 50;
 	/** Maximum channel topic length */
 	public static final int MAX_TOPIC_LENGTH = 400;
 
 	public static final long SECS_TO_MILLIS = 1000L;
+
+	public static final String LINK_VERSION = "021020000";
+	public static final String LINK_FLAGS = "IRC|";
 
 	public static final char CTCP_DELIMITER = 1;
 
@@ -50,6 +56,7 @@ public final class Constants {
 	public static final String RPL_CREATED = "003";
 	public static final String RPL_MYINFO = "004";
 	public static final String RPL_ISUPPORT = "005";
+	public static final String RPL_STATSCOMMANDS = "212";
 	public static final String RPL_ENDOFSTATS = "219";
 	public static final String RPL_UMODEIS = "221";
 	public static final String RPL_STATSUPTIME = "242";

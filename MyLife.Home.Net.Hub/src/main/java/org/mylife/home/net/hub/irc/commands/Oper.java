@@ -24,43 +24,39 @@ package org.mylife.home.net.hub.irc.commands;
 
 import org.mylife.home.net.hub.IrcServerMBean;
 import org.mylife.home.net.hub.irc.Command;
-import org.mylife.home.net.hub.irc.Constants;
-import org.mylife.home.net.hub.irc.Message;
-import org.mylife.home.net.hub.irc.Operator;
-import org.mylife.home.net.hub.irc.Source;
+import org.mylife.home.net.hub.irc.RegisteredEntity;
 import org.mylife.home.net.hub.irc.User;
 
 /**
  * @author markhale
  */
 public class Oper implements Command {
-	protected final IrcServerMBean jircd;
+
+	private final IrcServerMBean jircd;
 
 	public Oper(IrcServerMBean jircd) {
 		this.jircd = jircd;
 	}
+	
 	/**
-	 * @param params [0] name, [1] password
+	 * @param params
+	 *            [0] name, [1] password
 	 */
-	public void invoke(Source src, String[] params) {
-		String name = params[0];
-		String pass = params[1];
-		for(Operator oper : jircd.getOperators()) {
-			if (oper.isGood(name, pass, src.toString())) {
-				((User)src).processModes("+o",true);
-				Message message = new Message(Constants.RPL_YOUREOPER, src);
-				message.appendParameter("You are now an IRC operator");
-				src.send(message);
-				return;
+	public void invoke(RegisteredEntity src, String[] params) {
+		if (src instanceof User) {
+			User user = (User) src;
+			if (user.isLocal()) {
+				String name = params[0];
+				String pass = params[1];
+				user.loginOperator(jircd, name, pass);
 			}
 		}
-		Message message = new Message(Constants.ERR_NOOPERHOST, src);
-		message.appendParameter("No O-lines for your host");
-		src.send(message);
 	}
+
 	public String getName() {
 		return "OPER";
 	}
+
 	public int getMinimumParameterCount() {
 		return 2;
 	}

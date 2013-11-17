@@ -20,11 +20,14 @@
  *
  */
 
+
 package org.mylife.home.net.hub.irc;
+
 
 import java.io.Serializable;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+
 
 /**
  * Doesn't really describe the operator, just the line in the config file.
@@ -33,48 +36,51 @@ import java.security.NoSuchAlgorithmException;
  * @author markhale
  */
 public final class Operator implements Serializable {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 733516478053247911L;
-	private transient final byte[] pass;
-	private final String name;
-	private final String host;
+        /**
+         * 
+         */
+        private static final long serialVersionUID = 733516478053247911L;
+        private transient final byte[] pass;
+        private final String name;
+        private final String host;
 
-	private static byte[] encrypt(String pass) {
-		try {
-			return MessageDigest.getInstance("SHA").digest(pass.getBytes());
-		} catch(NoSuchAlgorithmException e) {
-			throw new RuntimeException(e.getMessage());
-		}
-	}
 
-	public Operator(String name, String host, String password) {
-		this.name = name;
-		this.host = host;
-		this.pass = encrypt(password);
-	}
-	public String getName() {
-		return name;
-	}
-	public String getHost() {
-		return host;
-	}
+        private static byte[] encrypt(String pass) {
+                try {
+                        return MessageDigest.getInstance("SHA").digest(pass.getBytes());
+                } catch(NoSuchAlgorithmException e) {
+                        throw new RuntimeException(e.getMessage());
+                }
+        }
 
-	public boolean isGood(String nick, String password, String userhost) {
-		if (nick.equalsIgnoreCase(name) && isGood(password) && Util.match(host,userhost))
-			return true;
-		else
-			return false;
-	}
-	private boolean isGood(String password) {
-		byte[] hash = encrypt(password);
-		if(hash.length != pass.length)
-			return false;
-		for(int i=0; i<hash.length; i++) {
-			if(hash[i] != pass[i])
-				return false;
-		}
-		return true;
-	}
+
+        public Operator(String name, String host, String password) {
+                this.name = name;
+                this.host = host;
+                this.pass = encrypt(password);
+        }
+        public String getName() {
+                return name;
+        }
+        public String getHost() {
+                return host;
+        }
+
+
+        public boolean isGood(String nick, String password, String userhost) {
+                if (nick.equalsIgnoreCase(name) && isGood(password) && Util.match(host,userhost))
+                        return true;
+                else
+                        return false;
+        }
+        private boolean isGood(String password) {
+                byte[] hash = encrypt(password);
+                if(hash.length != pass.length)
+                        return false;
+                for(int i=0; i<hash.length; i++) {
+                        if(hash[i] != pass[i])
+                                return false;
+                }
+                return true;
+        }
 }
