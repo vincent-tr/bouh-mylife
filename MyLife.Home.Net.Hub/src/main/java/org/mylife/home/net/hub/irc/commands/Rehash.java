@@ -23,12 +23,19 @@
 package org.mylife.home.net.hub.irc.commands;
 
 import java.io.IOException;
+
 import org.mylife.home.net.hub.IrcServerMBean;
-import org.mylife.home.net.hub.irc.*;
+import org.mylife.home.net.hub.irc.Command;
+import org.mylife.home.net.hub.irc.Constants;
+import org.mylife.home.net.hub.irc.Message;
+import org.mylife.home.net.hub.irc.RegisteredEntity;
+import org.mylife.home.net.hub.irc.User;
+import org.mylife.home.net.hub.irc.Util;
 
 /**
- * This REHASH command will reload all Command plugins from the plugins directory.
- * Plugins can thus be hot-swapped while the IRC server is running.
+ * This REHASH command will reload all Command plugins from the plugins
+ * directory. Plugins can thus be hot-swapped while the IRC server is running.
+ * 
  * @author markhale
  */
 public class Rehash implements Command {
@@ -37,40 +44,32 @@ public class Rehash implements Command {
 	public Rehash(IrcServerMBean jircd) {
 		this.jircd = jircd;
 	}
-	public void invoke(Source src, String[] params) {
-		if(src instanceof User) {
-			User user = (User) src;
-			handleCommand(user, params);
-		} else {
-			Util.sendNotRegisteredError(src);
-		}
-	}
-	private void handleCommand(User user, String[] params) {
-		if(hasPermission(user)) {
+
+	public void invoke(RegisteredEntity src, String[] params) {
+		User user = (User) src;
+		try {
+			Util.checkOperatorPermission(user);
 			Message msg = new Message(Constants.RPL_REHASHING, user);
-			//msg.appendParameter(jircd.getProperty("jircd.configFile"));
-			msg.appendParameter("Rehashing");
+			msg.appendParameter(jircd.getVersion());
+			msg.appendParameter(Util.getResourceString(user, "RPL_REHASHING"));
 			user.send(msg);
 			jircd.reloadPolicy();
 			try {
 				jircd.reloadConfiguration();
-			} catch(IOException ioe) {
+			} catch (IOException ioe) {
 				msg = new Message("ERROR", user);
-				msg.appendParameter(ioe.toString());
+				msg.appendLastParameter(ioe.toString());
 				user.send(msg);
 			}
-		} else {
-			Message msg = new Message(Constants.ERR_NOPRIVILEGES, user);
-			msg.appendParameter("Permission Denied- You're not an IRC operator");
-			user.send(msg);
+		} catch (SecurityException se) {
+			Util.sendNoPrivilegesError(user);
 		}
 	}
-	private boolean hasPermission(User user) {
-		return user.isModeSet(User.UMODE_OPER);
-	}
+
 	public String getName() {
 		return "REHASH";
 	}
+
 	public int getMinimumParameterCount() {
 		return 0;
 	}

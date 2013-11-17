@@ -22,34 +22,42 @@
 
 package org.mylife.home.net.hub.irc.commands;
 
+import java.util.Iterator;
+
 import org.mylife.home.net.hub.irc.Command;
 import org.mylife.home.net.hub.irc.Constants;
 import org.mylife.home.net.hub.irc.Message;
+import org.mylife.home.net.hub.irc.RegisteredEntity;
 import org.mylife.home.net.hub.irc.Server;
-import org.mylife.home.net.hub.irc.Source;
+import org.mylife.home.net.hub.irc.Util;
 
 /**
  * @author markhale
  */
 public class Links implements Command {
-	public void invoke(Source src, String[] params) {
+	public void invoke(RegisteredEntity src, String[] params) {
 		// TODO: wildcards and things, Iterator should be synchronized
 		String mask = "*";
-		for(Server  server : src.getServer().getNetwork().servers.values()) {
+		for (Iterator<Server> iter = src.getServer().getNetwork().getServers()
+				.iterator(); iter.hasNext();) {
+			Server server = iter.next();
 			Message message = new Message(Constants.RPL_LINKS, src);
 			message.appendParameter(mask);
 			message.appendParameter(server.getName());
-			message.appendParameter("0 "+server.getDescription());
+			message.appendLastParameter("0 " + server.getDescription());
 			src.send(message);
 		}
 		Message message = new Message(Constants.RPL_ENDOFLINKS, src);
 		message.appendParameter(mask);
-		message.appendParameter("End of /LINKS");
+		message.appendLastParameter(Util.getResourceString(src,
+				"RPL_ENDOFLINKS"));
 		src.send(message);
 	}
+
 	public String getName() {
 		return "LINKS";
 	}
+
 	public int getMinimumParameterCount() {
 		return 0;
 	}

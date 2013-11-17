@@ -22,37 +22,54 @@
 
 package org.mylife.home.net.hub.irc.commands;
 
-import org.mylife.home.net.hub.irc.*;
+import org.mylife.home.net.hub.irc.Channel;
+import org.mylife.home.net.hub.irc.Command;
+import org.mylife.home.net.hub.irc.Message;
+import org.mylife.home.net.hub.irc.Network;
+import org.mylife.home.net.hub.irc.RegisteredEntity;
+import org.mylife.home.net.hub.irc.User;
+import org.mylife.home.net.hub.irc.Util;
 
 /**
  * @author markhale
  */
 public class Part implements Command {
-	public void invoke(Source src, String[] params) {
-		final String channame = params[0];
+	public void invoke(RegisteredEntity src, String[] params) {
+		String[] chanNames = Util.split(params[0], ',');
+		String partMsg = (params.length > 1 ? params[1] : null);
+		User user = (User) src;
+		for (int i = 0; i < chanNames.length; i++) {
+			part(chanNames[i], user, partMsg);
+		}
+	}
+
+	private void part(String channame, User user, String partMsg) {
 		if (Util.isChannelIdentifier(channame)) {
-			Channel chan = src.getServer().getNetwork().getChannel(channame);
+			Network network = user.getServer().getNetwork();
+			Channel chan = network.getChannel(channame);
 			if (chan == null) {
-				Util.sendNoSuchChannelError(src, channame);
+				Util.sendNoSuchChannelError(user, channame);
 			} else {
-				User user = (User) src;
-				if(chan.isOn(user)) {
+				if (chan.isOn(user)) {
 					Message message = new Message(user, "PART", chan);
-					if(params.length == 2)
-						message.appendParameter(params[1]);
-					chan.send(message);
+					if (partMsg != null)
+						message.appendLastParameter(partMsg);
+					chan.sendLocal(message);
+					network.send(message, user.getServer());
 					chan.removeUser(user);
 				} else {
-					Util.sendNotOnChannelError(src, channame);
+					Util.sendNotOnChannelError(user, channame);
 				}
 			}
 		} else {
-			Util.sendNoSuchChannelError(src, channame);
+			Util.sendNoSuchChannelError(user, channame);
 		}
 	}
+
 	public String getName() {
 		return "PART";
 	}
+
 	public int getMinimumParameterCount() {
 		return 1;
 	}

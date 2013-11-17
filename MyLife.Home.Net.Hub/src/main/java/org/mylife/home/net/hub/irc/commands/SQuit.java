@@ -23,44 +23,50 @@
 package org.mylife.home.net.hub.irc.commands;
 
 import org.mylife.home.net.hub.irc.Command;
-import org.mylife.home.net.hub.irc.Constants;
 import org.mylife.home.net.hub.irc.Message;
 import org.mylife.home.net.hub.irc.RegisteredEntity;
+import org.mylife.home.net.hub.irc.Server;
 import org.mylife.home.net.hub.irc.User;
 import org.mylife.home.net.hub.irc.Util;
 
 /**
  * @author markhale
  */
-public class Away implements Command {
+public class SQuit implements Command {
 	public void invoke(RegisteredEntity src, String[] params) {
-		if (src instanceof User) {
-			User user = (User) src;
-			invoke(user, params);
+		//String qm = "SQuit";
+		if (params.length > 1) {
+			//qm = "SQuit: " + params[1];
 		}
-	}
-
-	private void invoke(User user, String[] params) {
-		if (params.length > 0) {
-			user.setAwayMessage(params[0]);
-			Message message = new Message(Constants.RPL_NOWAWAY, user);
-			message.appendLastParameter(Util.getResourceString(user,
-					"RPL_NOWAWAY"));
-			user.send(message);
+		if (src instanceof User) {
+			try {
+				Util.checkOperatorPermission((User) src);
+			} catch (SecurityException se) {
+				Util.sendNoPrivilegesError(src);
+				return;
+			}
+		}
+		String serverName = params[0];
+		Server target = src.getServer().getNetwork().getServer(serverName);
+		if (target != null) {
+			if (target.isPeer()) {
+				target.disconnect(params[1]);
+			} else {
+				// forward on
+				Message msg = new Message(src, getName(), target)
+						.appendLastParameter(params[1]);
+				target.send(msg);
+			}
 		} else {
-			user.setAwayMessage(null);
-			Message message = new Message(Constants.RPL_UNAWAY, user);
-			message.appendLastParameter(Util.getResourceString(user,
-					"RPL_UNAWAY"));
-			user.send(message);
+			Util.sendNoSuchServerError(src, serverName);
 		}
 	}
 
 	public String getName() {
-		return "AWAY";
+		return "SQUIT";
 	}
 
 	public int getMinimumParameterCount() {
-		return 0;
+		return 1;
 	}
 }

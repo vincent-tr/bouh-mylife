@@ -23,26 +23,33 @@
 package org.mylife.home.net.hub.irc;
 
 /**
- * Provides an interface for IRC commands.
- * To provide your own command implementation, simply write a class
- * that implements this interface and place it in a jar file in the plugins directory.
+ * Provides an interface for IRC commands. To provide your own command
+ * implementation, simply write a class that implements this interface and place
+ * it in a jar file in the plugins directory.
+ * 
  * @author markhale
  */
 public interface Command {
 	/**
-	 * Invokes this command.
-	 * This is called by the server when it receives a command string
-	 * matching {@link #getName()} with at least {@link #getMinimumParameterCount()} parameters.
-	 * @param src the sender
-	 * @param params the message parameters
+	 * Invokes this command. This is called by the server when it receives a
+	 * command string matching {@link #getName()} with at least
+	 * {@link #getMinimumParameterCount()} parameters.
+	 * 
+	 * @param src
+	 *            the sender
+	 * @param params
+	 *            the message parameters
 	 */
-	void invoke(Source src, String[] params);
+	void invoke(RegisteredEntity src, String[] params);
+
 	/**
 	 * Returns the command name, for example, PRIVMSG.
 	 */
 	String getName();
+
 	/**
-	 * Returns the minimum numbers of parameters this command is prepared to accept.
+	 * Returns the minimum numbers of parameters this command is prepared to
+	 * accept.
 	 */
 	int getMinimumParameterCount();
 }

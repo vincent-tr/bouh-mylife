@@ -22,24 +22,26 @@
 
 package org.mylife.home.net.hub.irc.commands;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.mylife.home.net.hub.irc.Command;
-import org.mylife.home.net.hub.irc.Source;
+import org.mylife.home.net.hub.irc.RegisteredEntity;
 
 /**
  * @author markhale
  */
 public class Error implements Command {
-	private static final Logger logger = Logger.getLogger(Error.class.getName());
+	private static final Logger logger = Logger
+			.getLogger(Error.class.getName());
 
-	public void invoke(Source src, String[] params) {
-		logger.log(Level.WARNING, params[0]);
+	public void invoke(RegisteredEntity src, String[] params) {
+		logger.warning(params[0]);
 	}
+
 	public String getName() {
 		return "ERROR";
 	}
+
 	public int getMinimumParameterCount() {
 		return 1;
 	}

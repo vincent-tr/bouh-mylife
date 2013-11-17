@@ -23,13 +23,22 @@
 package org.mylife.home.net.hub.irc.commands;
 
 import java.text.DecimalFormat;
+import java.util.Iterator;
+import java.util.Set;
+
+import javax.naming.Binding;
+import javax.naming.InitialContext;
+import javax.naming.NamingEnumeration;
+import javax.naming.NamingException;
 
 import org.mylife.home.net.hub.IrcServerMBean;
 import org.mylife.home.net.hub.irc.Command;
+import org.mylife.home.net.hub.irc.CommandContext;
+import org.mylife.home.net.hub.irc.ConnectedEntity;
 import org.mylife.home.net.hub.irc.Constants;
 import org.mylife.home.net.hub.irc.Message;
-import org.mylife.home.net.hub.irc.Operator;
-import org.mylife.home.net.hub.irc.Source;
+import org.mylife.home.net.hub.irc.RegisteredEntity;
+import org.mylife.home.net.hub.irc.User;
 import org.mylife.home.net.hub.irc.Util;
 
 /**
@@ -42,44 +51,82 @@ public class Stats implements Command {
 	public Stats(IrcServerMBean jircd) {
 		this.jircd = jircd;
 	}
-	public void invoke(Source src, String[] params) {
+
+	public void invoke(RegisteredEntity src, String[] params) {
 		String query = params[0];
-		switch(query.charAt(0)) {
-			case 'o':
+		switch (query.charAt(0)) {
+		case 'm':
+			sendCommandUsage(src);
+			break;
+		case 'o':
+			try {
+				Util.checkOperatorPermission((User) src);
 				sendOperators(src);
-				break;
-			case 'u':
-				sendUptime(src);
-				break;
+			} catch (SecurityException se) {
+				Util.sendNoPrivilegesError(src);
+			} catch (NamingException ne) {
+				ne.printStackTrace();
+			}
+			break;
+		case 'u':
+			sendUptime(src);
+			break;
 		}
 		Message message = new Message(Constants.RPL_ENDOFSTATS, src);
 		message.appendParameter(query);
-		message.appendParameter(Util.getResourceString(src, "RPL_ENDOFSTATS"));
+		message.appendLastParameter(Util.getResourceString(src,
+				"RPL_ENDOFSTATS"));
 		src.send(message);
 	}
-	private void sendOperators(Source src) {
-		for(Operator oper : jircd.getOperators()) {
-			Message message = new Message(Constants.RPL_STATSOLINE, src);
-			message.appendParameter("O");
-			message.appendParameter(oper.getHost());
-			message.appendParameter("*");
-			message.appendParameter(oper.getName());
+
+	private void sendCommandUsage(ConnectedEntity src) {
+		Set<CommandContext> ctxs = jircd.getCommandContexts();
+		for (Iterator<CommandContext> iter = ctxs.iterator(); iter.hasNext();) {
+			CommandContext ctx = iter.next();
+			Message message = new Message(Constants.RPL_STATSCOMMANDS, src);
+			message.appendParameter(ctx.getCommand().getName());
+			message.appendParameter(Integer.toString(ctx.getUsedCount()));
 			src.send(message);
 		}
 	}
-	private void sendUptime(Source src) {
-		int uptimeSecs = (int) (jircd.getUptimeMillis()/Constants.SECS_TO_MILLIS);
-		int days = uptimeSecs/(24*60*60);
-		int hours = uptimeSecs/(60*60) - 24*days;
-		int mins = uptimeSecs/60 - 60*(hours + 24*days);
-		int secs = uptimeSecs - 60*(mins + 60*(hours + 24*days));
+
+	private void sendOperators(ConnectedEntity src) throws NamingException {
+		InitialContext ctx = new InitialContext();
+		try {
+			NamingEnumeration<Binding> iter = ctx.listBindings("");
+			while (iter.hasMoreElements()) {
+				Binding binding = (Binding) iter.nextElement();
+				String name = binding.getName();
+				String[] userInfo = Util.split((String) binding.getObject(),
+						' ');
+				Message message = new Message(Constants.RPL_STATSOLINE, src);
+				message.appendParameter("O");
+				message.appendParameter(userInfo[1]);
+				message.appendParameter("*");
+				message.appendParameter(name);
+				src.send(message);
+			}
+		} finally {
+			ctx.close();
+		}
+	}
+
+	private void sendUptime(ConnectedEntity src) {
+		int uptimeSecs = (int) (jircd.getUptimeMillis() / Constants.SECS_TO_MILLIS);
+		int days = uptimeSecs / (24 * 60 * 60);
+		int hours = uptimeSecs / (60 * 60) - 24 * days;
+		int mins = uptimeSecs / 60 - 60 * (hours + 24 * days);
+		int secs = uptimeSecs - 60 * (mins + 60 * (hours + 24 * days));
 		Message message = new Message(Constants.RPL_STATSUPTIME, src);
-		message.appendParameter("Server Up "+days+" days "+hours+':'+TWO_PLACES.format(mins)+':'+TWO_PLACES.format(secs));
+		message.appendLastParameter("Server Up " + days + " days " + hours
+				+ ':' + TWO_PLACES.format(mins) + ':' + TWO_PLACES.format(secs));
 		src.send(message);
 	}
+
 	public String getName() {
 		return "STATS";
 	}
+
 	public int getMinimumParameterCount() {
 		return 1;
 	}

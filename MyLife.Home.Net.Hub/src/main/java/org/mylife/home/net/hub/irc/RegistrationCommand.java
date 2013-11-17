@@ -22,45 +22,19 @@
 
 package org.mylife.home.net.hub.irc;
 
-import java.security.Permission;
-
 /**
+ * Only RegistrationCommands are allowed to be used by UnregisteredEntities.
+ * 
  * @author markhale
  */
-public final class CommandPermission extends Permission {
-	static final long serialVersionUID = 8831251062883735035L;
-
+public interface RegistrationCommand extends Command {
 	/**
-	 * @param name
-	 *            IRC command name, can be the wildcard "*".
+	 * Invokes this command for an unregistered Entity.
+	 * 
+	 * @param src
+	 *            the sender
+	 * @param params
+	 *            the message parameters
 	 */
-	public CommandPermission(String name) {
-		super(name);
-	}
-
-	public boolean implies(Permission permission) {
-		if (permission != null && permission.getClass() == getClass()) {
-			return getName().equals("*")
-					|| getName().equals(permission.getName());
-		} else {
-			return false;
-		}
-	}
-
-	public String getActions() {
-		return "";
-	}
-
-	public boolean equals(Object obj) {
-		if (obj != null && obj.getClass() == getClass()) {
-			CommandPermission p = (CommandPermission) obj;
-			return getName().equals(p.getName());
-		} else {
-			return false;
-		}
-	}
-
-	public int hashCode() {
-		return getName().hashCode();
-	}
+	void invoke(UnregisteredEntity src, String[] params);
 }

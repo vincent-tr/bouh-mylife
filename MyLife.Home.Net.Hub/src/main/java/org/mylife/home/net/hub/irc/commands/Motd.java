@@ -25,7 +25,11 @@ package org.mylife.home.net.hub.irc.commands;
 import java.io.IOException;
 
 import org.mylife.home.net.hub.IrcServerMBean;
-import org.mylife.home.net.hub.irc.*;
+import org.mylife.home.net.hub.irc.Command;
+import org.mylife.home.net.hub.irc.Constants;
+import org.mylife.home.net.hub.irc.Message;
+import org.mylife.home.net.hub.irc.RegisteredEntity;
+import org.mylife.home.net.hub.irc.Util;
 
 /**
  * @author markhale
@@ -33,23 +37,27 @@ import org.mylife.home.net.hub.irc.*;
 public class Motd implements Command {
 	private String[] motd;
 
-	public Motd(IrcServerMBean jircd) throws IOException {
-		motd = Util.loadTextString(jircd.getConfiguration()
-				.getServerMotdContent(), 500);
+	public Motd(IrcServerMBean jircd) {
+		try {
+			motd = Util.loadTextString(jircd.getConfiguration()
+					.getServerMotdContent(), 500);
+		} catch (IOException ioe) {
+			motd = new String[0];
+		}
 	}
 
-	public void invoke(Source src, String[] params) {
+	public void invoke(RegisteredEntity src, String[] params) {
 		Message msg = new Message(Constants.RPL_MOTDSTART, src);
-		msg.appendParameter("- " + src.getServer().getName()
+		msg.appendLastParameter("- " + src.getServer().getName()
 				+ " Message of the Day -");
 		src.send(msg);
 		for (int i = 0; i < motd.length; i++) {
 			msg = new Message(Constants.RPL_MOTD, src);
-			msg.appendParameter("- " + motd[i]);
+			msg.appendLastParameter("- " + motd[i]);
 			src.send(msg);
 		}
 		msg = new Message(Constants.RPL_ENDOFMOTD, src);
-		msg.appendParameter("End of /MOTD command.");
+		msg.appendLastParameter("End of /MOTD command.");
 		src.send(msg);
 	}
 

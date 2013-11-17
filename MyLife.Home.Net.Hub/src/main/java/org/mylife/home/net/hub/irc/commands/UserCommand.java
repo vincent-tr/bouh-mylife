@@ -23,128 +23,155 @@
 package org.mylife.home.net.hub.irc.commands;
 
 import java.util.Date;
+import java.util.Iterator;
+import java.util.logging.Logger;
 
 import org.mylife.home.net.hub.IrcServerMBean;
-import org.mylife.home.net.hub.irc.Client;
-import org.mylife.home.net.hub.irc.Command;
+import org.mylife.home.net.hub.irc.CommandContext;
 import org.mylife.home.net.hub.irc.Connection;
 import org.mylife.home.net.hub.irc.Constants;
 import org.mylife.home.net.hub.irc.Message;
+import org.mylife.home.net.hub.irc.RegisteredEntity;
+import org.mylife.home.net.hub.irc.RegistrationCommand;
 import org.mylife.home.net.hub.irc.Server;
-import org.mylife.home.net.hub.irc.Source;
-import org.mylife.home.net.hub.irc.Unknown;
+import org.mylife.home.net.hub.irc.UnregisteredEntity;
 import org.mylife.home.net.hub.irc.User;
 import org.mylife.home.net.hub.irc.Util;
 
 /**
  * @author markhale
  */
-public class UserCommand implements Command {
+public class UserCommand implements RegistrationCommand {
+	private static final Logger logger = Logger
+			.getLogger(Error.class.getName());
 	protected final IrcServerMBean jircd;
 
 	public UserCommand(IrcServerMBean jircd) {
 		this.jircd = jircd;
 	}
-	public final void invoke(final Source src, String[] params) {
-		if(src instanceof Unknown) {
-			handleCommand((Unknown)src, params);
+
+	public final void invoke(final RegisteredEntity src, String[] params) {
+		if (src instanceof Server) {
+			invoke((Server) src, params);
 		} else {
-			Message message = new Message(Constants.ERR_ALREADYREGISTRED, src);
-			message.appendParameter(Util.getResourceString(src, "ERR_ALREADYREGISTRED"));
-			src.send(message);
+			Util.sendAlreadyRegisteredError(src);
 		}
 	}
-	private void handleCommand(Unknown src, String[] params) {
-		String nick = src.getNick();
-		if(nick == null) {
-			// if we have yet to receive a NICK command, remember these USER parameters
+
+	public final void invoke(final UnregisteredEntity src, String[] params) {
+		String nick = src.getName();
+		if (UnregisteredEntity.NO_NAME.equals(nick)) {
+			// if we have yet to receive a NICK command, remember these USER
+			// parameters
 			src.setParameters(params);
 		} else {
 			// already received a NICK command, so can complete login
-			Client client = (Client) src.getClient();
-			final Connection connection = client.getConnection();
-			if(checkPassword(connection, src.getPassword())) {
+			Connection.Handler handler = src.getHandler();
+			final Connection connection = handler.getConnection();
+			if (checkPass(connection, src.getPass())) {
 				String username = params[0];
-				//String hostname = params[1];
-				//String servername = params[2];
+				int modeFlags;
+				try {
+					// RFC 2812
+					modeFlags = Integer.parseInt(params[1]);
+				} catch (NumberFormatException nfe) {
+					// RFC 1459
+					modeFlags = 0;
+				}
+				// String unused = params[2];
 				String desc = params[3];
+				User user = createUser(src, username, desc);
+				handler.login(user);
 				Server thisServer = src.getServer();
-				User user = createUser(nick, username, connection.getRemoteHost(), desc, thisServer, client);
-				user.setLocale(src.getLocale());
-				client.login(user);
-				thisServer.addUser(user);
-				broadcastNewUser(user, thisServer);
+				// broadcast new user to other servers on the network
+				for (Iterator<Server> iter = thisServer.getNetwork()
+						.getServers().iterator(); iter.hasNext();) {
+					Server server = iter.next();
+					if (server.isPeer()) {
+						sendUser(server, user);
+					}
+				}
 
-				Message message = new Message(Constants.RPL_WELCOME, src);
-				message.appendParameter("Welcome to the " + thisServer.getNetwork().toString() + " " + nick + "!" + username + "@" + connection.getRemoteHost());
-				src.send(message);
+				Message message = new Message(Constants.RPL_WELCOME, user);
+				message.appendLastParameter("Welcome to the "
+						+ thisServer.getNetwork().getName() + " " + nick + "!"
+						+ username + "@" + connection.getRemoteHost());
+				user.send(message);
 
-				message = new Message(Constants.RPL_YOURHOST, src);
-				message.appendParameter("Your host is " + thisServer.getName() + ", running version " + jircd.getVersion());
-				src.send(message);
+				message = new Message(Constants.RPL_YOURHOST, user);
+				message.appendLastParameter("Your host is "
+						+ thisServer.getName() + ", running version "
+						+ jircd.getVersion());
+				user.send(message);
 
-				message = new Message(Constants.RPL_CREATED, src);
-				message.appendParameter("This server was created " + new Date(jircd.getStartTimeMillis()));
-				src.send(message);
+				message = new Message(Constants.RPL_CREATED, user);
+				message.appendLastParameter("This server was created "
+						+ new Date(jircd.getStartTimeMillis()));
+				user.send(message);
 
-				message = new Message(Constants.RPL_MYINFO, src);
-				message.appendParameter(thisServer.getName() + " " + jircd.getVersion() + " - -");
-				src.send(message);
+				message = new Message(Constants.RPL_MYINFO, user);
+				message.appendLastParameter(thisServer.getName() + " "
+						+ jircd.getVersion() + " - -");
+				user.send(message);
 
-				message = new Message(Constants.RPL_ISUPPORT, src);
-				message.appendParameter("NICKLEN="+Constants.MAX_NICK_LENGTH);
-				message.appendParameter("CHANNELLEN="+Constants.MAX_CHANNEL_LENGTH);
-				message.appendParameter("TOPICLEN="+Constants.MAX_TOPIC_LENGTH);
+				message = new Message(Constants.RPL_ISUPPORT, user);
+				message.appendParameter("NICKLEN=" + Constants.MAX_NICK_LENGTH);
+				message.appendParameter("CHANNELLEN="
+						+ Constants.MAX_CHANNEL_LENGTH);
+				message.appendParameter("TOPICLEN="
+						+ Constants.MAX_TOPIC_LENGTH);
 				message.appendParameter("PREFIX=(ov)@+");
 				message.appendParameter("CHANTYPES=#");
 				message.appendParameter("CHANMODES=b,k,l,imt");
 				message.appendParameter("CASEMAPPING=ascii");
-				message.appendParameter("NETWORK=" + thisServer.getNetwork().toString());
-				message.appendParameter("are supported by this server");
-				src.send(message);
+				message.appendParameter("NETWORK="
+						+ thisServer.getNetwork().getName());
+				message.appendLastParameter("are supported by this server");
+				user.send(message);
 
-				Command command = jircd.getCommand("LUSERS");
-				command.invoke(src, null);
-				command = jircd.getCommand("MOTD");
-				command.invoke(src, null);
+				CommandContext ctx = jircd.getCommandContext("LUSERS");
+				ctx.getCommand().invoke(user, null);
+				ctx = jircd.getCommandContext("MOTD");
+				ctx.getCommand().invoke(user, null);
+
+				StringBuffer modes = new StringBuffer('+');
+				if ((modeFlags & 2) != 0)
+					modes.append('w');
+				if ((modeFlags & 8) != 0)
+					modes.append('i');
+				if (modes.length() > 1)
+					user.processModes(modes.toString());
 			} else {
-				jircd.disconnectClient(client, "Invalid password");
+				logger.warning("Invalid password");
+				src.disconnect("Invalid password");
 			}
 		}
 	}
-	private boolean checkPassword(Connection connection, String password) {
-		//String expectedPassword = jircd.getProperty("jircd.accept."+connection.getRemoteAddress()+'#'+connection.getLocalPort());
-		//if(expectedPassword != null)
-		//	return expectedPassword.equals(password);
-		//else
-			return true;
+
+	private boolean checkPass(Connection connection, String[] passParams) {
+		return true;
 	}
-	protected User createUser(String nick, String username, String hostname, String desc, Server thisServer, Client client) {
-		return new User(nick, username, hostname, desc, thisServer, client);
+
+	protected User createUser(UnregisteredEntity unk, String username,
+			String desc) {
+		return new User(unk, username, desc);
 	}
-	/**
-	 * Broadcasts a new user to other servers on the network.
-	 * @param user a new user
-	 * @param thisServer the server the user is connected to
-	 */
-	protected void broadcastNewUser(User user, Server thisServer) {
-		for(Server server : thisServer.getNetwork().servers.values()) {
-			if(server != thisServer) {
-				Message message = new Message(thisServer, "NICK");
-				message.appendParameter(user.getNick());
-				message.appendParameter("1");
-				message.appendParameter(user.getIdent());
-				message.appendParameter(user.getHostName());
-				message.appendParameter(Integer.toString(thisServer.getToken()));
-				message.appendParameter(user.getModesList());
-				message.appendParameter(user.getDescription());
-				server.send(message);
-			}
-		}
+
+	protected void sendUser(Server server, User user) {
+		Util.sendUser(server, user.getServer(), user);
 	}
+
+	private void invoke(Server src, String[] params) {
+		// String username = params[0];
+		// String hostname = params[1];
+		// String servername = params[2];
+		// String desc = params[3];
+	}
+
 	public String getName() {
 		return "USER";
 	}
+
 	public int getMinimumParameterCount() {
 		return 4;
 	}

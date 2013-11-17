@@ -23,9 +23,21 @@
 package org.mylife.home.net.hub.irc.commands;
 
 import java.io.IOException;
+import java.net.Socket;
+import java.util.concurrent.Executors;
 
 import org.mylife.home.net.hub.IrcServerMBean;
-import org.mylife.home.net.hub.irc.*;
+import org.mylife.home.net.hub.configuration.IrcLinkConnect;
+import org.mylife.home.net.hub.irc.Command;
+import org.mylife.home.net.hub.irc.ConnectedEntity;
+import org.mylife.home.net.hub.irc.Connection;
+import org.mylife.home.net.hub.irc.Constants;
+import org.mylife.home.net.hub.irc.Message;
+import org.mylife.home.net.hub.irc.RegisteredEntity;
+import org.mylife.home.net.hub.irc.StreamConnection;
+import org.mylife.home.net.hub.irc.UnregisteredEntity;
+import org.mylife.home.net.hub.irc.User;
+import org.mylife.home.net.hub.irc.Util;
 
 /**
  * @author markhale
@@ -36,38 +48,62 @@ public class Connect implements Command {
 	public Connect(IrcServerMBean jircd) {
 		this.jircd = jircd;
 	}
-	public final void invoke(Source src, String[] params) {
+
+	public final void invoke(RegisteredEntity src, String[] params) {
 		final String host = params[0];
-		final int port = params.length>1 ? Integer.parseInt(params[1]) : Constants.DEFAULT_PORT;
+		final int port = params.length > 1 ? Integer.parseInt(params[1])
+				: Constants.DEFAULT_PORT;
 		User user = (User) src;
-		if(hasPermission(user)) {
+		try {
+			Util.checkOperatorPermission(user);
 			try {
-				Connector connector = new Connector(jircd, host, port, this);
-				jircd.addLink(connector.getLink());
-				Thread thr = new Thread(connector, connector.toString());
-				thr.start();
-			} catch(IOException e) {
+				StreamConnection connection = new StreamConnection(new Socket(
+						host, port), jircd.getLinks(),
+						Executors.newSingleThreadExecutor());
+				Connection.Handler handler = newConnectionHandler(jircd,
+						connection);
+				connection.setHandler(handler);
+				connection.start();
+				UnregisteredEntity entity = (UnregisteredEntity) handler
+						.getEntity();
+		        IrcLinkConnect configLink = jircd.findLinkConnect(connection.getRemoteAddress(), connection.getRemotePort());
+		        String linkPassword = configLink.getPassword();
+				sendLogin(entity, linkPassword);
+			} catch (IOException e) {
 				Message message = new Message(Constants.ERR_NOSUCHSERVER, src);
 				message.appendParameter(host);
-				message.appendParameter("No such server");
+				message.appendLastParameter("No such server");
 				src.send(message);
 			}
-		} else {
-			Message message = new Message(Constants.ERR_NOPRIVILEGES, src);
-			message.appendParameter("Permission Denied- You're not an IRC operator");
-			src.send(message);
+		} catch (SecurityException se) {
+			Util.sendNoPrivilegesError(src);
 		}
 	}
-	private boolean hasPermission(User user) {
-		return user.isModeSet(User.UMODE_OPER);
+
+	protected Connection.Handler newConnectionHandler(IrcServerMBean jircd,
+			Connection connection) {
+		return new Connection.Handler(jircd, connection);
 	}
-	/** Connect factory */
-	public Link newLink(IrcServerMBean jircd, Connector connection) {
-		return new Link(jircd, connection);
+
+	protected void sendLogin(UnregisteredEntity entity, String linkPassword) {
+		sendPass(entity, linkPassword);
+		sendServer(entity, jircd);
+		entity.setParameters(new String[0]); // so that we know we sent PASS &
+												// SERVER
 	}
+
+	protected void sendPass(ConnectedEntity to, String password) {
+		Util.sendPass(to, password);
+	}
+
+	protected void sendServer(ConnectedEntity to, IrcServerMBean jircd) {
+		Util.sendServer(to);
+	}
+
 	public String getName() {
 		return "CONNECT";
 	}
+
 	public int getMinimumParameterCount() {
 		return 1;
 	}

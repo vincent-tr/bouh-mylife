@@ -32,7 +32,7 @@
 			</thead>
 			<tbody>
 				<%
-					for (Server server : data.servers.values()) {
+					for (Server server : data.getServers()) {
 				%>
 				<tr>
 					<td><%=WebTools.htmlEscape(server.getName())%></td>
@@ -61,7 +61,7 @@
 			</thead>
 			<tbody>
 				<%
-					for (Server server : data.servers.values()) {
+					for (Server server : data.getServers()) {
 						for(User user : server.getUsers()) {
 							StringBuffer channels = new StringBuffer();
 							for(Channel chan : user.getChannels()) {
@@ -96,7 +96,7 @@
 			</thead>
 			<tbody>
 				<%
-					for (Channel channel : data.channels.values()) {
+					for (Channel channel : data.getChannels()) {
 						StringBuffer users = new StringBuffer();
 						for(User user : channel.getUsers()) {
 							if(users.length() > 0)

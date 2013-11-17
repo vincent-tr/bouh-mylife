@@ -24,84 +24,87 @@ package org.mylife.home.net.hub.irc;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * An IRC server.
+ * An IRC server. Inner class pattern of Network.
  * 
  * @author thaveman
  * @author markhale
  */
-public class Server extends Source {
+public class Server extends RegisteredEntity {
 	/** (String nickName, User user) */
-	private final Map<String, User> users = Collections
-			.synchronizedMap(new HashMap<String, User>());
+	private final Map<String, User> users = new ConcurrentHashMap<String, User>();
 	private final String name;
-	private String description;
+	private final String description;
 	protected final Server route;
-	protected final Connection connection; // the connection used if it's linked
-											// to me
-	protected final Object client;
 	protected final Network network;
 	protected final int token;
 
 	/**
-	 * Constructs an IRC server linked to another IRC server.
+	 * Constructs an IRC server linked to another IRC server. This server is
+	 * added to the network of the other.
 	 */
-	public Server(String name, int token, String description, Server route,
-			Connection connection, Object client) {
-		if (route == null)
-			throw new NullPointerException("The route cannot be null");
-		if (route.getNetwork() == null)
-			throw new NullPointerException(
-					"The route cannot have a null network");
-		this.name = name;
-		this.token = token;
-		this.description = description;
-		this.route = route;
-		this.connection = connection;
-		this.client = client;
-		this.network = route.getNetwork();
+	public Server(String name, int hopcount, int token, String description,
+			Server route) {
+		this(name, hopcount, token, description, route, route.getHandler(),
+				route.getNetwork());
 	}
 
 	/**
-	 * Constructs an IRC server on an IRC network. This should only be used to
-	 * construct the local server.
+	 * Constructs a peer server. This server is added to the network of the
+	 * other.
+	 */
+	public Server(UnregisteredEntity unk, int token, String description) {
+		this(unk.getName(), 1, token, description, unk.getServer(), unk
+				.getHandler(), unk.getServer().getNetwork());
+		setLocale(unk.getLocale());
+	}
+
+	/**
+	 * Constructs an IRC server (0 hops) on an IRC network. This server is added
+	 * to the network. This should only be used to construct the local jIRCd
+	 * server.
 	 */
 	public Server(String name, int token, String description, Network network) {
+		this(name, 0, token, description, null, null, network);
+	}
+
+	private Server(String name, int hopcount, int token, String description,
+			Server route, Connection.Handler handler, Network network) {
+		super(handler, hopcount);
 		if (network == null)
 			throw new NullPointerException("The network cannot be null");
 		this.name = name;
 		this.token = token;
 		this.description = description;
-		this.route = this;
-		this.connection = null;
-		this.client = null;
+		this.route = route;
 		this.network = network;
+		this.network.addServer(this);
 	}
 
 	/**
 	 * Returns the server's name.
 	 */
-	public String getNick() {
-		return getName();
-	}
-
-	/**
-	 * Returns the server's name.
-	 */
-	public String getName() {
+	public final String getName() {
 		return name;
 	}
 
 	/** ID */
 	public String toString() {
-		return getNick();
+		return getName();
 	}
 
-	public Collection<User> getUsers() {
+	/**
+	 * Returns true if this server is a peer (1 hop).
+	 */
+	public final boolean isPeer() {
+		return (hopCount == 1);
+	}
+
+	public final Collection<User> getUsers() {
 		return Collections.unmodifiableCollection(users.values());
 	}
 
@@ -114,10 +117,6 @@ public class Server extends Source {
 		return network;
 	}
 
-	public final Object getClient() {
-		return client;
-	}
-
 	/**
 	 * Returns the server this server is connected to.
 	 */
@@ -125,70 +124,71 @@ public class Server extends Source {
 		return route;
 	}
 
-	public void setDescription(String desc) {
-		description = desc;
-	}
-
-	public String getDescription() {
+	public final String getDescription() {
 		return description;
 	}
 
-	public int getToken() {
+	public final int getToken() {
 		return token;
 	}
 
-	public void addUser(User user) {
+	/** User hook */
+	void addUser(User user) {
 		users.put(user.getNick().toLowerCase(), user);
 	}
 
-	public User getUser(String nick) {
+	public final User getUser(String nick) {
 		return (User) users.get(nick.toLowerCase());
 	}
 
-	public void removeUser(User usr, String reason) {
-		String nick = usr.getNick().toLowerCase();
-		if (users.containsKey(nick)) {
-			// first remove the user from any channels he/she may be in
-			for (Iterator<Channel> it = usr.getChannels().iterator(); it.hasNext();) {
-				Channel channel = it.next();
-				Message message = new Message(usr, "QUIT");
-				message.appendLastParameter(reason);
-				channel.send(message, usr);
-				channel.removeUser(usr);
-			}
-			usr.getChannels().clear();
-			users.remove(nick);
-		}
+	/** User hook */
+	protected void removeUser(User usr) {
+		users.remove(usr.getNick().toLowerCase());
 	}
 
 	public void changeUserNick(User user, String oldnick, String newnick) {
-		synchronized (this.users) {
-			users.put(newnick.toLowerCase(), user);
-			users.remove(oldnick.toLowerCase());
-			Message message = new Message(user, "NICK");
-			message.appendParameter(newnick);
-			for (User iusr : users.values()) {
-				iusr.send(message);
-			}
+		users.put(newnick.toLowerCase(), user);
+		users.remove(oldnick.toLowerCase());
+		Message message = new Message(user, "NICK");
+		message.appendParameter(newnick);
+		for (Iterator<User> iter = users.values().iterator(); iter.hasNext();) {
+			User iusr = iter.next();
+			iusr.send(message);
 		}
 	}
 
 	public final int getUserCount(char mode, boolean isSet) {
 		int count = 0;
-		synchronized (users) {
-			for (User user : users.values()) {
-				if (user.isModeSet(mode) == isSet) {
-					count++;
-				}
+		for (Iterator<User> iter = users.values().iterator(); iter.hasNext();) {
+			User user = iter.next();
+			if (user.isModeSet(mode) == isSet) {
+				count++;
 			}
 		}
 		return count;
 	}
 
 	public void send(Message msg) {
-		if (connection != null)
-			connection.writeLine(msg.toString());
-		else
-			route.send(msg);
+		StringBuffer buf = new StringBuffer();
+		// append prefix
+		ConnectedEntity sender = msg.getSender();
+		if (sender != null)
+			buf.append(':').append(sender.getName()).append(' ');
+
+		// append command
+		buf.append(msg.getCommand());
+
+		// append parameters
+		final int paramCount = msg.getParameterCount();
+		if (paramCount > 0) {
+			final int lastParamIndex = paramCount - 1;
+			for (int i = 0; i < lastParamIndex; i++)
+				buf.append(' ').append(msg.getParameter(i));
+			if (msg.hasLastParameter())
+				buf.append(" :").append(msg.getParameter(lastParamIndex));
+			else
+				buf.append(' ').append(msg.getParameter(lastParamIndex));
+		}
+		handler.sendMessage(buf.toString());
 	}
 }

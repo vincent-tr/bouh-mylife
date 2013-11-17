@@ -31,41 +31,44 @@ public final class Modes {
 
 	private static int toMask(final char mode) {
 		final int ch = Character.toLowerCase(mode);
-		if(ch < 'a' || ch > 'z')
-			throw new IllegalArgumentException("Invalid mode: "+mode);
-		return 1<<(ch-'a');
+		if (ch < 'a' || ch > 'z')
+			throw new IllegalArgumentException("Invalid mode: " + mode);
+		return 1 << (ch - 'a');
 	}
 
 	public synchronized void add(final char mode) {
 		final int mask = toMask(mode);
-		if(Character.isUpperCase(mode))
+		if (Character.isUpperCase(mode))
 			uModes |= mask;
 		else
 			lModes |= mask;
 	}
+
 	public synchronized void remove(final char mode) {
 		final int mask = toMask(mode);
-		if(Character.isUpperCase(mode))
+		if (Character.isUpperCase(mode))
 			uModes &= ~mask;
 		else
 			lModes &= ~mask;
 	}
+
 	public synchronized boolean contains(final char mode) {
 		final int mask = toMask(mode);
-		if(Character.isUpperCase(mode))
+		if (Character.isUpperCase(mode))
 			return ((uModes & mask) != 0);
 		else
 			return ((lModes & mask) != 0);
 	}
+
 	public synchronized String toString() {
 		StringBuffer str = new StringBuffer("+");
-		for(int i=0; i<26; i++) {
-			if((lModes & (1<<i)) != 0)
-				str.append((char) ('a'+i));
+		for (int i = 0; i < 26; i++) {
+			if ((lModes & (1 << i)) != 0)
+				str.append((char) ('a' + i));
 		}
-		for(int i=0; i<26; i++) {
-			if((uModes & (1<<i)) != 0)
-				str.append((char) ('A'+i));
+		for (int i = 0; i < 26; i++) {
+			if ((uModes & (1 << i)) != 0)
+				str.append((char) ('A' + i));
 		}
 		return str.toString();
 	}

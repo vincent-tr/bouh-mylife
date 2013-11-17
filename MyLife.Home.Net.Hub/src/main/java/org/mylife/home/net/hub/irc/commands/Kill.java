@@ -22,42 +22,51 @@
 
 package org.mylife.home.net.hub.irc.commands;
 
-import org.mylife.home.net.hub.IrcServerMBean;
-import org.mylife.home.net.hub.irc.*;
+import org.mylife.home.net.hub.irc.Command;
+import org.mylife.home.net.hub.irc.Message;
+import org.mylife.home.net.hub.irc.RegisteredEntity;
+import org.mylife.home.net.hub.irc.Server;
+import org.mylife.home.net.hub.irc.User;
+import org.mylife.home.net.hub.irc.Util;
 
 /**
  * @author markhale
  */
 public class Kill implements Command {
-	protected final IrcServerMBean jircd;
-
-	public Kill(IrcServerMBean jircd) {
-		this.jircd = jircd;
-	}
-	public void invoke(Source src, String[] params) {
-		if(src instanceof User) {
+	public void invoke(RegisteredEntity src, String[] params) {
+		if (src instanceof User) {
 			User user = (User) src;
-			if(!hasPermission(user)) {
+			try {
+				Util.checkOperatorPermission(user);
+			} catch (SecurityException se) {
 				Util.sendNoPrivilegesError(src);
 				return;
 			}
 		}
 		final String nick = params[0];
-		if(Util.isNickName(nick)) {
-			User user = src.getServer().getNetwork().getUser(nick);
-			if(user == null) {
+		if (Util.isNickName(nick)) {
+			Server server = src.getServer();
+			User target = server.getNetwork().getUser(nick);
+			if (target == null) {
 				Util.sendNoSuchNickError(src, nick);
 			} else {
-				jircd.disconnectClient((Client)user.getClient(), "Kill by " + src.getNick() + ": " + params[1]);
+				if (target.isLocal()) {
+					target.disconnect("Kill by " + src.getName() + ": "
+							+ params[1]);
+				} else {
+					// forward on
+					Message msg = new Message(src, "KILL", target)
+							.appendLastParameter(params[1]);
+					target.send(msg);
+				}
 			}
 		}
 	}
-	private boolean hasPermission(User user) {
-		return user.isModeSet(User.UMODE_OPER);
-	}
+
 	public String getName() {
 		return "KILL";
 	}
+
 	public int getMinimumParameterCount() {
 		return 2;
 	}

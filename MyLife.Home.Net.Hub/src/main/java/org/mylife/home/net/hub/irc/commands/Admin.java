@@ -23,7 +23,11 @@
 package org.mylife.home.net.hub.irc.commands;
 
 import org.mylife.home.net.hub.IrcServerMBean;
-import org.mylife.home.net.hub.irc.*;
+import org.mylife.home.net.hub.irc.Command;
+import org.mylife.home.net.hub.irc.Constants;
+import org.mylife.home.net.hub.irc.Message;
+import org.mylife.home.net.hub.irc.RegisteredEntity;
+import org.mylife.home.net.hub.irc.Util;
 
 /**
  * @author markhale
@@ -35,38 +39,35 @@ public class Admin implements Command {
 	private final String email;
 
 	public Admin(IrcServerMBean jircd) {
-		server = jircd.getHostName();
+		server = jircd.getConfiguration().getServerName();
 		location1 = jircd.getConfiguration().getLocation1();
 		location2 = jircd.getConfiguration().getLocation2();
 		email = jircd.getConfiguration().getEmail();
 	}
-	public void invoke(Source src, String[] params) {
-		if(src instanceof Unknown)
-			Util.sendNotRegisteredError(src);
-		else
-			handleCommand(src, params);
-	}
-	private void handleCommand(Source src, String[] params) {
+
+	public void invoke(RegisteredEntity src, String[] params) {
 		Message message = new Message(Constants.RPL_ADMINME, src);
 		message.appendParameter(server);
-		message.appendParameter("Administrative info");
+		message.appendLastParameter(Util.getResourceString(src, "RPL_ADMINME"));
 		src.send(message);
 
 		message = new Message(Constants.RPL_ADMINLOC1, src);
-		message.appendParameter(location1);
+		message.appendLastParameter(location1);
 		src.send(message);
 
 		message = new Message(Constants.RPL_ADMINLOC2, src);
-		message.appendParameter(location2);
+		message.appendLastParameter(location2);
 		src.send(message);
 
 		message = new Message(Constants.RPL_ADMINEMAIL, src);
-		message.appendParameter(email);
+		message.appendLastParameter(email);
 		src.send(message);
 	}
+
 	public String getName() {
 		return "ADMIN";
 	}
+
 	public int getMinimumParameterCount() {
 		return 0;
 	}

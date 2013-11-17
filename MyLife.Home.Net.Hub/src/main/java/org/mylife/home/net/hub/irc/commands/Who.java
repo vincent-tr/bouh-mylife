@@ -22,11 +22,13 @@
 
 package org.mylife.home.net.hub.irc.commands;
 
+import java.util.Iterator;
+
 import org.mylife.home.net.hub.irc.Channel;
 import org.mylife.home.net.hub.irc.Command;
 import org.mylife.home.net.hub.irc.Constants;
 import org.mylife.home.net.hub.irc.Message;
-import org.mylife.home.net.hub.irc.Source;
+import org.mylife.home.net.hub.irc.RegisteredEntity;
 import org.mylife.home.net.hub.irc.User;
 import org.mylife.home.net.hub.irc.Util;
 
@@ -34,18 +36,20 @@ import org.mylife.home.net.hub.irc.Util;
  * @author markhale
  */
 public class Who implements Command {
-	public void invoke(Source src, String[] params) {
+	public void invoke(RegisteredEntity src, String[] params) {
 		// TODO: everything...
 		String name = "*";
 		Channel chan = null;
-		if(params.length > 0) {
+		if (params.length > 0) {
 			name = params[0];
-			if(Util.isChannelIdentifier(name))
+			if (Util.isChannelIdentifier(name))
 				chan = src.getServer().getNetwork().getChannel(name);
 		}
-		if(chan != null) {
+		if (chan != null) {
 			// list channel
-			for(User usr : chan.getUsers())  {
+			for (Iterator<User> iter = chan.getUsers().iterator(); iter
+					.hasNext();) {
+				User usr = iter.next();
 				if (!usr.isModeSet(User.UMODE_INVISIBLE) || usr.equals(src)) {
 					Message message = new Message(Constants.RPL_WHOREPLY, src);
 					message.appendParameter(chan.getName());
@@ -54,18 +58,23 @@ public class Who implements Command {
 					message.appendParameter(usr.getServer().getName());
 					message.appendParameter(usr.getNick());
 					message.appendParameter("H");
-					message.appendParameter("0 " + usr.getDescription());
+					message.appendLastParameter("0 " + usr.getDescription());
 					src.send(message);
 				}
 			}
 		} else {
 			// list server
-			for(User usr : src.getServer().getUsers()) {
+			for (Iterator<User> iter = src.getServer().getUsers().iterator(); iter
+					.hasNext();) {
+				User usr = iter.next();
 				// TODO: also check for in same channel
-				if (Util.match(name, usr.getNick()) && (!usr.isModeSet(User.UMODE_INVISIBLE) || usr.equals(src))) {
+				if (Util.match(name, usr.getNick())
+						&& (!usr.isModeSet(User.UMODE_INVISIBLE) || usr
+								.equals(src))) {
 					String chanName = "*";
 					if (usr.getChannels().size() > 0) {
-						chanName = ((Channel) usr.getChannels().iterator().next()).getName();
+						chanName = ((Channel) usr.getChannels().iterator()
+								.next()).getName();
 					}
 					Message message = new Message(Constants.RPL_WHOREPLY, src);
 					message.appendParameter(chanName);
@@ -74,14 +83,14 @@ public class Who implements Command {
 					message.appendParameter(usr.getServer().getName());
 					message.appendParameter(usr.getNick());
 					message.appendParameter("H");
-					message.appendParameter("0 " + usr.getDescription());
+					message.appendLastParameter("0 " + usr.getDescription());
 					src.send(message);
 				}
 			}
 		}
 		Message message = new Message(Constants.RPL_ENDOFWHO, src);
 		message.appendParameter(name);
-		message.appendParameter("End of /WHO list");
+		message.appendLastParameter(Util.getResourceString(src, "RPL_ENDOFWHO"));
 		src.send(message);
 	}
 

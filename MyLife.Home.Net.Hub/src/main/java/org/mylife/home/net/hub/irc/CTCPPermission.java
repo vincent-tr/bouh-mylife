@@ -28,47 +28,55 @@ import java.security.Permission;
  * @author markhale
  */
 public final class CTCPPermission extends Permission {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -4737873423948194982L;
+	static final long serialVersionUID = 744459141601570658L;
 	private final String action;
 
 	/**
-	 * @param name CTCP message type, can be the wildcard "*".
+	 * @param name
+	 *            CTCP message type, can be the wildcard "*".
 	 */
 	public CTCPPermission(String name) {
 		this(name, "");
 	}
+
 	/**
-	 * @param name CTCP message type, can be the wildcard "*".
-	 * @param action DCC action, can be the wildcard "*";
+	 * @param name
+	 *            CTCP message type, can be the wildcard "*".
+	 * @param action
+	 *            DCC action, can be the wildcard "*";
 	 */
 	public CTCPPermission(String name, String action) {
 		super(name);
-		if(action == null)
+		if (action == null)
 			throw new NullPointerException("Action cannot be null");
 		this.action = action;
 	}
+
 	public boolean implies(Permission permission) {
-		if(permission != null && permission.getClass() == getClass()) {
-			return (getName().equals("*") || getName().equals(permission.getName()))
-				&& (getActions().equals("*") || getActions().equals(permission.getActions()));
+		if (permission != null && permission.getClass() == getClass()) {
+			return (getName().equals("*") || getName().equals(
+					permission.getName()))
+					&& (getActions().equals("*") || getActions().equals(
+							permission.getActions()));
 		} else {
 			return false;
 		}
 	}
+
 	public String getActions() {
 		return action;
 	}
+
 	public boolean equals(Object obj) {
-		if(obj != null && obj.getClass() == getClass()) {
+		if (obj != null && obj.getClass() == getClass()) {
 			CTCPPermission p = (CTCPPermission) obj;
-			return getName().equals(p.getName()) && getActions().equals(p.getActions());
+			return getName().equals(p.getName())
+					&& getActions().equals(p.getActions());
 		} else {
 			return false;
 		}
 	}
+
 	public int hashCode() {
 		return getName().hashCode() ^ getActions().hashCode();
 	}

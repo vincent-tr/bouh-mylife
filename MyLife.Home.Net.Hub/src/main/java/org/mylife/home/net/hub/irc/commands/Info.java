@@ -25,7 +25,11 @@ package org.mylife.home.net.hub.irc.commands;
 import java.io.IOException;
 
 import org.mylife.home.net.hub.IrcServerMBean;
-import org.mylife.home.net.hub.irc.*;
+import org.mylife.home.net.hub.irc.Command;
+import org.mylife.home.net.hub.irc.Constants;
+import org.mylife.home.net.hub.irc.Message;
+import org.mylife.home.net.hub.irc.RegisteredEntity;
+import org.mylife.home.net.hub.irc.Util;
 
 /**
  * @author markhale
@@ -37,19 +41,23 @@ public class Info implements Command {
 		info = Util.loadTextString(jircd.getConfiguration()
 				.getServerInfoContent(), 100);
 	}
-	public void invoke(Source src, String[] params) {
-		for(int i=0; i<info.length; i++) {
+
+	public void invoke(RegisteredEntity src, String[] params) {
+		for (int i = 0; i < info.length; i++) {
 			Message message = new Message(Constants.RPL_INFO, src);
-			message.appendParameter(info[i]);
+			message.appendLastParameter(info[i]);
 			src.send(message);
 		}
 		Message message = new Message(Constants.RPL_ENDOFINFO, src);
-		message.appendParameter("End of /INFO list");
+		message.appendLastParameter(Util
+				.getResourceString(src, "RPL_ENDOFINFO"));
 		src.send(message);
 	}
+
 	public String getName() {
 		return "INFO";
 	}
+
 	public int getMinimumParameterCount() {
 		return 0;
 	}

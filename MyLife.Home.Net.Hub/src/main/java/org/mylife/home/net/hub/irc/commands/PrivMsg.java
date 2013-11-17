@@ -22,14 +22,24 @@
 
 package org.mylife.home.net.hub.irc.commands;
 
-import org.mylife.home.net.hub.irc.*;
+import org.mylife.home.net.hub.irc.Channel;
+import org.mylife.home.net.hub.irc.Command;
+import org.mylife.home.net.hub.irc.Constants;
+import org.mylife.home.net.hub.irc.Message;
+import org.mylife.home.net.hub.irc.Network;
+import org.mylife.home.net.hub.irc.RegisteredEntity;
+import org.mylife.home.net.hub.irc.User;
+import org.mylife.home.net.hub.irc.Util;
 
 /**
  * Security checks are performed on CTCP messages.
+ * 
  * @author markhale
  */
 public class PrivMsg implements Command {
-	public void invoke(Source src, String[] params) {
+	public void invoke(RegisteredEntity src, String[] params) {
+		if (src instanceof User && ((User) src).isLocal())
+			src.getHandler().active();
 		String msgdest = params[0];
 		if (msgdest.charAt(0) == '#') {
 			// message to channel
@@ -39,13 +49,15 @@ public class PrivMsg implements Command {
 				Util.sendNoSuchChannelError(src, msgdest);
 			} else {
 				User user = (User) src;
-				final boolean isModerated = chan.isModeSet(Channel.CHANMODE_MODERATED);
-				final boolean hasPrivileges = chan.isVoice(user) || chan.isOp(user);
-				if(!isModerated || (isModerated && hasPrivileges)) {
+				final boolean isModerated = chan
+						.isModeSet(Channel.CHANMODE_MODERATED);
+				final boolean hasPrivileges = chan.isVoice(user)
+						|| chan.isOp(user);
+				if (!isModerated || (isModerated && hasPrivileges)) {
 					Message message = new Message(user, "PRIVMSG", chan);
 					message.appendLastParameter(params[1]);
 					chan.send(message, user);
-				} else if(isModerated && !hasPrivileges) {
+				} else if (isModerated && !hasPrivileges) {
 					Util.sendCannotSendToChannelError(src, msgdest);
 				}
 			}
@@ -59,34 +71,41 @@ public class PrivMsg implements Command {
 			if (target != null) {
 				String awayMsg = target.getAwayMessage();
 				// check user is not away
-				if(awayMsg == null) {
+				if (awayMsg == null) {
 					// send message
 					String text = params[1];
 					int ctcpStartPos = text.indexOf(Constants.CTCP_DELIMITER);
-					while(ctcpStartPos != -1) {
-						final int ctcpEndPos = text.indexOf(Constants.CTCP_DELIMITER, ctcpStartPos+1);
-						if(ctcpStartPos < ctcpEndPos) {
-							String ctcp = text.substring(ctcpStartPos+1, ctcpEndPos);
+					while (ctcpStartPos != -1) {
+						final int ctcpEndPos = text.indexOf(
+								Constants.CTCP_DELIMITER, ctcpStartPos + 1);
+						if (ctcpStartPos < ctcpEndPos) {
+							String ctcp = text.substring(ctcpStartPos + 1,
+									ctcpEndPos);
 							int spacePos = ctcp.indexOf(' ');
-							int endPos = (spacePos != -1) ? spacePos : ctcp.length();
+							int endPos = (spacePos != -1) ? spacePos : ctcp
+									.length();
 							String dataType = ctcp.substring(0, endPos);
 							String action = "";
-							if(dataType.equals("DCC") && spacePos != -1) {
-								int startPos = spacePos+1;
+							if (dataType.equals("DCC") && spacePos != -1) {
+								// DCC CHAT message
+								int startPos = spacePos + 1;
 								spacePos = ctcp.indexOf(' ', startPos);
-								endPos = (spacePos != -1) ? spacePos : ctcp.length();
+								endPos = (spacePos != -1) ? spacePos : ctcp
+										.length();
 								action = ctcp.substring(startPos, endPos);
 							}
 							Util.checkCTCPPermission(dataType, action);
 						}
-						ctcpStartPos = text.indexOf(Constants.CTCP_DELIMITER, ctcpEndPos+1);
+						ctcpStartPos = text.indexOf(Constants.CTCP_DELIMITER,
+								ctcpEndPos + 1);
 					}
-					Message message = new Message((User)src, "PRIVMSG", target);
+					Message message = new Message(src, "PRIVMSG", target);
 					message.appendLastParameter(text);
 					target.send(message);
 				} else {
 					// send away message
-					Message message = new Message(target, Constants.RPL_AWAY, src);
+					Message message = new Message(target, Constants.RPL_AWAY,
+							src);
 					message.appendLastParameter(awayMsg);
 					src.send(message);
 				}
@@ -95,12 +114,15 @@ public class PrivMsg implements Command {
 			}
 		}
 	}
+
 	protected User findUser(Network network, String nick) {
 		return network.getUser(nick);
 	}
+
 	public String getName() {
 		return "PRIVMSG";
 	}
+
 	public int getMinimumParameterCount() {
 		return 2;
 	}

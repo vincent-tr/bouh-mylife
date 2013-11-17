@@ -22,71 +22,80 @@
 
 package org.mylife.home.net.hub.irc.commands;
 
+import java.util.logging.Logger;
+
 import org.mylife.home.net.hub.IrcServerMBean;
 import org.mylife.home.net.hub.configuration.IrcLinkAccept;
 import org.mylife.home.net.hub.configuration.IrcLinkConnect;
-import org.mylife.home.net.hub.irc.*;
+import org.mylife.home.net.hub.irc.Connection;
+import org.mylife.home.net.hub.irc.RegisteredEntity;
+import org.mylife.home.net.hub.irc.RegistrationCommand;
+import org.mylife.home.net.hub.irc.Server;
+import org.mylife.home.net.hub.irc.UnregisteredEntity;
+import org.mylife.home.net.hub.irc.Util;
 
 /**
  * @author markhale
  */
-public class ServerCommand implements Command {
-	protected final IrcServerMBean jircd;
-
-	public ServerCommand(IrcServerMBean jircd) {
-		this.jircd = jircd;
-	}
-	public final void invoke(Source src, String[] params) {
-		if(src instanceof Unknown) {
-			handleCommand((Unknown)src, params);
-		} else {
-			Message message = new Message(Constants.ERR_ALREADYREGISTRED, src);
-			message.appendParameter(Util.getResourceString(src, "ERR_ALREADYREGISTRED"));
-			src.send(message);
-		}
-	}
-	protected void handleCommand(Unknown src, String[] params) {
-		Client client = (Client) src.getClient();
-		final Connection connection = client.getConnection();
-		if(checkPassword(connection, src.getPassword())) {
-			String name = params[0];
-			//String hopcount = params[1];
-			String token = params[2];
-			String desc = params[3];
-			Server thisServer = jircd.getServer();
-			Server server = new Server(name, Integer.parseInt(token), desc, thisServer, connection, client);
-			client.login(server);
-			thisServer.getNetwork().addServer(server);
-
-			IrcLinkConnect configLink = jircd.findLinkConnect(connection.getRemoteAddress(), connection.getRemotePort());
-			String linkPassword = configLink.getPassword();
-			Message message = new Message("PASS");
-			message.appendParameter(linkPassword);
-			message.appendParameter("0210");
-			message.appendParameter("IRC|");
-			server.send(message);
-
-			message = new Message("SERVER");
-			message.appendParameter(thisServer.getName());
-			message.appendParameter("1");
-			message.appendParameter(Integer.toString(server.getToken()));
-			message.appendParameter(thisServer.getDescription());
-			server.send(message);
-
-			Util.sendNetSync(thisServer, server);
-		} else {
-			jircd.disconnectClient(client, "Invalid password");
-		}
-	}
-	protected boolean checkPassword(Connection connection, String password) {
-		IrcLinkAccept configLink = jircd.findLinkAccept(connection.getRemoteAddress(), connection.getLocalPort());
-		String expectedPassword = configLink.getPassword();
-		return expectedPassword != null && expectedPassword.equals(password);
-	}
-	public String getName() {
-		return "SERVER";
-	}
-	public int getMinimumParameterCount() {
-		return 4;
-	}
+public class ServerCommand implements RegistrationCommand {
+    private static final Logger logger = Logger.getLogger(Error.class.getName());
+    protected final IrcServerMBean jIRCd;
+    
+    public ServerCommand(IrcServerMBean jircd) {
+        this.jIRCd = jircd;
+    }
+    public void invoke(RegisteredEntity src, String[] params) {
+        String name = params[0];
+        int hopcount = Integer.parseInt(params[1]);
+        int token = Integer.parseInt(params[2]);
+        String desc = params[3];
+        /*Server server = */new Server(name, hopcount, token, desc, (Server) src);
+    }
+    public final void invoke(final UnregisteredEntity src, String[] params) {
+        Connection.Handler handler = src.getHandler();
+        final Connection connection = handler.getConnection();
+        if(checkPass(connection, src.getPass())) {
+            login(src, params);
+        } else {
+            logger.warning("Invalid password");
+            src.disconnect("Invalid password");
+        }
+    }
+    private boolean checkPass(Connection connection, String[] passParams) {
+        IrcLinkAccept configLink = jIRCd.findLinkAccept(connection.getRemoteAddress(), connection.getLocalPort());
+        String expectedPassword = configLink.getPassword();
+        if(expectedPassword != null) {
+            String password = (passParams != null && passParams.length > 0) ? passParams[0] : null;
+            return expectedPassword.equals(password);
+        } else {
+            return false;
+        }
+    }
+    protected void login(final UnregisteredEntity src, String[] params) {
+        Connection.Handler handler = src.getHandler();
+        final Connection connection = handler.getConnection();
+        String name = params[0];
+        int hopcount = Integer.parseInt(params[1]);
+        if(hopcount != 1)
+            Util.sendError(src, "The hop count must be 1 for a peer server: "+hopcount);
+        int token = Integer.parseInt(params[2]);
+        String desc = params[3];
+        src.setName(name);
+        Server server = new Server(src, token, desc);
+        handler.login(server);
+        
+        IrcLinkConnect configLink = jIRCd.findLinkConnect(connection.getRemoteAddress(), connection.getRemotePort());
+        String linkPassword = configLink.getPassword();
+        if(src.getParameters() == null) {
+            Util.sendPass(server, linkPassword);
+            Util.sendServer(server);
+        }
+        Util.sendNetSync(server);
+    }
+    public String getName() {
+        return "SERVER";
+    }
+    public int getMinimumParameterCount() {
+        return 4;
+    }
 }

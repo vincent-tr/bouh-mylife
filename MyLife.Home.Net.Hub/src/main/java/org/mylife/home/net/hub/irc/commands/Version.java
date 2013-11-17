@@ -22,9 +22,11 @@
 
 package org.mylife.home.net.hub.irc.commands;
 
-import org.mylife.home.net.hub.IrcServer;
 import org.mylife.home.net.hub.IrcServerMBean;
-import org.mylife.home.net.hub.irc.*;
+import org.mylife.home.net.hub.irc.Command;
+import org.mylife.home.net.hub.irc.Constants;
+import org.mylife.home.net.hub.irc.Message;
+import org.mylife.home.net.hub.irc.RegisteredEntity;
 
 /**
  * @author markhale
@@ -36,14 +38,14 @@ public class Version implements Command {
 
 	public Version(IrcServerMBean jircd) {
 		version = jircd.getVersion();
-		serverName = jircd.getHostName();
-		comments = IrcServer.VERSION_URL;
+		serverName = jircd.getConfiguration().getServerName();
+		comments = jircd.getVersion();
 	}
-	public void invoke(Source src, String[] params) {
+	public void invoke(RegisteredEntity src, String[] params) {
 		Message message = new Message(Constants.RPL_VERSION, src);
 		message.appendParameter(version);
 		message.appendParameter(serverName);
-		message.appendParameter(comments);
+		message.appendLastParameter(comments);
 		src.send(message);
 	}
 	public String getName() {

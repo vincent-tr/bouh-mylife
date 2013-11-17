@@ -22,31 +22,35 @@
 
 package org.mylife.home.net.hub.irc.commands;
 
-import org.mylife.home.net.hub.irc.*;
+import org.mylife.home.net.hub.irc.Channel;
+import org.mylife.home.net.hub.irc.Command;
+import org.mylife.home.net.hub.irc.Constants;
+import org.mylife.home.net.hub.irc.Message;
+import org.mylife.home.net.hub.irc.RegisteredEntity;
+import org.mylife.home.net.hub.irc.User;
+import org.mylife.home.net.hub.irc.Util;
 
 /**
  * @author markhale
  */
 public class Invite implements Command {
-	public void invoke(Source src, String[] params) {
+	public void invoke(RegisteredEntity src, String[] params) {
 		String nickname = params[0];
 		String channame = params[1];
 		User luser = src.getServer().getNetwork().getUser(nickname);
-		if(luser == null) {
-			Message message = new Message(Constants.ERR_NOSUCHNICK, src);
-			message.appendParameter(nickname);
-			message.appendParameter("No such nick");
-			src.send(message);
+		if (luser == null) {
+			Util.sendNoSuchNickError(src, nickname);
 		} else {
 			String awayMsg = luser.getAwayMessage();
-			if(awayMsg != null) {
+			if (awayMsg != null) {
 				Message message = new Message(luser, Constants.RPL_AWAY, src);
-				message.appendParameter(awayMsg);
+				message.appendLastParameter(awayMsg);
 				src.send(message);
 			} else {
-				Channel chan = src.getServer().getNetwork().getChannel(channame);
-				if(chan == null) {
-					Message message = new Message((User)src, "INVITE", luser);
+				Channel chan = src.getServer().getNetwork()
+						.getChannel(channame);
+				if (chan == null) {
+					Message message = new Message(src, "INVITE", luser);
 					message.appendParameter(channame);
 					luser.send(message);
 					message = new Message(Constants.RPL_INVITING, src);
@@ -54,26 +58,23 @@ public class Invite implements Command {
 					message.appendParameter(channame);
 					src.send(message);
 				} else {
-					if(chan.isOn(luser)) {
-						Message message = new Message(Constants.ERR_USERONCHANNEL, src);
+					if (chan.isOn(luser)) {
+						Message message = new Message(
+								Constants.ERR_USERONCHANNEL, src);
 						message.appendParameter(nickname);
 						message.appendParameter(channame);
-						message.appendParameter("is already on channel");
+						message.appendLastParameter("is already on channel");
 						src.send(message);
-					} else if(!chan.isOn((User)src)) {
-						Message message = new Message(Constants.ERR_NOTONCHANNEL, src);
-						message.appendParameter(channame);
-						message.appendParameter("You're not on that channel");
-						src.send(message);
+					} else if (!chan.isOn((User) src)) {
+						Util.sendNotOnChannelError(src, channame);
 					} else {
-						if(chan.isModeSet(Channel.CHANMODE_INVITEONLY) && !chan.isOp((User)src)) {
-							Message message = new Message(Constants.ERR_CHANOPRIVSNEEDED, src);
-							message.appendParameter(channame);
-							message.appendParameter("You're not channel operator");
-							src.send(message);
+						if (chan.isModeSet(Channel.CHANMODE_INVITEONLY)
+								&& !chan.isOp((User) src)) {
+							Util.sendChannelOpPrivilegesNeededError(src,
+									channame);
 						} else {
 							chan.invite(luser);
-							Message message = new Message((User)src, "INVITE", luser);
+							Message message = new Message(src, "INVITE", luser);
 							message.appendParameter(channame);
 							luser.send(message);
 							message = new Message(Constants.RPL_INVITING, src);
@@ -86,9 +87,11 @@ public class Invite implements Command {
 			}
 		}
 	}
+
 	public String getName() {
 		return "INVITE";
 	}
+
 	public int getMinimumParameterCount() {
 		return 2;
 	}

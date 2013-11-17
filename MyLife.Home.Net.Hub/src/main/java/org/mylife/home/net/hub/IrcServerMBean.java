@@ -28,43 +28,64 @@ import java.util.Set;
 import org.mylife.home.net.hub.configuration.IrcConfiguration;
 import org.mylife.home.net.hub.configuration.IrcLinkAccept;
 import org.mylife.home.net.hub.configuration.IrcLinkConnect;
-import org.mylife.home.net.hub.irc.Client;
-import org.mylife.home.net.hub.irc.Command;
-import org.mylife.home.net.hub.irc.Link;
+import org.mylife.home.net.hub.irc.CommandContext;
+import org.mylife.home.net.hub.irc.ConnectionManager;
+import org.mylife.home.net.hub.irc.Listener;
 import org.mylife.home.net.hub.irc.Message;
 import org.mylife.home.net.hub.irc.Operator;
 import org.mylife.home.net.hub.irc.Server;
-import org.mylife.home.net.hub.irc.Source;
 
 /**
  * JMX management interface.
+ * 
  * @author markhale
  */
 public interface IrcServerMBean {
 	long getUptimeMillis();
-	long getStartTimeMillis();
-	String getVersion();
-	int getVisibleUserCount();
-	int getInvisibleUserCount();
-	int getNetworkVisibleUserCount();
-	int getNetworkInvisibleUserCount();
-	int getChannelCount();
-	int getServerCount();
-	Server getServer();
-	IrcConfiguration getConfiguration();
-	IrcLinkAccept findLinkAccept(String remoteAddress, int localPort);
-	IrcLinkConnect findLinkConnect(String remoteAddress, int remotePort);
-	String getHostName();
-	void reloadConfiguration() throws IOException;
-	void reloadPolicy();
-	void start();
-	void stop();
-	Set<Operator> getOperators();
 
-	void invokeCommand(Source src, Message message);
-	Command getCommand(String name);
-	void addClient(Client client);
-	void disconnectClient(Client client, String reason);
-	void addLink(Link link);
-	void disconnectLink(Link link);
+	long getStartTimeMillis();
+
+	String getVersion();
+
+	int getVisibleUserCount();
+
+	int getInvisibleUserCount();
+
+	int getNetworkVisibleUserCount();
+
+	int getNetworkInvisibleUserCount();
+
+	int getChannelCount();
+
+	int getServerCount();
+
+	Server getServer();
+
+	IrcConfiguration getConfiguration();
+
+	String getHostName();
+
+	void reloadConfiguration() throws IOException;
+
+	void reloadPolicy();
+
+	void start();
+
+	void stop();
+
+	void invokeCommand(Message message);
+
+	CommandContext getCommandContext(String name);
+
+	Set<CommandContext> getCommandContexts();
+
+	Set<Listener> getListeners();
+
+	ConnectionManager getLinks();
+
+	IrcLinkAccept findLinkAccept(String remoteAddress, int localPort);
+
+	IrcLinkConnect findLinkConnect(String remoteAddress, int remotePort);
+
+	Set<Operator> getOperators();
 }

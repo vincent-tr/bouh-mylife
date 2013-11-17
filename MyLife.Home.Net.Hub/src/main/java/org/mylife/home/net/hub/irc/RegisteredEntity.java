@@ -22,45 +22,27 @@
 
 package org.mylife.home.net.hub.irc;
 
-import java.security.Permission;
+import javax.security.auth.Subject;
 
 /**
+ * 
  * @author markhale
  */
-public final class CommandPermission extends Permission {
-	static final long serialVersionUID = 8831251062883735035L;
+public abstract class RegisteredEntity extends ConnectedEntity {
+	protected final int hopCount;
+	protected Subject subject;
 
-	/**
-	 * @param name
-	 *            IRC command name, can be the wildcard "*".
-	 */
-	public CommandPermission(String name) {
-		super(name);
+	/** Creates a new instance of RegisteredEntity */
+	protected RegisteredEntity(Connection.Handler handler, int hopCount) {
+		super(handler);
+		this.hopCount = hopCount;
 	}
 
-	public boolean implies(Permission permission) {
-		if (permission != null && permission.getClass() == getClass()) {
-			return getName().equals("*")
-					|| getName().equals(permission.getName());
-		} else {
-			return false;
-		}
+	public final int getHopCount() {
+		return hopCount;
 	}
 
-	public String getActions() {
-		return "";
-	}
-
-	public boolean equals(Object obj) {
-		if (obj != null && obj.getClass() == getClass()) {
-			CommandPermission p = (CommandPermission) obj;
-			return getName().equals(p.getName());
-		} else {
-			return false;
-		}
-	}
-
-	public int hashCode() {
-		return getName().hashCode();
+	public final Subject getSubject() {
+		return subject;
 	}
 }
