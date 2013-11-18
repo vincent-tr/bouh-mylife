@@ -8,9 +8,9 @@ import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.mylife.home.net.irc.IRCNetConnection;
 import org.mylife.home.net.structure.NetAttribute;
 import org.mylife.home.net.structure.NetMember;
-import org.schwering.irc.lib.IRCConnection;
 import org.schwering.irc.lib.IRCEventListener;
 import org.schwering.irc.lib.IRCModeParser;
 import org.schwering.irc.lib.IRCUser;
@@ -36,7 +36,7 @@ class LocalConnector implements AttributeChangeListener, IRCEventListener, Conne
 	/**
 	 * Connexion irc
 	 */
-	private final IRCConnection connection;
+	private final IRCNetConnection connection;
 
 	/**
 	 * Identifiant
@@ -74,7 +74,7 @@ class LocalConnector implements AttributeChangeListener, IRCEventListener, Conne
 			object.registerAttributeChange(name, this);
 		}
 		String server = Configuration.getInstance().getProperty("ircserver");
-		connection = new IRCConnection(server, new int[] { 6667 }, null, getNick(), id, id);
+		connection = new IRCNetConnection(server, 6667, getNick(), id);
 		connection.addIRCEventListener(this);
 		connection.setDaemon(true);
 		connection.setPong(true);

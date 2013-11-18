@@ -11,7 +11,7 @@ import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.schwering.irc.lib.IRCConnection;
+import org.mylife.home.net.irc.IRCNetConnection;
 import org.schwering.irc.lib.IRCConstants;
 import org.schwering.irc.lib.IRCEventListener;
 import org.schwering.irc.lib.IRCModeParser;
@@ -34,7 +34,7 @@ class NetWatcher implements IRCEventListener {
 	/**
 	 * Connexion irc
 	 */
-	private final IRCConnection connection;
+	private final IRCNetConnection connection;
 
 	/**
 	 * Fermeture
@@ -44,15 +44,17 @@ class NetWatcher implements IRCEventListener {
 	/**
 	 * Liste des salons à surveiller
 	 */
-	private final Map<String, Integer> channels = Collections.synchronizedMap(new HashMap<String, Integer>());
+	private final Map<String, Integer> channels = Collections
+			.synchronizedMap(new HashMap<String, Integer>());
 
 	/**
 	 * Identifiant
 	 */
 	private final String id;
-	
+
 	/**
 	 * Construction de l'id
+	 * 
 	 * @return
 	 */
 	private static String buildId() {
@@ -68,15 +70,14 @@ class NetWatcher implements IRCEventListener {
 			throw new RuntimeException(e);
 		}
 	}
-	
+
 	/**
 	 * Constructeur par défaut
 	 */
 	public NetWatcher() {
 		id = buildId();
 		String server = Configuration.getInstance().getProperty("ircserver");
-		connection = new IRCConnection(server, new int[] { 6667 }, null, id,
-				id, id);
+		connection = new IRCNetConnection(server, 6667, id, id);
 		connection.addIRCEventListener(this);
 		connection.setDaemon(true);
 		connection.setPong(true);
@@ -136,18 +137,19 @@ class NetWatcher implements IRCEventListener {
 
 	/**
 	 * Envoi d'un message
+	 * 
 	 * @param channel
 	 * @param target
 	 * @param message
 	 */
 	public void send(String channel, String target, String message) {
-		if(!connection.isConnected()) {
+		if (!connection.isConnected()) {
 			log.log(Level.SEVERE, "IRC connection not connected");
 			return;
 		}
 		connection.doPrivmsg("#" + channel, target + " " + message);
 	}
-	
+
 	/**
 	 * Connexion avec logging
 	 */
@@ -170,13 +172,13 @@ class NetWatcher implements IRCEventListener {
 	}
 
 	private String getInternalChannel(String ircChannel) {
-		if(ircChannel == null || ircChannel.length() == 0)
+		if (ircChannel == null || ircChannel.length() == 0)
 			return ircChannel;
-		if(ircChannel.charAt(0) != '#')
+		if (ircChannel.charAt(0) != '#')
 			return ircChannel;
 		return ircChannel.substring(1);
 	}
-	
+
 	@Override
 	public void onRegistered() {
 		for (String channel : channels.keySet()) {
@@ -258,18 +260,19 @@ class NetWatcher implements IRCEventListener {
 
 	@Override
 	public void onReply(int num, String value, String msg) {
-		switch(num) {
+		switch (num) {
 		case IRCConstants.RPL_NAMREPLY:
 			StringTokenizer tokenizer = new StringTokenizer(value);
 			tokenizer.nextToken(); // nick
 			tokenizer.nextToken(); // type de channel, = pour public channel
-			String chan = getInternalChannel(tokenizer.nextToken()); // nom du chan
+			String chan = getInternalChannel(tokenizer.nextToken()); // nom du
+																		// chan
 			tokenizer = new StringTokenizer(msg);
-			while(tokenizer.hasMoreTokens()) {
+			while (tokenizer.hasMoreTokens()) {
 				String nick = tokenizer.nextToken();
-				if("~&@%+".indexOf(nick.charAt(0)) > -1)
+				if ("~&@%+".indexOf(nick.charAt(0)) > -1)
 					nick = nick.substring(1);
-				
+
 				RemoteConnector.nickJoin(nick, chan);
 			}
 			break;
