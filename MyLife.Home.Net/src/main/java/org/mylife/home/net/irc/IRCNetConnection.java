@@ -12,7 +12,7 @@ import org.schwering.irc.lib.IRCConnection;
  * @author pumbawoman
  * 
  */
-public class IRCNetConnection extends IRCConnection {
+public class IRCNetConnection extends Thread {
 
 	/**
 	 * Logger
@@ -20,6 +20,8 @@ public class IRCNetConnection extends IRCConnection {
 	private final static Logger log = Logger.getLogger(IRCNetConnection.class
 			.getName());
 
+	private IRCNetStream stream;
+	
 	private AutoConnection autoConnect;
 
 	/**
