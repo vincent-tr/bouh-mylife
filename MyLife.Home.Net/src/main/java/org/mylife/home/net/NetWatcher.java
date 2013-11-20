@@ -36,11 +36,6 @@ class NetWatcher implements IRCEventListener {
 	private final IRCNetConnection connection;
 
 	/**
-	 * Fermeture
-	 */
-	private boolean closed;
-
-	/**
 	 * Liste des salons à surveiller
 	 */
 	private final Map<String, Integer> channels = Collections
@@ -79,14 +74,13 @@ class NetWatcher implements IRCEventListener {
 		connection = new IRCNetConnection(server, 6667, id, id);
 		connection.addIRCEventListener(this);
 		connection.setPong(true);
-		doConnect();
+		connection.start();
 	}
 
 	/**
 	 * Fermeture du watcher
 	 */
 	public void close() {
-		closed = true;
 		connection.doQuit();
 		connection.stop();
 	}
@@ -148,22 +142,6 @@ class NetWatcher implements IRCEventListener {
 		connection.doPrivmsg("#" + channel, target + " " + message);
 	}
 
-	/**
-	 * Connexion avec logging
-	 */
-	private void doConnect() {
-		if (closed)
-			return;
-		connection.start();
-	}
-
-	/**
-	 * Exécution de la déconnexion
-	 */
-	private void doDisconnect() {
-		RemoteConnector.nickPart(null, null);
-	}
-
 	private String getInternalChannel(String ircChannel) {
 		if (ircChannel == null || ircChannel.length() == 0)
 			return ircChannel;
@@ -182,8 +160,7 @@ class NetWatcher implements IRCEventListener {
 	@Override
 	public void onDisconnected() {
 		log.severe("Connection broken !");
-		doDisconnect();
-		doConnect();
+		RemoteConnector.nickPart(null, null);
 	}
 
 	@Override

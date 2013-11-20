@@ -20,13 +20,15 @@ import org.schwering.irc.lib.IRCUser;
  * @author pumbawoman
  * 
  */
-class LocalConnector implements AttributeChangeListener, IRCEventListener, Connector {
+class LocalConnector implements AttributeChangeListener, IRCEventListener,
+		Connector {
 
 	/**
 	 * Logger
 	 */
-	private final static Logger log = Logger.getLogger(LocalConnector.class.getName());
-	
+	private final static Logger log = Logger.getLogger(LocalConnector.class
+			.getName());
+
 	/**
 	 * Conteneur publié
 	 */
@@ -46,12 +48,7 @@ class LocalConnector implements AttributeChangeListener, IRCEventListener, Conne
 	 * Attributs
 	 */
 	private final List<String> attributesNames;
-	
-	/**
-	 * Fermeture
-	 */
-	private boolean closed;
-	
+
 	/**
 	 * Construction du connecteur avec l'objet
 	 * 
@@ -59,7 +56,7 @@ class LocalConnector implements AttributeChangeListener, IRCEventListener, Conne
 	 * @param channel
 	 */
 	public LocalConnector(NetContainer container) {
-		
+
 		this.container = container;
 		NetObject object = container.getObject();
 		this.id = object.getId();
@@ -76,9 +73,9 @@ class LocalConnector implements AttributeChangeListener, IRCEventListener, Conne
 		connection = new IRCNetConnection(server, 6667, getNick(), id);
 		connection.addIRCEventListener(this);
 		connection.setPong(true);
-		doConnect();
+		connection.start();
 	}
-	
+
 	/**
 	 * Fermeture du connecteur
 	 */
@@ -92,8 +89,7 @@ class LocalConnector implements AttributeChangeListener, IRCEventListener, Conne
 			String name = attr.getName();
 			object.unregisterAttributeChange(name, this);
 		}
-		
-		closed = true;
+
 		connection.doQuit();
 		connection.stop();
 	}
@@ -107,29 +103,14 @@ class LocalConnector implements AttributeChangeListener, IRCEventListener, Conne
 		StringBuffer buffer = new StringBuffer();
 		buffer.append(id);
 		for (String attributeName : attributesNames) {
-			Object value = container.getObject().getAttributeValue(attributeName);
+			Object value = container.getObject().getAttributeValue(
+					attributeName);
 			buffer.append("|");
 			buffer.append(String.valueOf(value));
 		}
 		return buffer.toString();
 	}
 
-	/**
-	 * Connexion avec logging
-	 */
-	private void doConnect() {
-		if(closed)
-			return;
-		connection.start();
-	}
-	
-	/**
-	 * Exécution de la déconnexion
-	 */
-	private void doDisconnect() {
-		container.setConnected(false);
-	}
-	
 	/**
 	 * Appelé sur changement d'un attribut
 	 * 
@@ -151,8 +132,7 @@ class LocalConnector implements AttributeChangeListener, IRCEventListener, Conne
 	@Override
 	public void onDisconnected() {
 		log.severe("Connection broken !");
-		doDisconnect();
-		doConnect();
+		container.setConnected(false);
 	}
 
 	@Override
@@ -172,7 +152,7 @@ class LocalConnector implements AttributeChangeListener, IRCEventListener, Conne
 
 	@Override
 	public void onJoin(String chan, IRCUser user) {
-		if(user.getNick().equalsIgnoreCase(getNick())) {
+		if (user.getNick().equalsIgnoreCase(getNick())) {
 			container.setConnected(true);
 		}
 	}
@@ -214,19 +194,19 @@ class LocalConnector implements AttributeChangeListener, IRCEventListener, Conne
 
 	@Override
 	public void onPrivmsg(String target, IRCUser user, String msg) {
-		if(target.equalsIgnoreCase("#" + container.getChannel())) {
-			
+		if (target.equalsIgnoreCase("#" + container.getChannel())) {
+
 			// message sur channel : on doit voir si le 1er token est notre id
 			StringTokenizer tokenizer = new StringTokenizer(msg);
-			if(tokenizer.hasMoreTokens()) {
+			if (tokenizer.hasMoreTokens()) {
 				String chanTarget = tokenizer.nextToken();
-				if(chanTarget.equalsIgnoreCase(id)) {
+				if (chanTarget.equalsIgnoreCase(id)) {
 					processCommand(user, tokenizer);
 				}
 			}
-			
-		} else if(target.equalsIgnoreCase(getNick())) {
-			
+
+		} else if (target.equalsIgnoreCase(getNick())) {
+
 			// message privé : forcément adressé à nous
 			StringTokenizer tokenizer = new StringTokenizer(msg);
 			processCommand(user, tokenizer);
@@ -253,48 +233,53 @@ class LocalConnector implements AttributeChangeListener, IRCEventListener, Conne
 			String trailing) {
 		// nothing
 	}
-	
+
 	/**
 	 * Exécution de commande
+	 * 
 	 * @param from
 	 * @param tokenizer
 	 */
 	private void processCommand(IRCUser from, StringTokenizer tokenizer) {
-		
+
 		String command = null;
 		Collection<String> args = new ArrayList<String>();
-		
-		if(tokenizer.hasMoreTokens()) {
+
+		if (tokenizer.hasMoreTokens()) {
 			command = tokenizer.nextToken();
 		}
 
-		while(tokenizer.hasMoreTokens()) {
+		while (tokenizer.hasMoreTokens()) {
 			args.add(tokenizer.nextToken());
 		}
-		
-		if(command != null)
+
+		if (command != null)
 			processCommand(from, command, args);
 	}
-	
+
 	/**
 	 * Exécution de commande
+	 * 
 	 * @param from
 	 * @param command
 	 * @param args
 	 */
-	private void processCommand(IRCUser from, String command, Collection<String> args) {
+	private void processCommand(IRCUser from, String command,
+			Collection<String> args) {
 		StringBuffer buffer = new StringBuffer();
 		buffer.append(command);
-		for(String arg : args) {
+		for (String arg : args) {
 			buffer.append(" ");
 			buffer.append(arg);
 		}
 		log.info(String.format("Executing command : %s", buffer.toString()));
-		
+
 		try {
-			container.getObject().executeActionAsString(command, args.toArray(new String[args.size()]));
-		} catch(Exception ex) {
-			log.log(Level.SEVERE, String.format("Error executing action %s", command), ex);
+			container.getObject().executeActionAsString(command,
+					args.toArray(new String[args.size()]));
+		} catch (Exception ex) {
+			log.log(Level.SEVERE,
+					String.format("Error executing action %s", command), ex);
 		}
 	}
 }
