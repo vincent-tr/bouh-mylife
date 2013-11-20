@@ -16,12 +16,10 @@ public interface ConnectionService {
 	/**
 	 * Démarrage
 	 */
-	public void start();
+	public void startService();
 	
 	/**
 	 * Arrêt
 	 */
-	public void stop();
-	
-	// ne pas oublier setDaemon
+	public void stopService();
 }

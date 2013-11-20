@@ -33,7 +33,7 @@ public class IRCNetConnection {
 	/**
 	 * Gestion de la fabrique de connexions
 	 */
-	private static ConnectionServiceFactory connectionServiceFactory;
+	private static ConnectionServiceFactory connectionServiceFactory = AutoConnectionService.getFactory();
 
 	/**
 	 * Gestion de la fabrique de connexions
@@ -170,6 +170,7 @@ public class IRCNetConnection {
 		this.username = id;
 		this.realname = id;
 		this.connectionService = connectionServiceFactory.create();
+		this.connectionService.initialize(this);
 	}
 
 	/**
@@ -223,14 +224,14 @@ public class IRCNetConnection {
 	 * Démarrage
 	 */
 	public void start() {
-		connectionService.start();
+		connectionService.startService();
 	}
 	
 	/**
 	 * Arrêt
 	 */
 	public void stop() {
-		connectionService.stop();
+		connectionService.stopService();
 	}
 	
 	// ------------------------------
