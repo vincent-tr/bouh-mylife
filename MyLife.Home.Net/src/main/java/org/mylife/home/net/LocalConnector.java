@@ -1,6 +1,5 @@
 package org.mylife.home.net;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -76,7 +75,6 @@ class LocalConnector implements AttributeChangeListener, IRCEventListener, Conne
 		String server = Configuration.getInstance().getProperty("ircserver");
 		connection = new IRCNetConnection(server, 6667, getNick(), id);
 		connection.addIRCEventListener(this);
-		connection.setDaemon(true);
 		connection.setPong(true);
 		doConnect();
 	}
@@ -97,7 +95,7 @@ class LocalConnector implements AttributeChangeListener, IRCEventListener, Conne
 		
 		closed = true;
 		connection.doQuit();
-		connection.close();
+		connection.stop();
 	}
 
 	/**
@@ -122,11 +120,7 @@ class LocalConnector implements AttributeChangeListener, IRCEventListener, Conne
 	private void doConnect() {
 		if(closed)
 			return;
-		try {
-			connection.connect();
-		} catch(IOException ex) {
-			log.log(Level.SEVERE, "IRC connection error", ex);
-		}
+		connection.start();
 	}
 	
 	/**
@@ -134,7 +128,6 @@ class LocalConnector implements AttributeChangeListener, IRCEventListener, Conne
 	 */
 	private void doDisconnect() {
 		container.setConnected(false);
-		connection.close();
 	}
 	
 	/**
