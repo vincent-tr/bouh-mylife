@@ -1,6 +1,5 @@
 package org.mylife.home.net;
 
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Collections;
@@ -79,7 +78,6 @@ class NetWatcher implements IRCEventListener {
 		String server = Configuration.getInstance().getProperty("ircserver");
 		connection = new IRCNetConnection(server, 6667, id, id);
 		connection.addIRCEventListener(this);
-		connection.setDaemon(true);
 		connection.setPong(true);
 		doConnect();
 	}
@@ -90,7 +88,7 @@ class NetWatcher implements IRCEventListener {
 	public void close() {
 		closed = true;
 		connection.doQuit();
-		connection.close();
+		connection.stop();
 	}
 
 	/**
@@ -156,18 +154,13 @@ class NetWatcher implements IRCEventListener {
 	private void doConnect() {
 		if (closed)
 			return;
-		try {
-			connection.connect();
-		} catch (IOException ex) {
-			log.log(Level.SEVERE, "IRC connection error", ex);
-		}
+		connection.start();
 	}
 
 	/**
 	 * Exécution de la déconnexion
 	 */
 	private void doDisconnect() {
-		connection.close();
 		RemoteConnector.nickPart(null, null);
 	}
 
