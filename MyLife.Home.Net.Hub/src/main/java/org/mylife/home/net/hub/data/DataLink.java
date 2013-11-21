@@ -14,7 +14,6 @@ public class DataLink {
 	private String address;
 	private int port;
 	private String password;
-	private int retryInterval;
 
 	public int getId() {
 		return id;
@@ -63,13 +62,4 @@ public class DataLink {
 	public void setPassword(String password) {
 		this.password = password;
 	}
-
-	public int getRetryInterval() {
-		return retryInterval;
-	}
-
-	public void setRetryInterval(int retryInterval) {
-		this.retryInterval = retryInterval;
-	}
-
 }

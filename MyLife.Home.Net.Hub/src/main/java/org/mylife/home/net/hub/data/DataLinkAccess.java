@@ -77,15 +77,14 @@ public class DataLinkAccess extends BaseDataAccess {
 			pst = con
 					.prepareStatement(
 							"insert into net_link "
-									+ "(link_name, link_type, link_address, link_port, link_password, link_retry_interval) "
-									+ "values (?, ?, ?, ?, ?, ?)",
+									+ "(link_name, link_type, link_address, link_port, link_password) "
+									+ "values (?, ?, ?, ?, ?)",
 							Statement.RETURN_GENERATED_KEYS);
 			pst.setString(1, item.getName());
 			pst.setString(2, item.getType());
 			pst.setString(3, item.getAddress());
 			pst.setInt(4, item.getPort());
 			pst.setString(5, item.getPassword());
-			pst.setInt(6, item.getRetryInterval());
 
 			pst.executeUpdate();
 
@@ -109,15 +108,14 @@ public class DataLinkAccess extends BaseDataAccess {
 			pst = con.prepareStatement("update net_link "
 					+ "set link_name = ? " + ", link_type = ? "
 					+ ", link_address = ? " + ", link_port = ? "
-					+ ", link_password = ? " + ", link_retry_interval = ? "
+					+ ", link_password = ? "
 					+ "where link_id = ?");
 			pst.setString(1, item.getName());
 			pst.setString(2, item.getType());
 			pst.setString(3, item.getAddress());
 			pst.setInt(4, item.getPort());
 			pst.setString(5, item.getPassword());
-			pst.setInt(6, item.getRetryInterval());
-			pst.setInt(7, item.getId());
+			pst.setInt(6, item.getId());
 			pst.executeUpdate();
 
 		} catch (SQLException e) {
@@ -152,7 +150,6 @@ public class DataLinkAccess extends BaseDataAccess {
 		item.setAddress(rs.getString("link_address"));
 		item.setPort(rs.getInt("link_port"));
 		item.setPassword(rs.getString("link_password"));
-		item.setRetryInterval(rs.getInt("link_retry_interval"));
 	}
 
 }

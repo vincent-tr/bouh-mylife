@@ -73,7 +73,6 @@ public class WebConfiguration extends HttpServlet {
 		item.setAddress(req.getParameter("address"));
 		item.setPort(parseIntArg(req.getParameter("port"), 0));
 		item.setPassword(req.getParameter("password"));
-		item.setRetryInterval(parseIntArg(req.getParameter("retryInterval"), 0));
 		ServiceAccess.getInstance().getLinkService().create(item);
 
 		resp.sendRedirect(req.getRequestURI());
@@ -89,7 +88,6 @@ public class WebConfiguration extends HttpServlet {
 		item.setAddress(req.getParameter("address"));
 		item.setPort(parseIntArg(req.getParameter("port"), 0));
 		item.setPassword(req.getParameter("password"));
-		item.setRetryInterval(parseIntArg(req.getParameter("retryInterval"), 0));
 		ServiceAccess.getInstance().getLinkService().update(item);
 
 		resp.sendRedirect(req.getRequestURI());

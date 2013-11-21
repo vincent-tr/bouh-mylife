@@ -18,7 +18,7 @@
 	} else {
 %>
 
-			<table class="table_render">
+		<table class="table_render">
 			<thead>
 				<tr>
 					<th colspan="4">Servers</th>

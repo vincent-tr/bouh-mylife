@@ -60,7 +60,7 @@ public class ManagerService extends BaseManagerService {
 		server = new IrcServer(config);
 		server.start();
 		
-		ServiceAccess.getInstance().getLinkService().startAutoLinks();
+		ServiceAccess.getInstance().getLinkService().startAutoLinks(server);
 	}
 
 	/**
