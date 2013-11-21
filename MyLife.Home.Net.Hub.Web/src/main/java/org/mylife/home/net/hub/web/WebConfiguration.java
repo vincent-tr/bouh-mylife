@@ -1,12 +1,17 @@
 package org.mylife.home.net.hub.web;
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.mylife.home.net.hub.data.DataLink;
+import org.mylife.home.net.hub.services.LinkService;
+import org.mylife.home.net.hub.services.ServiceAccess;
 
 /**
  * Servlet de configuration
@@ -42,6 +47,8 @@ public class WebConfiguration extends HttpServlet {
 			delete(req, resp);
 		} else if ("create".equals(action)) {
 			create(req, resp);
+		} else if ("update".equals(action)) {
+			update(req, resp);
 		} else {
 			index(req, resp);
 		}
@@ -51,30 +58,52 @@ public class WebConfiguration extends HttpServlet {
 			throws ServletException, IOException {
 
 		int id = Integer.parseInt(req.getParameter("id"));
-		//ServiceAccess.getConfigurationService().delete(id);
+		ServiceAccess.getInstance().getLinkService().delete(id);
 
 		resp.sendRedirect(req.getRequestURI());
 	}
 
 	private void create(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		/*
-		DataConfiguration item = new DataConfiguration();
+
+		DataLink item = new DataLink();
+		item.setName(req.getParameter("name"));
 		item.setType(req.getParameter("type"));
-		item.setComment(req.getParameter("comment"));
-		item.setContent(readPart(req.getPart("content")));
-		ServiceAccess.getConfigurationService().create(item);
-		*/
+		item.setAddress(req.getParameter("address"));
+		item.setPort(Integer.parseInt(req.getParameter("port")));
+		item.setPassword(req.getParameter("password"));
+		item.setRetryInterval(Integer.parseInt(req.getParameter("retryInterval")));
+		ServiceAccess.getInstance().getLinkService().create(item);
+
 		resp.sendRedirect(req.getRequestURI());
 	}
-	
+
+	private void update(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+
+		DataLink item = new DataLink();
+		item.setId(Integer.parseInt(req.getParameter("id")));
+		item.setName(req.getParameter("name"));
+		item.setType(req.getParameter("type"));
+		item.setAddress(req.getParameter("address"));
+		item.setPort(Integer.parseInt(req.getParameter("port")));
+		item.setPassword(req.getParameter("password"));
+		item.setRetryInterval(Integer.parseInt(req.getParameter("retryInterval")));
+		ServiceAccess.getInstance().getLinkService().update(item);
+
+		resp.sendRedirect(req.getRequestURI());
+	}
+
 	private void index(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		/*
+
 		// par défaut redirection vers la jsp
-		List<DataConfiguration> data = ServiceAccess.getConfigurationService()
-				.list();
-		req.setAttribute("data", data);*/
+		LinkService service = ServiceAccess.getInstance().getLinkService();
+		List<DataLink> data = service.list();
+		List<String> types = service.listTypes();
+
+		req.setAttribute("data", data);
+		req.setAttribute("types", types);
 		req.setAttribute("title", "Gestion de la configuration");
 		req.getRequestDispatcher("/jsp/Configuration.jsp").forward(req, resp);
 	}

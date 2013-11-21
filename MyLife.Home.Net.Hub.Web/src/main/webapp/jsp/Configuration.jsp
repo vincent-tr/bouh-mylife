@@ -2,8 +2,10 @@
 	pageEncoding="ISO-8859-1"%>
 <%@ page import="java.util.List"%>
 <%@ page import="org.mylife.home.common.web.WebTools"%>
+<%@ page import="org.mylife.home.net.hub.data.DataLink"%>
 <%
-	//List<DataConfiguration> data = (List<DataConfiguration>)pageContext.getRequest().getAttribute("data");
+	List<DataLink> data = (List<DataLink>)pageContext.getRequest().getAttribute("data");
+	List<String> types = (List<String>)pageContext.getRequest().getAttribute("types");
 %>
 
 <%@include file="/jsp/template/Header.jsp"%>
@@ -46,17 +48,34 @@
 								<table class="table_render">
 									<thead>
 										<tr>
-											<th width="60px">Type</th>
-											<th width="50px">Actif</th>
-											<th width="150px">Date</th>
-											<th>Commentaires</th>
+											<th>Nom</th>
+											<th width="50px">Type</th>
+											<th width="100px">Adresse</th>
+											<th width="60px">Port</th>
+											<th width="60px">Mot de passe</th>
+											<th width="60px">Interval entre tentatives (ms - seulement
+												pour type Connect)</th>
 											<th width="60px">Actions</th>
 										</tr>
 									</thead>
 									<tbody>
-									
-									<!--  TODO  -->
-									
+										<%
+											for (DataLink item : data) {
+										%>
+										<tr>
+											<td><%=WebTools.htmlEscape(item.getName())%></td>
+											<td><%=WebTools.htmlEscape(item.getType())%></td>
+											<td><%=WebTools.htmlEscape(item.getAddress())%></td>
+											<td><%=WebTools.htmlEscape(String.valueOf(item.getPort()))%></td>
+											<td><%=WebTools.htmlEscape(item.getPassword())%></td>
+											<td><%=WebTools.htmlEscape(String.valueOf(item.getRetryInterval()))%></td>
+											<td><a href="?action=delete&id=<%=item.getId()%>"><img
+													src="<%=WebTools.image(pageContext, "erase.png")%>"
+													title="Supprimer" /></a></td>
+										</tr>
+										<%
+											}
+										%>
 									</tbody>
 								</table>
 							</div>
@@ -67,7 +86,7 @@
 				<div id="tabs-2">
 					<fieldset>
 						<legend>
-							<span>Création manuelle</span>
+							<span>Création</span>
 						</legend>
 
 						<form method="post" action="?action=create"
