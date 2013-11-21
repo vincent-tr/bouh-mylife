@@ -36,10 +36,12 @@ public abstract class Connection {
 	protected final Socket socket;
 	private final long connectTime;
 	protected Handler handler;
+	private final boolean locallyInitiated;
 
-	protected Connection(Socket socket, ConnectionManager manager) {
+	protected Connection(Socket socket, ConnectionManager manager, boolean locallyInitiated) {
 		this.socket = socket;
 		this.manager = manager;
+		this.locallyInitiated = locallyInitiated;
 		connectTime = System.currentTimeMillis();
 	}
 
@@ -91,6 +93,10 @@ public abstract class Connection {
 
 	public final Handler getHandler() {
 		return handler;
+	}
+
+	public final boolean isLocallyInitiated() {
+		return locallyInitiated;
 	}
 
 	protected abstract void writeLine(String s);

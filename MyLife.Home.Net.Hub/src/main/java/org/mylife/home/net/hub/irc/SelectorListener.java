@@ -212,7 +212,7 @@ public class SelectorListener extends Listener {
 
 		public KeyConnection(SelectionKey key) {
 			super(((SocketChannel) key.channel()).socket(),
-					SelectorListener.this);
+					SelectorListener.this, false);
 			this.key = key;
 
 			int inBufSize = DEFAULT_RECEIVE_BUFFER_SIZE;

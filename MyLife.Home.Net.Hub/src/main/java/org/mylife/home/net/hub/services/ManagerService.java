@@ -59,6 +59,8 @@ public class ManagerService extends BaseManagerService {
 		IrcConfiguration config = loadConfiguration();
 		server = new IrcServer(config);
 		server.start();
+		
+		ServiceAccess.getInstance().getLinkService().startAutoLinks();
 	}
 
 	/**
@@ -66,6 +68,8 @@ public class ManagerService extends BaseManagerService {
 	 */
 	@Override
 	protected void executeStop() throws Exception {
+		ServiceAccess.getInstance().getLinkService().stopAutoLinks();
+
 		server.stop();
 		server = null;
 	}

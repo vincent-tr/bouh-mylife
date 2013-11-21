@@ -67,7 +67,7 @@ public class SocketListener extends Listener {
 	protected void waitForActivity() throws IOException {
 		Socket socket = serverSocket.accept();
 		StreamConnection connection = new StreamConnection(socket, this,
-				streamThreadPool);
+				streamThreadPool, false);
 		Connection.Handler handler = new Connection.Handler(jircd, connection);
 		connection.setHandler(handler);
 		connection.start();

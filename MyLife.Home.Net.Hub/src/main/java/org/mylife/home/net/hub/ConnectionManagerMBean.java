@@ -20,7 +20,7 @@
  *
  */
 
-package org.mylife.home.net.hub.irc;
+package org.mylife.home.net.hub;
 
 /**
  * 
