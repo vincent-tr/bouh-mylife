@@ -1,10 +1,12 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
 	pageEncoding="ISO-8859-1"%>
 <%@ page import="java.util.List"%>
+<%@ page import="java.util.Map"%>
 <%@ page import="org.mylife.home.common.web.WebTools"%>
 <%@ page import="org.mylife.home.core.data.DataConfiguration"%>
 <%
 	List<DataConfiguration> data = (List<DataConfiguration>)pageContext.getRequest().getAttribute("data");
+	Map<String, String> types = (Map<String, String>)pageContext.getRequest().getAttribute("types");
 %>
 
 <%@include file="/jsp/template/Header.jsp"%>
@@ -119,8 +121,16 @@
 									<tr>
 										<td>Type :</td>
 										<td><select name="type">
-												<option value="core" selected="selected">Core</option>
-												<option value="net">Net</option>
+												<%
+													boolean first = true;
+													for (Map.Entry<String, String> type : types.entrySet()) {
+												%>
+												<option value="<%=WebTools.htmlEscape(type.getKey())%>"
+													<%if (first) {%> selected="selected" <%}%>><%=WebTools.htmlEscape(type.getValue())%></option>
+												<%
+													first = false;
+													}
+												%>
 										</select></td>
 									</tr>
 									<tr>

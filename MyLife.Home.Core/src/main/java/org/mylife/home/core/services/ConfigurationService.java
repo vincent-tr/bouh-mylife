@@ -3,8 +3,11 @@ package org.mylife.home.core.services;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.bind.JAXBException;
 
@@ -23,13 +26,26 @@ import org.mylife.home.net.exchange.XmlNetContainer;
  */
 public class ConfigurationService implements Service {
 
+	public final static String TYPE_CORE = "core";
+	public final static String TYPE_NET = "net";
+
+	private final Map<String, String> types;
+
 	/* internal */ConfigurationService() {
 
+		Map<String, String> map = new HashMap<String, String>();
+		map.put(TYPE_CORE, "Core");
+		map.put(TYPE_NET, "Net");
+		types = Collections.unmodifiableMap(map);
 	}
 
 	@Override
 	public void terminate() {
 
+	}
+
+	public Map<String, String> listTypes() {
+		return types;
 	}
 
 	/**
@@ -213,7 +229,7 @@ public class ConfigurationService implements Service {
 					.importContainer(new ByteArrayInputStream(data));
 
 			DataConfiguration config = new DataConfiguration();
-			config.setType("net");
+			config.setType(TYPE_NET);
 			config.setContent(data);
 			config.setComment("componentsVersion : "
 					+ container.componentsVersion + "\ndocumentVersion : "
@@ -231,7 +247,7 @@ public class ConfigurationService implements Service {
 					.importContainer(new ByteArrayInputStream(data));
 
 			DataConfiguration config = new DataConfiguration();
-			config.setType("core");
+			config.setType(TYPE_CORE);
 			config.setContent(data);
 			config.setComment("documentName : " + container.documentName
 					+ "\ndocumentVersion : " + container.documentVersion);
