@@ -1,7 +1,9 @@
 package org.mylife.home.common.web;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.PrintStream;
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -20,6 +22,10 @@ import org.mylife.home.common.web.model.Severity;
  */
 public class WebTools {
 
+	public static String urlEscape(String input) throws IOException {
+		return URLEncoder.encode(input, "UTF-8");
+	}
+	
 	/**
 	 * HTML escape
 	 * 
