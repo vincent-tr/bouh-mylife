@@ -52,8 +52,8 @@ public class StreamConnection extends Connection implements Runnable {
 	private int linesSent;
 
 	public StreamConnection(Socket socket, ConnectionManager manager,
-			ExecutorService pool) throws IOException {
-		super(socket, manager);
+			ExecutorService pool, boolean locallyInitiated) throws IOException {
+		super(socket, manager, locallyInitiated);
 		inputStats = new StatisticsInputStream(socket.getInputStream());
 		outputStats = new StatisticsOutputStream(socket.getOutputStream());
 		input = new LineNumberReader(new InputStreamReader(inputStats,

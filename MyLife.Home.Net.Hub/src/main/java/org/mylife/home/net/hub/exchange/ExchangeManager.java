@@ -17,6 +17,7 @@ import org.mylife.home.net.hub.configuration.IrcConfiguration;
 import org.mylife.home.net.hub.configuration.IrcLinkAccept;
 import org.mylife.home.net.hub.configuration.IrcLinkConnect;
 import org.mylife.home.net.hub.configuration.IrcOperator;
+import org.mylife.home.net.hub.services.ServiceAccess;
 
 /**
  * Gestion des échanges
@@ -74,14 +75,10 @@ public class ExchangeManager {
 		private String email;
 		private String serverInfoContent;
 		private String serverMotdContent;
-		private final Collection<IrcLinkAccept> linksAccept;
-		private final Collection<IrcLinkConnect> linksConnect;
 		private final Collection<IrcBinding> bindings = new ArrayList<IrcBinding>();
 		private final Collection<IrcOperator> operators = new ArrayList<IrcOperator>();
 
-		public IrcConfigImpl(Collection<IrcLinkAccept> linksAccept, Collection<IrcLinkConnect> linksConnect) {
-			this.linksAccept = linksAccept;
-			this.linksConnect = linksConnect;
+		public IrcConfigImpl() {
 		}
 		
 		public String getNetworkName() {
@@ -173,11 +170,11 @@ public class ExchangeManager {
 		}
 
 		public Collection<IrcLinkAccept> getLinksAccept() {
-			return linksAccept;
+			return ServiceAccess.getInstance().getLinkService().getLinksAccept();
 		}
 
 		public Collection<IrcLinkConnect> getLinksConnect() {
-			return linksConnect;
+			return ServiceAccess.getInstance().getLinkService().getLinksConnect();
 		}
 
 		public Collection<IrcBinding> getBindings() {
@@ -201,7 +198,7 @@ public class ExchangeManager {
 			Collection<IrcLinkAccept> linksAccept,
 			Collection<IrcLinkConnect> linksConnect) {
 		
-		IrcConfigImpl impl = new IrcConfigImpl(linksAccept, linksConnect);
+		IrcConfigImpl impl = new IrcConfigImpl();
 		
 		impl.setNetworkName(container.networkName);
 		impl.setServerName(container.serverName);

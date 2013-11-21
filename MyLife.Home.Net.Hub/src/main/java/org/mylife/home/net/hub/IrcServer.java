@@ -28,7 +28,6 @@ import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.net.InetAddress;
 import java.security.Policy;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -102,8 +101,6 @@ public class IrcServer implements IrcServerMBean {
 	// configuration and informational information
 	private final IrcConfiguration config;
 	protected final String hostName;
-	protected final Collection<IrcLinkAccept> linksAccept;
-	protected final Collection<IrcLinkConnect> linksConnect;
 	private final Set<Operator> operators = Collections
 			.synchronizedSet(new HashSet<Operator>());
 
@@ -117,10 +114,6 @@ public class IrcServer implements IrcServerMBean {
 
 		this.config = config;
 		this.hostName = InetAddress.getLocalHost().getHostName();
-		this.linksAccept = Collections.synchronizedCollection(config
-				.getLinksAccept());
-		this.linksConnect = Collections.synchronizedCollection(config
-				.getLinksConnect());
 
 		String networkName = config.getNetworkName();
 		if (Util.isIRCString(networkName)) {
@@ -461,7 +454,7 @@ public class IrcServer implements IrcServerMBean {
 	}
 
 	public IrcLinkAccept findLinkAccept(String remoteAddress, int localPort) {
-		for (IrcLinkAccept item : linksAccept) {
+		for (IrcLinkAccept item : this.getConfiguration().getLinksAccept()) {
 			if (item.getLocalPort() != localPort)
 				continue;
 			if (remoteAddress.equalsIgnoreCase(item.getRemoteAddress()))
@@ -475,7 +468,7 @@ public class IrcServer implements IrcServerMBean {
 	}
 
 	public IrcLinkConnect findLinkConnect(String remoteAddress, int remotePort) {
-		for (IrcLinkConnect item : linksConnect) {
+		for (IrcLinkConnect item : this.getConfiguration().getLinksConnect()) {
 			if (item.getRemotePort() != remotePort)
 				continue;
 			if (remoteAddress.equalsIgnoreCase(item.getRemoteAddress()))

@@ -59,15 +59,17 @@ public class Connect implements Command {
 			try {
 				StreamConnection connection = new StreamConnection(new Socket(
 						host, port), jircd.getLinks(),
-						Executors.newSingleThreadExecutor());
+						Executors.newSingleThreadExecutor(), true);
 				Connection.Handler handler = newConnectionHandler(jircd,
 						connection);
 				connection.setHandler(handler);
 				connection.start();
 				UnregisteredEntity entity = (UnregisteredEntity) handler
 						.getEntity();
-		        IrcLinkConnect configLink = jircd.findLinkConnect(connection.getRemoteAddress(), connection.getRemotePort());
-		        String linkPassword = configLink.getPassword();
+				IrcLinkConnect configLink = jircd.findLinkConnect(
+						connection.getRemoteAddress(),
+						connection.getRemotePort());
+				String linkPassword = configLink.getPassword();
 				sendLogin(entity, linkPassword);
 			} catch (IOException e) {
 				Message message = new Message(Constants.ERR_NOSUCHSERVER, src);

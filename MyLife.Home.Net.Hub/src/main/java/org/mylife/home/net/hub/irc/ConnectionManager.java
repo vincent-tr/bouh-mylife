@@ -28,18 +28,19 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.mylife.home.net.hub.ConnectionManagerMBean;
+
 /**
  * Manages a set of connections.
  * 
  * @author markhale
  */
 public class ConnectionManager implements ConnectionManagerMBean {
-	private final Map<Connection, Connection> connections = new ConcurrentHashMap<Connection, Connection>(); // use
-																												// as
-																												// a
-																												// set
+	// Used as a set
+	private final Map<Connection, Connection> connections = new ConcurrentHashMap<Connection, Connection>();
+	
 	private int maxConnCount;
-
+	
 	/**
 	 * Notifies the manager that a connection has been opened.
 	 */
