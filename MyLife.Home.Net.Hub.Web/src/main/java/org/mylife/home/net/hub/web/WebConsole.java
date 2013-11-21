@@ -2,6 +2,7 @@ package org.mylife.home.net.hub.web;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Set;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -15,6 +16,7 @@ import org.mylife.home.net.hub.configuration.IrcBinding;
 import org.mylife.home.net.hub.configuration.IrcConfiguration;
 import org.mylife.home.net.hub.configuration.IrcOperator;
 import org.mylife.home.net.hub.irc.Server;
+import org.mylife.home.net.hub.services.LinkService.RunningLink;
 import org.mylife.home.net.hub.services.ManagerService;
 import org.mylife.home.net.hub.services.ServiceAccess;
 import org.mylife.home.net.hub.web.model.IrcServerState;
@@ -54,6 +56,8 @@ public class WebConsole extends HttpServlet {
 			networkState(req, resp);
 		} else if ("linksState".equals(action)) {
 			linksState(req, resp);
+		} else if ("linksClose".equals(action)) {
+			linksClose(req, resp);
 		} else if ("start".equals(action)) {
 			start(req, resp);
 		} else if ("stop".equals(action)) {
@@ -148,10 +152,26 @@ public class WebConsole extends HttpServlet {
 		req.getRequestDispatcher("/jsp/NetworkState.jsp").forward(req, resp);
 	}
 	
+	private void linksClose(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+		
+		// On cherche un lien à fermer
+		String serverName = req.getParameter("server");
+		Set<RunningLink> links = ServiceAccess.getInstance().getLinkService().getRunning();
+		for(RunningLink link : links) {
+			if(link.getServer().getName().equals(serverName)) {
+				link.disconnect();
+			}
+		}
+		
+		resp.sendRedirect(req.getRequestURI());
+	}
+	
 	private void linksState(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		
-		//req.setAttribute("data", serverState);
+		Set<RunningLink> links = ServiceAccess.getInstance().getLinkService().getRunning();
+		req.setAttribute("data", links);
 		req.getRequestDispatcher("/jsp/LinksState.jsp").forward(req, resp);
 	}
 

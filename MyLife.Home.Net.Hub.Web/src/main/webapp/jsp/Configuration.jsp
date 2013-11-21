@@ -51,10 +51,9 @@
 										<tr>
 											<th>Nom</th>
 											<th width="120px">Type</th>
-											<th width="100px">Adresse</th>
+											<th>Adresse</th>
 											<th width="120px">Port</th>
-											<th width="120px">Mot de passe</th>
-											<th width="120px">Interval de reconnexion (ms)</th>
+											<th>Mot de passe</th>
 											<th width="60px">Actions</th>
 										</tr>
 									</thead>
@@ -68,8 +67,6 @@
 											<td><%=WebTools.htmlEscape(item.getAddress())%></td>
 											<td><%=WebTools.htmlEscape(String.valueOf(item.getPort()))%></td>
 											<td><%=WebTools.htmlEscape(item.getPassword())%></td>
-											<td><%=WebTools.htmlEscape(String.valueOf(item
-						.getRetryInterval()))%></td>
 											<td><a href="?action=delete&id=<%=item.getId()%>"><img
 													src="<%=WebTools.image(pageContext, "erase.png")%>"
 													title="Supprimer" /></a></td>
@@ -125,10 +122,6 @@
 									<tr>
 										<td>Mot de passe :</td>
 										<td><input style="width: 100%;" type="text" required name="password" /></td>
-									</tr>
-									<tr>
-										<td>Interval de reconnexion (ms) :</td>
-										<td><input style="width: 100%;" type="number" name="retryInterval" /></td>
 									</tr>
 									<tr>
 										<td colspan="2" class="form_action"><input type="image"

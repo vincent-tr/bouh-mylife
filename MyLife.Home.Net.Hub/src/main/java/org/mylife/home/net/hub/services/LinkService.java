@@ -1,13 +1,19 @@
 package org.mylife.home.net.hub.services;
 
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.mylife.home.common.services.Service;
@@ -19,6 +25,9 @@ import org.mylife.home.net.hub.data.DataLinkAccess;
 import org.mylife.home.net.hub.irc.ConnectedEntity;
 import org.mylife.home.net.hub.irc.Connection;
 import org.mylife.home.net.hub.irc.Server;
+import org.mylife.home.net.hub.irc.StreamConnection;
+import org.mylife.home.net.hub.irc.UnregisteredEntity;
+import org.mylife.home.net.hub.irc.Util;
 
 /**
  * Service de gestion des liens
@@ -34,13 +43,15 @@ public class LinkService implements Service {
 	public final static String TYPE_ACCEPT = "accept";
 	public final static String TYPE_CONNECT = "connect";
 
+	private final static int CHECK_INTERVAL = 10000;
+
 	private final Map<String, String> types;
 
 	/* internal */LinkService() {
 
 		Map<String, String> map = new HashMap<String, String>();
-		map.put("accept", "Accept");
-		map.put("connect", "Connect");
+		map.put(TYPE_ACCEPT, "Accept");
+		map.put(TYPE_CONNECT, "Connect");
 		types = Collections.unmodifiableMap(map);
 	}
 
@@ -69,7 +80,6 @@ public class LinkService implements Service {
 			item.setAddress(link.getAddress());
 			item.setPort(link.getPort());
 			item.setPassword(link.getPassword());
-			item.setRetryInterval(link.getRetryInterval());
 			access.updateLink(item);
 			resetCachedLinks();
 		} finally {
@@ -134,7 +144,7 @@ public class LinkService implements Service {
 		public boolean isConnectLink() {
 			return connection.isLocallyInitiated();
 		}
-		
+
 		public void disconnect() {
 			getServer().disconnect("Closing link from admin console");
 		}
@@ -156,8 +166,9 @@ public class LinkService implements Service {
 		return links;
 	}
 
-	public void refreshRunning() {
-
+	public synchronized void refreshRunning() {
+		if (autoLinksManager != null)
+			autoLinksManager.reset();
 	}
 
 	private synchronized void resetCachedLinks() {
@@ -180,8 +191,7 @@ public class LinkService implements Service {
 						.getAddress(), item.getPort(), item.getPassword()));
 			} else if (TYPE_CONNECT.equalsIgnoreCase(type)) {
 				linksConnect.add(new IrcLinkConnect(item.getName(), item
-						.getAddress(), item.getPort(), item.getPassword(), item
-						.getRetryInterval()));
+						.getAddress(), item.getPort(), item.getPassword()));
 			} else
 				log.warning("Unknow link type, ignored : " + type);
 
@@ -211,11 +221,18 @@ public class LinkService implements Service {
 	 * @author TRUMPFFV
 	 * 
 	 */
-	private static class AutoLinksManager extends Thread {
+	private class AutoLinksManager extends Thread {
 
+		private final IrcServerMBean server;
 		private boolean closing = false;
+		private Date lastRefresh = null;
 
-		public AutoLinksManager() {
+		public Date getLastRefresh() {
+			return lastRefresh;
+		}
+
+		public AutoLinksManager(IrcServerMBean server) {
+			this.server = server;
 			setName(toString());
 			setDaemon(true);
 		}
@@ -223,38 +240,148 @@ public class LinkService implements Service {
 		public void close() {
 			closing = true;
 			interrupt();
+
+			// Attente de la fin du thread
+			try {
+				join();
+			} catch (InterruptedException ie) {
+				log.warning("Interrupted");
+			}
 		}
-		
+
 		public void reset() {
-			
+			interrupt();
 		}
 
 		@Override
 		public void run() {
 			while (!closing) {
-				int nextTime = checkConnect();
+
 				try {
-					Thread.sleep(nextTime);
+					refresh();
+				} catch (Exception e) {
+					log.log(Level.SEVERE, "Error refreshin", e);
+				}
+				lastRefresh = new Date();
+
+				try {
+					Thread.sleep(CHECK_INTERVAL);
 				} catch (InterruptedException ie) {
 					// Interruption : fin d'attente
 				}
 			}
 		}
 
-		private int checkConnect() {
+		private void refresh() throws IOException {
 
+			// Obtention des config à faire
+			Collection<IrcLinkConnect> todo = todo();
+
+			// On essaye de se connecter
+			for (IrcLinkConnect ilc : todo) {
+				log.info("Connecting link : " + ilc.getName());
+				try {
+					tryConnect(ilc);
+					log.info("Link connected : " + ilc.getName());
+				} catch (IOException ioe) {
+					log.log(Level.WARNING, "Link connection failed : " + ilc.getName(), ioe);
+				}
+			}
+		}
+
+		private void tryConnect(IrcLinkConnect configLink) throws IOException {
+
+			// Repris de irc.commands.Connect
+			
+			StreamConnection connection = new StreamConnection(new Socket(configLink.getRemoteAddress(),
+					configLink.getRemotePort()), server.getLinks(),
+					Executors.newSingleThreadExecutor(), true);
+			Connection.Handler handler = new Connection.Handler(server,
+					connection);
+			connection.setHandler(handler);
+			connection.start();
+			UnregisteredEntity entity = (UnregisteredEntity) handler
+					.getEntity();
+			Util.sendPass(entity, configLink.getPassword());
+			Util.sendServer(entity);
+			// so that we know we sent PASS & SERVER
+			entity.setParameters(new String[0]); 
+		}
+
+		private Collection<IrcLinkConnect> todo() throws IOException {
+
+			// Récupération des liens en fonctionnement
+			Set<RunningLink> running = running();
+
+			// Récupération de la config des liens
+			Collection<IrcLinkConnect> config = config();
+
+			// Pour chaque config, on cherche si un lien est en cours de
+			// fonctionnement
+			Collection<IrcLinkConnect> ret = new ArrayList<IrcLinkConnect>();
+			for (IrcLinkConnect ilc : config) {
+				if (!exists(ilc, running))
+					ret.add(ilc);
+			}
+
+			return ret;
+		}
+
+		private Set<RunningLink> running() {
+
+			// Récupération des liens existants
+			Set<RunningLink> source = getRunning();
+
+			// On ne garde que ceux en connect
+			Set<RunningLink> ret = new HashSet<RunningLink>();
+			for (RunningLink rl : source) {
+				if (rl.isConnectLink())
+					ret.add(rl);
+			}
+
+			return ret;
+		}
+
+		private Collection<IrcLinkConnect> config() {
+			return getLinksConnect();
+		}
+
+		private boolean exists(IrcLinkConnect config, Set<RunningLink> running)
+				throws IOException {
+			for (RunningLink rl : running) {
+
+				Connection con = rl.getConnection();
+				if (con.getRemotePort() != config.getRemotePort())
+					continue;
+
+				String confAddr = InetAddress.getByName(
+						config.getRemoteAddress()).getHostAddress();
+				if (!confAddr.equalsIgnoreCase(con.getRemoteAddress()))
+					continue;
+
+				return true;
+			}
+
+			return false;
 		}
 	}
 
 	private AutoLinksManager autoLinksManager;
 
-	public void startAutoLinks() {
-		autoLinksManager = new AutoLinksManager();
+	public synchronized void startAutoLinks(IrcServerMBean server) {
+		autoLinksManager = new AutoLinksManager(server);
 		autoLinksManager.start();
 	}
 
-	public void stopAutoLinks() {
+	public synchronized void stopAutoLinks() {
 		autoLinksManager.close();
 		autoLinksManager = null;
+	}
+
+	public synchronized Date getAutoLinksLastRefresh() {
+		if (autoLinksManager == null)
+			return null;
+
+		return autoLinksManager.getLastRefresh();
 	}
 }

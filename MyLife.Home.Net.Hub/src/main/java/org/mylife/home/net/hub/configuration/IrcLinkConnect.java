@@ -11,15 +11,13 @@ public class IrcLinkConnect {
 	private final String remoteAddress;
 	private final int remotePort;
 	private final String password;
-	private final int retryIntervalMs;
 	
 	public IrcLinkConnect(String name, String remoteAddress, int remotePort,
-			String password, int retryIntervalMs) {
+			String password) {
 		this.name = name;
 		this.remoteAddress = remoteAddress;
 		this.remotePort = remotePort;
 		this.password = password;
-		this.retryIntervalMs = retryIntervalMs;
 	}
 
 	public String getName() {
@@ -37,9 +35,4 @@ public class IrcLinkConnect {
 	public String getPassword() {
 		return password;
 	}
-
-	public int getRetryIntervalMs() {
-		return retryIntervalMs;
-	}
-	
 }
