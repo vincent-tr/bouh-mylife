@@ -2,6 +2,7 @@ package org.mylife.home.net.hub.web;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
@@ -70,9 +71,9 @@ public class WebConfiguration extends HttpServlet {
 		item.setName(req.getParameter("name"));
 		item.setType(req.getParameter("type"));
 		item.setAddress(req.getParameter("address"));
-		item.setPort(Integer.parseInt(req.getParameter("port")));
+		item.setPort(parseIntArg(req.getParameter("port"), 0));
 		item.setPassword(req.getParameter("password"));
-		item.setRetryInterval(Integer.parseInt(req.getParameter("retryInterval")));
+		item.setRetryInterval(parseIntArg(req.getParameter("retryInterval"), 0));
 		ServiceAccess.getInstance().getLinkService().create(item);
 
 		resp.sendRedirect(req.getRequestURI());
@@ -86,9 +87,9 @@ public class WebConfiguration extends HttpServlet {
 		item.setName(req.getParameter("name"));
 		item.setType(req.getParameter("type"));
 		item.setAddress(req.getParameter("address"));
-		item.setPort(Integer.parseInt(req.getParameter("port")));
+		item.setPort(parseIntArg(req.getParameter("port"), 0));
 		item.setPassword(req.getParameter("password"));
-		item.setRetryInterval(Integer.parseInt(req.getParameter("retryInterval")));
+		item.setRetryInterval(parseIntArg(req.getParameter("retryInterval"), 0));
 		ServiceAccess.getInstance().getLinkService().update(item);
 
 		resp.sendRedirect(req.getRequestURI());
@@ -100,11 +101,21 @@ public class WebConfiguration extends HttpServlet {
 		// par défaut redirection vers la jsp
 		LinkService service = ServiceAccess.getInstance().getLinkService();
 		List<DataLink> data = service.list();
-		List<String> types = service.listTypes();
+		Map<String, String> types = service.listTypes();
 
 		req.setAttribute("data", data);
 		req.setAttribute("types", types);
 		req.setAttribute("title", "Gestion de la configuration");
 		req.getRequestDispatcher("/jsp/Configuration.jsp").forward(req, resp);
+	}
+	
+	private int parseIntArg(String argumentValue, Integer defaultValue) {
+		try {
+			return Integer.parseInt(argumentValue);
+		} catch(NumberFormatException nfe) {
+			if(defaultValue == null)
+				throw nfe;
+			return defaultValue.intValue();
+		}
 	}
 }

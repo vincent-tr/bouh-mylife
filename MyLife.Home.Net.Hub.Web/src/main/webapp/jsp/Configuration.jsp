@@ -1,11 +1,12 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
 	pageEncoding="ISO-8859-1"%>
 <%@ page import="java.util.List"%>
+<%@ page import="java.util.Map"%>
 <%@ page import="org.mylife.home.common.web.WebTools"%>
 <%@ page import="org.mylife.home.net.hub.data.DataLink"%>
 <%
 	List<DataLink> data = (List<DataLink>)pageContext.getRequest().getAttribute("data");
-	List<String> types = (List<String>)pageContext.getRequest().getAttribute("types");
+	Map<String, String> types = (Map<String, String>)pageContext.getRequest().getAttribute("types");
 %>
 
 <%@include file="/jsp/template/Header.jsp"%>
@@ -49,12 +50,11 @@
 									<thead>
 										<tr>
 											<th>Nom</th>
-											<th width="50px">Type</th>
+											<th width="120px">Type</th>
 											<th width="100px">Adresse</th>
-											<th width="60px">Port</th>
-											<th width="60px">Mot de passe</th>
-											<th width="60px">Interval entre tentatives (ms - seulement
-												pour type Connect)</th>
+											<th width="120px">Port</th>
+											<th width="120px">Mot de passe</th>
+											<th width="120px">Interval de reconnexion (ms)</th>
 											<th width="60px">Actions</th>
 										</tr>
 									</thead>
@@ -68,7 +68,8 @@
 											<td><%=WebTools.htmlEscape(item.getAddress())%></td>
 											<td><%=WebTools.htmlEscape(String.valueOf(item.getPort()))%></td>
 											<td><%=WebTools.htmlEscape(item.getPassword())%></td>
-											<td><%=WebTools.htmlEscape(String.valueOf(item.getRetryInterval()))%></td>
+											<td><%=WebTools.htmlEscape(String.valueOf(item
+						.getRetryInterval()))%></td>
 											<td><a href="?action=delete&id=<%=item.getId()%>"><img
 													src="<%=WebTools.image(pageContext, "erase.png")%>"
 													title="Supprimer" /></a></td>
@@ -95,30 +96,39 @@
 							<table class="form_format">
 								<tbody>
 									<tr>
+										<td>Nom :</td>
+										<td><input style="width: 100%;" type="text" required name="name" /></td>
+									</tr>
+									<tr>
 										<td>Type :</td>
 										<td><select name="type">
-												<option value="core" selected="selected">Core</option>
-												<option value="net">Net</option>
+												<%
+													boolean first = true;
+													for (Map.Entry<String, String> type : types.entrySet()) {
+												%>
+												<option value="<%=WebTools.htmlEscape(type.getKey())%>"
+													<%if (first) {%> selected="selected" <%}%>><%=WebTools.htmlEscape(type.getValue())%></option>
+												<%
+													first = false;
+													}
+												%>
 										</select></td>
 									</tr>
 									<tr>
-										<td>Commentaires :</td>
-										<td>
-											<div
-												style="position: relative; height: 70px; vertical-align: middle;">
-												<div
-													style="position: absolute; top: 2px; bottom: 8px; left: 0px; right: 8px;">
-													<textarea
-														style="resize: none; margin: 0; width: 100%; height: 100%;"
-														name="comment" rows="4" cols="120"></textarea>
-												</div>
-											</div>
-										</td>
+										<td>Adresse :</td>
+										<td><input style="width: 100%;" type="text" required name="address" /></td>
 									</tr>
 									<tr>
-										<td>Contenu :</td>
-										<td><input style="width: 100%;" type="file"
-											name="content" accept="application/xml" /></td>
+										<td>Port :</td>
+										<td><input style="width: 100%;" type="number" min="1" max="65535" required name="port" /></td>
+									</tr>
+									<tr>
+										<td>Mot de passe :</td>
+										<td><input style="width: 100%;" type="text" required name="password" /></td>
+									</tr>
+									<tr>
+										<td>Interval de reconnexion (ms) :</td>
+										<td><input style="width: 100%;" type="number" name="retryInterval" /></td>
 									</tr>
 									<tr>
 										<td colspan="2" class="form_action"><input type="image"
