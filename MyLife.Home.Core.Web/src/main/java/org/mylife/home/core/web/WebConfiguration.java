@@ -2,6 +2,7 @@ package org.mylife.home.core.web;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
@@ -12,6 +13,7 @@ import javax.servlet.http.Part;
 
 import org.apache.commons.io.IOUtils;
 import org.mylife.home.core.data.DataConfiguration;
+import org.mylife.home.core.services.ConfigurationService;
 import org.mylife.home.core.services.ServiceAccess;
 
 /**
@@ -70,7 +72,8 @@ public class WebConfiguration extends HttpServlet {
 
 		int id = Integer.parseInt(req.getParameter("id"));
 		String comment = req.getParameter("comment");
-		ServiceAccess.getInstance().getConfigurationService().changeComment(id, comment);
+		ServiceAccess.getInstance().getConfigurationService()
+				.changeComment(id, comment);
 
 		resp.sendRedirect(req.getRequestURI());
 	}
@@ -79,7 +82,8 @@ public class WebConfiguration extends HttpServlet {
 			throws ServletException, IOException {
 
 		int id = Integer.parseInt(req.getParameter("id"));
-		ServiceAccess.getInstance().getConfigurationService().changeActive(id, true);
+		ServiceAccess.getInstance().getConfigurationService()
+				.changeActive(id, true);
 
 		resp.sendRedirect(req.getRequestURI());
 	}
@@ -88,7 +92,8 @@ public class WebConfiguration extends HttpServlet {
 			throws ServletException, IOException {
 
 		int id = Integer.parseInt(req.getParameter("id"));
-		ServiceAccess.getInstance().getConfigurationService().changeActive(id, false);
+		ServiceAccess.getInstance().getConfigurationService()
+				.changeActive(id, false);
 
 		resp.sendRedirect(req.getRequestURI());
 	}
@@ -105,8 +110,9 @@ public class WebConfiguration extends HttpServlet {
 	private void content(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 
-		DataConfiguration item = ServiceAccess.getInstance().getConfigurationService().get(
-				Integer.parseInt(req.getParameter("id")));
+		DataConfiguration item = ServiceAccess.getInstance()
+				.getConfigurationService()
+				.get(Integer.parseInt(req.getParameter("id")));
 		resp.setContentType("application/xml");
 		byte[] content = item.getContent();
 		resp.getOutputStream().write(content, 0, content.length);
@@ -114,45 +120,51 @@ public class WebConfiguration extends HttpServlet {
 
 	private void create(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		
+
 		DataConfiguration item = new DataConfiguration();
 		item.setType(req.getParameter("type"));
 		item.setComment(req.getParameter("comment"));
 		item.setContent(readPart(req.getPart("content")));
 		ServiceAccess.getInstance().getConfigurationService().create(item);
-		
+
 		resp.sendRedirect(req.getRequestURI());
 	}
 
 	private void contentCreate(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		
+
 		byte[] data = readPart(req.getPart("content"));
-		ServiceAccess.getInstance().getConfigurationService().createFromContents(data);
-		
+		ServiceAccess.getInstance().getConfigurationService()
+				.createFromContents(data);
+
 		resp.sendRedirect(req.getRequestURI());
 	}
 
 	private void downloadCreate(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		
+
 		String url = req.getParameter("url");
-		ServiceAccess.getInstance().getConfigurationService().createFromContentsUrl(url);
-		
+		ServiceAccess.getInstance().getConfigurationService()
+				.createFromContentsUrl(url);
+
 		resp.sendRedirect(req.getRequestURI());
 	}
-	
+
 	private void index(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 
 		// par défaut redirection vers la jsp
-		List<DataConfiguration> data = ServiceAccess.getInstance().getConfigurationService()
-				.list();
+		ConfigurationService service = ServiceAccess.getInstance()
+				.getConfigurationService();
+		List<DataConfiguration> data = service.list();
+		Map<String, String> types = service.listTypes();
+		
 		req.setAttribute("data", data);
+		req.setAttribute("types", types);
 		req.setAttribute("title", "Gestion des configurations");
 		req.getRequestDispatcher("/jsp/Configuration.jsp").forward(req, resp);
 	}
-	
+
 	private byte[] readPart(Part part) throws IOException {
 		return IOUtils.toByteArray(part.getInputStream());
 	}
