@@ -140,7 +140,7 @@
 									<tr>
 										<td>Contenu :</td>
 										<td><input style="width: 100%;" type="file"
-											name="content" accept="application/xml" /></td>
+											name="content" required accept="application/xml" /></td>
 									</tr>
 									<tr>
 										<td colspan="2" class="form_action"><input type="image"
@@ -165,7 +165,7 @@
 									<tr>
 										<td>Contenu :</td>
 										<td><input style="width: 100%;" type="file"
-											name="content" accept="application/xml" /></td>
+											name="content" required accept="application/xml" /></td>
 									</tr>
 									<tr>
 										<td colspan="2" class="form_action"><input type="image"
@@ -188,7 +188,7 @@
 								<tbody>
 									<tr>
 										<td>URL :</td>
-										<td><input style="width: 100%;" type="text" name="url" /></td>
+										<td><input style="width: 100%;" type="text" required name="url" /></td>
 									</tr>
 									<tr>
 										<td colspan="2" class="form_action"><input type="image"

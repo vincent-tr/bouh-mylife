@@ -1,8 +1,9 @@
 package org.mylife.home.net.hub.services;
 
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.mylife.home.common.services.Service;
 import org.mylife.home.net.hub.data.DataLink;
@@ -16,14 +17,14 @@ import org.mylife.home.net.hub.data.DataLinkAccess;
  */
 public class LinkService implements Service {
 
-	private final List<String> types;
+	private final Map<String, String> types;
 
 	/* internal */LinkService() {
 
-		List<String> list = new ArrayList<String>();
-		list.add("Accept");
-		list.add("Connect");
-		types = Collections.unmodifiableList(list);
+		Map<String, String> map = new HashMap<String, String>();
+		map.put("accept", "Accept");
+		map.put("connect", "Connect");
+		types = Collections.unmodifiableMap(map);
 	}
 
 	@Override
@@ -32,7 +33,7 @@ public class LinkService implements Service {
 
 	public void create(DataLink link) {
 		checkType(link);
-		
+
 		DataLinkAccess access = new DataLinkAccess();
 		try {
 			access.createLink(link);
@@ -43,7 +44,7 @@ public class LinkService implements Service {
 
 	public void update(DataLink link) {
 		checkType(link);
-		
+
 		DataLinkAccess access = new DataLinkAccess();
 		try {
 			DataLink item = access.getLinkByKey(link.getId());
@@ -79,15 +80,11 @@ public class LinkService implements Service {
 	}
 
 	private void checkType(DataLink link) {
-		for (String type : types) {
-			if (type.equals(link.getType()))
-				return;
-		}
-
-		throw new UnsupportedOperationException("Unknown type");
+		if (!types.containsKey(link.getType()))
+			throw new UnsupportedOperationException("Unknown type");
 	}
 
-	public List<String> listTypes() {
+	public Map<String, String> listTypes() {
 		return types;
 	}
 }
