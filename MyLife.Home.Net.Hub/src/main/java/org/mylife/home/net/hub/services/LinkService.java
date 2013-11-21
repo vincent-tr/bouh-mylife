@@ -1,5 +1,7 @@
 package org.mylife.home.net.hub.services;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.mylife.home.common.services.Service;
@@ -8,20 +10,29 @@ import org.mylife.home.net.hub.data.DataLinkAccess;
 
 /**
  * Service de gestion des liens
+ * 
  * @author pumbawoman
- *
+ * 
  */
 public class LinkService implements Service {
 
+	private final List<String> types;
+
 	/* internal */LinkService() {
 
+		List<String> list = new ArrayList<String>();
+		list.add("Accept");
+		list.add("Connect");
+		types = Collections.unmodifiableList(list);
 	}
 
 	@Override
 	public void terminate() {
 	}
-	
+
 	public void create(DataLink link) {
+		checkType(link);
+		
 		DataLinkAccess access = new DataLinkAccess();
 		try {
 			access.createLink(link);
@@ -29,8 +40,10 @@ public class LinkService implements Service {
 			access.close();
 		}
 	}
-	
+
 	public void update(DataLink link) {
+		checkType(link);
+		
 		DataLinkAccess access = new DataLinkAccess();
 		try {
 			DataLink item = access.getLinkByKey(link.getId());
@@ -43,7 +56,7 @@ public class LinkService implements Service {
 			access.close();
 		}
 	}
-	
+
 	public void delete(int id) {
 		DataLinkAccess access = new DataLinkAccess();
 		try {
@@ -54,7 +67,7 @@ public class LinkService implements Service {
 			access.close();
 		}
 	}
-	
+
 	public List<DataLink> list() {
 		DataLinkAccess access = new DataLinkAccess();
 		try {
@@ -62,6 +75,19 @@ public class LinkService implements Service {
 		} finally {
 			access.close();
 		}
-		
+
+	}
+
+	private void checkType(DataLink link) {
+		for (String type : types) {
+			if (type.equals(link.getType()))
+				return;
+		}
+
+		throw new UnsupportedOperationException("Unknown type");
+	}
+
+	public List<String> listTypes() {
+		return types;
 	}
 }
