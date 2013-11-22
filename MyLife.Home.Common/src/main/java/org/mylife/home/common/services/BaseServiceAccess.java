@@ -36,4 +36,18 @@ public class BaseServiceAccess {
 		}
 	}
 
+	/**
+	 * Service de gestion des logs
+	 */
+	private final LoggerService loggerService = register(new LoggerService());
+
+	/**
+	 * Service de gestion des logs
+	 * 
+	 * @return
+	 */
+	public LoggerService getLoggerService() {
+		return loggerService;
+	}
+	
 }
