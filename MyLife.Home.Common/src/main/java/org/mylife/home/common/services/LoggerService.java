@@ -2,15 +2,16 @@ package org.mylife.home.common.services;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.logging.Handler;
+import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 import org.apache.commons.collections.buffer.CircularFifoBuffer;
-import org.mylife.home.common.collections.TreeNode;
 
 /**
  * Service pour afficher les logs
@@ -86,6 +87,10 @@ public class LoggerService implements Service {
 
 		if (maxCount == -1)
 			maxCount = RECORD_MAX;
+		if (minLevel == -1)
+			minLevel = Integer.MIN_VALUE;
+		if (maxLevel == -1)
+			maxLevel = Integer.MAX_VALUE;
 
 		Collection<LogRecord> ret = new ArrayList<LogRecord>();
 		Object[] source = getRecords();
@@ -108,17 +113,134 @@ public class LoggerService implements Service {
 
 		return ret;
 	}
+
+	/**
+	 * Obtention des loggers triés en liste
+	 * 
+	 * @return
+	 *//*
+	public Set<String> getLoggersList() {
+
+		TreeNode<String> source = getLoggersTree();
+		Set<String> loggers = new HashSet<String>();
+		fillLogger(source, loggers);
+		return loggers;
+	}
 	
-	public TreeNode<String> getLoggers() {
-		
+	private void fillLogger(TreeNode<String> source, Set<String> loggers) {
+		loggers.add(getLoggerFullName(source));
+		for(TreeNode<String> child : source.getChildren())
+			fillLogger(child, loggers);
+	}*/
+
+	/**
+	 * Obtention des loggers triés en arbre
+	 * 
+	 * @return
+	 *//*
+	public TreeNode<String> getLoggersTree() {
+
 		Object[] source = getRecords();
-		
-		Set<String> loggersNoHierarchy = new HashSet<String>();
-		for(Object o : source) {
-			LogRecord record = (LogRecord)o;
+
+		// Loggers triés par taille de chaine
+		SortedSet<String> loggersNoHierarchy = new TreeSet<String>(
+				new Comparator<String>() {
+					@Override
+					public int compare(String o1, String o2) {
+						int ret = ((Integer) o1.length()).compareTo(o2.length());
+						if (ret != 0)
+							return ret;
+						return o1.compareTo(o2);
+					}
+				});
+		for (Object o : source) {
+			LogRecord record = (LogRecord) o;
 			loggersNoHierarchy.add(record.getLoggerName());
 		}
-		
-		// TODO : Tri en arbre
+
+		// Construction de l'arbre
+		TreeNode<String> root = new TreeNode<String>();
+		root.setElement("");
+		for (String logger : loggersNoHierarchy) {
+
+			TreeNode<String> parent = findParentLogger(root, logger);
+			String parentName = getLoggerFullName(parent);
+			TreeNode<String> current = new TreeNode<String>();
+			
+			int parentLength = 0;
+			if(parentName.length() > 0) {
+				// +1 pour le .
+				parentLength = parentName.length() + 1;
+			}
+				
+			current.setElement(logger.substring(parentLength));
+			current.setParent(parent);
+			parent.getChildren().add(current);
+		}
+
+		return root;
+
+	}*/
+
+	/**
+	 * Trouve le logger parent pour le nom de logger spécifié
+	 * 
+	 * @param current
+	 * @param logger
+	 * @return
+	 *//*
+	private TreeNode<String> findParentLogger(TreeNode<String> current,
+			String logger) {
+		for (TreeNode<String> child : current.getChildren()) {
+			String name = getLoggerFullName(child);
+			if (logger.startsWith(name))
+				return findParentLogger(child, logger);
+		}
+
+		return current;
+	}*/
+
+	/**
+	 * Obtention le nom complet du logger spécifié
+	 * 
+	 * @param node
+	 * @return
+	 *//*
+	public String getLoggerFullName(TreeNode<String> node) {
+		TreeNode<String> parent = node.getParent();
+		if (parent == null)
+			return node.getElement();
+		else
+			return getLoggerFullName(parent) + "." + node.getElement();
+	}*/
+
+	/**
+	 * Liste des valeurs pour max count
+	 * 
+	 * @return
+	 */
+	public List<Integer> getMaxCountValues() {
+		List<Integer> values = new ArrayList<Integer>();
+		final int RECORD_STEP = 50;
+		for (int i = RECORD_STEP; i <= RECORD_MAX; i += RECORD_STEP)
+			values.add(i);
+		return values;
+	}
+
+	public SortedMap<Integer, String> getLevelValues() {
+		SortedMap<Integer, String> values = new TreeMap<Integer, String>();
+		values.put(-1, "(Aucun)");
+		addLevel(Level.CONFIG, values);
+		addLevel(Level.FINE, values);
+		addLevel(Level.FINER, values);
+		addLevel(Level.FINEST, values);
+		addLevel(Level.INFO, values);
+		addLevel(Level.SEVERE, values);
+		addLevel(Level.WARNING, values);
+		return values;
+	}
+
+	private void addLevel(Level level, SortedMap<Integer, String> values) {
+		values.put(level.intValue(), level.getName());
 	}
 }

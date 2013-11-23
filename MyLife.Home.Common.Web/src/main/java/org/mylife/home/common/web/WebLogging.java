@@ -6,7 +6,10 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
@@ -52,10 +55,29 @@ public class WebLogging extends HttpServlet {
 		// par défaut redirection vers la jsp
 		LoggerService service = BaseServiceAccess.getBaseInstance()
 				.getLoggerService();
-		Collection<LogRecord> records = service.getLogs("", 0, 1000, -1); // TODO
-		List<LogItem> data = mapLogs(records, true); // TODO
+		
+		String logger = getDefaultableParameter(req, "logger", "");
+		int minLevel = getDefaultableParameter(req, "minLevel", -1);
+		int maxLevel = getDefaultableParameter(req, "maxLevel", -1);
+		int maxCount = getDefaultableParameter(req, "maxCount", -1);
+		boolean showError = getDefaultableParameter(req, "showError", false);
+		
+		Collection<LogRecord> records = service.getLogs(logger, minLevel, maxLevel, maxCount);
+		List<LogItem> data = mapLogs(records, showError);
+		List<Integer> maxCountValues = service.getMaxCountValues();
+		Map<Integer, String> levels = service.getLevelValues();
+		//Set<String> loggers = service.getLoggersList();
 
+		req.setAttribute("logger", logger);
+		req.setAttribute("minLevel", minLevel);
+		req.setAttribute("maxLevel", maxLevel);
+		req.setAttribute("maxCount", maxCount);
+		
 		req.setAttribute("data", data);
+		req.setAttribute("maxCountValues", maxCountValues);
+		//req.setAttribute("loggers", loggers);
+		req.setAttribute("levels", levels);
+		req.setAttribute("showError", showError);
 		req.setAttribute("title", "Affichage des logs");
 		req.getRequestDispatcher("/jsp/Logging.jsp").forward(req, resp);
 	}
@@ -99,5 +121,23 @@ public class WebLogging extends HttpServlet {
 			list.add(item);
 		}
 		return list;
+	}
+	
+	private String getDefaultableParameter(HttpServletRequest req, String name, String defaultValue) {
+		if(!req.getParameterMap().containsKey(name))
+			return defaultValue;
+		return req.getParameter(name);
+	}
+	
+	private int getDefaultableParameter(HttpServletRequest req, String name, int defaultValue) {
+		if(!req.getParameterMap().containsKey(name))
+			return defaultValue;
+		return Integer.parseInt(req.getParameter(name));
+	}
+	
+	private boolean getDefaultableParameter(HttpServletRequest req, String name, boolean defaultValue) {
+		if(!req.getParameterMap().containsKey(name))
+			return defaultValue;
+		return Boolean.parseBoolean(req.getParameter(name));
 	}
 }
