@@ -2,12 +2,15 @@ package org.mylife.home.common.services;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Handler;
 import java.util.logging.LogManager;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 import org.apache.commons.collections.buffer.CircularFifoBuffer;
+import org.mylife.home.common.collections.TreeNode;
 
 /**
  * Service pour afficher les logs
@@ -104,5 +107,18 @@ public class LoggerService implements Service {
 		}
 
 		return ret;
+	}
+	
+	public TreeNode<String> getLoggers() {
+		
+		Object[] source = getRecords();
+		
+		Set<String> loggersNoHierarchy = new HashSet<String>();
+		for(Object o : source) {
+			LogRecord record = (LogRecord)o;
+			loggersNoHierarchy.add(record.getLoggerName());
+		}
+		
+		// TODO : Tri en arbre
 	}
 }
