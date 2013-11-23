@@ -93,7 +93,7 @@ public class LoggerService implements Service {
 			if (ret.size() >= maxCount)
 				break;
 
-			if (!record.getLoggerName().equals(logger))
+			if (!record.getLoggerName().startsWith(logger))
 				continue;
 
 			int level = record.getLevel().intValue();
