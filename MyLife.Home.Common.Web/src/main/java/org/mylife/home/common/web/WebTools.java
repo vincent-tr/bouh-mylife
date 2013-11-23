@@ -44,6 +44,8 @@ public class WebTools {
 	 * @return
 	 */
 	public static String htmlEscape(String input, boolean escapeSpecials) {
+		if(input == null)
+			return "";
 		String value = input;
 		value = StringEscapeUtils.escapeHtml4(value);
 		if (escapeSpecials) {
