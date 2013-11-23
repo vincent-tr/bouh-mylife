@@ -3,7 +3,6 @@ package org.mylife.home.common.services;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.logging.Handler;
-import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
@@ -81,6 +80,10 @@ public class LoggerService implements Service {
 	 */
 	public Collection<LogRecord> getLogs(String logger, int minLevel,
 			int maxLevel, int maxCount) {
+
+		if (maxCount == -1)
+			maxCount = RECORD_MAX;
+
 		Collection<LogRecord> ret = new ArrayList<LogRecord>();
 		Object[] source = getRecords();
 
