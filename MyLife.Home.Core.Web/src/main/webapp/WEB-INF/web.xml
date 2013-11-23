@@ -31,7 +31,13 @@
 		<servlet-class>org.mylife.home.core.web.WebPlugin</servlet-class>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
-	
+
+	<servlet>
+		<servlet-name>WebLogging</servlet-name>
+		<servlet-class>org.mylife.home.common.web.WebLogging</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+		
 	<servlet-mapping>
 		<servlet-name>WebConsole</servlet-name>
 		<url-pattern>/console</url-pattern>
@@ -45,5 +51,10 @@
 	<servlet-mapping>
 		<servlet-name>WebPlugin</servlet-name>
 		<url-pattern>/plugin</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>WebLogging</servlet-name>
+		<url-pattern>/logging</url-pattern>
 	</servlet-mapping>
 </web-app>

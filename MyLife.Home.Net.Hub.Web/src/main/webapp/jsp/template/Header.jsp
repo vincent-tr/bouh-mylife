@@ -14,6 +14,10 @@
 			href="<%=WebTools.servlet(pageContext, "configuration")%>"><img
 				src="<%=WebTools.image(pageContext, "wrench.png")%>" />Configuration</a>
 		</li>
+		<li><a
+			href="<%=WebTools.servlet(pageContext, "logging")%>"><img
+				src="<%=WebTools.image(pageContext, "view.png")%>" />Logging</a>
+		</li>
 	</ul>
 </div>
 

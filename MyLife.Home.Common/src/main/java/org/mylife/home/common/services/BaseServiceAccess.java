@@ -9,7 +9,7 @@ import java.util.List;
  * @author pumbawoman
  * 
  */
-public class BaseServiceAccess {
+public abstract class BaseServiceAccess {
 
 	/**
 	 * Liste des services utilisés
@@ -50,4 +50,23 @@ public class BaseServiceAccess {
 		return loggerService;
 	}
 	
+	/**
+	 * Constructeur appelé du singleton : définition de l'instance de base
+	 */
+	protected BaseServiceAccess() {
+		instance = this;
+	}
+	
+	/**
+	 * Instance de base
+	 */
+	private static BaseServiceAccess instance;
+	
+	/**
+	 * Obtention de l'instance de base utilisée pour les composants commmuns
+	 * @return
+	 */
+	public static BaseServiceAccess getBaseInstance() {
+		return instance;
+	}
 }
