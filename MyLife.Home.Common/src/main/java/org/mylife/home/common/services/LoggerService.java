@@ -95,11 +95,11 @@ public class LoggerService implements Service {
 		Collection<LogRecord> ret = new ArrayList<LogRecord>();
 		Object[] source = getRecords();
 
-		for (Object o : source) {
-			LogRecord record = (LogRecord) o;
-
-			if (ret.size() >= maxCount)
-				break;
+		int start = source.length - maxCount;
+		if(start < 0)
+			start = 0;
+		for(int i=start; i<source.length; i++) {
+			LogRecord record = (LogRecord) source[i];
 
 			if (!record.getLoggerName().startsWith(logger))
 				continue;

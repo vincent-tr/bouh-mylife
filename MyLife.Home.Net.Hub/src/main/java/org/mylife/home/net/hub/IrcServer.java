@@ -46,6 +46,7 @@ import javax.net.ServerSocketFactory;
 import javax.net.ssl.SSLServerSocketFactory;
 
 import org.apache.commons.lang3.StringUtils;
+import org.mylife.home.common.RegexUtils;
 import org.mylife.home.net.hub.configuration.IrcBinding;
 import org.mylife.home.net.hub.configuration.IrcConfiguration;
 import org.mylife.home.net.hub.configuration.IrcLinkAccept;
@@ -460,7 +461,7 @@ public class IrcServer implements IrcServerMBean {
 			if (remoteAddress.equalsIgnoreCase(item.getRemoteAddress()))
 				return item;
 			// match par wilcards pour accept
-			if (remoteAddress.matches(item.getRemoteAddress()))
+			if (remoteAddress.matches(RegexUtils.wildcardToRegex(item.getRemoteAddress())))
 				return item;
 		}
 
