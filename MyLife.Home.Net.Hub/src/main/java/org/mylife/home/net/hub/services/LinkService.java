@@ -260,7 +260,7 @@ public class LinkService implements Service {
 				try {
 					refresh();
 				} catch (Exception e) {
-					log.log(Level.SEVERE, "Error refreshin", e);
+					log.log(Level.SEVERE, "Error refreshing", e);
 				}
 				lastRefresh = new Date();
 

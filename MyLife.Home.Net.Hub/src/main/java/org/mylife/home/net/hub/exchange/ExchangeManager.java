@@ -1,9 +1,8 @@
 package org.mylife.home.net.hub.exchange;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -12,6 +11,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
+import org.mylife.home.common.NetUtils;
 import org.mylife.home.net.hub.configuration.IrcBinding;
 import org.mylife.home.net.hub.configuration.IrcConfiguration;
 import org.mylife.home.net.hub.configuration.IrcLinkAccept;
@@ -233,8 +233,8 @@ public class ExchangeManager {
 		String address = binding.address;
 		if("@host".equalsIgnoreCase(address)) {
 			try {
-				address = InetAddress.getLocalHost().getHostName();
-			} catch (UnknownHostException e) {
+				address = NetUtils.getPublicAddress().getHostAddress();
+			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
 		}
