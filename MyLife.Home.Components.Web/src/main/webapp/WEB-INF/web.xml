@@ -32,6 +32,12 @@
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 
+	<servlet>
+		<servlet-name>JmxMiniConsoleServlet</servlet-name>
+		<servlet-class>org.jminix.console.servlet.MiniConsoleServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	
 	<servlet-mapping>
 		<servlet-name>WebConsole</servlet-name>
 		<url-pattern>/console</url-pattern>
@@ -45,5 +51,10 @@
 	<servlet-mapping>
 		<servlet-name>WebLogging</servlet-name>
 		<url-pattern>/logging</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>JmxMiniConsoleServlet</servlet-name>
+		<url-pattern>/jmx/*</url-pattern>
 	</servlet-mapping>
 </web-app>
