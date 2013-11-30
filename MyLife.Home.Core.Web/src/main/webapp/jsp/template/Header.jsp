@@ -19,6 +19,8 @@
 				src="<%=WebTools.image(pageContext, "application.png")%>" />Plugin</a></li>
 		<li><a href="<%=WebTools.servlet(pageContext, "logging")%>"><img
 				src="<%=WebTools.image(pageContext, "view.png")%>" />Logging</a></li>
+		<li><a href="<%=WebTools.servlet(pageContext, "jmx/")%>" target="_blank"><img
+				src="<%=WebTools.image(pageContext, "view.png")%>" />JMX</a></li>
 	</ul>
 </div>
 
