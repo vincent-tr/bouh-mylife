@@ -137,6 +137,7 @@ public abstract class Connection {
 			messageFactory = new MessageFactory(thisServer.getNetwork());
 			// silent ping to unregistered entity
 			lastPing = System.currentTimeMillis();
+			lastActive = System.currentTimeMillis();
 		}
 
 		/**

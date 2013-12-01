@@ -10,14 +10,11 @@ public class IrcLinkConnect {
 	private final String name;
 	private final String remoteAddress;
 	private final int remotePort;
-	private final String password;
 	
-	public IrcLinkConnect(String name, String remoteAddress, int remotePort,
-			String password) {
+	public IrcLinkConnect(String name, String remoteAddress, int remotePort) {
 		this.name = name;
 		this.remoteAddress = remoteAddress;
 		this.remotePort = remotePort;
-		this.password = password;
 	}
 
 	public String getName() {
@@ -30,9 +27,5 @@ public class IrcLinkConnect {
 
 	public int getRemotePort() {
 		return remotePort;
-	}
-
-	public String getPassword() {
-		return password;
 	}
 }

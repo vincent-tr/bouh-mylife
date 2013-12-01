@@ -74,17 +74,12 @@ public class DataLinkAccess extends BaseDataAccess {
 		PreparedStatement pst = null;
 		ResultSet rs = null;
 		try {
-			pst = con
-					.prepareStatement(
-							"insert into net_link "
-									+ "(link_name, link_type, link_address, link_port, link_password) "
-									+ "values (?, ?, ?, ?, ?)",
-							Statement.RETURN_GENERATED_KEYS);
+			pst = con.prepareStatement("insert into net_link "
+					+ "(link_name, link_address, link_port) "
+					+ "values (?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
 			pst.setString(1, item.getName());
-			pst.setString(2, item.getType());
-			pst.setString(3, item.getAddress());
-			pst.setInt(4, item.getPort());
-			pst.setString(5, item.getPassword());
+			pst.setString(2, item.getAddress());
+			pst.setInt(3, item.getPort());
 
 			pst.executeUpdate();
 
@@ -106,16 +101,12 @@ public class DataLinkAccess extends BaseDataAccess {
 		PreparedStatement pst = null;
 		try {
 			pst = con.prepareStatement("update net_link "
-					+ "set link_name = ? " + ", link_type = ? "
-					+ ", link_address = ? " + ", link_port = ? "
-					+ ", link_password = ? "
-					+ "where link_id = ?");
+					+ "set link_name = ? " + ", link_address = ? "
+					+ ", link_port = ? " + "where link_id = ?");
 			pst.setString(1, item.getName());
-			pst.setString(2, item.getType());
-			pst.setString(3, item.getAddress());
-			pst.setInt(4, item.getPort());
-			pst.setString(5, item.getPassword());
-			pst.setInt(6, item.getId());
+			pst.setString(2, item.getAddress());
+			pst.setInt(3, item.getPort());
+			pst.setInt(4, item.getId());
 			pst.executeUpdate();
 
 		} catch (SQLException e) {
@@ -146,10 +137,8 @@ public class DataLinkAccess extends BaseDataAccess {
 
 		item.setId(rs.getInt("link_id"));
 		item.setName(rs.getString("link_name"));
-		item.setType(rs.getString("link_type"));
 		item.setAddress(rs.getString("link_address"));
 		item.setPort(rs.getInt("link_port"));
-		item.setPassword(rs.getString("link_password"));
 	}
 
 }

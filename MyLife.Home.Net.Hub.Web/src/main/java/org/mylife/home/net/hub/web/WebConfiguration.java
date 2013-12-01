@@ -2,7 +2,6 @@ package org.mylife.home.net.hub.web;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
@@ -69,10 +68,8 @@ public class WebConfiguration extends HttpServlet {
 
 		DataLink item = new DataLink();
 		item.setName(req.getParameter("name"));
-		item.setType(req.getParameter("type"));
 		item.setAddress(req.getParameter("address"));
 		item.setPort(parseIntArg(req.getParameter("port"), 0));
-		item.setPassword(req.getParameter("password"));
 		ServiceAccess.getInstance().getLinkService().create(item);
 
 		resp.sendRedirect(req.getRequestURI());
@@ -84,10 +81,8 @@ public class WebConfiguration extends HttpServlet {
 		DataLink item = new DataLink();
 		item.setId(Integer.parseInt(req.getParameter("id")));
 		item.setName(req.getParameter("name"));
-		item.setType(req.getParameter("type"));
 		item.setAddress(req.getParameter("address"));
 		item.setPort(parseIntArg(req.getParameter("port"), 0));
-		item.setPassword(req.getParameter("password"));
 		ServiceAccess.getInstance().getLinkService().update(item);
 
 		resp.sendRedirect(req.getRequestURI());
@@ -99,10 +94,8 @@ public class WebConfiguration extends HttpServlet {
 		// par défaut redirection vers la jsp
 		LinkService service = ServiceAccess.getInstance().getLinkService();
 		List<DataLink> data = service.list();
-		Map<String, String> types = service.listTypes();
 
 		req.setAttribute("data", data);
-		req.setAttribute("types", types);
 		req.setAttribute("title", "Gestion de la configuration");
 		req.getRequestDispatcher("/jsp/Configuration.jsp").forward(req, resp);
 	}

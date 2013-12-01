@@ -20,8 +20,6 @@ public interface IrcConfiguration {
 	String getEmail();
 	String getServerInfoContent();
 	String getServerMotdContent();
-	Collection<IrcLinkAccept> getLinksAccept();
-	Collection<IrcLinkConnect> getLinksConnect();
 	Collection<IrcBinding> getBindings();
 	Collection<IrcOperator> getOperators();
 }

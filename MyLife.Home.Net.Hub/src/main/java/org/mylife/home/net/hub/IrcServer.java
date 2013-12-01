@@ -46,11 +46,8 @@ import javax.net.ServerSocketFactory;
 import javax.net.ssl.SSLServerSocketFactory;
 
 import org.apache.commons.lang3.StringUtils;
-import org.mylife.home.common.RegexUtils;
 import org.mylife.home.net.hub.configuration.IrcBinding;
 import org.mylife.home.net.hub.configuration.IrcConfiguration;
-import org.mylife.home.net.hub.configuration.IrcLinkAccept;
-import org.mylife.home.net.hub.configuration.IrcLinkConnect;
 import org.mylife.home.net.hub.configuration.IrcOperator;
 import org.mylife.home.net.hub.irc.Command;
 import org.mylife.home.net.hub.irc.CommandContext;
@@ -91,7 +88,7 @@ public class IrcServer implements IrcServerMBean {
 	/** set of server socket Listeners. */
 	protected final Set<Listener> listeners = Collections
 			.synchronizedSet(new HashSet<Listener>());
-	protected final ConnectionManager links = new ConnectionManager();
+	protected final ConnectionManager connectLinks = new ConnectionManager();
 	/** commands */
 	private final Map<String, CommandContext> cmdCtxs = Collections
 			.synchronizedMap(new HashMap<String, CommandContext>());
@@ -274,7 +271,7 @@ public class IrcServer implements IrcServerMBean {
 		}
 		listeners.clear();
 		logger.info("Closing all link connections...");
-		disconnect(links.getConnections());
+		disconnect(connectLinks.getConnections());
 
 		startTime = -1;
 
@@ -293,7 +290,17 @@ public class IrcServer implements IrcServerMBean {
 		return listeners;
 	}
 
-	public final ConnectionManager getLinks() {
+	public final ConnectionManager getConnectLinks() {
+		return connectLinks;
+	}
+	
+	public Set<Server> getServerLinks() {
+		Set<Server> links = new HashSet<Server>();
+		for(Server server : network.getServers()) {
+			if(server.getServer() != thisServer)
+				continue;
+			links.add(server);
+		}
 		return links;
 	}
 
@@ -426,7 +433,7 @@ public class IrcServer implements IrcServerMBean {
 				Listener listener = iter.next();
 				ping(listener.getConnections());
 			}
-			ping(links.getConnections());
+			ping(connectLinks.getConnections());
 		}
 
 		private void ping(Set<Connection> connections) {
@@ -452,31 +459,6 @@ public class IrcServer implements IrcServerMBean {
 		public boolean accept(File dir, String name) {
 			return name.endsWith(extension);
 		}
-	}
-
-	public IrcLinkAccept findLinkAccept(String remoteAddress, int localPort) {
-		for (IrcLinkAccept item : this.getConfiguration().getLinksAccept()) {
-			if (item.getLocalPort() != localPort)
-				continue;
-			if (remoteAddress.equalsIgnoreCase(item.getRemoteAddress()))
-				return item;
-			// match par wilcards pour accept
-			if (remoteAddress.matches(RegexUtils.wildcardToRegex(item.getRemoteAddress())))
-				return item;
-		}
-
-		return null;
-	}
-
-	public IrcLinkConnect findLinkConnect(String remoteAddress, int remotePort) {
-		for (IrcLinkConnect item : this.getConfiguration().getLinksConnect()) {
-			if (item.getRemotePort() != remotePort)
-				continue;
-			if (remoteAddress.equalsIgnoreCase(item.getRemoteAddress()))
-				return item;
-		}
-
-		return null;
 	}
 
 	public Set<Operator> getOperators() {

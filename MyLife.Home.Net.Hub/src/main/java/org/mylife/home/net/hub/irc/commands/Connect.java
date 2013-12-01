@@ -27,7 +27,6 @@ import java.net.Socket;
 import java.util.concurrent.Executors;
 
 import org.mylife.home.net.hub.IrcServerMBean;
-import org.mylife.home.net.hub.configuration.IrcLinkConnect;
 import org.mylife.home.net.hub.irc.Command;
 import org.mylife.home.net.hub.irc.ConnectedEntity;
 import org.mylife.home.net.hub.irc.Connection;
@@ -58,7 +57,7 @@ public class Connect implements Command {
 			Util.checkOperatorPermission(user);
 			try {
 				StreamConnection connection = new StreamConnection(new Socket(
-						host, port), jircd.getLinks(),
+						host, port), jircd.getConnectLinks(),
 						Executors.newSingleThreadExecutor(), true);
 				Connection.Handler handler = newConnectionHandler(jircd,
 						connection);
@@ -66,11 +65,12 @@ public class Connect implements Command {
 				connection.start();
 				UnregisteredEntity entity = (UnregisteredEntity) handler
 						.getEntity();
+				/*
 				IrcLinkConnect configLink = jircd.findLinkConnect(
 						connection.getRemoteAddress(),
 						connection.getRemotePort());
-				String linkPassword = configLink.getPassword();
-				sendLogin(entity, linkPassword);
+				*/
+				sendLogin(entity);
 			} catch (IOException e) {
 				Message message = new Message(Constants.ERR_NOSUCHSERVER, src);
 				message.appendParameter(host);
@@ -87,8 +87,8 @@ public class Connect implements Command {
 		return new Connection.Handler(jircd, connection);
 	}
 
-	protected void sendLogin(UnregisteredEntity entity, String linkPassword) {
-		sendPass(entity, linkPassword);
+	protected void sendLogin(UnregisteredEntity entity) {
+		//sendPass(entity, linkPassword);
 		sendServer(entity, jircd);
 		entity.setParameters(new String[0]); // so that we know we sent PASS &
 												// SERVER

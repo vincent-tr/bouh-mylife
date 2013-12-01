@@ -24,9 +24,11 @@ package org.mylife.home.net.hub.irc.commands;
 
 import org.mylife.home.net.hub.irc.Channel;
 import org.mylife.home.net.hub.irc.Command;
+import org.mylife.home.net.hub.irc.Message;
 import org.mylife.home.net.hub.irc.Network;
 import org.mylife.home.net.hub.irc.RegisteredEntity;
 import org.mylife.home.net.hub.irc.Server;
+import org.mylife.home.net.hub.irc.User;
 import org.mylife.home.net.hub.irc.Util;
 
 /**
@@ -34,32 +36,72 @@ import org.mylife.home.net.hub.irc.Util;
  */
 public class NJoin implements Command {
 	public void invoke(RegisteredEntity src, String[] params) {
-		if (src instanceof Server) {
-			Server server = (Server) src;
-			Network network = server.getNetwork();
-			final String channame = params[0];
-			if (Util.isChannelIdentifier(channame)) {
-				Channel chan = network.getChannel(channame);
-				if (chan == null) {
-					chan = new Channel(channame, network);
-				}
-				String members[] = Util.split(params[1], ',');
-				for (int i = 0; i < members.length; i++)
-					addUser(network, chan, members[i]);
-			} else {
-				Util.sendNoSuchChannelError(src, channame);
-			}
+		if (!(src instanceof Server))
+			return;
+
+		Server server = (Server) src;
+		Network network = server.getNetwork();
+		final String channame = params[0];
+		if (!Util.isChannelIdentifier(channame)) {
+			Util.sendNoSuchChannelError(src, channame);
+			return;
 		}
+
+		// Transmission du NJOIN aux autres peers
+		Message message = new Message(src, "NJOIN");
+		message.appendParameter(params[0]);
+		message.appendParameter(params[1]);
+		// Envoi du message sauf à nous meme et a la source
+		network.send(message, network.getThisServer(), server);
+
+		Channel chan = network.getChannel(channame);
+		if (chan == null) {
+			chan = new Channel(channame, network);
+		}
+
+		String members[] = Util.split(params[1], ',');
+		for (int i = 0; i < members.length; i++)
+			addUser(network, chan, members[i]);
 	}
 
 	private void addUser(Network network, Channel chan, String nick) {
-		if (nick.startsWith("@@"))
+		boolean op = false;
+		boolean voice = false;
+		if (nick.startsWith("@@")) {
 			nick = nick.substring(2);
-		else if (nick.charAt(0) == '@')
+			op = true;
+		} else if (nick.charAt(0) == '@') {
 			nick = nick.substring(1);
-		else if (nick.charAt(0) == '+')
+			op = true;
+		} else if (nick.charAt(0) == '+') {
 			nick = nick.substring(1);
-		chan.addUser(network.getUser(nick));
+			voice = true;
+		}
+
+		User user = network.getUser(nick);
+		// ajout de l'utilisateur
+		chan.addUser(user);
+		// ajout des modes
+		if(op)
+			chan.setOp(user, true);
+		if(voice)
+			chan.setVoice(user, true);
+
+		// transmissions aux utilisateurs locaux
+		Message message = new Message(user, "JOIN", chan);
+		chan.sendLocal(message);
+		if(op) {
+			Message modeMessage = new Message(network.getThisServer(), "MODE", chan);
+			modeMessage.appendParameter("+o");
+			modeMessage.appendParameter(user.getNick());
+			chan.sendLocal(modeMessage);
+		}
+		if(voice) {
+			Message modeMessage = new Message(network.getThisServer(), "MODE", chan);
+			modeMessage.appendParameter("+v");
+			modeMessage.appendParameter(user.getNick());
+			chan.sendLocal(modeMessage);
+		}
 	}
 
 	public String getName() {

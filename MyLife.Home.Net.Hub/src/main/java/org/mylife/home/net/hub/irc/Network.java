@@ -22,10 +22,13 @@
 
 package org.mylife.home.net.hub.irc;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -43,6 +46,8 @@ public final class Network implements Entity {
 
 	/** (Integer token, Server server) */
 	private final Map<Integer, Server> serverTokens = new ConcurrentHashMap<Integer, Server>();
+	
+	private Server thisServer;
 
 	/**
 	 * All channels on this network. (String name, Channel channel)
@@ -67,6 +72,8 @@ public final class Network implements Entity {
 	void addServer(Server server) {
 		servers.put(server.getName().toLowerCase(), server);
 		serverTokens.put(new Integer(server.getToken()), server);
+		if(server.isThis())
+			thisServer = server;
 	}
 
 	public Server getServer(String name) {
@@ -76,10 +83,39 @@ public final class Network implements Entity {
 	public Server getServer(int token) {
 		return (Server) serverTokens.get(new Integer(token));
 	}
+	
+	public Server getThisServer() {
+		return thisServer;
+	}
+	
+	/**
+	 * Obtention de tous les serveurs connectés derrière un serveur
+	 * @param server
+	 * @return
+	 */
+	public Collection<Server> getServersFrom(Server server) {
+		Collection<Server> servers = new ArrayList<Server>();
+		for(Server item : getServers()) {
+			if(server.isFrom(item))
+				servers.add(item);
+		}
+		return servers;
+	}
+	
+	public Collection<Server> getServersPeer() {
+		Collection<Server> servers = new ArrayList<Server>();
+		for(Server item : getServers()) {
+			if(item.isPeer())
+				servers.add(item);
+		}
+		return servers;
+	}
 
 	void removeServer(Server server) {
 		servers.remove(server.getName().toLowerCase());
 		serverTokens.remove(new Integer(server.getToken()));
+		if(server.isThis())
+			thisServer = null;
 	}
 
 	public Collection<Channel> getChannels() {
@@ -127,14 +163,21 @@ public final class Network implements Entity {
 		return count;
 	}
 
-	public void send(Message message, Server excluded) {
-		Connection.Handler handler = excluded.getHandler();
-		ConnectedEntity excludedPeer = (handler != null ? handler.getEntity()
-				: null);
+	public void send(Message message, Server... excluded) {
+		Set<ConnectedEntity> excludedPeer = new HashSet<ConnectedEntity>();
+		for(Server excludedServer : excluded) {
+			if(excludedServer == null)
+				continue;
+			Connection.Handler handler = excludedServer.getHandler();
+			if(handler == null)
+				continue;
+			excludedPeer.add(handler.getEntity());
+		}
+		
 		for (Iterator<Server> iter = servers.values().iterator(); iter
 				.hasNext();) {
 			Server server = iter.next();
-			if (server.isPeer() && !server.equals(excludedPeer)) {
+			if (server.isPeer() && !excludedPeer.contains(server)) {
 				// send to local servers for forwarding
 				server.send(message);
 			}
@@ -145,7 +188,7 @@ public final class Network implements Entity {
 	 * Sends a message to all the servers on this network.
 	 */
 	public void send(Message message) {
-		send(message, null);
+		send(message, new Server[0]);
 	}
 
 	public String toString() {

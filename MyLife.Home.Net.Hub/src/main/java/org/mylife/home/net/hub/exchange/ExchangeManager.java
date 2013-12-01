@@ -14,10 +14,7 @@ import javax.xml.bind.Unmarshaller;
 import org.mylife.home.common.NetUtils;
 import org.mylife.home.net.hub.configuration.IrcBinding;
 import org.mylife.home.net.hub.configuration.IrcConfiguration;
-import org.mylife.home.net.hub.configuration.IrcLinkAccept;
-import org.mylife.home.net.hub.configuration.IrcLinkConnect;
 import org.mylife.home.net.hub.configuration.IrcOperator;
-import org.mylife.home.net.hub.services.ServiceAccess;
 
 /**
  * Gestion des échanges
@@ -169,14 +166,6 @@ public class ExchangeManager {
 			this.serverMotdContent = serverMotdContent;
 		}
 
-		public Collection<IrcLinkAccept> getLinksAccept() {
-			return ServiceAccess.getInstance().getLinkService().getLinksAccept();
-		}
-
-		public Collection<IrcLinkConnect> getLinksConnect() {
-			return ServiceAccess.getInstance().getLinkService().getLinksConnect();
-		}
-
 		public Collection<IrcBinding> getBindings() {
 			return bindings;
 		}
@@ -194,9 +183,7 @@ public class ExchangeManager {
 	 * @param linksConnect
 	 * @return
 	 */
-	public static IrcConfiguration marshal(XmlIrcConfiguration container,
-			Collection<IrcLinkAccept> linksAccept,
-			Collection<IrcLinkConnect> linksConnect) {
+	public static IrcConfiguration marshal(XmlIrcConfiguration container) {
 		
 		IrcConfigImpl impl = new IrcConfigImpl();
 		
