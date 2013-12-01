@@ -26,12 +26,11 @@ import java.io.IOException;
 import java.util.Set;
 
 import org.mylife.home.net.hub.configuration.IrcConfiguration;
-import org.mylife.home.net.hub.configuration.IrcLinkAccept;
-import org.mylife.home.net.hub.configuration.IrcLinkConnect;
 import org.mylife.home.net.hub.irc.CommandContext;
 import org.mylife.home.net.hub.irc.ConnectionManager;
 import org.mylife.home.net.hub.irc.Listener;
 import org.mylife.home.net.hub.irc.Message;
+import org.mylife.home.net.hub.irc.Network;
 import org.mylife.home.net.hub.irc.Operator;
 import org.mylife.home.net.hub.irc.Server;
 
@@ -81,11 +80,9 @@ public interface IrcServerMBean {
 
 	Set<Listener> getListeners();
 
-	ConnectionManager getLinks();
-
-	IrcLinkAccept findLinkAccept(String remoteAddress, int localPort);
-
-	IrcLinkConnect findLinkConnect(String remoteAddress, int remotePort);
+	ConnectionManager getConnectLinks();
+	
+	Set<Server> getServerLinks();
 
 	Set<Operator> getOperators();
 }

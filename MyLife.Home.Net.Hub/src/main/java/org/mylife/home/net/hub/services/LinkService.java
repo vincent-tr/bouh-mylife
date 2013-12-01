@@ -5,12 +5,9 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
@@ -18,11 +15,9 @@ import java.util.logging.Logger;
 
 import org.mylife.home.common.services.Service;
 import org.mylife.home.net.hub.IrcServerMBean;
-import org.mylife.home.net.hub.configuration.IrcLinkAccept;
 import org.mylife.home.net.hub.configuration.IrcLinkConnect;
 import org.mylife.home.net.hub.data.DataLink;
 import org.mylife.home.net.hub.data.DataLinkAccess;
-import org.mylife.home.net.hub.irc.ConnectedEntity;
 import org.mylife.home.net.hub.irc.Connection;
 import org.mylife.home.net.hub.irc.Server;
 import org.mylife.home.net.hub.irc.StreamConnection;
@@ -40,19 +35,9 @@ public class LinkService implements Service {
 	private static final Logger log = Logger.getLogger(LinkService.class
 			.getName());
 
-	public final static String TYPE_ACCEPT = "accept";
-	public final static String TYPE_CONNECT = "connect";
-
 	private final static int CHECK_INTERVAL = 10000;
 
-	private final Map<String, String> types;
-
 	/* internal */LinkService() {
-
-		Map<String, String> map = new HashMap<String, String>();
-		map.put(TYPE_ACCEPT, "Accept");
-		map.put(TYPE_CONNECT, "Connect");
-		types = Collections.unmodifiableMap(map);
 	}
 
 	@Override
@@ -60,7 +45,6 @@ public class LinkService implements Service {
 	}
 
 	public void create(DataLink link) {
-		checkType(link);
 
 		DataLinkAccess access = new DataLinkAccess();
 		try {
@@ -72,14 +56,12 @@ public class LinkService implements Service {
 	}
 
 	public void update(DataLink link) {
-		checkType(link);
 
 		DataLinkAccess access = new DataLinkAccess();
 		try {
 			DataLink item = access.getLinkByKey(link.getId());
 			item.setAddress(link.getAddress());
 			item.setPort(link.getPort());
-			item.setPassword(link.getPassword());
 			access.updateLink(item);
 			resetCachedLinks();
 		} finally {
@@ -106,15 +88,6 @@ public class LinkService implements Service {
 		} finally {
 			access.close();
 		}
-	}
-
-	private void checkType(DataLink link) {
-		if (!types.containsKey(link.getType()))
-			throw new UnsupportedOperationException("Unknown type");
-	}
-
-	public Map<String, String> listTypes() {
-		return types;
 	}
 
 	// ---------- gestion des liens actifs ----------
@@ -155,13 +128,10 @@ public class LinkService implements Service {
 				.getManagerService().getServer();
 		if (ircServer == null)
 			return null;
-		Set<Connection> connections = ircServer.getLinks().getConnections();
+		Set<Server> servers = ircServer.getServerLinks();
 		Set<RunningLink> links = new HashSet<RunningLink>();
-		for (Connection con : connections) {
-			ConnectedEntity entity = con.getHandler().getEntity();
-			if (!(entity instanceof Server))
-				continue;
-			links.add(new RunningLink(con));
+		for (Server server : servers) {
+			links.add(new RunningLink(server.getHandler().getConnection()));
 		}
 		return links;
 	}
@@ -172,39 +142,21 @@ public class LinkService implements Service {
 	}
 
 	private synchronized void resetCachedLinks() {
-		cachedLinksAccept = null;
 		cachedLinksConnect = null;
 	}
 
-	private Collection<IrcLinkAccept> cachedLinksAccept;
 	private Collection<IrcLinkConnect> cachedLinksConnect;
 
 	private void loadLinks() {
-		Collection<IrcLinkAccept> linksAccept = new ArrayList<IrcLinkAccept>();
 		Collection<IrcLinkConnect> linksConnect = new ArrayList<IrcLinkConnect>();
 
 		List<DataLink> list = list();
 		for (DataLink item : list) {
-			String type = item.getType();
-			if (TYPE_ACCEPT.equalsIgnoreCase(type)) {
-				linksAccept.add(new IrcLinkAccept(item.getName(), item
-						.getAddress(), item.getPort(), item.getPassword()));
-			} else if (TYPE_CONNECT.equalsIgnoreCase(type)) {
-				linksConnect.add(new IrcLinkConnect(item.getName(), item
-						.getAddress(), item.getPort(), item.getPassword()));
-			} else
-				log.warning("Unknow link type, ignored : " + type);
-
+			linksConnect.add(new IrcLinkConnect(item.getName(), item
+					.getAddress(), item.getPort()));
 		}
 
-		cachedLinksAccept = linksAccept;
 		cachedLinksConnect = linksConnect;
-	}
-
-	public synchronized Collection<IrcLinkAccept> getLinksAccept() {
-		if (cachedLinksAccept == null)
-			loadLinks();
-		return cachedLinksAccept;
 	}
 
 	public synchronized Collection<IrcLinkConnect> getLinksConnect() {
@@ -284,7 +236,8 @@ public class LinkService implements Service {
 					tryConnect(ilc);
 					log.info("Link connected : " + ilc.getName());
 				} catch (IOException ioe) {
-					log.log(Level.WARNING, "Link connection failed : " + ilc.getName(), ioe);
+					log.log(Level.WARNING,
+							"Link connection failed : " + ilc.getName(), ioe);
 				}
 			}
 		}
@@ -292,20 +245,21 @@ public class LinkService implements Service {
 		private void tryConnect(IrcLinkConnect configLink) throws IOException {
 
 			// Repris de irc.commands.Connect
-			
-			StreamConnection connection = new StreamConnection(new Socket(configLink.getRemoteAddress(),
-					configLink.getRemotePort()), server.getLinks(),
-					Executors.newSingleThreadExecutor(), true);
+
+			StreamConnection connection = new StreamConnection(new Socket(
+					configLink.getRemoteAddress(), configLink.getRemotePort()),
+					server.getConnectLinks(), Executors.newSingleThreadExecutor(),
+					true);
 			Connection.Handler handler = new Connection.Handler(server,
 					connection);
 			connection.setHandler(handler);
 			connection.start();
 			UnregisteredEntity entity = (UnregisteredEntity) handler
 					.getEntity();
-			Util.sendPass(entity, configLink.getPassword());
+			//Util.sendPass(entity, configLink.getPassword());
 			Util.sendServer(entity);
 			// so that we know we sent PASS & SERVER
-			entity.setParameters(new String[0]); 
+			entity.setParameters(new String[0]);
 		}
 
 		private Collection<IrcLinkConnect> todo() throws IOException {

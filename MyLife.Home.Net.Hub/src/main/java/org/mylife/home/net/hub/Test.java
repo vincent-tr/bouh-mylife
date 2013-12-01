@@ -8,8 +8,6 @@ import java.util.Collection;
 
 import org.mylife.home.net.hub.configuration.IrcBinding;
 import org.mylife.home.net.hub.configuration.IrcConfiguration;
-import org.mylife.home.net.hub.configuration.IrcLinkAccept;
-import org.mylife.home.net.hub.configuration.IrcLinkConnect;
 import org.mylife.home.net.hub.configuration.IrcOperator;
 
 public class Test {
@@ -69,16 +67,6 @@ public class Test {
 		@Override
 		public String getServerMotdContent() {
 			return "motd";
-		}
-
-		@Override
-		public Collection<IrcLinkAccept> getLinksAccept() {
-			return new ArrayList<IrcLinkAccept>();
-		}
-
-		@Override
-		public Collection<IrcLinkConnect> getLinksConnect() {
-			return new ArrayList<IrcLinkConnect>();
 		}
 
 		@Override

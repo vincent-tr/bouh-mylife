@@ -97,10 +97,19 @@ public class Nick implements RegistrationCommand {
 			String ident = params[2];
 			String host = params[3];
 			int token = Integer.parseInt(params[4]);
-			//String modes = params[5];
+			String modes = params[5];
 			String desc = params[6];
 			Server userServer = src.getNetwork().getServer(token);
-			/*User user = */new User(nick, hopcount, ident, host, desc, userServer);
+			User user = new User(nick, hopcount, ident, host, desc, userServer);
+			user.setModes(modes);
+			
+			// Propagation aux autres liens
+			for(Server server : src.getNetwork().getServersPeer()) {
+				if(server.equals(src))
+					continue;
+				Util.sendUser(server, src, user);
+			}
+			
 		} else {
 			// too few parameters
 			Util.sendNeedMoreParamsError(src, getName());

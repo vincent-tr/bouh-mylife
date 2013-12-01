@@ -96,6 +96,7 @@ public class User extends RegisteredEntity {
 	}
 
 	protected String maskHostName(String host) {
+		/*
 		// first see if it's an IP or name
 		String[] dotnames = Util.split(host, '.');
 		boolean isIP = (dotnames.length == 4);
@@ -128,6 +129,8 @@ public class User extends RegisteredEntity {
 			maskedHost = appendage + ".host";
 		}
 		return maskedHost;
+		*/
+		return host;
 	}
 
 	public void processModes(String modeString) {
@@ -181,6 +184,14 @@ public class User extends RegisteredEntity {
 			Message message = new Message(this, "MODE", this);
 			message.appendParameter(goodModes.toString());
 			send(message);
+		}
+	}
+	
+	public void setModes(String modeString) {
+		if(modeString.startsWith("+"))
+			modeString = modeString.substring(1);
+		for(char mode : modeString.toCharArray()) {
+			modes.add(mode);
 		}
 	}
 

@@ -265,6 +265,26 @@ public class Channel implements Entity {
 		invites.add(user);
 	}
 
+	public void setOp(User usr, boolean value) {
+		Modes memberModes = getModes(usr);
+		if (memberModes == null)
+			return;
+		if (value)
+			memberModes.add(CHANMODE_OPERATOR);
+		else
+			memberModes.remove(CHANMODE_OPERATOR);
+	}
+
+	public void setVoice(User usr, boolean value) {
+		Modes memberModes = getModes(usr);
+		if (memberModes == null)
+			return;
+		if (value)
+			memberModes.add(CHANMODE_VOICE);
+		else
+			memberModes.remove(CHANMODE_VOICE);
+	}
+
 	public final boolean isOp(User usr) {
 		Modes memberModes = getModes(usr);
 		return (memberModes != null && memberModes

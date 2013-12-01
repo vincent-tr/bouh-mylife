@@ -191,4 +191,76 @@ public class Server extends RegisteredEntity {
 		}
 		handler.sendMessage(buf.toString());
 	}
+	
+	/**
+	 * Obtention du peer pour joindre le serveur
+	 * @return
+	 */
+	public Server getPeer() {
+		if(isPeer())
+			return this;
+		return getServer().getPeer();
+	}
+	
+	/**
+	 * Indique si le serveur est le serveur courant
+	 * @return
+	 */
+	public boolean isThis() {
+		return route == null;
+	}
+	
+	/**
+	 * Test si le serveur spécifié passe par notre serveur
+	 * @param server
+	 * @return
+	 */
+	public boolean isFrom(Server server) {
+		if(server.route == null)
+			return false;
+		if(server.route.equals(this))
+			return true;
+		return isFrom(server.route);
+	}
+
+	@Override
+	public void disconnect(String reason) {
+		Message message = new Message(this, "SQUIT").appendParameter(name);
+		
+		// on supprime tous les serveurs et les utilisateurs venant de ce serveur
+		for(Server connectedServer : network.getServersFrom(this)) {
+			removeNetworkServer(connectedServer);
+		}
+		removeNetworkServer(this);
+
+		// on progage un SQUIT du serveur, sauf sur le peer d'ou vient notre serveur, et nous même
+		network.send(message, getPeer(), network.getThisServer());
+		
+		// Si serveur local, déconnexion
+		if(isPeer() && handler != null) {
+			handler.disconnect();
+		}
+	}
+	
+	private void removeNetworkServer(Server server) {
+		
+		// remove all users
+		for(Iterator<User> iter = server.getUsers().iterator(); iter.hasNext();) {
+			User user = iter.next();
+
+			Message message = new Message(user, "QUIT").appendLastParameter("net split");
+			
+			// first remove the user from any channels he/she may be in
+			for (Iterator<Channel> iterc = user.getChannels().iterator(); iterc.hasNext();) {
+				Channel channel = iterc.next();
+				channel.sendLocal(message, user);
+				channel.removeUser(user);
+			}
+
+			// remove user
+			server.removeUser(user);
+		}
+		
+		network.removeServer(server);
+	}
 }

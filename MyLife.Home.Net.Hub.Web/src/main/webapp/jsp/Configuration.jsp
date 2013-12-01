@@ -6,7 +6,6 @@
 <%@ page import="org.mylife.home.net.hub.data.DataLink"%>
 <%
 	List<DataLink> data = (List<DataLink>)pageContext.getRequest().getAttribute("data");
-	Map<String, String> types = (Map<String, String>)pageContext.getRequest().getAttribute("types");
 %>
 
 <%@include file="/jsp/template/Header.jsp"%>
@@ -50,10 +49,8 @@
 									<thead>
 										<tr>
 											<th>Nom</th>
-											<th width="120px">Type</th>
 											<th>Adresse</th>
 											<th width="120px">Port</th>
-											<th>Mot de passe</th>
 											<th width="60px">Actions</th>
 										</tr>
 									</thead>
@@ -63,10 +60,8 @@
 										%>
 										<tr>
 											<td><%=WebTools.htmlEscape(item.getName())%></td>
-											<td><%=WebTools.htmlEscape(item.getType())%></td>
 											<td><%=WebTools.htmlEscape(item.getAddress())%></td>
 											<td><%=WebTools.htmlEscape(String.valueOf(item.getPort()))%></td>
-											<td><%=WebTools.htmlEscape(item.getPassword())%></td>
 											<td><a href="?action=delete&id=<%=item.getId()%>"><img
 													src="<%=WebTools.image(pageContext, "erase.png")%>"
 													title="Supprimer" /></a></td>
@@ -97,31 +92,12 @@
 										<td><input style="width: 100%;" type="text" required name="name" /></td>
 									</tr>
 									<tr>
-										<td>Type :</td>
-										<td><select name="type">
-												<%
-													boolean first = true;
-													for (Map.Entry<String, String> type : types.entrySet()) {
-												%>
-												<option value="<%=WebTools.htmlEscape(type.getKey())%>"
-													<%if (first) {%> selected="selected" <%}%>><%=WebTools.htmlEscape(type.getValue())%></option>
-												<%
-													first = false;
-													}
-												%>
-										</select></td>
-									</tr>
-									<tr>
 										<td>Adresse :</td>
 										<td><input style="width: 100%;" type="text" required name="address" /></td>
 									</tr>
 									<tr>
 										<td>Port :</td>
 										<td><input style="width: 100%;" type="number" min="1" max="65535" required name="port" /></td>
-									</tr>
-									<tr>
-										<td>Mot de passe :</td>
-										<td><input style="width: 100%;" type="text" required name="password" /></td>
 									</tr>
 									<tr>
 										<td colspan="2" class="form_action"><input type="image"

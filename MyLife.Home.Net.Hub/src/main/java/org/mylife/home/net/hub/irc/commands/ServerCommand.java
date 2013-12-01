@@ -25,8 +25,6 @@ package org.mylife.home.net.hub.irc.commands;
 import java.util.logging.Logger;
 
 import org.mylife.home.net.hub.IrcServerMBean;
-import org.mylife.home.net.hub.configuration.IrcLinkAccept;
-import org.mylife.home.net.hub.configuration.IrcLinkConnect;
 import org.mylife.home.net.hub.irc.Connection;
 import org.mylife.home.net.hub.irc.RegisteredEntity;
 import org.mylife.home.net.hub.irc.RegistrationCommand;
@@ -62,6 +60,7 @@ public class ServerCommand implements RegistrationCommand {
         }
     }
     private boolean checkPass(Connection connection, String[] passParams) {
+    	/*
         IrcLinkAccept configLink = jIRCd.findLinkAccept(connection.getRemoteAddress(), connection.getLocalPort());
         String expectedPassword = configLink.getPassword();
         if(expectedPassword != null) {
@@ -69,11 +68,12 @@ public class ServerCommand implements RegistrationCommand {
             return expectedPassword.equals(password);
         } else {
             return false;
-        }
+        }*/
+    	return true;
     }
     protected void login(final UnregisteredEntity src, String[] params) {
         Connection.Handler handler = src.getHandler();
-        final Connection connection = handler.getConnection();
+        //final Connection connection = handler.getConnection();
         String name = params[0];
         int hopcount = Integer.parseInt(params[1]);
         if(hopcount != 1)
@@ -83,11 +83,12 @@ public class ServerCommand implements RegistrationCommand {
         src.setName(name);
         Server server = new Server(src, token, desc);
         handler.login(server);
-        
+        /*
         IrcLinkConnect configLink = jIRCd.findLinkConnect(connection.getRemoteAddress(), connection.getRemotePort());
         String linkPassword = configLink.getPassword();
+        */
         if(src.getParameters() == null) {
-            Util.sendPass(server, linkPassword);
+            //Util.sendPass(server, linkPassword);
             Util.sendServer(server);
         }
         Util.sendNetSync(server);
