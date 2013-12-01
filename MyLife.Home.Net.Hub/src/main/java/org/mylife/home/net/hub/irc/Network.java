@@ -93,10 +93,10 @@ public final class Network implements Entity {
 	 * @param server
 	 * @return
 	 */
-	public Collection<Server> getServersFrom(Server server) {
+	public Collection<Server> getServersConnectedThrough(Server server) {
 		Collection<Server> servers = new ArrayList<Server>();
 		for(Server item : getServers()) {
-			if(server.isFrom(item))
+			if(server.hasChildConnectionTo(item))
 				servers.add(item);
 		}
 		return servers;

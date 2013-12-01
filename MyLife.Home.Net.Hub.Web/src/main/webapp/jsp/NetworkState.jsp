@@ -21,11 +21,12 @@
 		<table class="table_render">
 			<thead>
 				<tr>
-					<th colspan="4">Servers</th>
+					<th colspan="5">Servers</th>
 				</tr>
 				<tr>
 					<th width="25%">Name</th>
 					<th width="10%">Token</th>
+					<th width="10%">Hop count</th>
 					<th>Description</th>
 					<th width="10%">Users count</th>
 				</tr>
@@ -37,6 +38,7 @@
 				<tr>
 					<td><%=WebTools.htmlEscape(server.getName())%></td>
 					<td><%=WebTools.htmlEscape(String.valueOf(server.getToken()))%></td>
+					<td><%=WebTools.htmlEscape(String.valueOf(server.getHopCount()))%></td>
 					<td><%=WebTools.htmlEscape(server.getDescription())%></td>
 					<td><%=WebTools.htmlEscape(String.valueOf(server.getUsers().size()))%></td>
 				</tr>

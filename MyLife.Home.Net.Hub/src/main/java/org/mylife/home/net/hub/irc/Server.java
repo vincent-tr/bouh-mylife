@@ -211,16 +211,16 @@ public class Server extends RegisteredEntity {
 	}
 	
 	/**
-	 * Test si le serveur spécifié passe par notre serveur
+	 * Test si le serveur passé en paramètre est connecté au travers du serveur courant 
 	 * @param server
 	 * @return
 	 */
-	public boolean isFrom(Server server) {
+	public boolean hasChildConnectionTo(Server server) {
 		if(server.route == null)
 			return false;
 		if(server.route.equals(this))
 			return true;
-		return isFrom(server.route);
+		return hasChildConnectionTo(server.route);
 	}
 
 	@Override
@@ -228,7 +228,7 @@ public class Server extends RegisteredEntity {
 		Message message = new Message(this, "SQUIT").appendParameter(name);
 		
 		// on supprime tous les serveurs et les utilisateurs venant de ce serveur
-		for(Server connectedServer : network.getServersFrom(this)) {
+		for(Server connectedServer : network.getServersConnectedThrough(this)) {
 			removeNetworkServer(connectedServer);
 		}
 		removeNetworkServer(this);
