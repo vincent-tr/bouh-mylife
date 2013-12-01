@@ -33,6 +33,7 @@ import java.security.AccessController;
 import java.security.Permission;
 import java.security.ProtectionDomain;
 import java.security.SecureRandom;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Locale;
@@ -247,8 +248,7 @@ public final class Util {
 		to.send(message);
 	}
 
-	public static void sendServer(ConnectedEntity to) {
-		Server server = to.getServer();
+	public static void sendServer(Server server, ConnectedEntity to) {
 		Message message = new Message("SERVER");
 		message.appendParameter(server.getName());
 		message.appendParameter(Integer.toString(server.getHopCount() + 1));
@@ -257,15 +257,31 @@ public final class Util {
 		to.send(message);
 	}
 
+	public static void sendServer(ConnectedEntity to) {
+		Server server = to.getServer();
+		sendServer(server, to);
+	}
+
 	public static void sendNetSync(final Server server) {
-		Server thisServer = server.getServer();
-		for (Iterator<User> iter = thisServer.getUsers().iterator(); iter
-				.hasNext();) {
-			User user = iter.next();
-			sendUser(server, null, user);
+		Network network = server.getNetwork();
+		Server thisServer = network.getThisServer();
+		Collection<Server> servers = network.getServers();
+		for (Server item : servers) {
+
+			// l'item vient du serveur, on ne le renvoie pas
+			if (server.hasChildConnectionTo(item))
+				continue;
+
+			// sauf nous car déjà envoyé
+			if (!item.equals(thisServer))
+				sendServer(item, server);
+
+			for (User user : item.getUsers()) {
+				sendUser(server, null, user);
+			}
 		}
-		for (Iterator<Channel> iter = thisServer.getNetwork().getChannels()
-				.iterator(); iter.hasNext();) {
+		for (Iterator<Channel> iter = network.getChannels().iterator(); iter
+				.hasNext();) {
 			Channel chan = iter.next();
 			Message message = new Message(thisServer, "NJOIN");
 			message.appendParameter(chan.getName());
@@ -303,7 +319,8 @@ public final class Util {
 	}
 
 	public static String getResourceString(ConnectedEntity src, String key) {
-		return ResourceBundle.getBundle(Util.class.getPackage().getName() + ".Bundle", src.getLocale())
+		return ResourceBundle.getBundle(
+				Util.class.getPackage().getName() + ".Bundle", src.getLocale())
 				.getString(key);
 	}
 
