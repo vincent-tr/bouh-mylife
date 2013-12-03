@@ -1,4 +1,4 @@
-package org.mylife.home.net.hub;
+package org.mylife.home.net.hub.irc;
 
 import org.mylife.home.net.hub.irc.io.IOManager;
 
