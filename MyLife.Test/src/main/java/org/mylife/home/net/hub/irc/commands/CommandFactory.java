@@ -1,6 +1,7 @@
 package org.mylife.home.net.hub.irc.commands;
 
 import java.io.IOException;
+import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -39,6 +40,13 @@ public class CommandFactory {
 	}
 
 	private void LoadCommand(Class<?> clazz) {
+
+		// Pas d'interfaces ni de classes abstraites
+		if (clazz.isInterface())
+			return;
+		if (Modifier.isAbstract(clazz.getModifiers()))
+			return;
+
 		try {
 			Command cmd = (Command) clazz.newInstance();
 			String name = cmd.getName();
@@ -79,11 +87,11 @@ public class CommandFactory {
 
 		return commands.get(name);
 	}
-	
+
 	public ConnectionClosedCommand getConnectionClosedCommand() {
 		return connectionClosedCommand;
 	}
-	
+
 	public ConnectionOpenedCommand getConnectionOpenedCommand() {
 		return connectionOpenedCommand;
 	}

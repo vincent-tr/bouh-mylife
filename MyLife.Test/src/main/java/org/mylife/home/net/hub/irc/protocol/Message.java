@@ -20,7 +20,7 @@ public class Message {
 	 *            can be null
 	 */
 	public Message(String from, String command) {
-		if (!Util.isCommandIdentifier(command))
+		if (!ProtocolUtils.isCommandIdentifier(command))
 			throw new IllegalArgumentException("Invalid command name");
 		this.from = from;
 		this.command = command;
@@ -69,7 +69,7 @@ public class Message {
 		if (hasLast)
 			throw new IllegalStateException(
 					"The last parameter has already been appended");
-		if (!Util.isParameter(param))
+		if (!ProtocolUtils.isParameter(param))
 			throw new IllegalArgumentException(
 					"Use appendLastParameter() instead");
 		addParam(param);

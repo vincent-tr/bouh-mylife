@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 
 import org.mylife.home.net.hub.irc.commands.Command;
 import org.mylife.home.net.hub.irc.commands.CommandFactory;
+import org.mylife.home.net.hub.irc.commands.CommandUtils;
 import org.mylife.home.net.hub.irc.commands.ConnectionClosedCommand;
 import org.mylife.home.net.hub.irc.io.IOConnection;
 import org.mylife.home.net.hub.irc.protocol.Message;
@@ -92,6 +93,10 @@ public class IrcConnection {
 	public void setStructure(Connectable structure) {
 		this.structure = structure;
 	}
+	
+	public String getRemoteHost() {
+		return connection.getRemoteHost();
+	}
 
 	public void send(Message message) {
 		try {
@@ -119,10 +124,18 @@ public class IrcConnection {
 		
 		Command cmd = CommandFactory.getInstance().getCommand(message.getCommand());
 		if(cmd == null) {
-			send(Numerics.createMessage(Numerics.ERR_UNKNOWNCOMMAND));
+			CommandUtils.replyError(owner, this, Numerics.ERR_UNKNOWNCOMMAND);
 			return;
 		}
 		
 		cmd.invoke(owner, this, message);
+	}
+	
+	/**
+	 * Exécute le message spécifié comme s'il était arrivé depuis la partie distante
+	 * @param message
+	 */
+	public void execute(Message message) {
+		receive(message);
 	}
 }

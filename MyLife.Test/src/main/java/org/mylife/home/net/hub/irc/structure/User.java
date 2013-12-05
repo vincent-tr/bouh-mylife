@@ -61,6 +61,10 @@ public class User implements Connectable {
 		return realName;
 	}
 
+	public String getFullName() {
+		return nick + "!" + ident + "@" + host;
+	}
+	
 	/* internal */void addChannel(Channel channel) {
 		channels.put(channel.getName().toLowerCase(), channel);
 	}

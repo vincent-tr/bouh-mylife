@@ -35,6 +35,7 @@ public class IrcServer extends Thread {
 	private final IrcConfiguration config;
 	private int status = STATE_STOPPED;
 	private Exception fatalError;
+	private long startTime;
 
 	private IOManager iom;
 	private Network net;
@@ -84,6 +85,7 @@ public class IrcServer extends Thread {
 			status = STATE_STOPPED;
 
 		} catch (Exception ex) {
+			log.log(Level.SEVERE, "Fatal error while running", ex);
 			fatalError = ex;
 			status = STATE_ERROR;
 		}
@@ -98,8 +100,15 @@ public class IrcServer extends Thread {
 	}
 
 	private void init() throws Exception {
+
+		startTime = System.currentTimeMillis();
+
 		iom = new IOManager();
-		net = new Network();
+
+		// TODO : lecture de config
+		net = new Network("test.network");
+		net.serverAdd("local.test.network", 1, null);
+
 		connections = new ArrayList<IrcConnection>();
 		listeners = new ArrayList<IOListener>();
 
@@ -164,5 +173,13 @@ public class IrcServer extends Thread {
 		public void newClient(SocketChannel client) {
 			newConnection(client);
 		}
+	}
+
+	public String getVersion() {
+		return "1.0.0";
+	}
+
+	public long getStartTimeMillis() {
+		return startTime;
 	}
 }

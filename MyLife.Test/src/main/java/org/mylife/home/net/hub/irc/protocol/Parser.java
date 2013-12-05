@@ -18,7 +18,7 @@ public class Parser {
 	}
 
 	private final Handler handler;
-	private String buffer;
+	private String buffer = "";
 
 	public Parser(Handler handler) {
 		this.handler = handler;
@@ -26,17 +26,41 @@ public class Parser {
 
 	public void readData(byte[] data) {
 		String sdata = new String(data, Charset.forName(Constants.CHARSET));
-		if (buffer != null)
-			buffer += sdata;
+		buffer += sdata;
 
 		int offset;
-		while ((offset = buffer.indexOf(Constants.MESSAGE_TERMINATOR)) >= 0) {
+		while ((offset = indexOf(buffer,
+				Constants.MESSAGE_TERMINATOR.toCharArray())) >= 0) {
 			String rawmsg = buffer.substring(0, offset);
-			buffer = buffer.substring(offset
-					+ Constants.MESSAGE_TERMINATOR.length());
+			buffer = buffer.substring(offset + 1);
 
-			parseRawMessage(rawmsg);
+			// si on recoit des \r\n ca va créer des lignes vides
+			if (rawmsg.length() > 0)
+				parseRawMessage(rawmsg);
 		}
+	}
+
+	/**
+	 * 1er index possible des chars
+	 * 
+	 * @param data
+	 * @param chars
+	 * @return
+	 */
+	private int indexOf(String data, char... chars) {
+		int min = Integer.MAX_VALUE;
+		for (char c : chars) {
+			int offset = data.indexOf(c);
+			if (offset == -1)
+				continue;
+
+			if (min > offset)
+				min = offset;
+		}
+
+		if (min == Integer.MAX_VALUE)
+			min = -1;
+		return min;
 	}
 
 	private void parseRawMessage(String rawmsg) {
@@ -55,7 +79,7 @@ public class Parser {
 			startPos = endPos + 1;
 		}
 		Message message = parseMessage(from, rawmsg, startPos);
-		
+
 		handler.messageReceived(message);
 	}
 

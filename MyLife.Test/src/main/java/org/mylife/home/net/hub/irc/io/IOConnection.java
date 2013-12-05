@@ -1,6 +1,7 @@
 package org.mylife.home.net.hub.irc.io;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
@@ -40,8 +41,16 @@ public class IOConnection extends IOElement {
 			throws IOException {
 		this.handler = handler;
 		this.socket = socket;
+		socket.configureBlocking(false);
 		readBuffer = ByteBuffer
 				.allocate(socket.socket().getReceiveBufferSize());
+	}
+	
+	public String getRemoteHost() {
+		if(!socket.isConnected())
+			return null;
+		InetAddress addr = socket.socket().getInetAddress();
+		return addr.getHostName();
 	}
 
 	@Override
