@@ -4,13 +4,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
+import org.mylife.home.net.hub.irc.IrcConnection;
+
 /**
  * Représente un serveur sur le réseau
  * 
  * @author pumbawoman
  * 
  */
-public class Server {
+public class Server implements Connectable {
 
 	private final String name;
 	private final int token;
@@ -18,6 +20,8 @@ public class Server {
 
 	private final Collection<Server> children = new ArrayList<Server>();
 	private final Collection<User> users = new ArrayList<User>();
+
+	private IrcConnection connection;
 
 	/* internal */Server(String name, int token, Server parent) {
 		this.name = name;
@@ -71,6 +75,16 @@ public class Server {
 
 	public Collection<User> getUsers() {
 		return Collections.unmodifiableCollection(users);
+	}
+
+	@Override
+	public IrcConnection getConnection() {
+		return connection;
+	}
+
+	@Override
+	public void setConnection(IrcConnection connection) {
+		this.connection = connection;
 	}
 
 }

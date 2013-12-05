@@ -5,19 +5,23 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.mylife.home.net.hub.irc.IrcConnection;
+
 /**
  * Représente un utilisateur sur le réseau
  * 
  * @author pumbawoman
  * 
  */
-public class User {
+public class User implements Connectable {
 
 	private final Server server;
 	private String nick;
 	private final String ident;
 	private final String host;
 	private final String realName;
+
+	private IrcConnection connection;
 
 	/**
 	 * Key : channel name lower case
@@ -71,5 +75,15 @@ public class User {
 
 	public Collection<Channel> getChannels() {
 		return Collections.unmodifiableCollection(channels.values());
+	}
+
+	@Override
+	public IrcConnection getConnection() {
+		return connection;
+	}
+
+	@Override
+	public void setConnection(IrcConnection connection) {
+		this.connection = connection;
 	}
 }
