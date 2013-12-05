@@ -16,6 +16,8 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class Network {
 
+	private final String name;
+	
 	/**
 	 * Key : channel name lower case
 	 */
@@ -29,6 +31,14 @@ public class Network {
 	private final Map<String, Server> servers = new HashMap<String, Server>();
 	private final Map<Integer, Server> serversByToken = new HashMap<Integer, Server>();
 
+	public Network(String name) {
+		this.name = name;
+	}
+	
+	public String getName() {
+		return name;
+	}
+	
 	public Channel getChannel(String name) {
 		return channels.get(name.toLowerCase());
 	}
@@ -74,6 +84,34 @@ public class Network {
 		return getLocalServer().getchildren();
 	}
 
+	/**
+	 * Obtention de la liste des utilisateurs impactés par une modification de
+	 * l'utilisateur spécifié
+	 * 
+	 * @param user
+	 * @return
+	 */
+	public Collection<User> getLocalImpactedUsers(User user) {
+		Collection<User> list = new ArrayList<User>();
+		for(User item : getLocalServer().getUsers()) {
+			// on n'ajoute pas l'utilisateur spécifié dans les retours
+			if(item == user)
+				continue;
+			
+			// on cherche si les 2 users ont au moins un chan commun
+			boolean found = false;
+			for(Channel userChan : user.getChannels()) {
+				if(item.getChannels().contains(userChan)) {
+					found = true;
+					break;
+				}
+			}
+			if(found)
+				list.add(item);
+		}
+		return list;
+	}
+
 	/* --------------- gestion des modifications --------------- */
 
 	private void checkArgumentNotNull(Object argument) {
@@ -86,7 +124,7 @@ public class Network {
 			throw new IllegalArgumentException();
 	}
 
-	public void serverAdd(String name, int token, Server parent)
+	public Server serverAdd(String name, int token, Server parent)
 			throws AlreadyExistsException {
 		checkArgumentNotNull(name);
 
@@ -101,33 +139,35 @@ public class Network {
 
 		servers.put(name.toLowerCase(), server);
 		serversByToken.put(token, server);
+		
+		return server;
 	}
 
 	public boolean serverRemove(Server server) {
 		checkArgumentNotNull(server);
 
-		if(!servers.containsKey(server.getName().toLowerCase()))
+		if (!servers.containsKey(server.getName().toLowerCase()))
 			return false;
-		
+
 		// suppression des utilisateurs du serveur
 		Collection<User> serverUsers = new ArrayList<User>(server.getUsers());
-		for(User user : serverUsers) {
+		for (User user : serverUsers) {
 			userRemove(user);
 		}
-		
+
 		// suppression du serveur dans le parent
 		Server parent = server.getParent();
-		if(parent != null)
+		if (parent != null)
 			parent.removeChild(server);
-		
+
 		// suppression de nos listes
 		servers.remove(server.getName().toLowerCase());
 		serversByToken.remove(server.getToken());
-		
+
 		return true;
 	}
 
-	public void userAdd(Server server, String nick, String ident, String host,
+	public User userAdd(Server server, String nick, String ident, String host,
 			String realName) throws AlreadyExistsException {
 
 		checkArgumentNotNull(server);
@@ -138,28 +178,31 @@ public class Network {
 
 		if (getUser(nick) != null)
 			throw new AlreadyExistsException();
-		
+
 		User user = new User(server, nick, ident, host, realName);
 		server.addUser(user);
 		users.add(user);
+		
+		return user;
 	}
 
 	public boolean userRemove(User user) {
 		checkArgumentNotNull(user);
-		
-		if(!users.contains(user))
+
+		if (!users.contains(user))
 			return false;
-		
+
 		// Suppression des salons
-		Collection<Channel> userChannels = new ArrayList<Channel>(user.getChannels());
-		for(Channel channel : userChannels) {
+		Collection<Channel> userChannels = new ArrayList<Channel>(
+				user.getChannels());
+		for (Channel channel : userChannels) {
 			userPart(user, channel);
 		}
-		
+
 		// Suppression de l'utilisateur sur le serveur
 		Server server = user.getServer();
 		server.removeUser(user);
-		
+
 		// Suppression de notre liste
 		users.remove(user);
 		return true;
@@ -168,18 +211,18 @@ public class Network {
 	public boolean userJoin(User user, String channelName) {
 		checkArgumentNotNull(user);
 		checkArgumentNotNull(channelName);
-		
+
 		// Création ou obtention du salon
 		String lowerName = channelName.toLowerCase();
 		Channel channel = channels.get(lowerName);
-		if(channel == null)
+		if (channel == null)
 			channel = new Channel(channelName);
 		channels.put(lowerName, channel);
-		
-		// Check si déjà dessus 
-		if(user.getChannels().contains(channel))
+
+		// Check si déjà dessus
+		if (user.getChannels().contains(channel))
 			return false;
-		
+
 		// Ajout
 		channel.addUser(user);
 		user.addChannel(channel);
@@ -191,9 +234,9 @@ public class Network {
 		checkArgumentNotNull(channel);
 
 		// Check
-		if(!user.getChannels().contains(channel))
+		if (!user.getChannels().contains(channel))
 			return false;
-		
+
 		// Suppression
 		user.removeChannel(channel);
 		channel.removeUser(user);

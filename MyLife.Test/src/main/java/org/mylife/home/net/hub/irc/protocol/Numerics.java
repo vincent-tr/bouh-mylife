@@ -1,5 +1,8 @@
 package org.mylife.home.net.hub.irc.protocol;
 
+import org.mylife.home.net.hub.irc.IrcServer;
+import org.mylife.home.net.hub.irc.structure.User;
+
 
 public final class Numerics {
 
@@ -175,9 +178,11 @@ public final class Numerics {
 		return name;
 	}
 
-	public static Message createMessage(Numerics num) {
-		Message msg = new Message(num.getDigits());
-		String text = Util.getResourceString(num.getName());
+	public static Message createMessage(IrcServer server, Numerics num, User user) {
+		Message msg = new Message(server.getNetwork().getLocalServer().getName(), num.getDigits());
+		if(user != null)
+			msg.appendParameter(user.getNick());
+		String text = ProtocolUtils.getResourceString(num.getName());
 		if (text != null)
 			msg.appendLastParameter(text);
 		return msg;

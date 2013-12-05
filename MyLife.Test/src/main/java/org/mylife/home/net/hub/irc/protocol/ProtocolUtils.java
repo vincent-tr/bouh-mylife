@@ -2,9 +2,9 @@ package org.mylife.home.net.hub.irc.protocol;
 
 import java.util.ResourceBundle;
 
-public final class Util {
+public final class ProtocolUtils {
 
-	private Util() {
+	private ProtocolUtils() {
 	}
 
 	public static byte[] concat(byte[] buffer1, byte[] buffer2) {
@@ -137,7 +137,7 @@ public final class Util {
 	}
 
 	public static String getResourceString(String key) {
-		String name = Util.class.getPackage().getName() + ".Bundle";
+		String name = ProtocolUtils.class.getPackage().getName() + ".Bundle";
 		ResourceBundle bundle = ResourceBundle.getBundle(name);
 		if(!bundle.containsKey(key))
 			return null;

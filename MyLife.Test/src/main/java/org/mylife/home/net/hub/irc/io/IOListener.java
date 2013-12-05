@@ -26,6 +26,7 @@ public class IOListener extends IOElement {
 			throws IOException {
 		this.handler = handler;
 		socket = ServerSocketChannel.open();
+		socket.configureBlocking(false);
 		InetSocketAddress addr;
 		if (address == null)
 			addr = new InetSocketAddress(port);
