@@ -394,10 +394,14 @@ public final class CommandUtils {
 	}
 	
 	public static void sendNetSync(IrcServer server, IrcConnection dest, boolean publishSelf) {
-		
+		// TODO
 	}
 	
-	public static void sendNetSplit(IrcServer server, IrcConnection src, Server lostServer, String reason) {
+	public static void sendNetSplit(IrcServer server, Server lostServer, String reason, IrcConnection... connections excluded) {
 		
+		// Propagation aux autres serveurs
+		// Propagation
+		
+		// TODO
 	}
 }
