@@ -44,7 +44,13 @@ public class QuitCommand implements Command {
 		User user = (User)src.getStructure(); 
 		
 		// Dispatch
-		CommandUtils.dispatchUserMessage(server, user, msg, src);
+		String reason = null;
+		if(msg.getParameterCount() > 0)
+			reason = msg.getParameter(0);
+		Message dispatchMessage = new Message(user.getNick(), "QUIT");
+		if(reason != null)
+			dispatchMessage.appendLastParameter(reason);
+		CommandUtils.dispatchUserMessage(server, user, dispatchMessage, src);
 		
 		// Déco
 		src.setStructure(new Unregistered()); // empeche ConnectionClosedCommand de gérer

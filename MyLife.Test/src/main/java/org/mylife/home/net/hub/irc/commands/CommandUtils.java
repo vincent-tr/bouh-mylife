@@ -9,6 +9,7 @@ import org.mylife.home.net.hub.irc.IrcConnection;
 import org.mylife.home.net.hub.irc.IrcServer;
 import org.mylife.home.net.hub.irc.protocol.Message;
 import org.mylife.home.net.hub.irc.protocol.Numerics;
+import org.mylife.home.net.hub.irc.structure.Channel;
 import org.mylife.home.net.hub.irc.structure.Connectable;
 import org.mylife.home.net.hub.irc.structure.Network;
 import org.mylife.home.net.hub.irc.structure.Server;
@@ -32,6 +33,15 @@ public final class CommandUtils {
 			return true;
 
 		replyError(server, src, Numerics.ERR_NOTREGISTERED);
+		return false;
+	}
+
+	public static boolean checkServer(IrcServer server, IrcConnection src) {
+		Connectable structure = src.getStructure();
+		if (structure instanceof Server)
+			return true;
+
+		replyError(server, src, Numerics.ERR_NOPRIVILEGES);
 		return false;
 	}
 
@@ -210,5 +220,35 @@ public final class CommandUtils {
 
 		dest.execute(new Message("LUSERS"));
 		dest.execute(new Message("MOTD"));
+	}
+	
+	public static void sendNames(IrcServer server, User user, Channel channel) {
+		
+		IrcConnection dest = user.getConnection();
+		
+		StringBuffer buffer = new StringBuffer();
+		for(User item : channel.getUsers()) {
+			if(buffer.length() > 0)
+				buffer.append(' ');
+			// si modes alors préfixes !
+			buffer.append(item.getNick());
+		}
+
+		String chanPrefix = "=";
+		/*
+		if (isModeSet(CHANMODE_SECRET))
+			chanPrefix = "@";
+		else if (isModeSet(CHANMODE_PRIVATE))
+			chanPrefix = "*";
+		*/
+		
+		Message nameReply = Numerics.createMessage(server, Numerics.RPL_NAMREPLY, user);
+		nameReply.appendParameter(chanPrefix);
+		nameReply.appendParameter(channel.getName());
+		nameReply.appendLastParameter(buffer.toString());
+		dest.send(nameReply);
+
+		Message endOfNamesReply = Numerics.createMessage(server, Numerics.RPL_ENDOFNAMES, user, channel.getName());
+		dest.send(endOfNamesReply);
 	}
 }
