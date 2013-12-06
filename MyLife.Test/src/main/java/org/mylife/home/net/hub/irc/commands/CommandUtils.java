@@ -130,6 +130,7 @@ public final class CommandUtils {
 		Message errorMessage = new Message("ERROR");
 		errorMessage.appendLastParameter(reason);
 		dest.send(errorMessage);
+		dest.setStructure(new Unregistered()); // empeche ConnectionClosedCommand de gérer
 		dest.close();
 
 		// si structure Unregistered rien d'autre à faire
