@@ -53,6 +53,11 @@ public class ConnectionClosedCommand {
 	}
 
 	private void serverLeft(IrcServer server, Server structure) {
-		// TODO
+
+		final String reason = "Connection error";
+		Network net = server.getNetwork();
+		CommandUtils.sendNetSplit(server, null, structure, reason);
+
+		net.serverRemove(structure);
 	}
 }

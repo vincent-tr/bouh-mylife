@@ -17,7 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 public class Network {
 
 	private final String name;
-	
+
 	/**
 	 * Key : channel name lower case
 	 */
@@ -34,11 +34,11 @@ public class Network {
 	public Network(String name) {
 		this.name = name;
 	}
-	
+
 	public String getName() {
 		return name;
 	}
-	
+
 	public Channel getChannel(String name) {
 		return channels.get(name.toLowerCase());
 	}
@@ -84,6 +84,15 @@ public class Network {
 		return getLocalServer().getchildren();
 	}
 
+	public Collection<User> getUsersBehindServer(Server server) {
+		Collection<User> list = new ArrayList<User>();
+		list.addAll(server.getUsers());
+		for (Server child : server.getchildren()) {
+			list.addAll(getUsersBehindServer(child));
+		}
+		return list;
+	}
+
 	/**
 	 * Obtention de la liste des utilisateurs impactés par une modification de
 	 * l'utilisateur spécifié
@@ -93,29 +102,29 @@ public class Network {
 	 */
 	public Collection<User> getLocalImpactedUsers(User user) {
 		Collection<User> list = new ArrayList<User>();
-		for(User item : getLocalServer().getUsers()) {
+		for (User item : getLocalServer().getUsers()) {
 			// on n'ajoute pas l'utilisateur spécifié dans les retours
-			if(item == user)
+			if (item == user)
 				continue;
-			
+
 			// on cherche si les 2 users ont au moins un chan commun
 			boolean found = false;
-			for(Channel userChan : user.getChannels()) {
-				if(item.getChannels().contains(userChan)) {
+			for (Channel userChan : user.getChannels()) {
+				if (item.getChannels().contains(userChan)) {
 					found = true;
 					break;
 				}
 			}
-			if(found)
+			if (found)
 				list.add(item);
 		}
 		return list;
 	}
-	
+
 	public boolean isOn(User user, Channel channel) {
 		return user.getChannel(channel.getName()) != null;
 	}
-	
+
 	public boolean isLocal(User user) {
 		return user.getServer().equals(getLocalServer());
 	}
@@ -147,7 +156,7 @@ public class Network {
 
 		servers.put(name.toLowerCase(), server);
 		serversByToken.put(token, server);
-		
+
 		return server;
 	}
 
@@ -190,7 +199,7 @@ public class Network {
 		User user = new User(server, nick, ident, host, realName);
 		server.addUser(user);
 		users.add(user);
-		
+
 		return user;
 	}
 

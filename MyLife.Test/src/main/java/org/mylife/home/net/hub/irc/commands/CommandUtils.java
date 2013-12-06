@@ -382,4 +382,22 @@ public final class CommandUtils {
 		// Envoi
 		dispatchUserListMessage(server, targets, fw, src);
 	}
+	
+	public static void sendSelf(IrcServer server, IrcConnection dest) {
+		Server self = server.getNetwork().getLocalServer();
+		Message msg = new Message("SERVER");
+		msg.appendParameter(self.getName());
+		msg.appendParameter("0");
+		msg.appendParameter("" + self.getToken());
+		msg.appendLastParameter(self.getName()); // description
+		dest.send(msg);
+	}
+	
+	public static void sendNetSync(IrcServer server, IrcConnection dest, boolean publishSelf) {
+		
+	}
+	
+	public static void sendNetSplit(IrcServer server, IrcConnection src, Server lostServer, String reason) {
+		
+	}
 }
