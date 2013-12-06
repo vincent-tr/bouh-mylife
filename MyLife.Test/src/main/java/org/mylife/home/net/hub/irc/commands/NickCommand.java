@@ -161,17 +161,17 @@ public class NickCommand implements Command {
 		User user1 = null;
 		User user2 = null;
 		
-		// Dispatch des nicks collisions
-		if(nick1 != null)
-			dispatchNickCollision(server, nick1);
-		if(nick2 != null)
-			dispatchNickCollision(server, nick2);
-		
 		// On essaye de récupérer les users s'il existent dans la base
 		if(nick1 != null)
 			user1 = net.getUser(nick1);
 		if(nick2 != null)
 			user2 = net.getUser(nick2);
+		
+		// Dispatch des nicks collisions
+		if(nick1 != null)
+			dispatchNickCollision(server, user1, nick1);
+		if(nick2 != null)
+			dispatchNickCollision(server, user2, nick2);
 
 		// Si les utilisateurs sont locaux, déco 
 		disconnectLocalNickCollision(net, user1);
@@ -197,14 +197,18 @@ public class NickCommand implements Command {
 		Message errorMessage = new Message("ERROR");
 		errorMessage.appendLastParameter(NICK_COLLISION_REASON);
 		user.getConnection().send(errorMessage);
+		user.getConnection().setStructure(new Unregistered()); // Empeche la gestion de ConnectionClosedCommand
 		user.getConnection().close();
 	}
 
-	private void dispatchNickCollision(IrcServer server, String nick) {
+	private void dispatchNickCollision(IrcServer server, User user, String nick) {
 
 		Message msg = new Message("KILL");
 		msg.appendParameter(nick);
 		msg.appendLastParameter(NICK_COLLISION_REASON);
-		CommandUtils.dispatchServerMessage(server, msg);
+		if(user != null)
+			CommandUtils.dispatchUserMessage(server, user, msg);
+		else
+			CommandUtils.dispatchServerMessage(server, msg);
 	}
 }

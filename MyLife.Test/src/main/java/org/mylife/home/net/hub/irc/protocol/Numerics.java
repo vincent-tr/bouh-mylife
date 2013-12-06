@@ -178,10 +178,12 @@ public final class Numerics {
 		return name;
 	}
 
-	public static Message createMessage(IrcServer server, Numerics num, User user) {
+	public static Message createMessage(IrcServer server, Numerics num, User user, String ... parameters) {
 		Message msg = new Message(server.getNetwork().getLocalServer().getName(), num.getDigits());
 		if(user != null)
 			msg.appendParameter(user.getNick());
+		for(String parameter : parameters)
+			msg.appendParameter(parameter);
 		String text = ProtocolUtils.getResourceString(num.getName());
 		if (text != null)
 			msg.appendLastParameter(text);
