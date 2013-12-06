@@ -58,7 +58,7 @@ public class JoinCommand implements Command {
 		msg.appendParameter(channelName);
 		CommandUtils.dispatchUserMessage(server, user, msg, src);
 
-		// Envoi des mesages à l'utilisateur arrivé
+		// Envoi des messages à l'utilisateur arrivé
 		welcome(server, src, user, channel);
 	}
 
