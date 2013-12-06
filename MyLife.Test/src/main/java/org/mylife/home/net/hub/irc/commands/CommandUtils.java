@@ -208,22 +208,27 @@ public final class CommandUtils {
 		// maj de la base
 		server.getNetwork().userRemove(user);
 	}
-
-	public static void dispatchNewUser(IrcServer server, User user,
-			int hopcount, IrcConnection... excluded) {
-
-		// Propagation du nouvel utilisateur
-		Network net = server.getNetwork();
+	
+	private static Message createNewNickMessage(IrcServer server, User user, int hopcount) {
+		
 		Message msg = new Message("NICK");
 
 		msg.appendParameter(user.getNick());
 		msg.appendParameter("" + hopcount);
 		msg.appendParameter(user.getIdent());
 		msg.appendParameter(user.getHost());
-		msg.appendParameter("" + net.getLocalServer().getToken());
+		msg.appendParameter("" + user.getServer().getToken());
 		msg.appendParameter("+"); // umode
 		msg.appendLastParameter(user.getRealName());
 
+		return msg;
+	}
+
+	public static void dispatchNewUser(IrcServer server, User user,
+			int hopcount, IrcConnection... excluded) {
+
+		// Propagation du nouvel utilisateur
+		Message msg = createNewNickMessage(server, user, hopcount);
 		CommandUtils.dispatchServerMessage(server, msg);
 	}
 
@@ -385,18 +390,80 @@ public final class CommandUtils {
 
 	public static void sendSelf(IrcServer server, IrcConnection dest) {
 		Server self = server.getNetwork().getLocalServer();
-		Message msg = new Message("SERVER");
-		msg.appendParameter(self.getName());
-		msg.appendParameter("0");
-		msg.appendParameter("" + self.getToken());
-		msg.appendLastParameter(self.getName()); // description
-		dest.send(msg);
+		sendServer(server, dest, self, true, false, null);
 	}
 
 	public static void sendNetSync(IrcServer server, IrcConnection dest,
 			boolean publishSelf) {
-		// TODO
 
+		Network net = server.getNetwork();
+		
+		Connectable structure = dest.getStructure();
+		Server targetServer = null;
+		if(structure instanceof Server)
+			targetServer = (Server)structure;
+
+		// envoi de tous les serveurs, en partant des plus proches vers les plus
+		// loins, sauf le serveur à qui on envoie le sync
+		sendServer(server, dest, server.getNetwork().getLocalServer(),
+				publishSelf, true, targetServer);
+
+		// Obtention de tous les utilisateurs sauf ceux du serveur à qui on envoie le sync
+		// Obtention des users locaux + ceux de chaque peer sauf le peer cible
+		Collection<User> users = new ArrayList<User>();
+		users.addAll(net.getLocalServer().getUsers());
+		for(Server peer : net.getPeerServers()) {
+			if(peer.equals(targetServer))
+				continue;
+			users.addAll(net.getUsersBehindServer(peer));
+		}
+		
+		// Envoi des users
+		for(User user : users) {
+			Message msg = createNewNickMessage(server, user, 1/*??*/);
+			dest.send(msg);
+		}
+		
+		// envoi des joins
+		// Remplacer par njoin avec les channels + modes
+		for(User user : users) {
+			StringBuffer buffer = new StringBuffer();
+			for(Channel chan : user.getChannels()) {
+				if(buffer.length() > 0)
+					buffer.append(',');
+				buffer.append(chan.getName());
+			}
+			Message msg = new Message(user.getNick(), "JOIN");
+			msg.appendParameter(buffer.toString());
+			dest.send(msg);
+		}
+	}
+
+	private static void sendServer(IrcServer server, IrcConnection dest,
+			Server currentServer, boolean publishCurrent,
+			boolean publishChildren, Server excludedServer) {
+
+		if(currentServer.equals(excludedServer))
+			return;
+		
+		if (publishCurrent) {
+			Server source = currentServer.getParent();
+			String sender = null;
+			if (source != null)
+				sender = source.getName();
+			Message msg = new Message(sender, "SERVER");
+			msg.appendParameter(currentServer.getName());
+			msg.appendParameter("0");
+			msg.appendParameter("" + currentServer.getToken());
+			msg.appendLastParameter(currentServer.getName()); // description
+			dest.send(msg);
+		}
+		
+		if (publishChildren) {
+			for (Server child : currentServer.getchildren()) {
+				sendServer(server, dest, child, true, true, excludedServer);
+			}
+		}
 	}
 
 	public static void sendNetSplit(IrcServer server, Server lostServer,
@@ -415,12 +482,11 @@ public final class CommandUtils {
 		Collection<User> splittedUsers = net.getUsersBehindServer(lostServer);
 		Collection<User> localUsers = net.getLocalServer().getUsers();
 		for (User splittedUser : splittedUsers) {
-			
+
 			// Préparation du message
-			Message quitMessage = new Message(splittedUser.getNick(),
-					"QUIT");
+			Message quitMessage = new Message(splittedUser.getNick(), "QUIT");
 			quitMessage.appendLastParameter(userReason);
-			
+
 			for (User localUser : localUsers) {
 				if (!net.hasCommonChannel(localUser, splittedUser))
 					continue;
