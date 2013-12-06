@@ -27,7 +27,7 @@ public class SquitCommand implements Command {
 		String reason = msg.getParameter(1);
 		Server lostServer = net.getServer(lostServerName);
 		
-		CommandUtils.sendNetSplit(server, src, lostServer, reason);
+		CommandUtils.sendNetSplit(server, lostServer, reason, src);
 		
 		net.serverRemove(lostServer);
 	}
