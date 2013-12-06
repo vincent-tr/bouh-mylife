@@ -111,6 +111,14 @@ public class Network {
 		}
 		return list;
 	}
+	
+	public boolean isOn(User user, Channel channel) {
+		return user.getChannel(channel.getName()) != null;
+	}
+	
+	public boolean isLocal(User user) {
+		return user.getServer().equals(getLocalServer());
+	}
 
 	/* --------------- gestion des modifications --------------- */
 

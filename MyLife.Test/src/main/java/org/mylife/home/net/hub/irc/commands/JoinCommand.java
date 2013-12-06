@@ -68,7 +68,7 @@ public class JoinCommand implements Command {
 		Network net = server.getNetwork();
 		
 		// On check si l'utilisateur est hebergé chez nous
-		if (user.getServer() != net.getLocalServer())
+		if(!net.isLocal(user))
 			return;
 
 /*
