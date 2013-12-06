@@ -21,7 +21,7 @@ public class ServerCommand implements Command {
 	 */
 	private final static Logger log = Logger.getLogger(ServerCommand.class
 			.getName());
-	
+
 	@Override
 	public void invoke(IrcServer server, IrcConnection src, Message msg) {
 		Connectable structure = src.getStructure();
@@ -38,60 +38,68 @@ public class ServerCommand implements Command {
 	private void serverInvoke(IrcServer server, IrcConnection src, Message msg) {
 		// Enregistrement et publication d'un nouveau serveur uniquement
 		Network net = server.getNetwork();
-		
+
 		// On trouve à quel serveur le nouveau serveur est connecté
 		Server source = null;
-		if(msg.getSender() == null)
-			source = (Server)src.getStructure();
+		if (msg.getSender() == null)
+			source = (Server) src.getStructure();
 		else
 			source = net.getServer(msg.getSender());
-		
+
 		Server newServer = createServer(server, source, msg);
-		if(newServer == null) {
-			log.severe("New server from '" + source.getName() + "' already exists !");
+		if (newServer == null) {
+			log.severe("New server from '" + source.getName()
+					+ "' already exists !");
 			return;
 		}
-		
+
 		publishServer(server, newServer, src);
 	}
 
-	private void unregisteredInvoke(IrcServer server, IrcConnection src, Message msg) {
-		
-		// Enregistrement d'un nouveau serveur directement lié à nous : Création du nouveau serveur puis net sync
+	private void unregisteredInvoke(IrcServer server, IrcConnection src,
+			Message msg) {
+
+		// Enregistrement d'un nouveau serveur directement lié à nous : Création
+		// du nouveau serveur puis net sync
 		Network net = server.getNetwork();
 		Server newServer = createServer(server, net.getLocalServer(), msg);
-		if(newServer == null) {
+		if (newServer == null) {
 			// Server déjà existant
 			Message errorMessage = new Message("ERROR");
-			errorMessage.appendLastParameter(ProtocolUtils.getResourceString(Numerics.ERR_ALREADYREGISTRED.getName()));
+			errorMessage
+					.appendLastParameter(ProtocolUtils
+							.getResourceString(Numerics.ERR_ALREADYREGISTRED
+									.getName()));
 			src.send(errorMessage);
 			src.close();
 			return;
 		}
-		
+
 		publishServer(server, newServer);
 		CommandUtils.sendNetSync(server, src, true);
 	}
 
-	private void publishServer(IrcServer server, Server newServer, IrcConnection... excluded) {
-		Message serverMessage = new Message(newServer.getParent().getName(), "SERVER");
+	private void publishServer(IrcServer server, Server newServer,
+			IrcConnection... excluded) {
+		Message serverMessage = new Message(newServer.getParent().getName(),
+				"SERVER");
 		serverMessage.appendParameter(newServer.getName());
 		serverMessage.appendParameter("0");
 		serverMessage.appendParameter("" + newServer.getToken());
 		serverMessage.appendLastParameter(newServer.getName()); // description
 		CommandUtils.dispatchServerMessage(server, serverMessage, excluded);
 	}
-	
+
 	private Server createServer(IrcServer server, Server parent, Message msg) {
-		
+
 		String name = msg.getParameter(0);
-		//String hopcount = msg.getParameter(1);
+		// String hopcount = msg.getParameter(1);
 		int token = Integer.parseInt(msg.getParameter(2));
-		//String info = msg.getParameter(3);
-		
+		// String info = msg.getParameter(3);
+
 		try {
 			return server.getNetwork().serverAdd(name, token, parent);
-		}catch(AlreadyExistsException ex) {
+		} catch (AlreadyExistsException ex) {
 			return null;
 		}
 	}
