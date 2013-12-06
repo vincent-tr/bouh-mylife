@@ -151,6 +151,10 @@ public class NickCommand implements Command {
 		Message newNickMsg = new Message(oldNick, "NICK");
 		newNickMsg.appendParameter(newNick);
 		CommandUtils.dispatchUserMessage(server, user, newNickMsg, excluded);
+
+		// Si user local on lui envoie aussi le msg
+		if (user.getServer() == server.getNetwork().getLocalServer())
+			user.getConnection().send(new Message(oldNick, "NICK").appendParameter(newNick));
 	}
 
 	private final static String NICK_COLLISION_REASON = "Nick collision";
