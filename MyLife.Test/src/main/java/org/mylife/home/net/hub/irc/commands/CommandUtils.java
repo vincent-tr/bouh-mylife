@@ -1,14 +1,18 @@
 package org.mylife.home.net.hub.irc.commands;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import org.mylife.home.net.hub.irc.IrcConnection;
 import org.mylife.home.net.hub.irc.IrcServer;
 import org.mylife.home.net.hub.irc.protocol.Message;
 import org.mylife.home.net.hub.irc.protocol.Numerics;
+import org.mylife.home.net.hub.irc.protocol.ProtocolUtils;
 import org.mylife.home.net.hub.irc.structure.Channel;
 import org.mylife.home.net.hub.irc.structure.Connectable;
 import org.mylife.home.net.hub.irc.structure.Network;
@@ -130,6 +134,51 @@ public final class CommandUtils {
 		}
 	}
 
+	/**
+	 * Propage le message spécifié à la liste d'utilisateurs spécifié
+	 * 
+	 * @param server
+	 * @param list
+	 * @param msg
+	 * @param excluded
+	 */
+	public static void dispatchUserListMessage(IrcServer server,
+			Collection<User> list, Message msg, IrcConnection... excluded) {
+
+		Collection<IrcConnection> excludedList = Arrays.asList(excluded);
+		Network net = server.getNetwork();
+
+		// Pour chaque user, on regarde la connexion ou il faut envoyer
+		Set<IrcConnection> connections = new HashSet<IrcConnection>();
+		for (User user : list) {
+			IrcConnection con = getUserConnection(net, user);
+			if (excludedList.contains(con))
+				continue;
+
+			// Set gère les doublons
+			connections.add(con);
+		}
+
+		for (IrcConnection con : connections) {
+			con.send(msg);
+		}
+	}
+
+	private static IrcConnection getUserConnection(Network net, User user) {
+		if (net.isLocal(user))
+			return user.getConnection();
+
+		Server server = user.getServer();
+		Collection<Server> peers = net.getPeerServers();
+
+		// On remonte jusqu'à tomber sur un peer
+		while (!peers.contains(server)) {
+			server = server.getParent();
+		}
+
+		return server.getConnection();
+	}
+
 	public static void userError(IrcServer server, IrcConnection dest,
 			String reason) {
 
@@ -140,7 +189,8 @@ public final class CommandUtils {
 		Message errorMessage = new Message("ERROR");
 		errorMessage.appendLastParameter(reason);
 		dest.send(errorMessage);
-		dest.setStructure(new Unregistered()); // empeche ConnectionClosedCommand de gérer
+		// empeche ConnectionClosedCommand de gérer
+		dest.setStructure(new Unregistered());
 		dest.close();
 
 		// si structure Unregistered rien d'autre à faire
@@ -221,14 +271,14 @@ public final class CommandUtils {
 		dest.execute(new Message("LUSERS"));
 		dest.execute(new Message("MOTD"));
 	}
-	
+
 	public static void sendNames(IrcServer server, User user, Channel channel) {
-		
+
 		IrcConnection dest = user.getConnection();
-		
+
 		StringBuffer buffer = new StringBuffer();
-		for(User item : channel.getUsers()) {
-			if(buffer.length() > 0)
+		for (User item : channel.getUsers()) {
+			if (buffer.length() > 0)
 				buffer.append(' ');
 			// si modes alors préfixes !
 			buffer.append(item.getNick());
@@ -236,19 +286,100 @@ public final class CommandUtils {
 
 		String chanPrefix = "=";
 		/*
-		if (isModeSet(CHANMODE_SECRET))
-			chanPrefix = "@";
-		else if (isModeSet(CHANMODE_PRIVATE))
-			chanPrefix = "*";
-		*/
-		
-		Message nameReply = Numerics.createMessage(server, Numerics.RPL_NAMREPLY, user);
+		 * if (isModeSet(CHANMODE_SECRET)) chanPrefix = "@"; else if
+		 * (isModeSet(CHANMODE_PRIVATE)) chanPrefix = "*";
+		 */
+
+		Message nameReply = Numerics.createMessage(server,
+				Numerics.RPL_NAMREPLY, user);
 		nameReply.appendParameter(chanPrefix);
 		nameReply.appendParameter(channel.getName());
 		nameReply.appendLastParameter(buffer.toString());
 		dest.send(nameReply);
 
-		Message endOfNamesReply = Numerics.createMessage(server, Numerics.RPL_ENDOFNAMES, user, channel.getName());
+		Message endOfNamesReply = Numerics.createMessage(server,
+				Numerics.RPL_ENDOFNAMES, user, channel.getName());
 		dest.send(endOfNamesReply);
+	}
+
+	public static void routeMessage(IrcServer server, IrcConnection src,
+			Message message, boolean sendReplies) {
+
+		Network net = server.getNetwork();
+
+		// Checks
+		Connectable structure = src.getStructure();
+		if (structure instanceof Unregistered) {
+			if (sendReplies)
+				replyError(server, src, Numerics.ERR_NOTREGISTERED);
+			return;
+		}
+
+		// Checks
+		if (message.getParameterCount() < 2) {
+			if (sendReplies)
+				replyError(server, src, Numerics.ERR_NEEDMOREPARAMS);
+			return;
+		}
+
+		// Obtention des infos
+		String sender = null;
+		if (structure instanceof User)
+			sender = ((User) structure).getNick();
+		else
+			sender = message.getSender();
+
+		String target = message.getParameter(0);
+		String text = message.getParameter(1);
+		User source = net.getUser(sender);
+		Collection<User> targets = new ArrayList<User>();
+
+		// Check du destinataire
+		if (ProtocolUtils.isChannelIdentifier(target)) {
+			Channel channelTarget = net.getChannel(target);
+			if (channelTarget == null) {
+				if (sendReplies)
+					replyError(server, src, Numerics.ERR_NOSUCHCHANNEL);
+				return;
+			}
+
+			if (!net.isOn(source, channelTarget)) {
+				// Pas de message externe
+				if (sendReplies)
+					replyError(server, src, Numerics.ERR_NOTONCHANNEL);
+				return;
+			}
+
+			for (User user : channelTarget.getUsers()) {
+				// On ne renvoie pas le message à la source
+				if (user.equals(source))
+					continue;
+				targets.add(user);
+			}
+
+		} else if (ProtocolUtils.isNickName(target)) {
+
+			User userTarget = net.getUser(target);
+			if (userTarget == null) {
+				if (sendReplies)
+					replyError(server, src, Numerics.ERR_NOSUCHNICK);
+				return;
+			}
+
+			targets.add(userTarget);
+		} else {
+			// Entité inconnue
+			if (sendReplies)
+				replyError(server, src, Numerics.ERR_ERRONEUSNICKNAME);
+			return;
+		}
+
+		// Création du message
+		Message fw = new Message(sender, message.getCommand());
+		fw.appendParameter(target);
+		fw.appendLastParameter(text);
+
+		// Envoi
+		dispatchUserListMessage(server, targets, fw, src);
 	}
 }

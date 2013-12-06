@@ -148,12 +148,13 @@ public class NickCommand implements Command {
 	private void dispatchNickChange(IrcServer server, User user,
 			String oldNick, String newNick, IrcConnection... excluded) {
 
+		Network net = server.getNetwork();
 		Message newNickMsg = new Message(oldNick, "NICK");
 		newNickMsg.appendParameter(newNick);
 		CommandUtils.dispatchUserMessage(server, user, newNickMsg, excluded);
 
 		// Si user local on lui envoie aussi le msg
-		if (user.getServer() == server.getNetwork().getLocalServer())
+		if (net.isLocal(user))
 			user.getConnection().send(new Message(oldNick, "NICK").appendParameter(newNick));
 	}
 
@@ -194,7 +195,7 @@ public class NickCommand implements Command {
 			return;
 
 		// On check si l'utilisateur est hebergé chez nous
-		if (user.getServer() != net.getLocalServer())
+		if (!net.isLocal(user))
 			return;
 
 		// Utilisateur local, déco

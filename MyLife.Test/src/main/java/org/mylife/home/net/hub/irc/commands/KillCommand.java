@@ -44,7 +44,7 @@ public class KillCommand implements Command {
 			return;
 
 		// On check si l'utilisateur est hebergé chez nous
-		if (user.getServer() != net.getLocalServer())
+		if(!net.isLocal(user))
 			return;
 
 		// Utilisateur local, déco

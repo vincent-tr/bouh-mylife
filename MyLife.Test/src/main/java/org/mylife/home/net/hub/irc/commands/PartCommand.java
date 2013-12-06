@@ -65,7 +65,7 @@ public class PartCommand implements Command {
 		CommandUtils.dispatchUserMessage(server, user, msg, src);
 		
 		// Si user local on lui envoie aussi le msg
-		if (user.getServer() == net.getLocalServer())
+		if (net.isLocal(user))
 			src.send(new Message(user.getNick(), "PART").appendParameter(channel.getName()));
 
 		// Maj de la base
