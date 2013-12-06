@@ -382,7 +382,7 @@ public final class CommandUtils {
 		// Envoi
 		dispatchUserListMessage(server, targets, fw, src);
 	}
-	
+
 	public static void sendSelf(IrcServer server, IrcConnection dest) {
 		Server self = server.getNetwork().getLocalServer();
 		Message msg = new Message("SERVER");
@@ -392,17 +392,42 @@ public final class CommandUtils {
 		msg.appendLastParameter(self.getName()); // description
 		dest.send(msg);
 	}
-	
-	public static void sendNetSync(IrcServer server, IrcConnection dest, boolean publishSelf) {
+
+	public static void sendNetSync(IrcServer server, IrcConnection dest,
+			boolean publishSelf) {
 		// TODO
-		
+
 	}
-	
-	public static void sendNetSplit(IrcServer server, Server lostServer, String reason, IrcConnection... excluded) {
-		
+
+	public static void sendNetSplit(IrcServer server, Server lostServer,
+			String reason, IrcConnection... excluded) {
+
+		Network net = server.getNetwork();
+		final String userReason = "*.net *.split";
+
 		// Propagation aux autres serveurs
-		// Propagation
-		
-		// TODO
+		Message squitMessage = new Message("SQUIT");
+		squitMessage.appendParameter(lostServer.getName());
+		squitMessage.appendLastParameter(reason);
+		dispatchServerMessage(server, squitMessage, excluded);
+
+		// Propagation aux utilisateurs locaux impactés
+		Collection<User> splittedUsers = net.getUsersBehindServer(lostServer);
+		Collection<User> localUsers = net.getLocalServer().getUsers();
+		for (User splittedUser : splittedUsers) {
+			
+			// Préparation du message
+			Message quitMessage = new Message(splittedUser.getNick(),
+					"QUIT");
+			quitMessage.appendLastParameter(userReason);
+			
+			for (User localUser : localUsers) {
+				if (!net.hasCommonChannel(localUser, splittedUser))
+					continue;
+
+				// envoi d'un quit
+				localUser.getConnection().send(quitMessage);
+			}
+		}
 	}
 }

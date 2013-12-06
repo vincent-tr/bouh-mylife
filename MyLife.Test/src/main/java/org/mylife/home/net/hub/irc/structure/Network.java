@@ -106,21 +106,25 @@ public class Network {
 			// on n'ajoute pas l'utilisateur spécifié dans les retours
 			if (item == user)
 				continue;
-
+			
 			// on cherche si les 2 users ont au moins un chan commun
-			boolean found = false;
-			for (Channel userChan : user.getChannels()) {
-				if (item.getChannels().contains(userChan)) {
-					found = true;
-					break;
-				}
-			}
-			if (found)
-				list.add(item);
+			if(!hasCommonChannel(user, item))
+				continue;
+			
+			list.add(item);
 		}
 		return list;
 	}
 
+	public boolean hasCommonChannel(User user1, User user2) {
+		for (Channel userChan : user1.getChannels()) {
+			if (user2.getChannels().contains(userChan)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	public boolean isOn(User user, Channel channel) {
 		return user.getChannel(channel.getName()) != null;
 	}
