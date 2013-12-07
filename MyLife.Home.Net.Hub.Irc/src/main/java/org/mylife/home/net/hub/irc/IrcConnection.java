@@ -143,4 +143,8 @@ public class IrcConnection {
 	public void execute(Message message) {
 		receive(message);
 	}
+	
+	public void pong(String value) {
+		pingTask.pong(value);
+	}
 }

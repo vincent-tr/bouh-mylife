@@ -275,8 +275,8 @@ public final class CommandUtils {
 		message.appendLastParameter("are supported by this server");
 		dest.send(message);
 
-		dest.execute(new Message("LUSERS"));
-		dest.execute(new Message("MOTD"));
+		//dest.execute(new Message("LUSERS"));
+		//dest.execute(new Message("MOTD"));
 	}
 
 	public static void sendNames(IrcServer server, User user, Channel channel) {
