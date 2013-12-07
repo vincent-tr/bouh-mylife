@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -15,6 +16,24 @@ import org.mylife.home.net.hub.irc.structure.Network;
 
 public class IrcServer extends Thread {
 
+	public static final String NAME;
+	public static final String VERSION;
+	public static final String BUILD_TIMESTAMP;
+	
+	static {
+		Properties ircServerProperties = new Properties();
+		String name = IrcServer.class.getPackage().getName().replace('/', '.') + "/ircserver.properties";
+		try {
+			ircServerProperties.load(IrcServer.class.getResourceAsStream(name));
+		} catch (IOException e) {
+			throw new RuntimeException("Error loading properties", e);
+		}
+		NAME = ircServerProperties.getProperty("name");
+		VERSION = ircServerProperties.getProperty("version");
+		BUILD_TIMESTAMP = ircServerProperties.getProperty("build.timestamp");
+
+	}
+	
 	/**
 	 * Logger
 	 */
@@ -175,11 +194,15 @@ public class IrcServer extends Thread {
 		}
 	}
 
-	public String getVersion() {
-		return "1.0.0";
-	}
-
 	public long getStartTimeMillis() {
 		return startTime;
+	}
+	
+	/**
+	 * Exécution 
+	 * @param runnable
+	 */
+	public void execute(Runnable runnable) {
+		
 	}
 }

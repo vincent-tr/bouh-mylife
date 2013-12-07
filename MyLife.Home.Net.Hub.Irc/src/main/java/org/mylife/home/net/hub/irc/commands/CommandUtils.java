@@ -208,9 +208,10 @@ public final class CommandUtils {
 		// maj de la base
 		server.getNetwork().userRemove(user);
 	}
-	
-	private static Message createNewNickMessage(IrcServer server, User user, int hopcount) {
-		
+
+	private static Message createNewNickMessage(IrcServer server, User user,
+			int hopcount) {
+
 		Message msg = new Message("NICK");
 
 		msg.appendParameter(user.getNick());
@@ -246,7 +247,8 @@ public final class CommandUtils {
 
 		message = Numerics.createMessage(server, Numerics.RPL_YOURHOST, user);
 		message.appendLastParameter("Your host is " + localServer.getName()
-				+ ", running version " + server.getVersion());
+				+ ", running version " + IrcServer.VERSION + "_"
+				+ IrcServer.BUILD_TIMESTAMP);
 		dest.send(message);
 
 		message = Numerics.createMessage(server, Numerics.RPL_CREATED, user);
@@ -256,8 +258,8 @@ public final class CommandUtils {
 
 		message = Numerics.createMessage(server, Numerics.RPL_MYINFO, user);
 		message.appendLastParameter(localServer.getName() + " "
-				+ IrcServer.class.getName() + "_v" + server.getVersion()
-				+ " - -");
+				+ IrcServer.NAME + "_v" + IrcServer.VERSION + "_"
+				+ IrcServer.BUILD_TIMESTAMP + " - -");
 		dest.send(message);
 
 		message = Numerics.createMessage(server, Numerics.RPL_ISUPPORT, user);
@@ -397,39 +399,40 @@ public final class CommandUtils {
 			boolean publishSelf) {
 
 		Network net = server.getNetwork();
-		
+
 		Connectable structure = dest.getStructure();
 		Server targetServer = null;
-		if(structure instanceof Server)
-			targetServer = (Server)structure;
+		if (structure instanceof Server)
+			targetServer = (Server) structure;
 
 		// envoi de tous les serveurs, en partant des plus proches vers les plus
 		// loins, sauf le serveur à qui on envoie le sync
 		sendServer(server, dest, server.getNetwork().getLocalServer(),
 				publishSelf, true, targetServer);
 
-		// Obtention de tous les utilisateurs sauf ceux du serveur à qui on envoie le sync
+		// Obtention de tous les utilisateurs sauf ceux du serveur à qui on
+		// envoie le sync
 		// Obtention des users locaux + ceux de chaque peer sauf le peer cible
 		Collection<User> users = new ArrayList<User>();
 		users.addAll(net.getLocalServer().getUsers());
-		for(Server peer : net.getPeerServers()) {
-			if(peer.equals(targetServer))
+		for (Server peer : net.getPeerServers()) {
+			if (peer.equals(targetServer))
 				continue;
 			users.addAll(net.getUsersBehindServer(peer));
 		}
-		
+
 		// Envoi des users
-		for(User user : users) {
-			Message msg = createNewNickMessage(server, user, 1/*??*/);
+		for (User user : users) {
+			Message msg = createNewNickMessage(server, user, 1/* ?? */);
 			dest.send(msg);
 		}
-		
+
 		// envoi des joins
 		// Remplacer par njoin avec les channels + modes
-		for(User user : users) {
+		for (User user : users) {
 			StringBuffer buffer = new StringBuffer();
-			for(Channel chan : user.getChannels()) {
-				if(buffer.length() > 0)
+			for (Channel chan : user.getChannels()) {
+				if (buffer.length() > 0)
 					buffer.append(',');
 				buffer.append(chan.getName());
 			}
@@ -443,9 +446,9 @@ public final class CommandUtils {
 			Server currentServer, boolean publishCurrent,
 			boolean publishChildren, Server excludedServer) {
 
-		if(currentServer.equals(excludedServer))
+		if (currentServer.equals(excludedServer))
 			return;
-		
+
 		if (publishCurrent) {
 			Server source = currentServer.getParent();
 			String sender = null;
@@ -458,7 +461,7 @@ public final class CommandUtils {
 			msg.appendLastParameter(currentServer.getName()); // description
 			dest.send(msg);
 		}
-		
+
 		if (publishChildren) {
 			for (Server child : currentServer.getchildren()) {
 				sendServer(server, dest, child, true, true, excludedServer);
