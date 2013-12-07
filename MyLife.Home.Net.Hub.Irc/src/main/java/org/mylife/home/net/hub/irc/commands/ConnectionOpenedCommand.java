@@ -22,6 +22,9 @@ public class ConnectionOpenedCommand {
 		Unregistered structure = new Unregistered();
 		src.setStructure(structure);
 		structure.setConnection(src);
+
+		if (src.getLocallyinitiated())
+			CommandUtils.sendSelf(server, src);
 	}
 
 }

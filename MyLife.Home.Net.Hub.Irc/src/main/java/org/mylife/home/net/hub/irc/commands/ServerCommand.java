@@ -74,9 +74,13 @@ public class ServerCommand implements Command {
 			src.close();
 			return;
 		}
-
-		publishServer(server, newServer);
-		CommandUtils.sendNetSync(server, src, true);
+		src.setStructure(newServer);
+		
+		publishServer(server, newServer, src);
+		
+		// Si connexion depuis nous alors nous avons déjà été publié à la connexion 
+		boolean publishSelf = !src.getLocallyinitiated();
+		CommandUtils.sendNetSync(server, src, publishSelf);
 	}
 
 	private void publishServer(IrcServer server, Server newServer,

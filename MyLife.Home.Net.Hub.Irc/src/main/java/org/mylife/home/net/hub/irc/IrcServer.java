@@ -11,11 +11,10 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.mylife.home.net.hub.irc.commands.CommandFactory;
-import org.mylife.home.net.hub.irc.commands.ConnectionOpenedCommand;
 import org.mylife.home.net.hub.irc.io.IOListener;
 import org.mylife.home.net.hub.irc.io.IOManager;
 import org.mylife.home.net.hub.irc.structure.Network;
+import org.mylife.home.net.hub.irc.tasks.ConnectTask;
 import org.mylife.home.net.hub.irc.tasks.ServerDisconnectTask;
 import org.mylife.home.net.hub.irc.tasks.UserDisconnectTask;
 
@@ -207,9 +206,21 @@ public class IrcServer extends Thread {
 		}
 
 		connections.add(connection);
-		ConnectionOpenedCommand cmd = CommandFactory.getInstance()
-				.getConnectionOpenedCommand();
-		cmd.invoke(this, connection);
+		connection.markConnected();
+	}
+	
+	private void newConnection(String address, int port, IrcConnectHandler connectHandler) {
+		IrcConnection connection = null;
+		try {
+			connection = new IrcConnection(this, address, port, connectHandler);
+			iom.addElement(connection.getIOConnection());
+		} catch (IOException e) {
+			log.log(Level.SEVERE, "Error creating connection", e);
+			return;
+		}
+
+		connections.add(connection);
+		// pas encore connecté
 	}
 
 	/* internal */void removeConnection(IrcConnection connection) {
@@ -309,5 +320,15 @@ public class IrcServer extends Thread {
 		return task.getResult();
 	}
 	
-	// TODO : open link
+	public void connect(String address, int port, IrcConnectHandler connectHandler) throws InterruptedException {
+		ConnectTask task = new ConnectTask(address, port, connectHandler, new ConnectTask.Handler() {
+			@Override
+			public void executeNewConnection(String address, int port,
+					IrcConnectHandler connectHandler) {
+				newConnection(address, port, connectHandler);
+			}
+		});
+		execute(task);
+		task.waitTask();
+	}
 }
