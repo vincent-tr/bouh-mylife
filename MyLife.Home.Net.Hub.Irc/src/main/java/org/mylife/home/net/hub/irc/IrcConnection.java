@@ -14,6 +14,7 @@ import org.mylife.home.net.hub.irc.protocol.Message;
 import org.mylife.home.net.hub.irc.protocol.Numerics;
 import org.mylife.home.net.hub.irc.protocol.Parser;
 import org.mylife.home.net.hub.irc.structure.Connectable;
+import org.mylife.home.net.hub.irc.tasks.PingTask;
 
 /**
  * Représentation d'une connexion IRC
@@ -34,6 +35,7 @@ public class IrcConnection {
 	private final Parser parser;
 	private final IOConnectionHandler connectionHandler;
 	private final ParserHandler parserHandler;
+	private final PingTask pingTask;
 
 	private Connectable structure;
 
@@ -43,6 +45,8 @@ public class IrcConnection {
 		this.parserHandler = new ParserHandler();
 		this.connection = new IOConnection(connectionHandler, socket);
 		this.parser = new Parser(parserHandler);
+		this.pingTask = new PingTask(this);
+		owner.addScheduledTask(pingTask);
 	}
 
 	private class IOConnectionHandler implements IOConnection.Handler {
@@ -110,6 +114,7 @@ public class IrcConnection {
 
 	public void close() {
 		owner.removeConnection(this);
+		owner.removeScheduledTask(pingTask);
 		try {
 			connection.close();
 		} catch (IOException ex) {
