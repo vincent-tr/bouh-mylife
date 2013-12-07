@@ -308,4 +308,6 @@ public class IrcServer extends Thread {
 		task.waitTask();
 		return task.getResult();
 	}
+	
+	// TODO : open link
 }
