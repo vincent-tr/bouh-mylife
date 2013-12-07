@@ -30,23 +30,42 @@ public class IrcConnection {
 	private final static Logger log = Logger.getLogger(IrcConnection.class
 			.getName());
 
-	private final IrcServer owner;
-	private final IOConnection connection;
-	private final Parser parser;
-	private final IOConnectionHandler connectionHandler;
-	private final ParserHandler parserHandler;
-	private final PingTask pingTask;
+	private IrcServer owner;
+	private IOConnection connection;
+	private Parser parser;
+	private IOConnectionHandler connectionHandler;
+	private ParserHandler parserHandler;
+	private PingTask pingTask;
+	private IrcConnectHandler connectHandler;
 
 	private Connectable structure;
 
-	public IrcConnection(IrcServer owner, SocketChannel socket) throws IOException {
+	public IrcConnection(IrcServer owner, SocketChannel socket)
+			throws IOException {
+		init(owner);
+		this.connection = new IOConnection(connectionHandler, socket);
+		connectionConnected(false);
+	}
+
+	public IrcConnection(IrcServer owner, String address, int port, IrcConnectHandler connectHandler)
+			throws IOException {
+		init(owner);
+		this.connectHandler = connectHandler;
+		this.connection = new IOConnection(connectionHandler, address, port);
+	}
+
+	private void init(IrcServer owner) {
 		this.owner = owner;
 		this.connectionHandler = new IOConnectionHandler();
 		this.parserHandler = new ParserHandler();
-		this.connection = new IOConnection(connectionHandler, socket);
 		this.parser = new Parser(parserHandler);
 		this.pingTask = new PingTask(this);
+	}
+
+	private void connectionConnected(boolean initiatedLocally) {
 		owner.addScheduledTask(pingTask);
+		if (initiatedLocally)
+			CommandUtils.sendSelf(owner, this);
 	}
 
 	private class IOConnectionHandler implements IOConnection.Handler {
@@ -63,12 +82,14 @@ public class IrcConnection {
 
 		@Override
 		public void connected() {
-			// TODO Auto-generated method stub
+			connectionConnected(true);
+			connectHandler.connected();
 		}
 
 		@Override
 		public void connectionFailed(IOException e) {
-			// TODO Auto-generated method stub
+			close();
+			connectHandler.connectionFailed(e);
 		}
 	}
 
@@ -86,10 +107,10 @@ public class IrcConnection {
 
 	}
 
-	/*internal*/ IOConnection getIOConnection() {
+	/* internal */IOConnection getIOConnection() {
 		return connection;
 	}
-	
+
 	public Connectable getStructure() {
 		return structure;
 	}
@@ -97,7 +118,7 @@ public class IrcConnection {
 	public void setStructure(Connectable structure) {
 		this.structure = structure;
 	}
-	
+
 	public String getRemoteHost() {
 		return connection.getRemoteHost();
 	}
@@ -121,29 +142,33 @@ public class IrcConnection {
 			log.log(Level.SEVERE, "Error closing connection", ex);
 		}
 
-		ConnectionClosedCommand cmd = CommandFactory.getInstance().getConnectionClosedCommand();
+		ConnectionClosedCommand cmd = CommandFactory.getInstance()
+				.getConnectionClosedCommand();
 		cmd.invoke(owner, this);
 	}
 
 	private void receive(Message message) {
-		
-		Command cmd = CommandFactory.getInstance().getCommand(message.getCommand());
-		if(cmd == null) {
+
+		Command cmd = CommandFactory.getInstance().getCommand(
+				message.getCommand());
+		if (cmd == null) {
 			CommandUtils.replyError(owner, this, Numerics.ERR_UNKNOWNCOMMAND);
 			return;
 		}
-		
+
 		cmd.invoke(owner, this, message);
 	}
-	
+
 	/**
-	 * Exécute le message spécifié comme s'il était arrivé depuis la partie distante
+	 * Exécute le message spécifié comme s'il était arrivé depuis la partie
+	 * distante
+	 * 
 	 * @param message
 	 */
 	public void execute(Message message) {
 		receive(message);
 	}
-	
+
 	public void pong(String value) {
 		pingTask.pong(value);
 	}
