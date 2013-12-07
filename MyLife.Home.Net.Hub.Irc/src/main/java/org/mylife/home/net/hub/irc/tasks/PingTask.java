@@ -27,8 +27,10 @@ public class PingTask implements Runnable {
 				pingTimeout();
 		} else {
 			// On regarde si on doit envoyer un ping
-			if (now >= lastSendPing + PING_INTERVAL)
+			if (now >= lastSendPing + PING_INTERVAL) {
 				sendPing();
+				lastSendPing = now;
+			}
 		}
 	}
 

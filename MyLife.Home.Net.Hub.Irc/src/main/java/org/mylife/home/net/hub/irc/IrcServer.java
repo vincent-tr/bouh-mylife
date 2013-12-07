@@ -27,7 +27,7 @@ public class IrcServer extends Thread {
 
 	static {
 		Properties ircServerProperties = new Properties();
-		String name = IrcServer.class.getPackage().getName().replace('.', '/')
+		String name = "/" + IrcServer.class.getPackage().getName().replace('.', '/')
 				+ "/ircserver.properties";
 		try {
 			ircServerProperties.load(IrcServer.class.getResourceAsStream(name));
