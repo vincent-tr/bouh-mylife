@@ -331,4 +331,6 @@ public class IrcServer extends Thread {
 		execute(task);
 		task.waitTask();
 	}
+	
+	// TODO : copie du réseau sans connexions, et export pour accès depuis extérieur en tasks
 }
