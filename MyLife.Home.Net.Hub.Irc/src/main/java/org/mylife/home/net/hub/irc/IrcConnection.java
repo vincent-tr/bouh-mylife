@@ -9,6 +9,7 @@ import org.mylife.home.net.hub.irc.commands.Command;
 import org.mylife.home.net.hub.irc.commands.CommandFactory;
 import org.mylife.home.net.hub.irc.commands.CommandUtils;
 import org.mylife.home.net.hub.irc.commands.ConnectionClosedCommand;
+import org.mylife.home.net.hub.irc.commands.ConnectionOpenedCommand;
 import org.mylife.home.net.hub.irc.io.IOConnection;
 import org.mylife.home.net.hub.irc.protocol.Message;
 import org.mylife.home.net.hub.irc.protocol.Numerics;
@@ -37,18 +38,20 @@ public class IrcConnection {
 	private ParserHandler parserHandler;
 	private PingTask pingTask;
 	private IrcConnectHandler connectHandler;
+	private boolean locallyinitiated;
 
 	private Connectable structure;
 
-	public IrcConnection(IrcServer owner, SocketChannel socket)
+	/* internal */IrcConnection(IrcServer owner, SocketChannel socket)
 			throws IOException {
+		locallyinitiated = false;
 		init(owner);
 		this.connection = new IOConnection(connectionHandler, socket);
-		connectionConnected(false);
 	}
 
-	public IrcConnection(IrcServer owner, String address, int port, IrcConnectHandler connectHandler)
-			throws IOException {
+	/* internal */IrcConnection(IrcServer owner, String address, int port,
+			IrcConnectHandler connectHandler) throws IOException {
+		locallyinitiated = true;
 		init(owner);
 		this.connectHandler = connectHandler;
 		this.connection = new IOConnection(connectionHandler, address, port);
@@ -62,10 +65,12 @@ public class IrcConnection {
 		this.pingTask = new PingTask(this);
 	}
 
-	private void connectionConnected(boolean initiatedLocally) {
+	/* internal */void markConnected() {
+		ConnectionOpenedCommand cmd = CommandFactory.getInstance()
+				.getConnectionOpenedCommand();
+		cmd.invoke(owner, this);
+
 		owner.addScheduledTask(pingTask);
-		if (initiatedLocally)
-			CommandUtils.sendSelf(owner, this);
 	}
 
 	private class IOConnectionHandler implements IOConnection.Handler {
@@ -82,7 +87,7 @@ public class IrcConnection {
 
 		@Override
 		public void connected() {
-			connectionConnected(true);
+			markConnected();
 			connectHandler.connected();
 		}
 
@@ -109,6 +114,10 @@ public class IrcConnection {
 
 	/* internal */IOConnection getIOConnection() {
 		return connection;
+	}
+
+	public boolean getLocallyinitiated() {
+		return locallyinitiated;
 	}
 
 	public Connectable getStructure() {
