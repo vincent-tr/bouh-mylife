@@ -15,6 +15,7 @@ import org.mylife.home.net.hub.irc.io.IOListener;
 import org.mylife.home.net.hub.irc.io.IOManager;
 import org.mylife.home.net.hub.irc.structure.Network;
 import org.mylife.home.net.hub.irc.tasks.ConnectTask;
+import org.mylife.home.net.hub.irc.tasks.NetworkAccessTask;
 import org.mylife.home.net.hub.irc.tasks.ServerDisconnectTask;
 import org.mylife.home.net.hub.irc.tasks.UserDisconnectTask;
 
@@ -26,7 +27,8 @@ public class IrcServer extends Thread {
 
 	static {
 		Properties ircServerProperties = new Properties();
-		String name = "/" + IrcServer.class.getPackage().getName().replace('.', '/')
+		String name = "/"
+				+ IrcServer.class.getPackage().getName().replace('.', '/')
 				+ "/ircserver.properties";
 		try {
 			ircServerProperties.load(IrcServer.class.getResourceAsStream(name));
@@ -79,6 +81,10 @@ public class IrcServer extends Thread {
 	}
 
 	public Network getNetwork() {
+		// Accès que depuis le thread du server
+		if (!Thread.currentThread().equals(this))
+			throw new UnsupportedOperationException(
+					"Not server thread : use requestNetworkAccess instead");
 		return net;
 	}
 
@@ -142,7 +148,7 @@ public class IrcServer extends Thread {
 
 		String netName = config.getNetworkName();
 		String serverName = config.getServerName();
-		if(serverName == null)
+		if (serverName == null)
 			serverName = InetAddress.getLocalHost().getHostName();
 		int serverToken = config.getServerToken();
 		if (serverToken == 0)
@@ -208,8 +214,9 @@ public class IrcServer extends Thread {
 		connections.add(connection);
 		connection.markConnected();
 	}
-	
-	private void newConnection(String address, int port, IrcConnectHandler connectHandler) {
+
+	private void newConnection(String address, int port,
+			IrcConnectHandler connectHandler) {
 		IrcConnection connection = null;
 		try {
 			connection = new IrcConnection(this, address, port, connectHandler);
@@ -319,18 +326,41 @@ public class IrcServer extends Thread {
 		task.waitTask();
 		return task.getResult();
 	}
-	
-	public void connect(String address, int port, IrcConnectHandler connectHandler) throws InterruptedException {
-		ConnectTask task = new ConnectTask(address, port, connectHandler, new ConnectTask.Handler() {
-			@Override
-			public void executeNewConnection(String address, int port,
-					IrcConnectHandler connectHandler) {
-				newConnection(address, port, connectHandler);
-			}
-		});
+
+	/**
+	 * Connexion d'un lien
+	 * 
+	 * @param address
+	 * @param port
+	 * @param connectHandler
+	 * @throws InterruptedException
+	 */
+	public void connect(String address, int port,
+			IrcConnectHandler connectHandler) throws InterruptedException {
+		ConnectTask task = new ConnectTask(address, port, connectHandler,
+				new ConnectTask.Handler() {
+					@Override
+					public void executeNewConnection(String address, int port,
+							IrcConnectHandler connectHandler) {
+						newConnection(address, port, connectHandler);
+					}
+				});
 		execute(task);
 		task.waitTask();
 	}
-	
-	// TODO : copie du réseau sans connexions, et export pour accès depuis extérieur en tasks
+
+	/**
+	 * Accès au réseau
+	 * 
+	 * @param handler
+	 * @throws InterruptedException
+	 */
+	public void requestNetworkAccess(IrcNetworkAccessHandler handler)
+			throws InterruptedException {
+		if (handler == null)
+			throw new IllegalArgumentException();
+		NetworkAccessTask task = new NetworkAccessTask(this, handler);
+		execute(task);
+		task.waitTask();
+	}
 }
