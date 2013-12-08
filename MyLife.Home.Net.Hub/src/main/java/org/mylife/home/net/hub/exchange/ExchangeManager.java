@@ -1,6 +1,5 @@
 package org.mylife.home.net.hub.exchange;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -11,10 +10,8 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
-import org.mylife.home.common.NetUtils;
-import org.mylife.home.net.hub.configuration.IrcBinding;
-import org.mylife.home.net.hub.configuration.IrcConfiguration;
-import org.mylife.home.net.hub.configuration.IrcOperator;
+import org.apache.commons.lang3.StringUtils;
+import org.mylife.home.net.hub.irc.IrcConfiguration;
 
 /**
  * Gestion des échanges
@@ -63,17 +60,8 @@ public class ExchangeManager {
 
 		private String networkName;
 		private String serverName;
-		private String serverDescription;
 		private int serverToken;
-		private int pingIntervalMs;
-		private int pingTimeoutMs;
-		private String location1;
-		private String location2;
-		private String email;
-		private String serverInfoContent;
-		private String serverMotdContent;
-		private final Collection<IrcBinding> bindings = new ArrayList<IrcBinding>();
-		private final Collection<IrcOperator> operators = new ArrayList<IrcOperator>();
+		private final Collection<IrcConfiguration.Listener> listeners = new ArrayList<IrcConfiguration.Listener>();
 
 		public IrcConfigImpl() {
 		}
@@ -94,14 +82,6 @@ public class ExchangeManager {
 			this.serverName = serverName;
 		}
 
-		public String getServerDescription() {
-			return serverDescription;
-		}
-
-		public void setServerDescription(String serverDescription) {
-			this.serverDescription = serverDescription;
-		}
-
 		public int getServerToken() {
 			return serverToken;
 		}
@@ -110,69 +90,31 @@ public class ExchangeManager {
 			this.serverToken = serverToken;
 		}
 
-		public int getPingIntervalMs() {
-			return pingIntervalMs;
+		public Collection<IrcConfiguration.Listener> getListeners() {
+			return listeners;
+		}
+	}
+	
+	private static class IrcListenerImpl implements IrcConfiguration.Listener {
+
+		private final String address;
+		private final int port;
+		
+		public IrcListenerImpl(String address, int port) {
+			this.address = address;
+			this.port = port;
+		}
+		
+		@Override
+		public String getAddress() {
+			return address;
 		}
 
-		public void setPingIntervalMs(int pingIntervalMs) {
-			this.pingIntervalMs = pingIntervalMs;
+		@Override
+		public int getPort() {
+			return port;
 		}
-
-		public int getPingTimeoutMs() {
-			return pingTimeoutMs;
-		}
-
-		public void setPingTimeoutMs(int pingTimeoutMs) {
-			this.pingTimeoutMs = pingTimeoutMs;
-		}
-
-		public String getLocation1() {
-			return location1;
-		}
-
-		public void setLocation1(String location1) {
-			this.location1 = location1;
-		}
-
-		public String getLocation2() {
-			return location2;
-		}
-
-		public void setLocation2(String location2) {
-			this.location2 = location2;
-		}
-
-		public String getEmail() {
-			return email;
-		}
-
-		public void setEmail(String email) {
-			this.email = email;
-		}
-
-		public String getServerInfoContent() {
-			return serverInfoContent;
-		}
-
-		public void setServerInfoContent(String serverInfoContent) {
-			this.serverInfoContent = serverInfoContent;
-		}
-
-		public String getServerMotdContent() {
-			return serverMotdContent;
-		}
-
-		public void setServerMotdContent(String serverMotdContent) {
-			this.serverMotdContent = serverMotdContent;
-		}
-
-		public Collection<IrcBinding> getBindings() {
-			return bindings;
-		}
-
-		public Collection<IrcOperator> getOperators() {
-			return operators;
-		}
+		
 	}
 
 	/**
@@ -187,27 +129,16 @@ public class ExchangeManager {
 		
 		IrcConfigImpl impl = new IrcConfigImpl();
 		
+		String serverName = container.networkName;
+		if(StringUtils.isEmpty(serverName))
+			serverName = null;
 		impl.setNetworkName(container.networkName);
-		impl.setServerName(container.serverName);
-		impl.setServerDescription(container.serverDescription);
+		impl.setServerName(serverName);
 		impl.setServerToken(container.serverToken);
-		impl.setPingIntervalMs(container.pingIntervalMs);
-		impl.setPingTimeoutMs(container.pingTimeoutMs);
-		impl.setLocation1(container.location1);
-		impl.setLocation2(container.location2);
-		impl.setEmail(container.email);
-		impl.setServerInfoContent(container.serverInfoContent);
-		impl.setServerMotdContent(container.serverMotdContent);
 		
-		if(container.bindings != null) {
-			for(XmlIrcBinding xmlBinding : container.bindings) {
-				impl.getBindings().add(marshal(xmlBinding));
-			}
-		}
-		
-		if(container.operators != null) {
-			for(XmlIrcOperator xmlOperator : container.operators) {
-				impl.getOperators().add(marshal(xmlOperator));
+		if(container.listeners != null) {
+			for(XmlIrcListener xmlListener : container.listeners) {
+				impl.getListeners().add(marshal(xmlListener));
 			}
 		}
 		
@@ -215,21 +146,11 @@ public class ExchangeManager {
 		
 	}
 	
-	private static IrcBinding marshal(XmlIrcBinding binding) {
+	private static IrcConfiguration.Listener marshal(XmlIrcListener listener) {
 		
-		String address = binding.address;
-		if("@host".equalsIgnoreCase(address)) {
-			try {
-				address = NetUtils.getPublicAddress().getHostAddress();
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		}
-			
-		return new IrcBinding(address, binding.port, binding.ssl);
-	}
-	
-	private static IrcOperator marshal(XmlIrcOperator operator) {
-		return new IrcOperator(operator.name, operator.host, operator.pass);
+		String address = listener.address;
+		if(StringUtils.isEmpty(address))
+			address = null;
+		return new IrcListenerImpl(address, listener.port);
 	}
 }

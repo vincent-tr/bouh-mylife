@@ -5,12 +5,11 @@ package org.mylife.home.net.hub.exchange;
  * @author trumpffv
  *
  */
-public class XmlIrcBinding {
+public class XmlIrcListener {
 
 	/**
 	 * Addresse : @host pour le nom de la machine courante
 	 */
 	public String address;
 	public int port;
-	public boolean ssl;
 }

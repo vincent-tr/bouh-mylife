@@ -5,11 +5,10 @@ import java.io.InputStream;
 import javax.xml.bind.JAXBException;
 
 import org.mylife.home.common.services.BaseManagerService;
-import org.mylife.home.net.hub.IrcServer;
-import org.mylife.home.net.hub.IrcServerMBean;
-import org.mylife.home.net.hub.configuration.IrcConfiguration;
 import org.mylife.home.net.hub.exchange.ExchangeManager;
 import org.mylife.home.net.hub.exchange.XmlIrcConfiguration;
+import org.mylife.home.net.hub.irc.IrcConfiguration;
+import org.mylife.home.net.hub.irc.IrcServer;
 
 /**
  * Service de gestion
@@ -64,7 +63,7 @@ public class ManagerService extends BaseManagerService {
 	protected void executeStop() throws Exception {
 		ServiceAccess.getInstance().getLinkService().stopAutoLinks();
 
-		server.stop();
+		server.close();
 		server = null;
 	}
 
@@ -73,7 +72,7 @@ public class ManagerService extends BaseManagerService {
 	 * 
 	 * @return
 	 */
-	public IrcServerMBean getServer() {
+	public IrcServer getServer() {
 		return server;
 	}
 }
