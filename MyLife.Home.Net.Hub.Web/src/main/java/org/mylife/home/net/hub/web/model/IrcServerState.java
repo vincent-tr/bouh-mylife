@@ -15,8 +15,7 @@ public class IrcServerState extends ServerState {
 	private boolean ircServer;
 	private String ircServerName;
 	private String ircNetworkName;
-	private Collection<String> ircBindings;
-	private String ircOperators;
+	private Collection<String> ircListeners;
 
 	public boolean isIrcServer() {
 		return ircServer;
@@ -42,20 +41,11 @@ public class IrcServerState extends ServerState {
 		this.ircNetworkName = ircNetworkName;
 	}
 
-	public Collection<String> getIrcBindings() {
-		return ircBindings;
+	public Collection<String> getIrcListeners() {
+		return ircListeners;
 	}
 
-	public void setIrcBindings(Collection<String> ircBindings) {
-		this.ircBindings = ircBindings;
+	public void setIrcListeners(Collection<String> ircListeners) {
+		this.ircListeners = ircListeners;
 	}
-
-	public String getIrcOperators() {
-		return ircOperators;
-	}
-
-	public void setIrcOperators(String ircOperators) {
-		this.ircOperators = ircOperators;
-	}
-
 }

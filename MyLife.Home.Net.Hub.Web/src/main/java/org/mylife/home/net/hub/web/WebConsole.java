@@ -11,11 +11,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.mylife.home.common.web.model.Severity;
-import org.mylife.home.net.hub.IrcServerMBean;
-import org.mylife.home.net.hub.configuration.IrcBinding;
-import org.mylife.home.net.hub.configuration.IrcConfiguration;
-import org.mylife.home.net.hub.configuration.IrcOperator;
-import org.mylife.home.net.hub.irc.Server;
+import org.mylife.home.net.hub.irc.IrcConfiguration;
+import org.mylife.home.net.hub.irc.IrcServer;
+import org.mylife.home.net.hub.services.LinkService;
 import org.mylife.home.net.hub.services.LinkService.RunningLink;
 import org.mylife.home.net.hub.services.ManagerService;
 import org.mylife.home.net.hub.services.ServiceAccess;
@@ -111,32 +109,21 @@ public class WebConsole extends HttpServlet {
 
 		}
 		
-		IrcServerMBean server = ServiceAccess.getInstance().getManagerService().getServer();
+		IrcServer server = ServiceAccess.getInstance().getManagerService().getServer();
 		serverState.setIrcServer(server != null);
 		if (server != null) {
-			IrcConfiguration config = server.getConfiguration();
-			Server ircServer = server.getServer();
+			IrcConfiguration config = server.getConfig();
+			serverState.setIrcServerName(server.getServerName());
+			serverState.setIrcNetworkName(server.getNetworkName());
 			
-			serverState.setIrcServerName(ircServer.getName());
-			serverState.setIrcNetworkName(ircServer.getNetwork().getName());
-			
-			serverState.setIrcBindings(new ArrayList<String>());
-			for (IrcBinding binding : config.getBindings()) {
-				String address = binding.getAddress();
+			serverState.setIrcListeners(new ArrayList<String>());
+			for (IrcConfiguration.Listener listener : config.getListeners()) {
+				String address = listener.getAddress();
 				if(StringUtils.isEmpty(address))
 					address = "localhost";
-				String ssl = binding.isSsl() ? "yes" : "no";
 				
-				serverState.getIrcBindings().add(address + ":" + binding.getPort() + " (ssl:" + ssl + ")");
+				serverState.getIrcListeners().add(address + ":" + listener.getPort());
 			}			
-
-			StringBuffer operators = new StringBuffer();
-			for(IrcOperator op : config.getOperators()) {
-				if(operators.length() > 0)
-					operators.append(", ");
-				operators.append(op.getName());
-			}
-			serverState.setIrcOperators(operators.toString());
 		}
 		
 		req.setAttribute("data", serverState);
@@ -146,7 +133,7 @@ public class WebConsole extends HttpServlet {
 	private void networkState(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 		
-		IrcServerMBean server = ServiceAccess.getInstance().getManagerService().getServer();
+		IrcServer server = ServiceAccess.getInstance().getManagerService().getServer();
 		if(server != null) 
 			req.setAttribute("data", server.getServer().getNetwork());
 		req.getRequestDispatcher("/jsp/NetworkState.jsp").forward(req, resp);
@@ -157,10 +144,12 @@ public class WebConsole extends HttpServlet {
 		
 		// On cherche un lien à fermer
 		String serverName = req.getParameter("server");
-		Set<RunningLink> links = ServiceAccess.getInstance().getLinkService().getRunning();
+		LinkService service = ServiceAccess.getInstance().getLinkService();
+		Set<RunningLink> links = service.getRunning();
 		for(RunningLink link : links) {
-			if(link.getServer().getName().equals(serverName)) {
-				link.disconnect();
+			if(link.getServerName().equals(serverName)) {
+				service.closeLink(link);
+				break;
 			}
 		}
 		
