@@ -14,15 +14,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.mylife.home.common.services.Service;
-import org.mylife.home.net.hub.IrcServerMBean;
-import org.mylife.home.net.hub.configuration.IrcLinkConnect;
 import org.mylife.home.net.hub.data.DataLink;
 import org.mylife.home.net.hub.data.DataLinkAccess;
-import org.mylife.home.net.hub.irc.Connection;
-import org.mylife.home.net.hub.irc.Server;
-import org.mylife.home.net.hub.irc.StreamConnection;
-import org.mylife.home.net.hub.irc.UnregisteredEntity;
-import org.mylife.home.net.hub.irc.Util;
+import org.mylife.home.net.hub.irc.IrcServer;
+import org.mylife.home.net.hub.irc.structure.Server;
 
 /**
  * Service de gestion des liens
@@ -49,7 +44,7 @@ public class LinkService implements Service {
 		DataLinkAccess access = new DataLinkAccess();
 		try {
 			access.createLink(link);
-			resetCachedLinks();
+			resetCachedConfig();
 		} finally {
 			access.close();
 		}
@@ -63,7 +58,7 @@ public class LinkService implements Service {
 			item.setAddress(link.getAddress());
 			item.setPort(link.getPort());
 			access.updateLink(item);
-			resetCachedLinks();
+			resetCachedConfig();
 		} finally {
 			access.close();
 		}
@@ -75,7 +70,7 @@ public class LinkService implements Service {
 			DataLink item = new DataLink();
 			item.setId(id);
 			access.deleteLink(item);
-			resetCachedLinks();
+			resetCachedConfig();
 		} finally {
 			access.close();
 		}
@@ -100,6 +95,10 @@ public class LinkService implements Service {
 	 */
 	public static class RunningLink {
 
+		private final String server;
+		private final String remoteHost;
+		private final int remotePort;
+		
 		private final Connection connection;
 
 		public RunningLink(Connection connection) {
@@ -124,7 +123,7 @@ public class LinkService implements Service {
 	}
 
 	public Set<RunningLink> getRunning() {
-		IrcServerMBean ircServer = ServiceAccess.getInstance()
+		IrcServer ircServer = ServiceAccess.getInstance()
 				.getManagerService().getServer();
 		if (ircServer == null)
 			return null;
@@ -141,28 +140,16 @@ public class LinkService implements Service {
 			autoLinksManager.reset();
 	}
 
-	private synchronized void resetCachedLinks() {
-		cachedLinksConnect = null;
+	private synchronized void resetCachedConfig() {
+		cachedConfig = null;
 	}
 
-	private Collection<IrcLinkConnect> cachedLinksConnect;
+	private Collection<DataLink> cachedConfig;
 
-	private void loadLinks() {
-		Collection<IrcLinkConnect> linksConnect = new ArrayList<IrcLinkConnect>();
-
-		List<DataLink> list = list();
-		for (DataLink item : list) {
-			linksConnect.add(new IrcLinkConnect(item.getName(), item
-					.getAddress(), item.getPort()));
-		}
-
-		cachedLinksConnect = linksConnect;
-	}
-
-	public synchronized Collection<IrcLinkConnect> getLinksConnect() {
-		if (cachedLinksConnect == null)
-			loadLinks();
-		return cachedLinksConnect;
+	public synchronized Collection<DataLink> getConfig() {
+		if (cachedConfig == null)
+			cachedConfig = list();
+		return cachedConfig;
 	}
 
 	// ---------- gestion des connexions de liens ----------
@@ -175,7 +162,7 @@ public class LinkService implements Service {
 	 */
 	private class AutoLinksManager extends Thread {
 
-		private final IrcServerMBean server;
+		private final IrcServer server;
 		private boolean closing = false;
 		private Date lastRefresh = null;
 
@@ -183,7 +170,7 @@ public class LinkService implements Service {
 			return lastRefresh;
 		}
 
-		public AutoLinksManager(IrcServerMBean server) {
+		public AutoLinksManager(IrcServer server) {
 			this.server = server;
 			setName(toString());
 			setDaemon(true);
@@ -227,10 +214,10 @@ public class LinkService implements Service {
 		private void refresh() throws IOException {
 
 			// Obtention des config à faire
-			Collection<IrcLinkConnect> todo = todo();
+			Collection<DataLink> todo = todo();
 
 			// On essaye de se connecter
-			for (IrcLinkConnect ilc : todo) {
+			for (DataLink ilc : todo) {
 				log.info("Connecting link : " + ilc.getName());
 				try {
 					tryConnect(ilc);
@@ -242,7 +229,7 @@ public class LinkService implements Service {
 			}
 		}
 
-		private void tryConnect(IrcLinkConnect configLink) throws IOException {
+		private void tryConnect(DataLink configLink) throws IOException {
 
 			// Repris de irc.commands.Connect
 
@@ -262,18 +249,18 @@ public class LinkService implements Service {
 			entity.setParameters(new String[0]);
 		}
 
-		private Collection<IrcLinkConnect> todo() throws IOException {
+		private Collection<DataLink> todo() throws IOException {
 
 			// Récupération des liens en fonctionnement
 			Set<RunningLink> running = running();
 
 			// Récupération de la config des liens
-			Collection<IrcLinkConnect> config = config();
+			Collection<DataLink> config = config();
 
 			// Pour chaque config, on cherche si un lien est en cours de
 			// fonctionnement
-			Collection<IrcLinkConnect> ret = new ArrayList<IrcLinkConnect>();
-			for (IrcLinkConnect ilc : config) {
+			Collection<DataLink> ret = new ArrayList<DataLink>();
+			for (DataLink ilc : config) {
 				if (!exists(ilc, running))
 					ret.add(ilc);
 			}
@@ -296,11 +283,11 @@ public class LinkService implements Service {
 			return ret;
 		}
 
-		private Collection<IrcLinkConnect> config() {
-			return getLinksConnect();
+		private Collection<DataLink> config() {
+			return getConfig();
 		}
 
-		private boolean exists(IrcLinkConnect config, Set<RunningLink> running)
+		private boolean exists(DataLink config, Set<RunningLink> running)
 				throws IOException {
 			for (RunningLink rl : running) {
 
@@ -322,7 +309,7 @@ public class LinkService implements Service {
 
 	private AutoLinksManager autoLinksManager;
 
-	public synchronized void startAutoLinks(IrcServerMBean server) {
+	public synchronized void startAutoLinks(IrcServer server) {
 		autoLinksManager = new AutoLinksManager(server);
 		autoLinksManager.start();
 	}
