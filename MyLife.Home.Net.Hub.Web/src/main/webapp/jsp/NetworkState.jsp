@@ -21,26 +21,24 @@
 		<table class="table_render">
 			<thead>
 				<tr>
-					<th colspan="5">Servers</th>
+					<th colspan="2">Local users</th>
 				</tr>
 				<tr>
-					<th width="25%">Name</th>
-					<th width="10%">Token</th>
-					<th width="10%">Hop count</th>
-					<th>Description</th>
-					<th width="10%">Users count</th>
+					<th width="80%">Name</th>
 				</tr>
 			</thead>
 			<tbody>
 				<%
-					for (Server server : data.getServers()) {
+					for (UserView user : data.getLocalServer().getUsers()) {
 				%>
 				<tr>
-					<td><%=WebTools.htmlEscape(server.getName())%></td>
-					<td><%=WebTools.htmlEscape(String.valueOf(server.getToken()))%></td>
-					<td><%=WebTools.htmlEscape(String.valueOf(server.getHopCount()))%></td>
-					<td><%=WebTools.htmlEscape(server.getDescription())%></td>
-					<td><%=WebTools.htmlEscape(String.valueOf(server.getUsers().size()))%></td>
+					<td><%=WebTools.htmlEscape(user.getName())%></td>
+				</tr>
+				<tr>
+					<td><a
+						href="?action=userClose&user=<%=WebTools.urlEscape(user.getName())%>"><img
+							src="<%=WebTools.image(pageContext, "erase.png")%>"
+							title="Supprimer" /></a></td>
 				</tr>
 				<%
 					}
@@ -52,58 +50,21 @@
 		<table class="table_render">
 			<thead>
 				<tr>
-					<th colspan="4">Users</th>
+					<th colspan="2">Channels</th>
 				</tr>
 				<tr>
-					<th width="20%">Nick</th>
-					<th width="20%">Host</th>
-					<th width="20%">Server</th>
-					<th>Channels</th>
-				</tr>
-			</thead>
-			<tbody>
-				<%
-					for (Server server : data.getServers()) {
-						for(User user : server.getUsers()) {
-							StringBuffer channels = new StringBuffer();
-							for(Channel chan : user.getChannels()) {
-								if(channels.length() > 0)
-									channels.append(", ");
-								channels.append(chan.getName());
-							}
-				%>
-				<tr>
-					<td><%=WebTools.htmlEscape(user.getNick())%></td>
-					<td><%=WebTools.htmlEscape(user.getHostName())%></td>
-					<td><%=WebTools.htmlEscape(server.getName())%></td>
-					<td><%=WebTools.htmlEscape(channels.toString())%></td>
-				</tr>
-				<%
-						}
-					}
-				%>
-			</tbody>
-		</table>
-		&nbsp;
-			
-		<table class="table_render">
-			<thead>
-				<tr>
-					<th colspan="4">Channels</th>
-				</tr>
-				<tr>
-					<th width="25%">Name</th>
+					<th width="20%">Name</th>
 					<th>Users</th>
 				</tr>
 			</thead>
 			<tbody>
 				<%
-					for (Channel channel : data.getChannels()) {
+					for (ChannelView channel : data.getChannels()) {
 						StringBuffer users = new StringBuffer();
-						for(User user : channel.getUsers()) {
+						for(String user : channel.getUsers()) {
 							if(users.length() > 0)
 								users.append(", ");
-							users.append(user.getNick());
+							users.append(user);
 						}
 				%>
 				<tr>
@@ -113,6 +74,21 @@
 				<%
 					}
 				%>
+			</tbody>
+		</table>
+		&nbsp;
+		
+		<table class="table_render">
+			<thead>
+				<tr>
+					<th colspan="2">Map</th>
+				</tr>
+				<tr>
+					<th width="20%">Name</th>
+					<th>Users</th>
+				</tr>
+			</thead>
+			<tbody>
 			</tbody>
 		</table>
 <%

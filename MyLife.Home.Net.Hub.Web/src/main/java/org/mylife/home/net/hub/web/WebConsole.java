@@ -55,8 +55,10 @@ public class WebConsole extends HttpServlet {
 			networkState(req, resp);
 		} else if ("linksState".equals(action)) {
 			linksState(req, resp);
-		} else if ("linksClose".equals(action)) {
-			linksClose(req, resp);
+		} else if ("serverClose".equals(action)) {
+			serverClose(req, resp);
+		} else if ("userClose".equals(action)) {
+			userClose(req, resp);
 		} else if ("start".equals(action)) {
 			start(req, resp);
 		} else if ("stop".equals(action)) {
@@ -82,7 +84,8 @@ public class WebConsole extends HttpServlet {
 		case ManagerService.STATE_ERROR:
 			serverState.setState("ERROR");
 			serverState.setSeverity(Severity.ERROR);
-			serverState.setError(ServiceAccess.getInstance().getManagerService().getError());
+			serverState.setError(ServiceAccess.getInstance()
+					.getManagerService().getError());
 			serverState.setCanStop(true);
 			serverState.setCanStart(true);
 			break;
@@ -109,58 +112,83 @@ public class WebConsole extends HttpServlet {
 			break;
 
 		}
-		
-		IrcServer server = ServiceAccess.getInstance().getManagerService().getServer();
+
+		IrcServer server = ServiceAccess.getInstance().getManagerService()
+				.getServer();
 		serverState.setIrcServer(server != null);
 		if (server != null) {
 			IrcConfiguration config = server.getConfig();
 			serverState.setIrcServerName(server.getServerName());
 			serverState.setIrcNetworkName(server.getNetworkName());
-			
+
 			serverState.setIrcListeners(new ArrayList<String>());
 			for (IrcConfiguration.Listener listener : config.getListeners()) {
 				String address = listener.getAddress();
-				if(StringUtils.isEmpty(address))
+				if (StringUtils.isEmpty(address))
 					address = "localhost";
-				
-				serverState.getIrcListeners().add(address + ":" + listener.getPort());
-			}			
+
+				serverState.getIrcListeners().add(
+						address + ":" + listener.getPort());
+			}
 		}
-		
+
 		req.setAttribute("data", serverState);
 		req.getRequestDispatcher("/jsp/ServerState.jsp").forward(req, resp);
 	}
-	
+
+	private void userClose(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+
+		// On cherche un user à fermer
+		String userName = req.getParameter("user");
+		IrcServer server = ServiceAccess.getInstance().getManagerService()
+				.getServer();
+		if (server != null) {
+			int idx;
+			if ((idx = userName.indexOf('!')) > -1)
+				userName = userName.substring(0, idx);
+			try {
+				server.externalDisconnectUser(userName);
+			} catch (InterruptedException e) {
+				// interrupted
+			}
+		}
+
+		resp.sendRedirect(req.getRequestURI());
+	}
+
 	private void networkState(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		
-		IrcServer server = ServiceAccess.getInstance().getManagerService().getServer();
-		if(server != null)
+
+		IrcServer server = ServiceAccess.getInstance().getManagerService()
+				.getServer();
+		if (server != null)
 			req.setAttribute("data", NetworkView.getView(server));
 		req.getRequestDispatcher("/jsp/NetworkState.jsp").forward(req, resp);
 	}
-	
-	private void linksClose(HttpServletRequest req, HttpServletResponse resp)
+
+	private void serverClose(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		
+
 		// On cherche un lien à fermer
 		String serverName = req.getParameter("server");
 		LinkService service = ServiceAccess.getInstance().getLinkService();
 		Set<RunningLink> links = service.getRunning();
-		for(RunningLink link : links) {
-			if(link.getServerName().equals(serverName)) {
+		for (RunningLink link : links) {
+			if (link.getServerName().equals(serverName)) {
 				service.closeLink(link);
 				break;
 			}
 		}
-		
+
 		resp.sendRedirect(req.getRequestURI());
 	}
-	
+
 	private void linksState(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		
-		Set<RunningLink> links = ServiceAccess.getInstance().getLinkService().getRunning();
+
+		Set<RunningLink> links = ServiceAccess.getInstance().getLinkService()
+				.getRunning();
 		req.setAttribute("data", links);
 		req.getRequestDispatcher("/jsp/LinksState.jsp").forward(req, resp);
 	}

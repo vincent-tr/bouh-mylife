@@ -36,7 +36,7 @@
 					<td><%=WebTools.htmlEscape(link.getRemoteHost())%></td>
 					<td><%=WebTools.htmlEscape(link.getServerName())%></td>
 					<td><a
-						href="?action=linksClose&server=<%=WebTools.urlEscape(link.getServerName())%>"><img
+						href="?action=serverClose&server=<%=WebTools.urlEscape(link.getServerName())%>"><img
 							src="<%=WebTools.image(pageContext, "erase.png")%>"
 							title="Supprimer" /></a></td>
 				</tr>
