@@ -53,20 +53,14 @@
 			<td><%=WebTools.htmlEscape(data.getIrcNetworkName())%></td>
 		</tr>
 		<%
-			for (String binding : data.getIrcBindings()) {
+				for (String listener : data.getIrcListeners()) {
 		%>
 		<tr>
-			<td>IRC binding :</td>
-			<td><%=WebTools.htmlEscape(binding)%></td>
+			<td>IRC listener :</td>
+			<td><%=WebTools.htmlEscape(listener)%></td>
 		</tr>
 		<%
-			}
-		%>
-		<tr>
-			<td>IRC operators :</td>
-			<td><%=WebTools.htmlEscape(data.getIrcOperators())%></td>
-		</tr>
-		<%
+				}
 			}
 		%>
 	</tbody>
