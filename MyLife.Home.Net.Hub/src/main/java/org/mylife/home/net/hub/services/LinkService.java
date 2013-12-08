@@ -1,22 +1,23 @@
 package org.mylife.home.net.hub.services;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.mylife.home.common.services.Service;
 import org.mylife.home.net.hub.data.DataLink;
 import org.mylife.home.net.hub.data.DataLinkAccess;
+import org.mylife.home.net.hub.irc.IrcConnectHandler;
+import org.mylife.home.net.hub.irc.IrcConnection;
+import org.mylife.home.net.hub.irc.IrcNetworkAccessHandler;
 import org.mylife.home.net.hub.irc.IrcServer;
+import org.mylife.home.net.hub.irc.structure.Network;
 import org.mylife.home.net.hub.irc.structure.Server;
 
 /**
@@ -95,44 +96,69 @@ public class LinkService implements Service {
 	 */
 	public static class RunningLink {
 
-		private final String server;
+		private final String serverName;
 		private final String remoteHost;
-		private final int remotePort;
-		
-		private final Connection connection;
+		private final boolean locallyInitiated;
 
-		public RunningLink(Connection connection) {
-			this.connection = connection;
+		/**
+		 * Doit être appelé sur le thread du serveur
+		 * 
+		 * @param peerServer
+		 */
+		public RunningLink(Server peerServer) {
+			this.serverName = peerServer.getName();
+			IrcConnection con = peerServer.getConnection();
+			this.remoteHost = con.getRemoteHost();
+			this.locallyInitiated = con.getLocallyinitiated();
 		}
 
-		public Server getServer() {
-			return (Server) connection.getHandler().getEntity();
+		public String getServerName() {
+			return serverName;
 		}
 
-		public Connection getConnection() {
-			return connection;
+		public String getRemoteHost() {
+			return remoteHost;
 		}
 
-		public boolean isConnectLink() {
-			return connection.isLocallyInitiated();
-		}
-
-		public void disconnect() {
-			getServer().disconnect("Closing link from admin console");
+		public boolean isLocallyInitiated() {
+			return locallyInitiated;
 		}
 	}
 
 	public Set<RunningLink> getRunning() {
-		IrcServer ircServer = ServiceAccess.getInstance()
-				.getManagerService().getServer();
+		IrcServer ircServer = ServiceAccess.getInstance().getManagerService()
+				.getServer();
 		if (ircServer == null)
 			return null;
-		Set<Server> servers = ircServer.getServerLinks();
-		Set<RunningLink> links = new HashSet<RunningLink>();
-		for (Server server : servers) {
-			links.add(new RunningLink(server.getHandler().getConnection()));
+
+		try {
+			final Set<RunningLink> links = new HashSet<RunningLink>();
+			ircServer.requestNetworkAccess(new IrcNetworkAccessHandler() {
+				@Override
+				public void execute(Network net) {
+					for (Server peerServer : net.getPeerServers()) {
+						links.add(new RunningLink(peerServer));
+					}
+				}
+			});
+			return links;
+		} catch (InterruptedException e) {
+			log.warning("Interrupted operation !");
+			return null;
 		}
-		return links;
+	}
+
+	public void linkClose(RunningLink link) {
+		IrcServer ircServer = ServiceAccess.getInstance().getManagerService()
+				.getServer();
+		if (ircServer == null)
+			return;
+
+		try {
+			ircServer.externalDisconnectServer(link.getServerName());
+		} catch (InterruptedException e) {
+			log.warning("Interrupted operation !");
+		}
 	}
 
 	public synchronized void refreshRunning() {
@@ -218,35 +244,32 @@ public class LinkService implements Service {
 
 			// On essaye de se connecter
 			for (DataLink ilc : todo) {
-				log.info("Connecting link : " + ilc.getName());
-				try {
-					tryConnect(ilc);
-					log.info("Link connected : " + ilc.getName());
-				} catch (IOException ioe) {
-					log.log(Level.WARNING,
-							"Link connection failed : " + ilc.getName(), ioe);
-				}
+				tryConnect(ilc);
 			}
 		}
 
-		private void tryConnect(DataLink configLink) throws IOException {
+		private void tryConnect(final DataLink configLink) {
 
-			// Repris de irc.commands.Connect
+			log.info("Link connecting : " + configLink.getName());
+			try {
+				server.connect(configLink.getAddress(), configLink.getPort(),
+						new IrcConnectHandler() {
+							@Override
+							public void connected(IrcConnection connection) {
+								log.info("Link success : "
+										+ configLink.getName());
+							}
 
-			StreamConnection connection = new StreamConnection(new Socket(
-					configLink.getRemoteAddress(), configLink.getRemotePort()),
-					server.getConnectLinks(), Executors.newSingleThreadExecutor(),
-					true);
-			Connection.Handler handler = new Connection.Handler(server,
-					connection);
-			connection.setHandler(handler);
-			connection.start();
-			UnregisteredEntity entity = (UnregisteredEntity) handler
-					.getEntity();
-			//Util.sendPass(entity, configLink.getPassword());
-			Util.sendServer(entity);
-			// so that we know we sent PASS & SERVER
-			entity.setParameters(new String[0]);
+							@Override
+							public void connectionFailed(
+									IrcConnection connection, IOException e) {
+								log.warning("Link failed : "
+										+ configLink.getName());
+							}
+						});
+			} catch (InterruptedException e) {
+				log.warning("Interrupted operation !");
+			}
 		}
 
 		private Collection<DataLink> todo() throws IOException {
@@ -276,7 +299,7 @@ public class LinkService implements Service {
 			// On ne garde que ceux en connect
 			Set<RunningLink> ret = new HashSet<RunningLink>();
 			for (RunningLink rl : source) {
-				if (rl.isConnectLink())
+				if (rl.isLocallyInitiated())
 					ret.add(rl);
 			}
 
@@ -290,17 +313,8 @@ public class LinkService implements Service {
 		private boolean exists(DataLink config, Set<RunningLink> running)
 				throws IOException {
 			for (RunningLink rl : running) {
-
-				Connection con = rl.getConnection();
-				if (con.getRemotePort() != config.getRemotePort())
-					continue;
-
-				String confAddr = InetAddress.getByName(
-						config.getRemoteAddress()).getHostAddress();
-				if (!confAddr.equalsIgnoreCase(con.getRemoteAddress()))
-					continue;
-
-				return true;
+				if (rl.getServerName().equalsIgnoreCase(config.getName()))
+					return true;
 			}
 
 			return false;
