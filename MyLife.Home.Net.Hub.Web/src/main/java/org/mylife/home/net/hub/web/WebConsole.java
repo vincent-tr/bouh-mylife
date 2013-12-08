@@ -18,6 +18,7 @@ import org.mylife.home.net.hub.services.LinkService.RunningLink;
 import org.mylife.home.net.hub.services.ManagerService;
 import org.mylife.home.net.hub.services.ServiceAccess;
 import org.mylife.home.net.hub.web.model.IrcServerState;
+import org.mylife.home.net.hub.web.model.NetworkView;
 
 /**
  * Servlet console
@@ -134,8 +135,8 @@ public class WebConsole extends HttpServlet {
 			throws ServletException, IOException {
 		
 		IrcServer server = ServiceAccess.getInstance().getManagerService().getServer();
-		if(server != null) 
-			req.setAttribute("data", server.getServer().getNetwork());
+		if(server != null)
+			req.setAttribute("data", NetworkView.getView(server));
 		req.getRequestDispatcher("/jsp/NetworkState.jsp").forward(req, resp);
 	}
 	

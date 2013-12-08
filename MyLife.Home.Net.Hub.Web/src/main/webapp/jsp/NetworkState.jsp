@@ -2,9 +2,9 @@
     pageEncoding="ISO-8859-1"%>
 <%@ page import="java.util.List"%>
 <%@ page import="org.mylife.home.common.web.WebTools"%>
-<%@ page import="org.mylife.home.net.hub.irc.*"%>
+<%@ page import="org.mylife.home.net.hub.web.model.*"%>
 <%
-	Network data = (Network) pageContext.getRequest()
+	NetworkView data = (NetworkView) pageContext.getRequest()
 			.getAttribute("data");
 %>
 
