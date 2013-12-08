@@ -2,28 +2,10 @@
 <ircConfiguration>
 	<networkName>mti-team2.dyndns.org</networkName>
 	<serverName></serverName>
-	<serverDescription></serverDescription>
 	<serverToken>0</serverToken>
-	<pingIntervalMs>30000</pingIntervalMs>
-	<pingTimeoutMs>60000</pingTimeoutMs>
-	<location1>location1</location1>
-	<location2>location2</location2>
-	<email>email</email>
-	<serverInfoContent>info</serverInfoContent>
-	<serverMotdContent>motd</serverMotdContent>
-	<bindings>
-		<address>@host</address>
-		<port>6667</port>
-		<ssl>false</ssl>
-	</bindings>
-	<bindings>
+	<listeners>
 		<address></address>
 		<port>6667</port>
 		<ssl>false</ssl>
-	</bindings>
-	<operators>
-		<name>bouh</name>
-		<host>*</host>
-		<pass>toto</pass>
-	</operators>
+	</listeners>
 </ircConfiguration>
