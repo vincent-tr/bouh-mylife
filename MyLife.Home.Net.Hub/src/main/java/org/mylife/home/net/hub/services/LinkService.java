@@ -148,7 +148,7 @@ public class LinkService implements Service {
 		}
 	}
 
-	public void linkClose(RunningLink link) {
+	public void closeLink(RunningLink link) {
 		IrcServer ircServer = ServiceAccess.getInstance().getManagerService()
 				.getServer();
 		if (ircServer == null)
