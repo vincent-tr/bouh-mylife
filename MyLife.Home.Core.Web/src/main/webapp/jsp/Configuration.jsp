@@ -25,7 +25,7 @@
 </script>
 
 <div class="tabs">
-	<table>
+	<table class="tabHeaders">
 		<tr>
 			<td>
 				<ul>

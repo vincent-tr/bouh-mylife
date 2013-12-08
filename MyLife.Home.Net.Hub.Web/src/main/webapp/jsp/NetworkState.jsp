@@ -1,5 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
-    pageEncoding="ISO-8859-1"%>
+	pageEncoding="ISO-8859-1"%>
 <%@ page import="java.util.List"%>
 <%@ page import="org.mylife.home.common.web.WebTools"%>
 <%@ page import="org.mylife.home.net.hub.web.model.*"%>
@@ -10,13 +10,13 @@
 
 <div class="table_render_outer">
 	<div class="table_render_inner">
-<%
-	if(data == null) {
-%>
-	No data available
-<%
-	} else {
-%>
+		<%
+			if (data == null) {
+		%>
+		No data available
+		<%
+			} else {
+		%>
 
 		<table class="table_render">
 			<thead>
@@ -44,7 +44,7 @@
 			</tbody>
 		</table>
 		&nbsp;
-		
+
 		<table class="table_render">
 			<thead>
 				<tr>
@@ -58,12 +58,12 @@
 			<tbody>
 				<%
 					for (ChannelView channel : data.getChannels()) {
-						StringBuffer users = new StringBuffer();
-						for(String user : channel.getUsers()) {
-							if(users.length() > 0)
-								users.append(", ");
-							users.append(user);
-						}
+							StringBuffer users = new StringBuffer();
+							for (String user : channel.getUsers()) {
+								if (users.length() > 0)
+									users.append(", ");
+								users.append(user);
+							}
 				%>
 				<tr>
 					<td><%=WebTools.htmlEscape(channel.getName())%></td>
@@ -75,22 +75,41 @@
 			</tbody>
 		</table>
 		&nbsp;
-		
+
+		<%!private void renderServerMap(StringBuffer buffer, int indent,
+			ServerView server) {
+
+	}%>
+
 		<table class="table_render">
 			<thead>
 				<tr>
-					<th colspan="2">Map</th>
-				</tr>
-				<tr>
-					<th width="20%">Name</th>
-					<th>Users</th>
+					<th>Map</th>
 				</tr>
 			</thead>
 			<tbody>
+				<tr>
+					<td>
+						<ul>
+							<li><img
+							src="<%=WebTools.image(pageContext, "server.gif")%>"
+							title="Serveur" />Server</li>
+							<li><img
+							src="<%=WebTools.image(pageContext, "user.png")%>"
+							title="Utilisateur" />User</li>
+							<li>Server
+								<ul>
+									<li>Item1</li>
+									<li>Item2</li>
+								</ul>
+							</li>
+						</ul>
+					</td>
+				</tr>
 			</tbody>
 		</table>
-<%
-	}
-%>
+		<%
+			}
+		%>
 	</div>
 </div>
