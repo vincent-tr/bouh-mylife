@@ -33,8 +33,6 @@
 				%>
 				<tr>
 					<td><%=WebTools.htmlEscape(user.getName())%></td>
-				</tr>
-				<tr>
 					<td><a
 						href="?action=userClose&user=<%=WebTools.urlEscape(user.getName())%>"><img
 							src="<%=WebTools.image(pageContext, "erase.png")%>"
