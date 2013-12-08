@@ -313,6 +313,8 @@ public class IrcServer extends Thread {
 	public void execute(Runnable runnable) {
 		if (runnable == null)
 			throw new IllegalArgumentException();
+		if(externalTasks == null)
+			throw new IllegalStateException("Not ready to execute external tasks");
 		externalTasks.add(runnable);
 		// Arrêt du select pour permettre l'exécution 'immédiate' de la tâche
 		iom.wakeup();

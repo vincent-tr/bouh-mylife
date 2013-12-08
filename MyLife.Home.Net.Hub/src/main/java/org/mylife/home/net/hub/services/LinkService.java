@@ -224,6 +224,8 @@ public class LinkService implements Service {
 
 				try {
 					refresh();
+				}catch (IllegalStateException e) {
+					// Le serveur n'est pas encore pret on essayera plus tard
 				} catch (Exception e) {
 					log.log(Level.SEVERE, "Error refreshing", e);
 				}
