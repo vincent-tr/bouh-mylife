@@ -73,12 +73,12 @@ public class IOConnection extends IOElement {
 	private void finishConnect() throws IOException {
 		try {
 			socket.finishConnect();
+			// On change les opérations à surveiller de CONNECT à READ
+			getSelectionKey().interestOps(SelectionKey.OP_READ);
 			handler.connected();
 		} catch (IOException e) {
 			handler.connectionFailed(e);
 		}
-		// On repasse en bloquant
-		socket.configureBlocking(true);
 		connecting = false;
 	}
 

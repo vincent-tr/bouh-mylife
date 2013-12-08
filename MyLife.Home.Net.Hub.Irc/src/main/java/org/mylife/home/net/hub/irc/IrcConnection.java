@@ -38,20 +38,31 @@ public class IrcConnection {
 	private ParserHandler parserHandler;
 	private PingTask pingTask;
 	private IrcConnectHandler connectHandler;
-	private boolean locallyinitiated;
+	private boolean locallyInitiated;
+	private boolean closing = false;
 
 	private Connectable structure;
 
+	@Override
+	public String toString() {
+		if (locallyInitiated)
+			return "IrcConnection:" + owner.getServerName() + " -> "
+					+ connection.getRemoteHost();
+		else
+			return "IrcConnection:" + connection.getRemoteHost() + " -> "
+					+ owner.getServerName();
+	}
+
 	/* internal */IrcConnection(IrcServer owner, SocketChannel socket)
 			throws IOException {
-		locallyinitiated = false;
+		locallyInitiated = false;
 		init(owner);
 		this.connection = new IOConnection(connectionHandler, socket);
 	}
 
 	/* internal */IrcConnection(IrcServer owner, String address, int port,
 			IrcConnectHandler connectHandler) throws IOException {
-		locallyinitiated = true;
+		locallyInitiated = true;
 		init(owner);
 		this.connectHandler = connectHandler;
 		this.connection = new IOConnection(connectionHandler, address, port);
@@ -117,7 +128,7 @@ public class IrcConnection {
 	}
 
 	public boolean getLocallyinitiated() {
-		return locallyinitiated;
+		return locallyInitiated;
 	}
 
 	public Connectable getStructure() {
@@ -143,17 +154,25 @@ public class IrcConnection {
 	}
 
 	public void close() {
-		owner.removeConnection(this);
-		owner.removeScheduledTask(pingTask);
+		if (closing)
+			return;
 		try {
-			connection.close();
-		} catch (IOException ex) {
-			log.log(Level.SEVERE, "Error closing connection", ex);
-		}
+			// réentrance
+			closing = true;
+			owner.removeConnection(this);
+			owner.removeScheduledTask(pingTask);
+			try {
+				connection.close();
+			} catch (IOException ex) {
+				log.log(Level.SEVERE, "Error closing connection", ex);
+			}
 
-		ConnectionClosedCommand cmd = CommandFactory.getInstance()
-				.getConnectionClosedCommand();
-		cmd.invoke(owner, this);
+			ConnectionClosedCommand cmd = CommandFactory.getInstance()
+					.getConnectionClosedCommand();
+			cmd.invoke(owner, this);
+		} finally {
+			closing = false;
+		}
 	}
 
 	private void receive(Message message) {

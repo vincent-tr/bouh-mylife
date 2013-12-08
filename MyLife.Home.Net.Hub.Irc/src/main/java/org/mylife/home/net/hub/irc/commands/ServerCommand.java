@@ -75,6 +75,7 @@ public class ServerCommand implements Command {
 			return;
 		}
 		src.setStructure(newServer);
+		newServer.setConnection(src);
 		
 		publishServer(server, newServer, src);
 		
