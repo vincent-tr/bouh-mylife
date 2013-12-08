@@ -15,6 +15,10 @@ public final class Numerics {
 	public static final Numerics RPL_MYINFO = new Numerics("004", "RPL_MYINFO");
 	public static final Numerics RPL_ISUPPORT = new Numerics("005",
 			"RPL_ISUPPORT");
+	public static final Numerics RPL_MAP = new Numerics("006",
+			"RPL_MAP");
+	public static final Numerics RPL_MAPEND = new Numerics("007",
+			"RPL_MAPEND");
 	public static final Numerics RPL_STATSCOMMANDS = new Numerics("212",
 			"RPL_STATSCOMMANDS");
 	public static final Numerics RPL_ENDOFSTATS = new Numerics("219",
