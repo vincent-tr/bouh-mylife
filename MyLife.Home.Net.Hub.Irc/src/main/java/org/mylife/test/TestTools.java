@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.logging.Logger;
 
 import org.mylife.home.net.hub.irc.IrcConnectHandler;
+import org.mylife.home.net.hub.irc.IrcConnection;
 import org.mylife.home.net.hub.irc.IrcServer;
 
 public final class TestTools {
@@ -34,12 +35,12 @@ public final class TestTools {
 			from.connect("localhost", confTo.getListenPort(), new IrcConnectHandler() {
 
 				@Override
-				public void connected() {
+				public void connected(IrcConnection connection) {
 					log.info("Connection from '" + from.getServerName() + "' to '" + to.getServerName() + "' success");
 				}
 
 				@Override
-				public void connectionFailed(IOException e) {
+				public void connectionFailed(IrcConnection connection, IOException e) {
 					log.info("Connection from '" + from.getServerName() + "' to '" + to.getServerName() + "' failed");
 				}
 			});
