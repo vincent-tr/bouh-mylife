@@ -56,7 +56,7 @@ public class ConnectionClosedCommand {
 
 		final String reason = "Connection error";
 		Network net = server.getNetwork();
-		CommandUtils.sendNetSplit(server, structure, reason);
+		CommandUtils.sendNetSplit(server, structure, reason, structure.getConnection());
 
 		net.serverRemove(structure);
 	}

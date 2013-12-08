@@ -44,4 +44,9 @@ public class Channel {
 		return Collections.unmodifiableCollection(users);
 	}
 
+	@Override
+	public String toString() {
+		return "Channel:" + name;
+	}
+
 }

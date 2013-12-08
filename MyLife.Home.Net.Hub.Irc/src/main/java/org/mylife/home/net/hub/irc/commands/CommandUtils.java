@@ -230,7 +230,7 @@ public final class CommandUtils {
 
 		// Propagation du nouvel utilisateur
 		Message msg = createNewNickMessage(server, user, hopcount);
-		CommandUtils.dispatchServerMessage(server, msg);
+		CommandUtils.dispatchServerMessage(server, msg, excluded);
 	}
 
 	public static void userWelcome(IrcServer server, User user) {
@@ -436,9 +436,11 @@ public final class CommandUtils {
 					buffer.append(',');
 				buffer.append(chan.getName());
 			}
-			Message msg = new Message(user.getNick(), "JOIN");
-			msg.appendParameter(buffer.toString());
-			dest.send(msg);
+			if(buffer.length() > 0) {
+				Message msg = new Message(user.getNick(), "JOIN");
+				msg.appendLastParameter(buffer.toString());
+				dest.send(msg);
+			}
 		}
 	}
 

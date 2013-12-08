@@ -90,4 +90,9 @@ public class User implements Connectable {
 	public void setConnection(IrcConnection connection) {
 		this.connection = connection;
 	}
+
+	@Override
+	public String toString() {
+		return "User:" + getFullName();
+	}
 }

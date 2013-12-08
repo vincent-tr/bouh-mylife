@@ -62,6 +62,7 @@ public class IrcServer extends Thread {
 	private int status = STATE_STOPPED;
 	private Exception fatalError;
 	private long startTime;
+	private String serverName;
 
 	private IOManager iom;
 	private Network net;
@@ -90,11 +91,23 @@ public class IrcServer extends Thread {
 
 	public IrcServer(IrcConfiguration config) {
 		this.config = config;
+		this.setName("IrcServer thread " + config.getServerName());
+		this.setDaemon(true);
 	}
 
 	public long getStartTimeMillis() {
 		return startTime;
 	}
+	
+	public String getServerName() {
+		return serverName;
+	}
+
+	@Override
+	public String toString() {
+		return "IrcServer:" + serverName;
+	}
+	
 
 	// ----------------------------------------------------------------
 	// -------------------- Gestion de l'exécution --------------------
@@ -147,15 +160,16 @@ public class IrcServer extends Thread {
 		scheduledTasks = new ArrayList<Runnable>();
 
 		String netName = config.getNetworkName();
-		String serverName = config.getServerName();
-		if (serverName == null)
-			serverName = InetAddress.getLocalHost().getHostName();
+		String tmpServerName = config.getServerName();
+		if (tmpServerName == null)
+			tmpServerName = InetAddress.getLocalHost().getHostName();
+		serverName = tmpServerName + "." + netName;
 		int serverToken = config.getServerToken();
 		if (serverToken == 0)
 			serverToken = serverName.hashCode();
 
 		net = new Network(netName);
-		net.serverAdd(serverName + "." + netName, serverToken, null);
+		net.serverAdd(this.serverName, serverToken, null);
 
 		connections = new ArrayList<IrcConnection>();
 		listeners = new ArrayList<IOListener>();
