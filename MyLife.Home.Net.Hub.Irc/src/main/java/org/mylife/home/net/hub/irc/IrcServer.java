@@ -63,6 +63,7 @@ public class IrcServer extends Thread {
 	private Exception fatalError;
 	private long startTime;
 	private String serverName;
+	private String networkName;
 
 	private IOManager iom;
 	private Network net;
@@ -101,6 +102,10 @@ public class IrcServer extends Thread {
 	
 	public String getServerName() {
 		return serverName;
+	}
+	
+	public String getNetworkName() {
+		return networkName;
 	}
 
 	@Override
@@ -159,16 +164,16 @@ public class IrcServer extends Thread {
 		externalTasks = new ConcurrentLinkedQueue<Runnable>();
 		scheduledTasks = new ArrayList<Runnable>();
 
-		String netName = config.getNetworkName();
+		networkName = config.getNetworkName();
 		String tmpServerName = config.getServerName();
 		if (tmpServerName == null)
 			tmpServerName = InetAddress.getLocalHost().getHostName();
-		serverName = tmpServerName + "." + netName;
+		serverName = tmpServerName + "." + networkName;
 		int serverToken = config.getServerToken();
 		if (serverToken == 0)
 			serverToken = serverName.hashCode();
 
-		net = new Network(netName);
+		net = new Network(networkName);
 		net.serverAdd(this.serverName, serverToken, null);
 
 		connections = new ArrayList<IrcConnection>();
