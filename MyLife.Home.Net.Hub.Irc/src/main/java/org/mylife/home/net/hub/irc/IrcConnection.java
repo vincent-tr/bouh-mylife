@@ -99,13 +99,13 @@ public class IrcConnection {
 		@Override
 		public void connected() {
 			markConnected();
-			connectHandler.connected();
+			connectHandler.connected(IrcConnection.this);
 		}
 
 		@Override
 		public void connectionFailed(IOException e) {
 			close();
-			connectHandler.connectionFailed(e);
+			connectHandler.connectionFailed(IrcConnection.this, e);
 		}
 	}
 
