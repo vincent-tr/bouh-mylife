@@ -101,18 +101,18 @@ h2 {
 	/*margin-left: 20px;*/
 }
 
-table.tabHeaders {
+div.tabs>table {
 	width: 100%;
 	height: 100%;
 }
 
-table.tabHeaders ul {
+ul.tabHeaders {
 	list-style-type: none;
 	padding: 0;
 	margin: 10px 10px 10px 10px;
 }
 
-table.tabHeaders li {
+ul.tabHeaders li {
 	float: left;
 	list-style-type: none;
 	padding: 0;
@@ -125,18 +125,18 @@ table.tabHeaders li {
 	border-radius: 15px;
 }
 
-table.tabHeaders li:hover {
+ul.tabHeaders li:hover {
 	background-color: #FFFFFF;
 }
 
-table.tabHeaders a:link,table.tabHeaders a:visited,table.tabHeaders a:hover,table.tabHeaders a:active
+ul.tabHeaders a:link,ul.tabHeaders a:visited,ul.tabHeaders a:hover,ul.tabHeaders a:active
 	{
 	color: black;
 	font-style: normal;
 	text-decoration: none;
 }
 
-table.tabHeaders ul li img {
+ul.tabHeaders li img {
 	vertical-align: middle;
 	margin-right: 10px;
 	margin-left: 10px;
