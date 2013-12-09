@@ -100,7 +100,7 @@ public class NetworkView {
 				users.add(user);
 			}
 
-			return new ServerView(server.getName(),
+			return new ServerView(server.getServerName(),
 					Collections.unmodifiableCollection(users),
 					Collections.unmodifiableCollection(children));
 		}
