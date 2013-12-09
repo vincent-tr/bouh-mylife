@@ -25,10 +25,10 @@
 </script>
 
 <div class="tabs">
-	<table class="tabHeaders">
+	<table>
 		<tr>
 			<td>
-				<ul>
+				<ul class="tabHeaders">
 					<li><a href="#tabs-1"><img
 							src="<%=WebTools.image(pageContext, "view.png")%>" />Données</a></li>
 					<li><a href="#tabs-2"><img
