@@ -76,11 +76,6 @@
 		</table>
 		&nbsp;
 
-		<%!private void renderServerMap(StringBuffer buffer, int indent,
-			ServerView server) {
-
-	}%>
-
 		<table class="table_render">
 			<thead>
 				<tr>
@@ -89,20 +84,13 @@
 			</thead>
 			<tbody>
 				<tr>
-					<td>
+					<td style="text-align: left">
 						<ul>
-							<li><img
-							src="<%=WebTools.image(pageContext, "server.gif")%>"
-							title="Serveur" />Server</li>
-							<li><img
-							src="<%=WebTools.image(pageContext, "user.png")%>"
-							title="Utilisateur" />User</li>
-							<li>Server
-								<ul>
-									<li>Item1</li>
-									<li>Item2</li>
-								</ul>
-							</li>
+							<%
+								pageContext.getRequest().setAttribute("server",
+											data.getLocalServer());
+							%>
+							<%@include file="NetworkStateNode.jsp"%>
 						</ul>
 					</td>
 				</tr>
