@@ -129,7 +129,7 @@ public class ExchangeManager {
 		
 		IrcConfigImpl impl = new IrcConfigImpl();
 		
-		String serverName = container.networkName;
+		String serverName = container.serverName;
 		if(StringUtils.isEmpty(serverName))
 			serverName = null;
 		impl.setNetworkName(container.networkName);
