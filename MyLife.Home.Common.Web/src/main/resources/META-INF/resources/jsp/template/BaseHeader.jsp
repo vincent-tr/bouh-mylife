@@ -10,7 +10,7 @@
 	href="<%=WebTools.style(pageContext, "base.css")%>">
 <link rel="stylesheet" type="text/css"
 	href="<%=WebTools.style(pageContext, "site.css")%>">
-<title>MyLife.Home.Core</title>
+<title><%=pageContext.getRequest().getAttribute("app")%></title>
 
   <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
   <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
