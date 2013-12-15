@@ -1,4 +1,4 @@
-package org.mylife.home.components;
+package org.mylife.home.components.providers;
 
 /**
  * Fabrique de composant
