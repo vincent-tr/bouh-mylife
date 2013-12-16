@@ -16,10 +16,16 @@ public interface ComponentFactory {
 	public String getType();
 
 	/**
-	 * Création d'un composant
+	 * Obtention du type de composant, pour l'affichage
 	 * 
-	 * @param context
 	 * @return
 	 */
-	public Component create(ComponentContext context);
+	public String getDisplayType();
+
+	/**
+	 * Création d'un composant
+	 * 
+	 * @return
+	 */
+	public Component create();
 }

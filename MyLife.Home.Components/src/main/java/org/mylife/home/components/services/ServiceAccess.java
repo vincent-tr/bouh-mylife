@@ -44,4 +44,18 @@ public class ServiceAccess extends BaseServiceAccess {
 	public ComponentService getComponentService() {
 		return componentService;
 	}
+
+	/**
+	 * Service de gestion des configurations
+	 */
+	private final ConfigurationService configurationService = register(new ConfigurationService());
+
+	/**
+	 * Service de gestion des configurations
+	 * 
+	 * @return
+	 */
+	public ConfigurationService getConfigurationService() {
+		return configurationService;
+	}
 }
