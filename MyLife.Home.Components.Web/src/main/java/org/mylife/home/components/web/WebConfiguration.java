@@ -2,6 +2,7 @@ package org.mylife.home.components.web;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
@@ -73,7 +74,12 @@ public class WebConfiguration extends HttpServlet {
 		ComponentConfiguration item = new ComponentConfiguration();
 		item.setComponentId(req.getParameter("componentId"));
 		item.setType(req.getParameter("type"));
-		// TODO : create parameters
+		String[] names = req.getParameterValues("nameList");
+		String[] values = req.getParameterValues("valueList");
+		for (int i = 0; i < names.length; i++) {
+			item.getParameters().put(names[i], values[i]);
+		}
+
 		ServiceAccess.getInstance().getConfigurationService().create(item);
 
 		ServiceAccess.getInstance().getManagerService()
@@ -125,7 +131,13 @@ public class WebConfiguration extends HttpServlet {
 				.getConfigurationService();
 		ComponentConfiguration item = configurationService.get(id);
 		if (item != null) {
-			// TODO : update parameters
+
+			String[] names = req.getParameterValues("nameList");
+			String[] values = req.getParameterValues("valueList");
+			for (int i = 0; i < names.length; i++) {
+				item.getParameters().put(names[i], values[i]);
+			}
+
 			configurationService.update(item);
 
 			ServiceAccess.getInstance().getManagerService()
@@ -139,9 +151,12 @@ public class WebConfiguration extends HttpServlet {
 			throws ServletException, IOException {
 
 		// par défaut redirection vers la jsp
-		List<ComponentConfiguration> data = ServiceAccess.getInstance()
-				.getConfigurationService().list();
+		ConfigurationService service = ServiceAccess.getInstance()
+				.getConfigurationService();
+		List<ComponentConfiguration> data = service.list();
+		Map<String, String> types = service.listTypes();
 		req.setAttribute("data", data);
+		req.setAttribute("types", types);
 		req.setAttribute("title", "Gestion de la configuration");
 		req.getRequestDispatcher("/jsp/Configuration.jsp").forward(req, resp);
 	}

@@ -7,7 +7,19 @@
 <%@ page import="org.mylife.home.common.web.WebTools"%>
 <%
 	List<ComponentConfiguration> data = (List<ComponentConfiguration>)pageContext.getRequest().getAttribute("data");
+	Map<String, String> types = (Map<String, String>)pageContext.getRequest().getAttribute("types");
 %>
+<%!private String getParametersDisplay(ComponentConfiguration item) {
+	StringBuffer builder = new StringBuffer();
+	for (Map.Entry<String, String> param : item.getParameters().entrySet()) {
+		if (builder.length() > 0)
+			builder.append("\n");
+		builder.append(param.getKey());
+		builder.append(" : ");
+		builder.append(param.getValue());
+	}
+	return builder.toString();
+}%>
 
 <%@include file="/jsp/template/Header.jsp"%>
 
@@ -50,7 +62,7 @@
 									<thead>
 										<tr>
 											<th width="150px">Id</th>
-											<th width="60px">Type</th>
+											<th width="150px">Type</th>
 											<th width="50px">Actif</th>
 											<th>Paramètres</th>
 											<th width="60px">Actions</th>
@@ -60,15 +72,6 @@
 
 										<%
 											for (ComponentConfiguration item : data) {
-												StringBuffer builder = new StringBuffer();
-												for (Map.Entry<String, String> param : item.getParameters()
-														.entrySet()) {
-													if (builder.length() > 0)
-														builder.append("\n");
-													builder.append(param.getKey());
-													builder.append(" : ");
-													builder.append(param.getValue());
-												}
 										%>
 										<tr>
 											<td><%=WebTools.htmlEscape(item.getComponentId())%></td>
@@ -80,8 +83,9 @@
 						item.isActive() ? "apply.png" : "erase.png")%>"
 													title="<%=item.isActive() ? "Oui" : "Non"%>" />
 											</a></td>
-											<td><%=WebTools.htmlEscape(builder.toString())%></td>
-											<td><a href="?action=updateForm&id=<%=item.getDataId()%>"><img
+											<td><%=WebTools.htmlEscape(getParametersDisplay(item))%></td>
+											<td><a
+												href="?action=updateForm&id=<%=item.getDataId()%>"><img
 													src="<%=WebTools.image(pageContext, "modify.png")%>"
 													title="Modification" /></a> <a
 												href="?action=delete&id=<%=item.getDataId()%>"><img
@@ -104,36 +108,60 @@
 							<span>Création</span>
 						</legend>
 
-						<form method="post" action="?action=create"
-							enctype="multipart/form-data">
+						<form method="post" action="?action=create">
 
 							<table class="form_format">
 								<tbody>
 									<tr>
+										<td>Id :</td>
+										<td><input style="width: 100%;" type="text" required
+											name="componentId" /></td>
+									</tr>
+									<tr>
 										<td>Type :</td>
 										<td><select name="type">
-												<option value="core" selected="selected">Core</option>
-												<option value="net">Net</option>
+												<%
+													boolean first = true;
+												%>
+												<%
+													for (Map.Entry<String, String> type : types.entrySet()) {
+												%>
+												<option value="<%=type.getKey()%>" <%if (first) {%>
+													selected="selected" <%}%>><%=WebTools.htmlEscape(type.getValue())%></option>
+												<%
+													}
+												%>
 										</select></td>
 									</tr>
 									<tr>
-										<td>Commentaires :</td>
+										<td>Paramètres :</td>
 										<td>
-											<div
-												style="position: relative; height: 70px; vertical-align: middle;">
-												<div
-													style="position: absolute; top: 2px; bottom: 8px; left: 0px; right: 8px;">
-													<textarea
-														style="resize: none; margin: 0; width: 100%; height: 100%;"
-														name="comment" rows="4" cols="120"></textarea>
+											<div class="table_render_outer">
+												<div class="table_render_inner">
+													<table class="table_render" id="parameter_table">
+														<thead>
+															<tr>
+																<th>Nom</th>
+																<th>Valeur</th>
+															</tr>
+														</thead>
+														<tbody>
+														</tbody>
+														<tfoot>
+															<tr>
+																<th colspan="2" style="text-align: left;"><img
+																	id="parameter_add"
+																	src="<%=WebTools.image(pageContext, "create.png")%>"
+																	title="Ajouter ligne" />&nbsp;<img
+																	id="parameter_remove"
+																	src="<%=WebTools.image(pageContext, "erase.png")%>"
+																	title="Supprimer ligne" /></th>
+															</tr>
+														</tfoot>
+													</table>
 												</div>
 											</div>
 										</td>
-									</tr>
-									<tr>
-										<td>Contenu :</td>
-										<td><input style="width: 100%;" type="file"
-											name="content" accept="application/xml" /></td>
 									</tr>
 									<tr>
 										<td colspan="2" class="form_action"><input type="image"
@@ -150,4 +178,15 @@
 	</table>
 </div>
 
+<script>
+	$("#parameter_add")
+			.click(
+					function() {
+						var row = '<tr><td><input style="width: 100%;" type="text" required name="nameList" /></td><td><input style="width: 100%;" type="text" required name="valueList" /></td></tr>';
+						$('#parameter_table tbody').append(row);
+					});
+	$("#parameter_remove").click(function() {
+		$('#parameter_table tbody tr:last').remove();
+	});
+</script>
 <%@include file="/jsp/template/Footer.jsp"%>
