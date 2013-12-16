@@ -1,2 +1,9 @@
 # http://docs.oracle.com/javase/6/docs/api/java/util/ServiceLoader.html
 org.mylife.home.components.providers.impl.test.TestComponent$Factory
+
+org.mylife.home.components.providers.impl.mpd.MPDComponent$Factory
+
+org.mylife.home.components.providers.impl.raspberry.GPIOInputComponent$Factory
+org.mylife.home.components.providers.impl.raspberry.GPIOOutputComponent$Factory
+org.mylife.home.components.providers.impl.raspberry.GPIOPWMComponent$Factory
+org.mylife.home.components.providers.impl.raspberry.GPIORGBComponent$Factory

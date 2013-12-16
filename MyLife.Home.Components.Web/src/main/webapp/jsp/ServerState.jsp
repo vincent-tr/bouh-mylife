@@ -18,6 +18,10 @@
 				style="color: <%=WebTools.severityColor(data.getSeverity())%>"><%=WebTools.htmlEscape(data.getState())%></span></td>
 		</tr>
 		<tr>
+			<td>Structure :</td>
+			<td>Exporter la structure des composants :TODO</td>
+		</tr>
+		<tr>
 			<td>Date du statut :</td>
 			<td><%=WebTools.formatDate(new Date())%></td>
 		</tr>
