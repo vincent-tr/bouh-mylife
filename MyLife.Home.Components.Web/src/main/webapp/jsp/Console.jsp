@@ -22,6 +22,9 @@
 					<li><a href="#tabs-2"><img
 							src="<%=WebTools.image(pageContext, "application.png")%>" />Vue
 							des composants</a></li>
+					<li><a href="#tabs-3"><img
+							src="<%=WebTools.image(pageContext, "text_preview.png")%>" />Structure
+							des composants</a></li>
 				</ul>
 			</td>
 		</tr>
@@ -47,6 +50,16 @@
 
 					</fieldset>
 				</div>
+				<div id="tabs-3">
+					<fieldset>
+						<legend>
+							<span>Structure des composants</span>
+						</legend>
+
+						<div id="structureState"></div>
+
+					</fieldset>
+				</div>
 			</td>
 		</tr>
 	</table>
@@ -55,10 +68,15 @@
 <script>
 $('#serverState').load('<%=WebTools.servlet(pageContext, "console")%>?action=serverState');
 $('#componentsState').load('<%=WebTools.servlet(pageContext, "console")%>?action=componentsState');
+$('#structureState').load('<%=WebTools.servlet(pageContext, "console")%>?action=structureState');
+
 self.setInterval(function() {
 	$('#serverState').load('<%=WebTools.servlet(pageContext, "console")%>?action=serverState');
 	$('#componentsState').load('<%=WebTools.servlet(pageContext, "console")%>?action=componentsState');
-					}, 5000);
+}, 5000);
+self.setInterval(function() {
+	$('#structureState').load('<%=WebTools.servlet(pageContext, "console")%>?action=structureState');
+}, 30000);
 </script>
 
 <%@include file="/jsp/template/Footer.jsp"%>

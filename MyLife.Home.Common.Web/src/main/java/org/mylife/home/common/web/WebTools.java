@@ -25,7 +25,7 @@ public class WebTools {
 	public static String urlEscape(String input) throws IOException {
 		return URLEncoder.encode(input, "UTF-8");
 	}
-	
+
 	/**
 	 * HTML escape
 	 * 
@@ -44,7 +44,7 @@ public class WebTools {
 	 * @return
 	 */
 	public static String htmlEscape(String input, boolean escapeSpecials) {
-		if(input == null)
+		if (input == null)
 			return "";
 		String value = input;
 		value = StringEscapeUtils.escapeHtml4(value);
@@ -156,5 +156,23 @@ public class WebTools {
 		String root = ((HttpServletRequest) context.getRequest())
 				.getContextPath();
 		return root + "/static/scripts/" + name;
+	}
+
+	public static String fullCallingRoot(PageContext context) {
+		HttpServletRequest req = (HttpServletRequest) context.getRequest();
+
+		String scheme = req.getScheme();
+		String serverName = req.getServerName();
+		int serverPort = req.getServerPort();
+		String contextPath = req.getContextPath();
+		StringBuffer builder = new StringBuffer();
+
+		builder.append(scheme);
+		builder.append("://");
+		builder.append(serverName);
+		builder.append(":");
+		builder.append(serverPort);
+		builder.append(contextPath);
+		return builder.toString();
 	}
 }
