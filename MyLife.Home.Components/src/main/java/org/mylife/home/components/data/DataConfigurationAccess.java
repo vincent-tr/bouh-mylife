@@ -131,7 +131,7 @@ public class DataConfigurationAccess extends BaseDataAccess {
 		try {
 			pst = con.prepareStatement("update comp_configuration "
 					+ "set conf_compid = ? " + ", conf_type = ? "
-					+ "set conf_active = ? " + ", conf_parameters = ? "
+					+ ", conf_active = ? " + ", conf_parameters = ? "
 					+ "where conf_id = ?");
 
 			Blob parameters = con.createBlob();
