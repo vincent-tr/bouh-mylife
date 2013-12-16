@@ -7,6 +7,11 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.mylife.home.common.web.model.ServerState;
+import org.mylife.home.common.web.model.Severity;
+import org.mylife.home.components.services.ManagerService;
+import org.mylife.home.components.services.ServiceAccess;
+
 /**
  * Servlet console
  * 
@@ -51,9 +56,9 @@ public class WebConsole extends HttpServlet {
 
 	private void serverState(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		/*
+
 		ServerState serverState = new ServerState();
-		int state = ServiceAccess.getManagerService().getState();
+		int state = ServiceAccess.getInstance().getManagerService().getState();
 		switch (state) {
 		case ManagerService.STATE_STOPPED:
 			serverState.setState("STOPPED");
@@ -65,7 +70,8 @@ public class WebConsole extends HttpServlet {
 		case ManagerService.STATE_ERROR:
 			serverState.setState("ERROR");
 			serverState.setSeverity(Severity.ERROR);
-			serverState.setError(ServiceAccess.getManagerService().getError());
+			serverState.setError(ServiceAccess.getInstance()
+					.getManagerService().getError());
 			serverState.setCanStop(true);
 			serverState.setCanStart(true);
 			break;
@@ -92,21 +98,22 @@ public class WebConsole extends HttpServlet {
 			break;
 
 		}
-		req.setAttribute("data", serverState);*/
+		req.setAttribute("data", serverState);
+
 		req.getRequestDispatcher("/jsp/ServerState.jsp").forward(req, resp);
 	}
-	
-	private void componentsState(HttpServletRequest req, HttpServletResponse resp)
-			throws ServletException, IOException {
-		
-		//req.setAttribute("data", serverState);
+
+	private void componentsState(HttpServletRequest req,
+			HttpServletResponse resp) throws ServletException, IOException {
+
+		// req.setAttribute("data", serverState);
 		req.getRequestDispatcher("/jsp/ComponentsState.jsp").forward(req, resp);
 	}
 
 	private void start(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 
-		//ServiceAccess.getManagerService().start();
+		ServiceAccess.getInstance().getManagerService().start();
 
 		resp.sendRedirect(req.getRequestURI());
 	}
@@ -114,7 +121,7 @@ public class WebConsole extends HttpServlet {
 	private void stop(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 
-		//ServiceAccess.getManagerService().stop();
+		ServiceAccess.getInstance().getManagerService().stop();
 
 		resp.sendRedirect(req.getRequestURI());
 	}

@@ -58,4 +58,18 @@ public class ServiceAccess extends BaseServiceAccess {
 	public ConfigurationService getConfigurationService() {
 		return configurationService;
 	}
+
+	/**
+	 * Service de gestion de gestion
+	 */
+	private final ManagerService managerService = register(new ManagerService());
+
+	/**
+	 * Service de gestion de gestion
+	 * 
+	 * @return
+	 */
+	public ManagerService getManagerService() {
+		return managerService;
+	}
 }

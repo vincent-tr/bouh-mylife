@@ -23,12 +23,17 @@
 	<dependencies>
 		<dependency>
 			<groupId>mylife.home</groupId>
-			<artifactId>MyLife.Home.Raspberry</artifactId>
+			<artifactId>MyLife.Home.Components</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>mylife.home</groupId>
-			<artifactId>MyLife.Home.Components</artifactId>
+			<artifactId>MyLife.Home.Common</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>mylife.home</groupId>
+			<artifactId>MyLife.Home.Common.Web</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
