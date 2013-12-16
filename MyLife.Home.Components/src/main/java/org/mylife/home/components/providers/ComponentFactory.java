@@ -27,5 +27,5 @@ public interface ComponentFactory {
 	 * 
 	 * @return
 	 */
-	public Component create();
+	public Component create() throws Exception;
 }
