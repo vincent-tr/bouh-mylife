@@ -1,5 +1,7 @@
 package org.mylife.home.components.providers;
 
+import java.util.Collection;
+
 /**
  * Fabrique de composant
  * 
@@ -21,6 +23,13 @@ public interface ComponentFactory {
 	 * @return
 	 */
 	public String getDisplayType();
+
+	/**
+	 * Obtention si supporté de la liste des noms de paramètres supportés
+	 * 
+	 * @return
+	 */
+	public Collection<String> getParameterNames();
 
 	/**
 	 * Création d'un composant
