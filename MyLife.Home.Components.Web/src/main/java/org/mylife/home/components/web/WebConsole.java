@@ -106,7 +106,7 @@ public class WebConsole extends HttpServlet {
 	private void componentsState(HttpServletRequest req,
 			HttpServletResponse resp) throws ServletException, IOException {
 
-		// req.setAttribute("data", serverState);
+		req.setAttribute("data", ServiceAccess.getInstance().getComponentService().getComponents());
 		req.getRequestDispatcher("/jsp/ComponentsState.jsp").forward(req, resp);
 	}
 

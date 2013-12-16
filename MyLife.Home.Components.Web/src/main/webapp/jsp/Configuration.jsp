@@ -1,9 +1,12 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
 	pageEncoding="ISO-8859-1"%>
 <%@ page import="java.util.List"%>
+<%@ page import="java.util.Map"%>
+<%@ page
+	import="org.mylife.home.components.providers.ComponentConfiguration"%>
 <%@ page import="org.mylife.home.common.web.WebTools"%>
 <%
-	//List<DataConfiguration> data = (List<DataConfiguration>)pageContext.getRequest().getAttribute("data");
+	List<ComponentConfiguration> data = (List<ComponentConfiguration>)pageContext.getRequest().getAttribute("data");
 %>
 
 <%@include file="/jsp/template/Header.jsp"%>
@@ -46,17 +49,48 @@
 								<table class="table_render">
 									<thead>
 										<tr>
+											<th width="150px">Id</th>
 											<th width="60px">Type</th>
 											<th width="50px">Actif</th>
-											<th width="150px">Date</th>
-											<th>Commentaires</th>
+											<th>Paramètres</th>
 											<th width="60px">Actions</th>
 										</tr>
 									</thead>
 									<tbody>
-									
-									<!--  TODO  -->
-									
+
+										<%
+											for (ComponentConfiguration item : data) {
+												StringBuffer builder = new StringBuffer();
+												for (Map.Entry<String, String> param : item.getParameters()
+														.entrySet()) {
+													if (builder.length() > 0)
+														builder.append("\n");
+													builder.append(param.getKey());
+													builder.append(" : ");
+													builder.append(param.getValue());
+												}
+										%>
+										<tr>
+											<td><%=WebTools.htmlEscape(item.getComponentId())%></td>
+											<td><%=WebTools.htmlEscape(item.getType())%></td>
+											<td><a
+												href="?action=<%=item.isActive() ? "deactivate" : "activate"%>&id=<%=item.getDataId()%>">
+													<img
+													src="<%=WebTools.image(pageContext,
+						item.isActive() ? "apply.png" : "erase.png")%>"
+													title="<%=item.isActive() ? "Oui" : "Non"%>" />
+											</a></td>
+											<td><%=WebTools.htmlEscape(builder.toString())%></td>
+											<td><a href="?action=updateForm&id=<%=item.getDataId()%>"><img
+													src="<%=WebTools.image(pageContext, "modify.png")%>"
+													title="Modification" /></a> <a
+												href="?action=delete&id=<%=item.getDataId()%>"><img
+													src="<%=WebTools.image(pageContext, "erase.png")%>"
+													title="Supprimer" /></a></td>
+										</tr>
+										<%
+											}
+										%>
 									</tbody>
 								</table>
 							</div>
@@ -67,7 +101,7 @@
 				<div id="tabs-2">
 					<fieldset>
 						<legend>
-							<span>Création manuelle</span>
+							<span>Création</span>
 						</legend>
 
 						<form method="post" action="?action=create"
