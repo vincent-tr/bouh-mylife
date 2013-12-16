@@ -1,11 +1,13 @@
 package org.mylife.home.components.web;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.bind.JAXBException;
 
 import org.mylife.home.common.web.model.ServerState;
 import org.mylife.home.common.web.model.Severity;
@@ -45,6 +47,8 @@ public class WebConsole extends HttpServlet {
 			serverState(req, resp);
 		} else if ("componentsState".equals(action)) {
 			componentsState(req, resp);
+		} else if ("structureState".equals(action)) {
+			structureState(req, resp);
 		} else if ("start".equals(action)) {
 			start(req, resp);
 		} else if ("stop".equals(action)) {
@@ -106,8 +110,23 @@ public class WebConsole extends HttpServlet {
 	private void componentsState(HttpServletRequest req,
 			HttpServletResponse resp) throws ServletException, IOException {
 
-		req.setAttribute("data", ServiceAccess.getInstance().getComponentService().getComponents());
+		req.setAttribute("data", ServiceAccess.getInstance()
+				.getComponentService().getComponents());
 		req.getRequestDispatcher("/jsp/ComponentsState.jsp").forward(req, resp);
+	}
+
+	private void structureState(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+
+		ByteArrayOutputStream stream = new ByteArrayOutputStream();
+		try {
+			WebStructure.exportStructure(this, stream);
+		} catch (JAXBException e) {
+			throw new ServletException("error exporting", e);
+		}
+		String data = stream.toString("utf-8");
+		req.setAttribute("data", data);
+		req.getRequestDispatcher("/jsp/StructureState.jsp").forward(req, resp);
 	}
 
 	private void start(HttpServletRequest req, HttpServletResponse resp)

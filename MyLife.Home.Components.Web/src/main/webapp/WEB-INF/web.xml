@@ -27,6 +27,12 @@
 	</servlet>
 
 	<servlet>
+		<servlet-name>WebStructure</servlet-name>
+		<servlet-class>org.mylife.home.components.web.WebStructure</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	
+	<servlet>
 		<servlet-name>WebLogging</servlet-name>
 		<servlet-class>org.mylife.home.common.web.WebLogging</servlet-class>
 		<load-on-startup>1</load-on-startup>
@@ -48,6 +54,11 @@
 		<url-pattern>/configuration</url-pattern>
 	</servlet-mapping>
 
+	<servlet-mapping>
+		<servlet-name>WebStructure</servlet-name>
+		<url-pattern>/structure</url-pattern>
+	</servlet-mapping>
+	
 	<servlet-mapping>
 		<servlet-name>WebLogging</servlet-name>
 		<url-pattern>/logging</url-pattern>
