@@ -89,7 +89,6 @@ public class Server implements Connectable {
 
 	@Override
 	public String toString() {
-		// TODO Auto-generated method stub
 		return "Server:" + name;
 	}
 }
