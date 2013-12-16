@@ -204,7 +204,7 @@ td.form_action {
 	position: relative;
 }
 
-td.form_action>input {
+td.form_action>* {
 	position: absolute;
 	left: 50%;
 	margin-left: -12px;

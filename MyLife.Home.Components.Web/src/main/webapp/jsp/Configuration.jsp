@@ -83,7 +83,7 @@
 						item.isActive() ? "apply.png" : "erase.png")%>"
 													title="<%=item.isActive() ? "Oui" : "Non"%>" />
 											</a></td>
-											<td><%=WebTools.htmlEscape(getParametersDisplay(item))%></td>
+											<td style="text-align: left;"><%=WebTools.htmlEscape(getParametersDisplay(item))%></td>
 											<td><a
 												href="?action=updateForm&id=<%=item.getDataId()%>"><img
 													src="<%=WebTools.image(pageContext, "modify.png")%>"

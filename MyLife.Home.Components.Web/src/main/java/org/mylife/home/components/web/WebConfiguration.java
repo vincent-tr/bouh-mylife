@@ -1,6 +1,9 @@
 package org.mylife.home.components.web;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -11,6 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mylife.home.components.providers.ComponentConfiguration;
+import org.mylife.home.components.providers.ComponentFactory;
 import org.mylife.home.components.services.ConfigurationService;
 import org.mylife.home.components.services.ServiceAccess;
 
@@ -78,8 +82,10 @@ public class WebConfiguration extends HttpServlet {
 		item.setType(req.getParameter("type"));
 		String[] names = req.getParameterValues("nameList");
 		String[] values = req.getParameterValues("valueList");
-		for (int i = 0; i < names.length; i++) {
-			item.getParameters().put(names[i], values[i]);
+		if (names != null && values != null) {
+			for (int i = 0; i < names.length; i++) {
+				item.getParameters().put(names[i], values[i]);
+			}
 		}
 
 		ServiceAccess.getInstance().getConfigurationService().create(item);
@@ -133,7 +139,7 @@ public class WebConfiguration extends HttpServlet {
 				.getConfigurationService();
 		ComponentConfiguration item = configurationService.get(id);
 		if (item != null) {
-			
+
 			item.getParameters().clear();
 			String[] names = req.getParameterValues("nameList");
 			String[] values = req.getParameterValues("valueList");
@@ -149,22 +155,30 @@ public class WebConfiguration extends HttpServlet {
 
 		resp.sendRedirect(req.getRequestURI());
 	}
-	
-	private void updateForm(HttpServletRequest req,
-			HttpServletResponse resp) throws ServletException, IOException {
-		
+
+	private void updateForm(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+
 		ConfigurationService service = ServiceAccess.getInstance()
 				.getConfigurationService();
 		int id = Integer.parseInt(req.getParameter("id"));
 		ComponentConfiguration data = service.get(id);
-		if(data == null) {
+		if (data == null) {
 			resp.sendRedirect(req.getRequestURI());
 			return;
 		}
-		
+
+		ComponentFactory factory = ServiceAccess.getInstance()
+				.getComponentService().getFactory(data.getType());
+		Collection<String> supportedParameters = factory.getParameterNames();
+		if (supportedParameters == null)
+			supportedParameters = Collections.emptyList();
+
 		req.setAttribute("data", data);
+		req.setAttribute("supportedParameters", supportedParameters);
 		req.setAttribute("title", "Gestion de la configuration");
-		req.getRequestDispatcher("/jsp/ConfigurationUpdateParameters.jsp").forward(req, resp);
+		req.getRequestDispatcher("/jsp/ConfigurationUpdateParameters.jsp")
+				.forward(req, resp);
 	}
 
 	private void index(HttpServletRequest req, HttpServletResponse resp)
