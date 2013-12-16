@@ -9,6 +9,15 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 
+	<repositories>
+	    <!-- pour javampd -->
+		<repository>
+			<id>thejavashop</id>
+			<name>The Javashop Repository</name>
+			<url>http://www.thejavashop.net/maven2</url>
+		</repository>
+	</repositories>
+		
 	<dependencies>
 		<dependency>
 			<groupId>mylife.home</groupId>
@@ -39,6 +48,12 @@
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
 			<version>2.2.4</version>
+		</dependency>
+		<dependency>
+			<groupId>org.bff.javampd</groupId>
+			<artifactId>javampd</artifactId>
+			<version>4.1</version>
+			<scope>compile</scope>
 		</dependency>
 	</dependencies>
 
