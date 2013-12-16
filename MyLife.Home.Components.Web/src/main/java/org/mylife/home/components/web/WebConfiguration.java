@@ -50,6 +50,8 @@ public class WebConfiguration extends HttpServlet {
 			create(req, resp);
 		} else if ("updateParameters".equals(action)) {
 			updateParameters(req, resp);
+		} else if ("updateForm".equals(action)) {
+			updateForm(req, resp);
 		} else if ("activate".equals(action)) {
 			activate(req, resp);
 		} else if ("deactivate".equals(action)) {
@@ -108,7 +110,7 @@ public class WebConfiguration extends HttpServlet {
 			throws ServletException, IOException {
 
 		int id = Integer.parseInt(req.getParameter("id"));
-		changeActivate(id, false);
+		changeActivate(id, true);
 
 		resp.sendRedirect(req.getRequestURI());
 	}
@@ -131,7 +133,8 @@ public class WebConfiguration extends HttpServlet {
 				.getConfigurationService();
 		ComponentConfiguration item = configurationService.get(id);
 		if (item != null) {
-
+			
+			item.getParameters().clear();
 			String[] names = req.getParameterValues("nameList");
 			String[] values = req.getParameterValues("valueList");
 			for (int i = 0; i < names.length; i++) {
@@ -145,6 +148,23 @@ public class WebConfiguration extends HttpServlet {
 		}
 
 		resp.sendRedirect(req.getRequestURI());
+	}
+	
+	private void updateForm(HttpServletRequest req,
+			HttpServletResponse resp) throws ServletException, IOException {
+		
+		ConfigurationService service = ServiceAccess.getInstance()
+				.getConfigurationService();
+		int id = Integer.parseInt(req.getParameter("id"));
+		ComponentConfiguration data = service.get(id);
+		if(data == null) {
+			resp.sendRedirect(req.getRequestURI());
+			return;
+		}
+		
+		req.setAttribute("data", data);
+		req.setAttribute("title", "Gestion de la configuration");
+		req.getRequestDispatcher("/jsp/ConfigurationUpdateParameters.jsp").forward(req, resp);
 	}
 
 	private void index(HttpServletRequest req, HttpServletResponse resp)
