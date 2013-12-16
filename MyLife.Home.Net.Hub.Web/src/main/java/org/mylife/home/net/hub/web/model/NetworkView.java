@@ -50,11 +50,11 @@ public class NetworkView {
 
 	private static class AccessHandler implements IrcNetworkAccessHandler {
 
-		private final IrcServer server;
+		//private final IrcServer server;
 		private NetworkView view;
 
 		public AccessHandler(IrcServer server) {
-			this.server = server;
+			//this.server = server;
 		}
 
 		public NetworkView getView() {
@@ -100,7 +100,7 @@ public class NetworkView {
 				users.add(user);
 			}
 
-			return new ServerView(server.getServerName(),
+			return new ServerView(source.getName(),
 					Collections.unmodifiableCollection(users),
 					Collections.unmodifiableCollection(children));
 		}
