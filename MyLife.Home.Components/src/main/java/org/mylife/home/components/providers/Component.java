@@ -13,7 +13,7 @@ public interface Component {
 	 * 
 	 * @throws Exception
 	 */
-	public void init() throws Exception;
+	public void init(ComponentContext context) throws Exception;
 
 	/**
 	 * Suppression du composant
