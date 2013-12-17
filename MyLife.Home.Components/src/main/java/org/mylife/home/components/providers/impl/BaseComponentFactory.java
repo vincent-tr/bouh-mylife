@@ -9,10 +9,10 @@ import org.mylife.home.components.providers.ComponentFactory;
 
 public class BaseComponentFactory implements ComponentFactory {
 
-	private final Class<?> componentClass;
+	private final Class<? extends Component> componentClass;
 	private final Collection<String> parameterNames;
 
-	protected BaseComponentFactory(Class<?> componentClass,
+	protected BaseComponentFactory(Class<? extends Component> componentClass,
 			String... parameterNames) {
 		this.componentClass = componentClass;
 		this.parameterNames = Collections.unmodifiableCollection(Arrays
