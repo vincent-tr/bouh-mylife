@@ -9,6 +9,9 @@ import java.util.logging.Logger;
 import org.mylife.home.core.plugins.Plugin;
 import org.mylife.home.core.plugins.PluginContext;
 import org.mylife.home.core.plugins.PluginDesignMetadata;
+import org.mylife.home.net.NetObject;
+import org.mylife.home.net.structure.NetClass;
+import org.mylife.home.net.structure.NetMember;
 
 /**
  * Gestion d'un plugin avancé
@@ -38,13 +41,12 @@ class EnhancedPluginWrapper implements Plugin {
 
 		this.context = context;
 		
+		// Exécution des méthodes d'initialisation
 		PluginConfigurationWrapper configurationInstance = null;
 		Class<?> configurationInterface = metadata.getConfigurationInterface();
 		if(configurationInterface != null)
 			configurationInstance = new PluginConfigurationWrapper(context, configurationInterface);
 		
-		if(configurationInterface != null)
-
 		for (Method method : metadata.getInitMethods()) {
 			
 			Collection<Object> args = new ArrayList<Object>();
@@ -56,6 +58,15 @@ class EnhancedPluginWrapper implements Plugin {
 			}
 			method.invoke(instance, args.toArray());
 		}
+		
+		// Construction de l'objet publié
+		Collection<NetMember> members = new ArrayList<NetMember>();
+		for(PluginClassMetadata.MemberMetadata member : metadata.getMembers()) {
+			// TODO : members
+		}
+		NetObject netObject = new NetObject(context.getId(), new NetClass(members));
+		// TODO : bindings
+		context.publishObject(netObject);
 	}
 
 	@Override
