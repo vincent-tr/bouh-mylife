@@ -30,6 +30,7 @@ class EnhancedPluginWrapper implements Plugin {
 	private final PluginClassMetadata metadata;
 	private final Object instance;
 	private PluginContext context;
+	private NetObject netObject;
 
 	public EnhancedPluginWrapper(PluginClassMetadata metadata) throws Exception {
 		this.metadata = metadata;
@@ -40,37 +41,41 @@ class EnhancedPluginWrapper implements Plugin {
 	public void init(PluginContext context) throws Exception {
 
 		this.context = context;
-		
+
 		// Exécution des méthodes d'initialisation
 		PluginConfigurationWrapper configurationInstance = null;
 		Class<?> configurationInterface = metadata.getConfigurationInterface();
-		if(configurationInterface != null)
-			configurationInstance = new PluginConfigurationWrapper(context, configurationInterface);
-		
+		if (configurationInterface != null)
+			configurationInstance = new PluginConfigurationWrapper(context,
+					configurationInterface);
+
 		for (Method method : metadata.getInitMethods()) {
-			
+
 			Collection<Object> args = new ArrayList<Object>();
-			for(Class<?> argClass : method.getParameterTypes()) {
-				if(argClass.equals(PluginContext.class))
+			for (Class<?> argClass : method.getParameterTypes()) {
+				if (argClass.equals(PluginContext.class))
 					args.add(context);
-				if(argClass.equals(configurationInterface))
+				if (argClass.equals(configurationInterface))
 					args.add(configurationInstance.getConfiguration());
 			}
 			method.invoke(instance, args.toArray());
 		}
-		
+
 		// Construction de l'objet publié
 		Collection<NetMember> members = new ArrayList<NetMember>();
-		for(PluginClassMetadata.MemberMetadata member : metadata.getMembers()) {
+		for (PluginClassMetadata.MemberMetadata member : metadata.getMembers()) {
 			// TODO : members
 		}
-		NetObject netObject = new NetObject(context.getId(), new NetClass(members));
+		netObject = new NetObject(context.getId(), new NetClass(
+				members));
 		// TODO : bindings
 		context.publishObject(netObject);
 	}
 
 	@Override
 	public void destroy() {
+
+		// Exécution des méthodes de destruction
 		for (Method method : metadata.getDestroyMethods()) {
 			try {
 				method.invoke(instance);
