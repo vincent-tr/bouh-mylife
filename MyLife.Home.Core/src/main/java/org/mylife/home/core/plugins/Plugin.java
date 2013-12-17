@@ -13,12 +13,12 @@ public interface Plugin {
 	 * Initialisation
 	 * @param context
 	 */
-	public void initialize(PluginContext context);
+	public void init(PluginContext context) throws Exception;
 
 	/**
 	 * Fin d'utilisation
 	 */
-	public void terminate();
+	public void destroy();
 
 	/**
 	 * Obtention des metadata de config au design
