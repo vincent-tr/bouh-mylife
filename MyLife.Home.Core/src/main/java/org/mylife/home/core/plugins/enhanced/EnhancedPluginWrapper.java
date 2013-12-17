@@ -68,7 +68,7 @@ class EnhancedPluginWrapper implements Plugin {
 		}
 		netObject = new NetObject(context.getId(), new NetClass(
 				members));
-		// TODO : bindings
+		// TODO : bindings (types : range <=> integer, enum <=> string)
 		context.publishObject(netObject);
 	}
 
