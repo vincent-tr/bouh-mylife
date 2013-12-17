@@ -37,13 +37,9 @@ public class PluginRuntimeContext implements PluginContext {
 		return map;
 	}
 
-	private static Plugin instanciatePlugin(String pluginClass) {
-		try {
-			Class<?> clazz = Class.forName(pluginClass);
-			return (Plugin) clazz.newInstance();
-		} catch (Exception e) {
-			throw new PluginInstanciateException(e);
-		}
+	private static Plugin instanciatePlugin(String pluginType) throws Exception {
+		PluginFactory factory = ServiceAccess.getInstance().getPluginService().getFactory(pluginType);
+		return factory.create();
 	}
 
 	/**
@@ -51,24 +47,26 @@ public class PluginRuntimeContext implements PluginContext {
 	 * 
 	 * @param data
 	 */
-	public PluginRuntimeContext(XmlCoreComponent data) {
-		this(data.id, data.pluginClass, mapFromXml(data.configuration));
+	public PluginRuntimeContext(XmlCoreComponent data) throws Exception {
+		this(data.id, data.pluginType, mapFromXml(data.configuration));
 	}
 
 	/**
 	 * Contexte avec données
 	 * 
 	 * @param id
-	 * @param pluginClass
+	 * @param pluginType
 	 * @param configuration
 	 */
-	public PluginRuntimeContext(String id, String pluginClass,
-			Map<String, String> configuration) {
+	public PluginRuntimeContext(String id, String pluginType,
+			Map<String, String> configuration) throws Exception {
 		this.id = id;
-		this.plugin = instanciatePlugin(pluginClass);
-		this.configuration = configuration != null ? Collections
-				.unmodifiableMap(configuration) : null;
-		this.plugin.initialize(this);
+		this.plugin = instanciatePlugin(pluginType);
+		if (configuration == null)
+			this.configuration = Collections.emptyMap();
+		else
+			this.configuration = Collections.unmodifiableMap(configuration);
+		this.plugin.init(this);
 	}
 
 	@Override
@@ -109,7 +107,7 @@ public class PluginRuntimeContext implements PluginContext {
 	 * Fin d'utilisation
 	 */
 	public void terminate() {
-		plugin.terminate();
+		plugin.destroy();
 		ManagerService service = ServiceAccess.getInstance()
 				.getManagerService();
 		for (NetContainer obj : publishedObjects) {
