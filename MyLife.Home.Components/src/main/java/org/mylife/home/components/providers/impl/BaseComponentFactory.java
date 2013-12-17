@@ -31,7 +31,7 @@ public class BaseComponentFactory implements ComponentFactory {
 
 	@Override
 	public Component create() throws Exception {
-		return (Component) componentClass.newInstance();
+		return componentClass.newInstance();
 	}
 
 	/**
