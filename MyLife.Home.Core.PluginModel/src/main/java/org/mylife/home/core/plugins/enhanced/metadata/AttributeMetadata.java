@@ -9,8 +9,8 @@ public class AttributeMetadata extends MemberMetadata {
 	private final NetType netType;
 
 	public AttributeMetadata(Method method, int index, String name,
-			NetType netType) {
-		super(method, index, name);
+			String displayName, NetType netType) {
+		super(method, index, name, displayName);
 		this.netType = netType;
 	}
 

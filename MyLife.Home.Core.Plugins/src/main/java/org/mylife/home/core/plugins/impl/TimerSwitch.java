@@ -13,6 +13,7 @@ import org.mylife.home.core.plugins.enhanced.annotations.PluginConfiguration;
 import org.mylife.home.core.plugins.enhanced.annotations.PluginDataName;
 import org.mylife.home.core.plugins.enhanced.annotations.PluginDestroy;
 import org.mylife.home.core.plugins.enhanced.annotations.PluginInit;
+import org.mylife.home.core.plugins.enhanced.annotations.PluginMandatory;
 
 /**
  * Minuterie
@@ -44,6 +45,7 @@ public class TimerSwitch {
 		 * @return
 		 */
 		@PluginDataName(name = "delaySeconds")
+		@PluginMandatory
 		int delay();
 	}
 

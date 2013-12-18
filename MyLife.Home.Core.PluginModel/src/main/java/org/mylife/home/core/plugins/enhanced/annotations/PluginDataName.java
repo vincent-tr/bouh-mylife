@@ -18,4 +18,10 @@ public @interface PluginDataName {
 	 * @return
 	 */
 	String name();
+	
+	/**
+	 * Nom de la propriété de configuration à l'affichage
+	 * @return
+	 */
+	String displayName() default "";
 }

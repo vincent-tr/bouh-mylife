@@ -1,5 +1,7 @@
 package org.mylife.home.core.plugins.enhanced.metadata;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -9,7 +11,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -36,9 +41,16 @@ import org.mylife.home.net.structure.NetType;
  */
 public class PluginClassMetadata {
 
+	/**
+	 * Logger
+	 */
+	private final static Logger log = Logger
+			.getLogger(PluginClassMetadata.class.getName());
+
 	private final Class<?> pluginClass;
 	private final String type;
 	private final String displayType;
+	private final byte[] image;
 	private final Class<?> configurationInterface;
 	private final Collection<Method> initMethods;
 	private final Collection<Method> destroyMethods;
@@ -50,6 +62,7 @@ public class PluginClassMetadata {
 		Plugin pluginAnnotation = initPluginAnnotation();
 		type = initType(pluginAnnotation);
 		displayType = initDisplayType(pluginAnnotation);
+		image = initImage(pluginClass, pluginAnnotation);
 		Pair<Collection<Method>, Class<?>> initData = initInitMethods();
 		initMethods = Collections.unmodifiableCollection(initData.getLeft());
 		configurationInterface = initData.getRight();
@@ -77,6 +90,21 @@ public class PluginClassMetadata {
 		if (StringUtils.isEmpty(displayType))
 			displayType = type;
 		return displayType;
+	}
+
+	private byte[] initImage(Class<?> pluginClass, Plugin pluginAnnotation) {
+		String name = pluginAnnotation.imageResource();
+		if (StringUtils.isEmpty(name))
+			return null;
+		InputStream stream = pluginClass.getResourceAsStream(name);
+		if (stream == null)
+			return null;
+		try {
+			return IOUtils.toByteArray(stream);
+		} catch (IOException e) {
+			log.log(Level.SEVERE, "Error reading plugin image", e);
+			return null;
+		}
 	}
 
 	private void throwInvalidMethod(Method method, String usage)
@@ -224,7 +252,12 @@ public class PluginClassMetadata {
 		if (StringUtils.isEmpty(name))
 			name = method.getName();
 
-		return new ActionMetadata(method, annotation.index(), name, netTypes);
+		String displayType = annotation.displayType();
+		if (StringUtils.isEmpty(displayType))
+			displayType = name;
+
+		return new ActionMetadata(method, annotation.index(), name,
+				displayType, netTypes);
 	}
 
 	private MemberMetadata initAttribute(Method method,
@@ -246,7 +279,12 @@ public class PluginClassMetadata {
 		if (StringUtils.isEmpty(name))
 			name = method.getName();
 
-		return new AttributeMetadata(method, annotation.index(), name, netType);
+		String displayType = annotation.displayType();
+		if (StringUtils.isEmpty(displayType))
+			displayType = name;
+
+		return new AttributeMetadata(method, annotation.index(), name,
+				displayType, netType);
 	}
 
 	private NetType initMemberArgument(Class<?> clazz, Annotation[] annotations)
@@ -281,6 +319,10 @@ public class PluginClassMetadata {
 
 	public String getDisplayType() {
 		return displayType;
+	}
+
+	public byte[] getImage() {
+		return image;
 	}
 
 	public Class<?> getConfigurationInterface() {
