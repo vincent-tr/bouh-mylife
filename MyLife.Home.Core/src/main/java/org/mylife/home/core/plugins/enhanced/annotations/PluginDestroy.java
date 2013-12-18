@@ -4,8 +4,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Appliqué sur une méthode sans paramètre, indique que la méthode doit être
- * appelée à la destruction du plugin
+ * Appliqué sur une méthode sans paramètre, ou avec un paramètre de type
+ * PluginContext, indique que la méthode doit être appelée à la destruction du
+ * plugin
  * 
  * @author pumbawoman
  * 

@@ -47,21 +47,9 @@ class PluginConfigurationWrapper implements InvocationHandler {
 		if (returnClass.equals(String.class))
 			return valueString;
 		if (returnClass.isEnum())
-			return valueOfEnum(returnClass, valueString);
+			return Helpers.valueOfEnum(returnClass, valueString);
 		if(returnClass.isPrimitive())
 			return valueOfPrimitive(returnClass, valueString);
-		return null;
-	}
-
-	private Object valueOfEnum(Class<?> clazz, String value) {
-		if (StringUtils.isEmpty(value))
-			return null;
-
-		Object[] values = clazz.getEnumConstants();
-		for (Object item : values) {
-			if (item.toString().equalsIgnoreCase(value))
-				return item;
-		}
 		return null;
 	}
 
