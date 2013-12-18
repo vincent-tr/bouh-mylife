@@ -1,9 +1,14 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
 	pageEncoding="ISO-8859-1"%>
 <%@ page import="java.util.List"%>
+<%@ page import="java.util.Collection"%>
 <%@ page import="org.mylife.home.common.web.WebTools"%>
+<%@ page import="org.mylife.home.core.plugins.PluginFactory"%>
 
 <%@include file="/jsp/template/Header.jsp"%>
+<%
+	Collection<PluginFactory> factories = (Collection<PluginFactory>)pageContext.getRequest().getAttribute("factories");
+%>
 
 <script>
 	$(function() {
@@ -20,12 +25,15 @@
 							src="<%=WebTools.image(pageContext, "view.png")%>" />Etat du
 							serveur</a></li>
 					<li><a href="#tabs-2"><img
-							src="<%=WebTools.image(pageContext, "application.png")%>" />Vue
-							des composants</a></li>
+							src="<%=WebTools.image(pageContext, "application.png")%>" />Fabriques
+							de plugins</a></li>
 					<li><a href="#tabs-3"><img
 							src="<%=WebTools.image(pageContext, "application.png")%>" />Vue
-							des plugins</a></li>
+							des composants</a></li>
 					<li><a href="#tabs-4"><img
+							src="<%=WebTools.image(pageContext, "application.png")%>" />Vue
+							des plugins</a></li>
+					<li><a href="#tabs-5"><img
 							src="<%=WebTools.image(pageContext, "lightning.png")%>" />Vue
 							des liens</a></li>
 				</ul>
@@ -46,6 +54,40 @@
 				<div id="tabs-2">
 					<fieldset>
 						<legend>
+							<span>Fabriques de plugins</span>
+						</legend>
+
+						<div class="table_render_outer">
+							<div class="table_render_inner">
+								<table class="table_render">
+									<thead>
+										<tr>
+											<td>Type de plugin</td>
+											<td>Type de plugin (affichage)</td>
+											<td>Classe d'implémentation de la fabrique</td>
+										</tr>
+									</thead>
+									<tbody>
+										<%
+											for(PluginFactory factory : factories) {
+										%>
+										<tr>
+											<td><%=WebTools.htmlEscape(factory.getType())%></td>
+											<td><%=WebTools.htmlEscape(factory.getDisplayType())%></td>
+											<td><%=WebTools.htmlEscape(factory.getClass().toString())%></td>
+										</tr>
+										<%
+											}
+										%>
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</fieldset>
+				</div>
+				<div id="tabs-3">
+					<fieldset>
+						<legend>
 							<span>Vue des composants</span>
 						</legend>
 
@@ -53,7 +95,7 @@
 
 					</fieldset>
 				</div>
-				<div id="tabs-3">
+				<div id="tabs-4">
 					<fieldset>
 						<legend>
 							<span>Vue des plugins</span>
@@ -69,7 +111,7 @@
 						</div>
 					</fieldset>
 				</div>
-				<div id="tabs-4">
+				<div id="tabs-5">
 					<fieldset>
 						<legend>
 							<span>Vue des liens</span>
@@ -96,7 +138,7 @@ $('#componentsState').load('<%=WebTools.servlet(pageContext, "console")%>?action
 self.setInterval(function() {
 	$('#serverState').load('<%=WebTools.servlet(pageContext, "console")%>?action=serverState');
 	$('#componentsState').load('<%=WebTools.servlet(pageContext, "console")%>?action=componentsState');
-					}, 5000);
+}, 5000);
 </script>
 
 <%@include file="/jsp/template/Footer.jsp"%>

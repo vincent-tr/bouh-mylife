@@ -1,6 +1,7 @@
 package org.mylife.home.core.web;
 
 import java.io.IOException;
+import java.util.Collection;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -9,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mylife.home.common.web.model.ServerState;
 import org.mylife.home.common.web.model.Severity;
+import org.mylife.home.core.plugins.PluginFactory;
 import org.mylife.home.core.services.ManagerService;
 import org.mylife.home.core.services.ServiceAccess;
 
@@ -127,7 +129,10 @@ public class WebConsole extends HttpServlet {
 	private void index(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 
+		Collection<PluginFactory> factories = ServiceAccess.getInstance().getPluginService().getFactories();
+		
 		req.setAttribute("title", "Console");
+		req.setAttribute("factories", factories);
 		req.getRequestDispatcher("/jsp/Console.jsp").forward(req, resp);
 	}
 }

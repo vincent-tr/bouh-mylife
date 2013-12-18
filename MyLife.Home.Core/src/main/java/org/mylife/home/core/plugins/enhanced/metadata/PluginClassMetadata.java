@@ -194,7 +194,7 @@ public class PluginClassMetadata {
 
 			PluginAttribute attributeAnnotation = method
 					.getAnnotation(PluginAttribute.class);
-			if (actionAnnotation != null)
+			if (attributeAnnotation != null)
 				member = initAttribute(method, attributeAnnotation);
 
 			if (member == null)
