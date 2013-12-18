@@ -14,12 +14,21 @@ import java.util.Collections;
 public class NetEnum extends NetType {
 
 	private final Collection<String> values;
+	private final String toStringCache;
 
 	public NetEnum(Iterable<String> items) {
 		ArrayList<String> list = new ArrayList<String>();
 		for (String item : items)
 			list.add(item);
 		values = Collections.unmodifiableCollection(list);
+		
+		StringBuffer builder = new StringBuffer();
+		for(String value : values) {
+			if(builder.length() > 0)
+				builder.append(',');
+			builder.append(value);
+		}
+		toStringCache = "Enum[" + builder + "]";
 	}
 
 	public NetEnum(String... items) {
@@ -54,4 +63,13 @@ public class NetEnum extends NetType {
 		return true;
 	}
 
+	@Override
+	public int hashCode() {
+		return toStringCache.hashCode();
+	}
+
+	@Override
+	public String toString() {
+		return toStringCache;
+	}
 }

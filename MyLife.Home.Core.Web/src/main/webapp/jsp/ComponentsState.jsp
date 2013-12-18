@@ -3,34 +3,6 @@
 <%@ page import="org.mylife.home.common.web.WebTools"%>
 <%@ page import="org.mylife.home.net.*"%>
 <%@ page import="org.mylife.home.net.structure.*"%>
-<%!/**
-	 * Représentation d'un type
-	 * @param type
-	 * @return
-	 */
-	private String getTypeDisplay(NetType type) {
-		if (type instanceof NetRange) {
-			NetRange range = (NetRange) type;
-			return String.format("Range[%d..%d]", range.getMin(),
-					range.getMax());
-		} else if (type instanceof NetEnum) {
-			NetEnum enu = (NetEnum) type;
-			StringBuffer buffer = new StringBuffer();
-			buffer.append("Enum[");
-			boolean first = true;
-			for (String value : enu.getValues()) {
-				if (first)
-					first = false;
-				else
-					buffer.append(",");
-				buffer.append(value);
-			}
-			buffer.append("]");
-			return buffer.toString();
-		} else {
-			throw new UnsupportedOperationException("unknown type");
-		}
-	}%>
 <div class="table_render_outer">
 	<div class="table_render_inner">
 		<%
@@ -60,8 +32,8 @@
 				%>
 				<tr>
 					<td><%=WebTools.htmlEscape(attribute.getName())%></td>
-					<td><%=WebTools.htmlEscape(getTypeDisplay(attribute
-							.getType()))%></td>
+					<td><%=WebTools.htmlEscape(attribute.getType()
+							.toString())%></td>
 					<td><%=WebTools.htmlEscape(String.valueOf(value))%></td>
 				</tr>
 				<%
