@@ -31,11 +31,16 @@ class EnhancedPluginWrapper implements Plugin {
 	private final static Logger log = Logger
 			.getLogger(EnhancedPluginWrapper.class.getName());
 
+	// Données générales
 	private final PluginClassMetadata metadata;
 	private final Object instance;
 	private PluginContext context;
+	
+	// Données de runtime
 	private NetObject netObject;
 	private Collection<MemberWrapper> members;
+	
+	// Données de design
 	private EnhancedPluginDesignMetadata designMetadata;
 
 	public EnhancedPluginWrapper(PluginClassMetadata metadata) throws Exception {
