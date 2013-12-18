@@ -42,7 +42,8 @@ public class TestComponent implements Component {
 				new NetAttribute(1, "volume", volumeType),
 				new NetAction(2, "setOn"),
 				new NetAction(3, "setOff"),
-				new NetAction(4, "setVolume", volumeType));
+				new NetAction(4, "setVolume", volumeType),
+				new NetAction(5, "setOnOff", onOffType));
 		
 		NetObject obj = new NetObject(context.componentId(), netClass);
 
@@ -71,6 +72,14 @@ public class TestComponent implements Component {
 					Object[] arguments) {
 				int value = ((Integer)arguments[0]).intValue();
 				obj.setAttributeValue("volume", value);
+			}
+		});
+		obj.setActionExecutor("setOnOff", new ActionExecutor() {
+			@Override
+			public void execute(NetObject obj, NetAction action,
+					Object[] arguments) {
+				String value = (String)arguments[0];
+				obj.setAttributeValue("onOff", value);
 			}
 		});
 		
