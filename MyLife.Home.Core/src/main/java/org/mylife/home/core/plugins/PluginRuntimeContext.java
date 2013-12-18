@@ -1,6 +1,7 @@
 package org.mylife.home.core.plugins;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -22,6 +23,7 @@ import org.mylife.home.net.NetObject;
 public class PluginRuntimeContext implements PluginContext {
 
 	private final String id;
+	private final PluginFactory factory;
 	private final Plugin plugin;
 	private final Map<String, String> configuration;
 	private final List<NetContainer> publishedObjects = new ArrayList<NetContainer>();
@@ -35,11 +37,6 @@ public class PluginRuntimeContext implements PluginContext {
 			map.put(item.key, item.value);
 		}
 		return map;
-	}
-
-	private static Plugin instanciatePlugin(String pluginType) throws Exception {
-		PluginFactory factory = ServiceAccess.getInstance().getPluginService().getFactory(pluginType);
-		return factory.create();
 	}
 
 	/**
@@ -61,7 +58,9 @@ public class PluginRuntimeContext implements PluginContext {
 	public PluginRuntimeContext(String id, String pluginType,
 			Map<String, String> configuration) throws Exception {
 		this.id = id;
-		this.plugin = instanciatePlugin(pluginType);
+		this.factory = ServiceAccess.getInstance().getPluginService()
+				.getFactory(pluginType);
+		this.plugin = factory.create();
 		if (configuration == null)
 			this.configuration = Collections.emptyMap();
 		else
@@ -113,5 +112,23 @@ public class PluginRuntimeContext implements PluginContext {
 		for (NetContainer obj : publishedObjects) {
 			service.unregisterPluginObject(this, obj);
 		}
+	}
+
+	/**
+	 * Obtention des objets publiés par le plugin
+	 * 
+	 * @return
+	 */
+	public Collection<NetContainer> getPublishedObjects() {
+		return Collections.unmodifiableCollection(publishedObjects);
+	}
+
+	/**
+	 * Obtention de la fabrique du plugin
+	 * 
+	 * @return
+	 */
+	public PluginFactory getFactory() {
+		return factory;
 	}
 }

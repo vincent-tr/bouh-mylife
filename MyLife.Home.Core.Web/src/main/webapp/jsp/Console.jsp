@@ -101,14 +101,7 @@
 							<span>Vue des plugins</span>
 						</legend>
 
-						<div class="table_render_outer">
-							<div class="table_render_inner">
-								<table class="table_render">
-									<thead></thead>
-									<tbody></tbody>
-								</table>
-							</div>
-						</div>
+						<div id="pluginsState"></div>
 					</fieldset>
 				</div>
 				<div id="tabs-5">
@@ -116,15 +109,8 @@
 						<legend>
 							<span>Vue des liens</span>
 						</legend>
-
-						<div class="table_render_outer">
-							<div class="table_render_inner">
-								<table class="table_render">
-									<thead></thead>
-									<tbody></tbody>
-								</table>
-							</div>
-						</div>
+						
+						<div id="linksState"></div>
 					</fieldset>
 				</div>
 			</td>
@@ -135,9 +121,14 @@
 <script>
 $('#serverState').load('<%=WebTools.servlet(pageContext, "console")%>?action=serverState');
 $('#componentsState').load('<%=WebTools.servlet(pageContext, "console")%>?action=componentsState');
+$('#pluginsState').load('<%=WebTools.servlet(pageContext, "console")%>?action=pluginsState');
+$('#linksState').load('<%=WebTools.servlet(pageContext, "console")%>?action=linksState');
 self.setInterval(function() {
 	$('#serverState').load('<%=WebTools.servlet(pageContext, "console")%>?action=serverState');
 	$('#componentsState').load('<%=WebTools.servlet(pageContext, "console")%>?action=componentsState');
+	/* pas de refresh car pas de modification une fois en ligne */
+	/* $('#pluginsState').load('<%=WebTools.servlet(pageContext, "console")%>?action=pluginsState'); */
+	$('#linksState').load('<%=WebTools.servlet(pageContext, "console")%>?action=linksState');
 }, 5000);
 </script>
 

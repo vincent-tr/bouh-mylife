@@ -10,7 +10,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mylife.home.common.web.model.ServerState;
 import org.mylife.home.common.web.model.Severity;
+import org.mylife.home.core.links.Link;
 import org.mylife.home.core.plugins.PluginFactory;
+import org.mylife.home.core.plugins.PluginView;
 import org.mylife.home.core.services.ManagerService;
 import org.mylife.home.core.services.ServiceAccess;
 
@@ -47,6 +49,10 @@ public class WebConsole extends HttpServlet {
 			serverState(req, resp);
 		} else if ("componentsState".equals(action)) {
 			componentsState(req, resp);
+		} else if ("pluginsState".equals(action)) {
+			pluginsState(req, resp);
+		} else if ("linksState".equals(action)) {
+			linksState(req, resp);
 		} else if ("start".equals(action)) {
 			start(req, resp);
 		} else if ("stop".equals(action)) {
@@ -72,7 +78,8 @@ public class WebConsole extends HttpServlet {
 		case ManagerService.STATE_ERROR:
 			serverState.setState("ERROR");
 			serverState.setSeverity(Severity.ERROR);
-			serverState.setError(ServiceAccess.getInstance().getManagerService().getError());
+			serverState.setError(ServiceAccess.getInstance()
+					.getManagerService().getError());
 			serverState.setCanStop(true);
 			serverState.setCanStart(true);
 			break;
@@ -102,12 +109,29 @@ public class WebConsole extends HttpServlet {
 		req.setAttribute("data", serverState);
 		req.getRequestDispatcher("/jsp/ServerState.jsp").forward(req, resp);
 	}
-	
-	private void componentsState(HttpServletRequest req, HttpServletResponse resp)
-			throws ServletException, IOException {
-		
-		//req.setAttribute("data", serverState);
+
+	private void componentsState(HttpServletRequest req,
+			HttpServletResponse resp) throws ServletException, IOException {
+
 		req.getRequestDispatcher("/jsp/ComponentsState.jsp").forward(req, resp);
+	}
+
+	private void pluginsState(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+
+		Collection<PluginView> data = ServiceAccess.getInstance()
+				.getManagerService().getPlugins();
+		req.setAttribute("data", data);
+		req.getRequestDispatcher("/jsp/PluginsState.jsp").forward(req, resp);
+	}
+
+	private void linksState(HttpServletRequest req, HttpServletResponse resp)
+			throws ServletException, IOException {
+
+		Collection<Link> data = ServiceAccess.getInstance().getManagerService()
+				.getLinks();
+		req.setAttribute("data", data);
+		req.getRequestDispatcher("/jsp/LinksState.jsp").forward(req, resp);
 	}
 
 	private void start(HttpServletRequest req, HttpServletResponse resp)
@@ -129,8 +153,9 @@ public class WebConsole extends HttpServlet {
 	private void index(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 
-		Collection<PluginFactory> factories = ServiceAccess.getInstance().getPluginService().getFactories();
-		
+		Collection<PluginFactory> factories = ServiceAccess.getInstance()
+				.getPluginService().getFactories();
+
 		req.setAttribute("title", "Console");
 		req.setAttribute("factories", factories);
 		req.getRequestDispatcher("/jsp/Console.jsp").forward(req, resp);

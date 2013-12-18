@@ -1,6 +1,8 @@
 package org.mylife.home.core.services;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -16,6 +18,7 @@ import org.mylife.home.core.exchange.XmlCoreLink;
 import org.mylife.home.core.links.Link;
 import org.mylife.home.core.links.LinkFactory;
 import org.mylife.home.core.plugins.PluginRuntimeContext;
+import org.mylife.home.core.plugins.PluginView;
 import org.mylife.home.net.NetContainer;
 import org.mylife.home.net.NetObject;
 import org.mylife.home.net.NetRepository;
@@ -195,5 +198,34 @@ public class ManagerService extends BaseManagerService {
 		}
 		ServiceAccess.getInstance().getPluginPersistanceService()
 				.updateByComponentId(context.getId(), list);
+	}
+
+	/**
+	 * Réservé pour monitoring - ne pas modifier
+	 * 
+	 * @return
+	 */
+	public Collection<PluginView> getPlugins() {
+		Collection<PluginView> list = new ArrayList<PluginView>();
+		for (PluginRuntimeContext plugin : plugins) {
+			Collection<NetObject> netObjects = new ArrayList<NetObject>();
+			for (NetContainer container : plugin.getPublishedObjects()) {
+				netObjects.add(container.getObject());
+			}
+			list.add(new PluginView(plugin.getId(), plugin.getFactory()
+					.getType(), plugin.getFactory().getDisplayType(),
+					Collections.unmodifiableMap(plugin.getConfiguration()),
+					netObjects));
+		}
+		return Collections.unmodifiableCollection(list);
+	}
+
+	/**
+	 * Réservé pour monitoring - ne pas modifier
+	 * 
+	 * @return
+	 */
+	public Collection<Link> getLinks() {
+		return Collections.unmodifiableCollection(links);
 	}
 }
