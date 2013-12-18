@@ -124,7 +124,7 @@ class EnhancedPluginWrapper implements Plugin {
 			}
 			try {
 
-				method.invoke(instance, args);
+				method.invoke(instance, args.toArray());
 			} catch (Exception e) {
 				log.log(Level.SEVERE, "Error destroying plugin", e);
 			}
