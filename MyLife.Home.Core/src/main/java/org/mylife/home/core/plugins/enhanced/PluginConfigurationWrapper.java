@@ -5,7 +5,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.mylife.home.core.plugins.PluginContext;
 import org.mylife.home.core.plugins.enhanced.annotations.PluginDataName;
 
@@ -54,19 +53,19 @@ class PluginConfigurationWrapper implements InvocationHandler {
 	}
 
 	private Object valueOfPrimitive(Class<?> clazz, String value) {
-		if (Boolean.class == clazz)
+		if (boolean.class == clazz)
 			return Boolean.parseBoolean(value);
-		if (Byte.class == clazz)
+		if (byte.class == clazz)
 			return Byte.parseByte(value);
-		if (Short.class == clazz)
+		if (short.class == clazz)
 			return Short.parseShort(value);
-		if (Integer.class == clazz)
+		if (int.class == clazz)
 			return Integer.parseInt(value);
-		if (Long.class == clazz)
+		if (long.class == clazz)
 			return Long.parseLong(value);
-		if (Float.class == clazz)
+		if (float.class == clazz)
 			return Float.parseFloat(value);
-		if (Double.class == clazz)
+		if (double.class == clazz)
 			return Double.parseDouble(value);
 		return null;
 	}
