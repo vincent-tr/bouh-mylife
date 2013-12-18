@@ -119,6 +119,7 @@ public class PluginClassMetadata {
 				if (parameter.isAnnotationPresent(PluginConfiguration.class)) {
 					checkValidConfigurationInterface(parameter);
 					configurationInterface = parameter;
+					continue;
 				}
 
 				throwInvalidMethod(method, "PluginInit");

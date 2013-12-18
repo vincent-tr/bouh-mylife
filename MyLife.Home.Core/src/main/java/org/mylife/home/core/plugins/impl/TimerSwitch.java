@@ -43,7 +43,7 @@ public class TimerSwitch {
 		 * 
 		 * @return
 		 */
-		@PluginDataName(name = "delayMinutes")
+		@PluginDataName(name = "delaySeconds")
 		int delay();
 	}
 
@@ -93,7 +93,7 @@ public class TimerSwitch {
 				task.cancel();
 			// Création de la tâche d'extinction
 			task = new Task();
-			timer.schedule(task, delay);
+			timer.schedule(task, delay * 1000);
 		}
 	}
 
