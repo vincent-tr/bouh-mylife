@@ -1,5 +1,0 @@
-# http://docs.oracle.com/javase/6/docs/api/java/util/ServiceLoader.html
-
-org.mylife.home.core.plugins.impl.StepRelay$Factory
-org.mylife.home.core.plugins.impl.TimerSwitch$Factory
-org.mylife.home.core.plugins.impl.TwoWaySwitch$Factory
