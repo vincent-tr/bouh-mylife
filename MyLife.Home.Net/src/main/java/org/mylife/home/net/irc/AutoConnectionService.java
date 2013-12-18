@@ -46,7 +46,7 @@ public class AutoConnectionService extends Thread implements ConnectionService {
 
 	@Override
 	public void run() {
-		while (true) {
+		while (!isInterrupted()) {
 			try {
 
 				if (!owner.isConnected()) {
