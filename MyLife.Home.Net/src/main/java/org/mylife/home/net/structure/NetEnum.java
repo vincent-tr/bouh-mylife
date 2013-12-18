@@ -41,7 +41,7 @@ public class NetEnum extends NetType {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (!(obj instanceof NetRange))
+		if (!(obj instanceof NetEnum))
 			return false;
 		NetEnum other = (NetEnum) obj;
 
