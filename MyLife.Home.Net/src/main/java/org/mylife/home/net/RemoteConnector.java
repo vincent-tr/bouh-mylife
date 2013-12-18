@@ -81,6 +81,7 @@ class RemoteConnector implements Connector, ActionExecutor {
 	public void close() {
 
 		synchronized (connectors) {
+			connectors.remove(this);
 			watcher.removeChannel(container.getChannel());
 			if (connectors.size() == 0) {
 				watcher.close();
