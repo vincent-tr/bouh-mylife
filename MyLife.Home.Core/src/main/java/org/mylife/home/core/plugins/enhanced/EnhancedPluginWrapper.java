@@ -9,6 +9,10 @@ import java.util.logging.Logger;
 import org.mylife.home.core.plugins.Plugin;
 import org.mylife.home.core.plugins.PluginContext;
 import org.mylife.home.core.plugins.PluginDesignMetadata;
+import org.mylife.home.core.plugins.enhanced.metadata.ActionMetadata;
+import org.mylife.home.core.plugins.enhanced.metadata.AttributeMetadata;
+import org.mylife.home.core.plugins.enhanced.metadata.MemberMetadata;
+import org.mylife.home.core.plugins.enhanced.metadata.PluginClassMetadata;
 import org.mylife.home.net.NetObject;
 import org.mylife.home.net.structure.NetClass;
 import org.mylife.home.net.structure.NetMember;
@@ -31,6 +35,7 @@ class EnhancedPluginWrapper implements Plugin {
 	private final Object instance;
 	private PluginContext context;
 	private NetObject netObject;
+	private Collection<MemberWrapper> members;
 
 	public EnhancedPluginWrapper(PluginClassMetadata metadata) throws Exception {
 		this.metadata = metadata;
@@ -62,23 +67,58 @@ class EnhancedPluginWrapper implements Plugin {
 		}
 
 		// Construction de l'objet publié
-		Collection<NetMember> members = new ArrayList<NetMember>();
-		for (PluginClassMetadata.MemberMetadata member : metadata.getMembers()) {
-			// TODO : members
+		Collection<NetMember> netMembers = new ArrayList<NetMember>();
+		members = createMemberWrappers();
+		for (MemberWrapper member : members) {
+			netMembers.add(member.createMember());
 		}
-		netObject = new NetObject(context.getId(), new NetClass(
-				members));
-		// TODO : bindings (types : range <=> integer, enum <=> string)
+		netObject = new NetObject(context.getId(), new NetClass(netMembers));
+		for (MemberWrapper member : members) {
+			member.bind(netObject);
+		}
 		context.publishObject(netObject);
+	}
+
+	private Collection<MemberWrapper> createMemberWrappers() throws Exception {
+		Collection<MemberWrapper> members = new ArrayList<MemberWrapper>();
+		for (MemberMetadata memberMetadata : metadata.getMembers()) {
+			MemberWrapper member = null;
+			if (memberMetadata instanceof AttributeMetadata) {
+				member = new AttributeWrapper(instance,
+						(AttributeMetadata) memberMetadata);
+			}
+			if (memberMetadata instanceof ActionMetadata) {
+				member = new ActionWrapper(instance,
+						(ActionMetadata) memberMetadata);
+			}
+
+			if (member == null)
+				throw new UnsupportedOperationException();
+
+			members.add(member);
+		}
+
+		return members;
 	}
 
 	@Override
 	public void destroy() {
 
+		// Suppression des binding entre l'objet réseau et le plugin
+		for (MemberWrapper member : members) {
+			member.unbind(netObject);
+		}
+
 		// Exécution des méthodes de destruction
 		for (Method method : metadata.getDestroyMethods()) {
+			Collection<Object> args = new ArrayList<Object>();
+			for (Class<?> argClass : method.getParameterTypes()) {
+				if (argClass.equals(PluginContext.class))
+					args.add(context);
+			}
 			try {
-				method.invoke(instance);
+
+				method.invoke(instance, args);
 			} catch (Exception e) {
 				log.log(Level.SEVERE, "Error destroying plugin", e);
 			}

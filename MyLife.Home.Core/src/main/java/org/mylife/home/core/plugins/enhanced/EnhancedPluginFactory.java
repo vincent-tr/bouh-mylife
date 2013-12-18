@@ -2,6 +2,7 @@ package org.mylife.home.core.plugins.enhanced;
 
 import org.mylife.home.core.plugins.Plugin;
 import org.mylife.home.core.plugins.PluginFactory;
+import org.mylife.home.core.plugins.enhanced.metadata.PluginClassMetadata;
 
 /**
  * Gestion de la fabrique de plugins avancés

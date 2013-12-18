@@ -1,4 +1,4 @@
-package org.mylife.home.core.plugins.enhanced;
+package org.mylife.home.core.plugins.enhanced.metadata;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -14,6 +14,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.mylife.home.core.plugins.PluginContext;
+import org.mylife.home.core.plugins.enhanced.Attribute;
+import org.mylife.home.core.plugins.enhanced.Helpers;
+import org.mylife.home.core.plugins.enhanced.InvalidPluginException;
 import org.mylife.home.core.plugins.enhanced.annotations.Plugin;
 import org.mylife.home.core.plugins.enhanced.annotations.PluginAction;
 import org.mylife.home.core.plugins.enhanced.annotations.PluginAttribute;
@@ -31,67 +34,7 @@ import org.mylife.home.net.structure.NetType;
  * @author pumbawoman
  * 
  */
-class PluginClassMetadata {
-
-	/**
-	 * Membre
-	 * 
-	 * @author pumbawoman
-	 * 
-	 */
-	public static abstract class MemberMetadata {
-		private final Method method;
-		private final int index;
-		private final String name;
-
-		public MemberMetadata(Method method, int index, String name) {
-			this.method = method;
-			this.index = index;
-			this.name = name;
-		}
-
-		public Method getMethod() {
-			return method;
-		}
-
-		public int getIndex() {
-			return index;
-		}
-
-		public String getName() {
-			return name;
-		}
-	}
-
-	public static class AttributeMetadata extends MemberMetadata {
-
-		private final NetType netType;
-
-		public AttributeMetadata(Method method, int index, String name,
-				NetType netType) {
-			super(method, index, name);
-			this.netType = netType;
-		}
-
-		public NetType getNetType() {
-			return netType;
-		}
-	}
-
-	public static class ActionMetadata extends MemberMetadata {
-
-		private final Collection<NetType> netTypes;
-
-		public ActionMetadata(Method method, int index, String name,
-				Collection<NetType> netTypes) {
-			super(method, index, name);
-			this.netTypes = Collections.unmodifiableCollection(netTypes);
-		}
-
-		public Collection<NetType> getNetTypes() {
-			return netTypes;
-		}
-	}
+public class PluginClassMetadata {
 
 	private final Class<?> pluginClass;
 	private final String type;
@@ -225,8 +168,14 @@ class PluginClassMetadata {
 				continue;
 
 			Class<?>[] parameters = method.getParameterTypes();
-			if (parameters.length > 0)
+			for (Class<?> parameter : parameters) {
+
+				// Check si de type PluginContext
+				if (parameter.equals(PluginContext.class))
+					continue;
+
 				throwInvalidMethod(method, "PluginDestroy");
+			}
 
 			methods.add(method);
 		}
@@ -302,13 +251,8 @@ class PluginClassMetadata {
 	private NetType initMemberArgument(Class<?> clazz, Annotation[] annotations)
 			throws InvalidPluginException {
 
-		if (clazz.isEnum()) {
-			Collection<String> values = new ArrayList<String>();
-			for (Object value : clazz.getEnumConstants()) {
-				values.add(value.toString());
-			}
-			return new NetEnum(values);
-		}
+		if (clazz.isEnum())
+			return new NetEnum(Helpers.namesOfEnum(clazz));
 
 		if (clazz.equals(Integer.class)) {
 			for (Annotation annotation : annotations) {
