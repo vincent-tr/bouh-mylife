@@ -137,7 +137,7 @@ class RemoteConnector implements Connector, ActionExecutor {
 				buffer.append(' ');
 			buffer.append(String.valueOf(arg));
 		}
-		String message = buffer.toString();
+		String message = action.getName() + " " + buffer.toString();
 		watcher.send(container.getChannel(), obj.getId(), message);
 	}
 
