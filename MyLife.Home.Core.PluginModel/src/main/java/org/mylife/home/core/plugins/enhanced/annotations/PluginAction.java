@@ -23,7 +23,14 @@ public @interface PluginAction {
 	String name() default "";
 
 	/**
-	 * Index de l'attribut (doit être défini)
+	 * Affichage pour l'action du plugin (ou le nom si null)
+	 * 
+	 * @return
+	 */
+	String displayType() default "";
+
+	/**
+	 * Index de l'action (doit être défini)
 	 * 
 	 * @return
 	 */

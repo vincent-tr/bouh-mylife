@@ -11,8 +11,8 @@ public class ActionMetadata extends MemberMetadata {
 	private final Collection<NetType> netTypes;
 
 	public ActionMetadata(Method method, int index, String name,
-			Collection<NetType> netTypes) {
-		super(method, index, name);
+			String displayName, Collection<NetType> netTypes) {
+		super(method, index, name, displayName);
 		this.netTypes = Collections.unmodifiableCollection(netTypes);
 	}
 

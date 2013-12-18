@@ -13,16 +13,23 @@ import java.lang.annotation.RetentionPolicy;
 public @interface Plugin {
 
 	/**
-	 * Type du plugin (ou la classs du plugin si null)
+	 * Type du plugin (ou la classe du plugin si null)
 	 * 
 	 * @return
 	 */
 	String type() default "";
 
 	/**
-	 * Affichage pour le type du plugin (ou la classs du plugin si null)
+	 * Affichage pour le type du plugin (ou la classe du plugin si null)
 	 * 
 	 * @return
 	 */
 	String displayType() default "";
+
+	/**
+	 * Chemin de la ressource pour l'image au design du plugin
+	 * 
+	 * @return
+	 */
+	String imageResource() default "";
 }

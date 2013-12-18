@@ -20,6 +20,13 @@ public @interface PluginAttribute {
 	 * @return
 	 */
 	String name() default "";
+
+	/**
+	 * Affichage pour l'attribut du plugin (ou le nom si null)
+	 * 
+	 * @return
+	 */
+	String displayType() default "";
 	
 	/**
 	 * Index de l'attribut (doit être défini)
