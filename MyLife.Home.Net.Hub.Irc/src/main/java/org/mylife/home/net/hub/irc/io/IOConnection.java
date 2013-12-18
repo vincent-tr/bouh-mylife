@@ -7,6 +7,8 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Connexion
@@ -15,6 +17,12 @@ import java.nio.channels.SocketChannel;
  * 
  */
 public class IOConnection extends IOElement {
+
+	/**
+	 * Logger
+	 */
+	private final static Logger log = Logger.getLogger(IOConnection.class
+			.getName());
 
 	public static interface Handler {
 		public void read(byte[] data);
@@ -45,9 +53,9 @@ public class IOConnection extends IOElement {
 		readBuffer = ByteBuffer
 				.allocate(socket.socket().getReceiveBufferSize());
 	}
-	
+
 	public String getRemoteHost() {
-		if(!socket.isConnected())
+		if (!socket.isConnected())
 			return null;
 		InetAddress addr = socket.socket().getInetAddress();
 		return addr.getHostName();
@@ -82,9 +90,19 @@ public class IOConnection extends IOElement {
 		connecting = false;
 	}
 
-	private void read() throws IOException {
+	private void read() {
 		readBuffer.clear();
-		switch (socket.read(readBuffer)) {
+		
+		int ret = 0;
+		try {
+			ret = socket.read(readBuffer);
+		} catch(IOException ioe) {
+			log.log(Level.SEVERE, "read error", ioe);
+			handler.remoteClosed();
+			return;
+		}
+		
+		switch (ret) {
 		case -1:
 			handler.remoteClosed();
 			break;
