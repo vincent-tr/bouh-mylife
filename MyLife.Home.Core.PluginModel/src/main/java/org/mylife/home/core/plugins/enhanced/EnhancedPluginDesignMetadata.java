@@ -47,7 +47,7 @@ class EnhancedPluginDesignMetadata implements PluginDesignMetadata {
 			Class<?> configurationInterface) {
 
 		if (configurationInterface == null)
-			return null;
+			return Collections.emptyList();
 
 		Collection<PluginDesignConfiguration> list = new ArrayList<PluginDesignConfiguration>();
 		for (Method method : configurationInterface.getMethods()) {
