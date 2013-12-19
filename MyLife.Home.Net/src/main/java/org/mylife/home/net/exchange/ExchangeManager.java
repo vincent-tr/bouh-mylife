@@ -104,7 +104,7 @@ public class ExchangeManager {
 		return xml;
 	}
 
-	private static XmlNetType marshal(NetType net) {
+	public static XmlNetType marshal(NetType net) {
 		XmlNetType xml = null;
 		if (net instanceof NetRange)
 			xml = marshal((NetRange) net);
@@ -162,7 +162,7 @@ public class ExchangeManager {
 		}
 	}
 
-	private static NetType unmarshal(XmlNetType xml) {
+	public static NetType unmarshal(XmlNetType xml) {
 		if (xml instanceof XmlNetRange) {
 			XmlNetRange xmlRange = (XmlNetRange) xml;
 			return new NetRange(xmlRange.min, xmlRange.max);
