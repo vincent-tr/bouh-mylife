@@ -28,12 +28,15 @@
 							src="<%=WebTools.image(pageContext, "application.png")%>" />Fabriques
 							de plugins</a></li>
 					<li><a href="#tabs-3"><img
-							src="<%=WebTools.image(pageContext, "application.png")%>" />Vue
-							des composants</a></li>
+							src="<%=WebTools.image(pageContext, "text_preview.png")%>" />Structure
+							de designer de plugins</a></li>
 					<li><a href="#tabs-4"><img
 							src="<%=WebTools.image(pageContext, "application.png")%>" />Vue
-							des plugins</a></li>
+							des composants</a></li>
 					<li><a href="#tabs-5"><img
+							src="<%=WebTools.image(pageContext, "application.png")%>" />Vue
+							des plugins</a></li>
+					<li><a href="#tabs-6"><img
 							src="<%=WebTools.image(pageContext, "lightning.png")%>" />Vue
 							des liens</a></li>
 				</ul>
@@ -88,6 +91,16 @@
 				<div id="tabs-3">
 					<fieldset>
 						<legend>
+							<span>Structure de designer de plugins</span>
+						</legend>
+
+						<div id="designStructureState"></div>
+
+					</fieldset>
+				</div>
+				<div id="tabs-4">
+					<fieldset>
+						<legend>
 							<span>Vue des composants</span>
 						</legend>
 
@@ -95,7 +108,7 @@
 
 					</fieldset>
 				</div>
-				<div id="tabs-4">
+				<div id="tabs-5">
 					<fieldset>
 						<legend>
 							<span>Vue des plugins</span>
@@ -104,12 +117,12 @@
 						<div id="pluginsState"></div>
 					</fieldset>
 				</div>
-				<div id="tabs-5">
+				<div id="tabs-6">
 					<fieldset>
 						<legend>
 							<span>Vue des liens</span>
 						</legend>
-						
+
 						<div id="linksState"></div>
 					</fieldset>
 				</div>
@@ -123,13 +136,15 @@ $('#serverState').load('<%=WebTools.servlet(pageContext, "console")%>?action=ser
 $('#componentsState').load('<%=WebTools.servlet(pageContext, "console")%>?action=componentsState');
 $('#pluginsState').load('<%=WebTools.servlet(pageContext, "console")%>?action=pluginsState');
 $('#linksState').load('<%=WebTools.servlet(pageContext, "console")%>?action=linksState');
+$('#designStructureState').load('<%=WebTools.servlet(pageContext, "console")%>?action=designStructureState');
 self.setInterval(function() {
 	$('#serverState').load('<%=WebTools.servlet(pageContext, "console")%>?action=serverState');
 	$('#componentsState').load('<%=WebTools.servlet(pageContext, "console")%>?action=componentsState');
 	/* pas de refresh car pas de modification une fois en ligne */
 	/* $('#pluginsState').load('<%=WebTools.servlet(pageContext, "console")%>?action=pluginsState'); */
+	/* $('#designStructureState').load('<%=WebTools.servlet(pageContext, "console")%>?action=designStructureState'); */
 	$('#linksState').load('<%=WebTools.servlet(pageContext, "console")%>?action=linksState');
-}, 5000);
+					}, 5000);
 </script>
 
 <%@include file="/jsp/template/Footer.jsp"%>

@@ -1,5 +1,6 @@
 package org.mylife.home.core.web;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Collection;
 
@@ -7,6 +8,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.bind.JAXBException;
 
 import org.mylife.home.common.web.model.ServerState;
 import org.mylife.home.common.web.model.Severity;
@@ -49,6 +51,8 @@ public class WebConsole extends HttpServlet {
 			serverState(req, resp);
 		} else if ("componentsState".equals(action)) {
 			componentsState(req, resp);
+		} else if ("designStructureState".equals(action)) {
+			designStructureState(req, resp);
 		} else if ("pluginsState".equals(action)) {
 			pluginsState(req, resp);
 		} else if ("linksState".equals(action)) {
@@ -114,6 +118,20 @@ public class WebConsole extends HttpServlet {
 			HttpServletResponse resp) throws ServletException, IOException {
 
 		req.getRequestDispatcher("/jsp/ComponentsState.jsp").forward(req, resp);
+	}
+
+	private void designStructureState(HttpServletRequest req,
+			HttpServletResponse resp) throws ServletException, IOException {
+
+		ByteArrayOutputStream stream = new ByteArrayOutputStream();
+		try {
+			WebDesignStructure.exportStructure(this, stream);
+		} catch (JAXBException e) {
+			throw new ServletException("error exporting", e);
+		}
+		String data = stream.toString("utf-8");
+		req.setAttribute("data", data);
+		req.getRequestDispatcher("/jsp/DesignStructureState.jsp").forward(req, resp);
 	}
 
 	private void pluginsState(HttpServletRequest req, HttpServletResponse resp)
