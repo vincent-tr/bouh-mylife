@@ -1,6 +1,5 @@
 package org.mylife.home.core.plugins;
 
-import org.mylife.home.core.plugins.design.PluginDesignMetadata;
 
 /**
  * Interface de gestion d'un plugin. L'implémentation doit avoir un constructeur
@@ -21,10 +20,4 @@ public interface Plugin {
 	 * Fin d'utilisation
 	 */
 	public void destroy();
-
-	/**
-	 * Obtention des metadata de config au design
-	 * @return
-	 */
-	public PluginDesignMetadata getDesignMetadata();
 }

@@ -18,22 +18,6 @@ public interface PluginContext {
 	public String getId();
 	
 	/**
-	 * Le plugin a été instancié pour servir à l'exécution
-	 */
-	public final static int PURPOSE_RUNTIME = 1;
-	
-	/**
-	 * Le plugin a été instancié pour servir au design
-	 */
-	public final static int PURPOSE_DESIGN = 2;
-	
-	/**
-	 * Obtention de la raison de l'instanciation du plugin
-	 * @return
-	 */
-	public int getPurpose();
-	
-	/**
 	 * Publication d'un objet
 	 * @param obj
 	 */

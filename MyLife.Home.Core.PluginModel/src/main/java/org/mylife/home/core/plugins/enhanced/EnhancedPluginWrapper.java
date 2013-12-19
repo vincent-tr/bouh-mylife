@@ -8,7 +8,6 @@ import java.util.logging.Logger;
 
 import org.mylife.home.core.plugins.Plugin;
 import org.mylife.home.core.plugins.PluginContext;
-import org.mylife.home.core.plugins.design.PluginDesignMetadata;
 import org.mylife.home.core.plugins.enhanced.metadata.ActionMetadata;
 import org.mylife.home.core.plugins.enhanced.metadata.AttributeMetadata;
 import org.mylife.home.core.plugins.enhanced.metadata.MemberMetadata;
@@ -31,17 +30,11 @@ class EnhancedPluginWrapper implements Plugin {
 	private final static Logger log = Logger
 			.getLogger(EnhancedPluginWrapper.class.getName());
 
-	// Données générales
 	private final PluginClassMetadata metadata;
 	private final Object instance;
 	private PluginContext context;
-	
-	// Données de runtime
 	private NetObject netObject;
 	private Collection<MemberWrapper> members;
-	
-	// Données de design
-	private EnhancedPluginDesignMetadata designMetadata;
 
 	public EnhancedPluginWrapper(PluginClassMetadata metadata) throws Exception {
 		this.metadata = metadata;
@@ -50,22 +43,6 @@ class EnhancedPluginWrapper implements Plugin {
 
 	@Override
 	public void init(PluginContext context) throws Exception {
-
-		this.context = context;
-
-		switch (context.getPurpose()) {
-		case PluginContext.PURPOSE_DESIGN:
-			initDesign();
-			break;
-
-		case PluginContext.PURPOSE_RUNTIME:
-			initRuntime();
-			break;
-		}
-
-	}
-
-	private void initRuntime() throws Exception {
 
 		// Exécution des méthodes d'initialisation
 		PluginConfigurationWrapper configurationInstance = null;
@@ -99,10 +76,6 @@ class EnhancedPluginWrapper implements Plugin {
 		context.publishObject(netObject);
 	}
 
-	private void initDesign() throws Exception {
-		designMetadata = new EnhancedPluginDesignMetadata(metadata);
-	}
-
 	private Collection<MemberWrapper> createMemberWrappers() throws Exception {
 		Collection<MemberWrapper> members = new ArrayList<MemberWrapper>();
 		for (MemberMetadata memberMetadata : metadata.getMembers()) {
@@ -127,19 +100,6 @@ class EnhancedPluginWrapper implements Plugin {
 
 	@Override
 	public void destroy() {
-
-		switch (context.getPurpose()) {
-		case PluginContext.PURPOSE_DESIGN:
-			destroyDesign();
-			break;
-
-		case PluginContext.PURPOSE_RUNTIME:
-			destroyRuntime();
-			break;
-		}
-	}
-
-	private void destroyRuntime() {
 		// Suppression des binding entre l'objet réseau et le plugin
 		for (MemberWrapper member : members) {
 			member.unbind(netObject);
@@ -160,18 +120,4 @@ class EnhancedPluginWrapper implements Plugin {
 			}
 		}
 	}
-
-	private void destroyDesign() {
-
-	}
-
-	@Override
-	public PluginDesignMetadata getDesignMetadata() {
-
-		if (context.getPurpose() == PluginContext.PURPOSE_RUNTIME)
-			throw new UnsupportedOperationException();
-
-		return designMetadata;
-	}
-
 }

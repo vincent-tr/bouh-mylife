@@ -2,6 +2,7 @@ package org.mylife.home.core.plugins.simple;
 
 import org.mylife.home.core.plugins.Plugin;
 import org.mylife.home.core.plugins.PluginFactory;
+import org.mylife.home.core.plugins.design.PluginDesignMetadata;
 
 /**
  * Fabrique de base d'un plugin
@@ -37,5 +38,10 @@ public class SimplePluginFactory implements PluginFactory {
 	@Override
 	public Plugin create() throws Exception {
 		return pluginClass.newInstance();
+	}
+
+	@Override
+	public PluginDesignMetadata getDesignMetadata() {
+		throw new UnsupportedOperationException();
 	}
 }

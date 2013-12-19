@@ -74,11 +74,6 @@ public class PluginRuntimeContext implements PluginContext {
 	}
 
 	@Override
-	public int getPurpose() {
-		return PluginContext.PURPOSE_RUNTIME;
-	}
-
-	@Override
 	public void publishObject(NetObject obj) {
 		NetContainer container = ServiceAccess.getInstance()
 				.getManagerService().registerPluginObject(this, obj);
