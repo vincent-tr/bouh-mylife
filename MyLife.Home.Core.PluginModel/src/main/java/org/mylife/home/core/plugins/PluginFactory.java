@@ -1,5 +1,7 @@
 package org.mylife.home.core.plugins;
 
+import org.mylife.home.core.plugins.design.PluginDesignMetadata;
+
 
 /**
  * Fabrique de plugins
@@ -30,4 +32,10 @@ public interface PluginFactory {
 	 */
 	public Plugin create() throws Exception;
 
+
+	/**
+	 * Obtention des metadata de config au design
+	 * @return
+	 */
+	public PluginDesignMetadata getDesignMetadata();
 }
