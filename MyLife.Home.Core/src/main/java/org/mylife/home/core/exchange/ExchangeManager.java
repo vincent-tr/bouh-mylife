@@ -44,4 +44,19 @@ public class ExchangeManager {
 		Unmarshaller u = jc.createUnmarshaller();
 		return (XmlCoreContainer) u.unmarshal(stream);
 	}
+
+	/**
+	 * Export
+	 * 
+	 * @param container
+	 * @param stream
+	 * @throws JAXBException
+	 */
+	public static void exportContainer(XmlDesignContainer container,
+			OutputStream stream) throws JAXBException {
+		JAXBContext jc = JAXBContext.newInstance(XmlDesignContainer.class);
+		Marshaller m = jc.createMarshaller();
+		m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+		m.marshal(container, stream);
+	}
 }

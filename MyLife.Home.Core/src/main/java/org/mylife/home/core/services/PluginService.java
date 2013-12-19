@@ -1,5 +1,6 @@
 package org.mylife.home.core.services;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -12,7 +13,20 @@ import org.apache.commons.lang3.Validate;
 import org.mylife.home.common.services.Service;
 import org.mylife.home.core.data.DataPlugin;
 import org.mylife.home.core.data.DataPluginAccess;
+import org.mylife.home.core.exchange.XmlDesignAction;
+import org.mylife.home.core.exchange.XmlDesignAttribute;
+import org.mylife.home.core.exchange.XmlDesignConfiguration;
+import org.mylife.home.core.exchange.XmlDesignContainer;
+import org.mylife.home.core.exchange.XmlDesignPlugin;
+import org.mylife.home.core.exchange.XmlDesignValueType;
 import org.mylife.home.core.plugins.PluginFactory;
+import org.mylife.home.core.plugins.design.PluginDesignAction;
+import org.mylife.home.core.plugins.design.PluginDesignAttribute;
+import org.mylife.home.core.plugins.design.PluginDesignConfiguration;
+import org.mylife.home.core.plugins.design.PluginDesignMetadata;
+import org.mylife.home.net.exchange.ExchangeManager;
+import org.mylife.home.net.exchange.XmlNetType;
+import org.mylife.home.net.structure.NetType;
 
 /**
  * Service de gestion des plugins
@@ -139,7 +153,7 @@ public class PluginService implements Service {
 	public void createFromJar(byte[] data) {
 		throw new UnsupportedOperationException();
 	}
-	
+
 	// ------------------------------------------------------------------------------------------------------------
 
 	private void initFactories() {
@@ -182,5 +196,123 @@ public class PluginService implements Service {
 	public PluginFactory getFactory(String type) {
 		Validate.notEmpty(type);
 		return factories.get(type);
+	}
+
+	/**
+	 * Obtention des métadonnées de design sous format xml Le nom et la version
+	 * ne sont pas remplis
+	 * 
+	 * @return
+	 */
+	public XmlDesignContainer getDesignMetadata() {
+
+		XmlDesignContainer xmlContainer = new XmlDesignContainer();
+		Collection<XmlDesignPlugin> plugins = new ArrayList<XmlDesignPlugin>();
+		for (PluginFactory factory : getFactories()) {
+			plugins.add(mapDesignPlugin(factory));
+		}
+		xmlContainer.plugins = plugins.toArray(new XmlDesignPlugin[plugins
+				.size()]);
+
+		return xmlContainer;
+	}
+
+	private XmlDesignPlugin mapDesignPlugin(PluginFactory factory) {
+
+		XmlDesignPlugin xmlPlugin = new XmlDesignPlugin();
+		xmlPlugin.type = factory.getType();
+		xmlPlugin.displayType = factory.getDisplayType();
+		PluginDesignMetadata metadata = factory.getDesignMetadata();
+		xmlPlugin.image = metadata.getImage();
+
+		Collection<XmlDesignConfiguration> config = new ArrayList<XmlDesignConfiguration>();
+		for (PluginDesignConfiguration configItem : metadata
+				.getConfigurationData()) {
+			config.add(mapDesignConfiguration(configItem));
+		}
+		xmlPlugin.configuration = config
+				.toArray(new XmlDesignConfiguration[config.size()]);
+
+		Collection<XmlDesignAttribute> attributes = new ArrayList<XmlDesignAttribute>();
+		for (PluginDesignAttribute attribute : metadata.getAttributes()) {
+			attributes.add(mapDesignAttribute(attribute));
+		}
+		xmlPlugin.attributes = attributes
+				.toArray(new XmlDesignAttribute[attributes.size()]);
+
+		Collection<XmlDesignAction> actions = new ArrayList<XmlDesignAction>();
+		for (PluginDesignAction action : metadata.getActions()) {
+			actions.add(mapDesignAction(action));
+		}
+		xmlPlugin.actions = actions
+				.toArray(new XmlDesignAction[actions.size()]);
+
+		return xmlPlugin;
+	}
+
+	private XmlDesignConfiguration mapDesignConfiguration(
+			PluginDesignConfiguration config) {
+		XmlDesignConfiguration xmlConfig = new XmlDesignConfiguration();
+		xmlConfig.name = config.getName();
+		xmlConfig.displayName = config.getDisplayName();
+		xmlConfig.mandatory = config.isMandatory();
+
+		Class<?> clazz = config.getType();
+		if (clazz == String.class) {
+			xmlConfig.type = XmlDesignValueType.STRING;
+		} else if (clazz == boolean.class) {
+			xmlConfig.type = XmlDesignValueType.BOOLEAN;
+		} else if (clazz == byte.class) {
+			xmlConfig.type = XmlDesignValueType.BYTE;
+		} else if (clazz == short.class) {
+			xmlConfig.type = XmlDesignValueType.SHORT;
+		} else if (clazz == int.class) {
+			xmlConfig.type = XmlDesignValueType.INT;
+		} else if (clazz == long.class) {
+			xmlConfig.type = XmlDesignValueType.LONG;
+		} else if (clazz == float.class) {
+			xmlConfig.type = XmlDesignValueType.FLOAT;
+		} else if (clazz == double.class) {
+			xmlConfig.type = XmlDesignValueType.DOUBLE;
+		} else {
+			throw new UnsupportedOperationException("Unsupported class : "
+					+ clazz.toString());
+		}
+
+		if (config.getPossibleValues() != null) {
+			Collection<String> possibleValues = new ArrayList<String>();
+			for (Object value : config.getPossibleValues()) {
+				possibleValues.add(value == null ? null : value.toString());
+			}
+			xmlConfig.possibleValues = possibleValues
+					.toArray(new String[possibleValues.size()]);
+		}
+
+		return xmlConfig;
+	}
+
+	private XmlDesignAttribute mapDesignAttribute(
+			PluginDesignAttribute attribute) {
+
+		XmlDesignAttribute xmlAttribute = new XmlDesignAttribute();
+		xmlAttribute.name = attribute.getName();
+		xmlAttribute.displayName = attribute.getDisplayName();
+		xmlAttribute.type = ExchangeManager.marshal(attribute.getType());
+		return xmlAttribute;
+	}
+
+	private XmlDesignAction mapDesignAction(PluginDesignAction action) {
+		XmlDesignAction xmlAction = new XmlDesignAction();
+		xmlAction.name = action.getName();
+		xmlAction.displayName = action.getDisplayName();
+
+		Collection<XmlNetType> arguments = new ArrayList<XmlNetType>();
+		for (NetType argument : action.getArguments()) {
+			arguments.add(ExchangeManager.marshal(argument));
+		}
+		xmlAction.arguments = arguments
+				.toArray(new XmlNetType[arguments.size()]);
+
+		return xmlAction;
 	}
 }
