@@ -67,6 +67,7 @@
 										<tr>
 											<td>Type de plugin</td>
 											<td>Type de plugin (affichage)</td>
+											<td>UI</td>
 											<td>Classe d'implémentation de la fabrique</td>
 										</tr>
 									</thead>
@@ -77,6 +78,7 @@
 										<tr>
 											<td><%=WebTools.htmlEscape(factory.getType())%></td>
 											<td><%=WebTools.htmlEscape(factory.getDisplayType())%></td>
+											<td><%=factory.getDesignMetadata().isUi() ? "oui" : "non"%></td>
 											<td><%=WebTools.htmlEscape(factory.getClass().toString())%></td>
 										</tr>
 										<%
@@ -143,7 +145,8 @@ self.setInterval(function() {
 	/* pas de refresh car pas de modification une fois en ligne */
 	/* $('#pluginsState').load('<%=WebTools.servlet(pageContext, "console")%>?action=pluginsState'); */
 	/* $('#designStructureState').load('<%=WebTools.servlet(pageContext, "console")%>?action=designStructureState'); */
-	$('#linksState').load('<%=WebTools.servlet(pageContext, "console")%>?action=linksState');
+	$('#linksState').load('<%=WebTools.servlet(pageContext, "console")%>
+	?action=linksState');
 					}, 5000);
 </script>
 
