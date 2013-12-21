@@ -82,7 +82,9 @@ public class ExchangeManager {
 			@Override
 			public Result createOutput(String namespaceUri,
 					String suggestedFileName) throws IOException {
-				return new StreamResult(stream);
+				StreamResult sr = new StreamResult(stream);
+				sr.setSystemId(String.valueOf(stream.hashCode()));
+				return sr;
 			}
 		});
 	}
@@ -101,7 +103,9 @@ public class ExchangeManager {
 			@Override
 			public Result createOutput(String namespaceUri,
 					String suggestedFileName) throws IOException {
-				return new StreamResult(stream);
+				StreamResult sr = new StreamResult(stream);
+				sr.setSystemId(String.valueOf(stream.hashCode()));
+				return sr;
 			}
 		});
 	}
@@ -120,7 +124,9 @@ public class ExchangeManager {
 			@Override
 			public Result createOutput(String namespaceUri,
 					String suggestedFileName) throws IOException {
-				return new StreamResult(stream);
+				StreamResult sr = new StreamResult(stream);
+				sr.setSystemId(String.valueOf(stream.hashCode()));
+				return sr;
 			}
 		});
 	}
