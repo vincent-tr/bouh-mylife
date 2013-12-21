@@ -13,8 +13,8 @@ public class XmlDesignPlugin {
 
 	public String type;
 	public String displayType;
-	
 	public byte[] image;
+	public boolean ui;
 	
 	@XmlElementWrapper(name = "configuration")
 	@XmlElement(name = "configurationItem")

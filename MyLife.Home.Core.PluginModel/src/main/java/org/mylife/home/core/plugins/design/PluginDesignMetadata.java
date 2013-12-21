@@ -11,6 +11,13 @@ import java.util.Collection;
 public interface PluginDesignMetadata {
 
 	/**
+	 * Indique si le plugin est considéré comme un plugin d'ui
+	 * 
+	 * @return
+	 */
+	public boolean isUi();
+
+	/**
 	 * Obtention de l'image à afficher pour le plugin, ou null si pas d'image
 	 * 
 	 * @return
@@ -26,12 +33,14 @@ public interface PluginDesignMetadata {
 
 	/**
 	 * Métadonnées des attributs
+	 * 
 	 * @return
 	 */
 	public Collection<PluginDesignAttribute> getAttributes();
-	
+
 	/**
 	 * Métadonnées des actions
+	 * 
 	 * @return
 	 */
 	public Collection<PluginDesignAction> getActions();

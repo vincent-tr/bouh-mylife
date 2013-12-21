@@ -50,6 +50,7 @@ public class PluginClassMetadata {
 	private final Class<?> pluginClass;
 	private final String type;
 	private final String displayType;
+	private final boolean ui;
 	private final byte[] image;
 	private final Class<?> configurationInterface;
 	private final Collection<Method> initMethods;
@@ -62,6 +63,7 @@ public class PluginClassMetadata {
 		Plugin pluginAnnotation = initPluginAnnotation();
 		type = initType(pluginAnnotation);
 		displayType = initDisplayType(pluginAnnotation);
+		ui = pluginAnnotation.ui();
 		image = initImage(pluginClass, pluginAnnotation);
 		Pair<Collection<Method>, Class<?>> initData = initInitMethods();
 		initMethods = Collections.unmodifiableCollection(initData.getLeft());
@@ -319,6 +321,10 @@ public class PluginClassMetadata {
 
 	public String getDisplayType() {
 		return displayType;
+	}
+
+	public boolean isUi() {
+		return ui;
 	}
 
 	public byte[] getImage() {

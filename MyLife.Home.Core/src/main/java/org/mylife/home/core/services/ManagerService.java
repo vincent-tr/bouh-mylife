@@ -146,8 +146,8 @@ public class ManagerService extends BaseManagerService {
 	 * @param obj
 	 */
 	public NetContainer registerPluginObject(PluginRuntimeContext context,
-			NetObject obj) {
-		return NetRepository.register(obj, NetRepository.CHANNEL_DEBUG, true);
+			NetObject obj, boolean ui) {
+		return NetRepository.register(obj, ui ? NetRepository.CHANNL_UI : NetRepository.CHANNEL_DEBUG, true);
 	}
 
 	/**

@@ -224,6 +224,7 @@ public class PluginService implements Service {
 		xmlPlugin.displayType = factory.getDisplayType();
 		PluginDesignMetadata metadata = factory.getDesignMetadata();
 		xmlPlugin.image = metadata.getImage();
+		xmlPlugin.ui = metadata.isUi();
 
 		Collection<XmlDesignConfiguration> config = new ArrayList<XmlDesignConfiguration>();
 		for (PluginDesignConfiguration configItem : metadata

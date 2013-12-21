@@ -32,4 +32,11 @@ public @interface Plugin {
 	 * @return
 	 */
 	String imageResource() default "";
+
+	/**
+	 * Indique si le plugin est un plugin d'ui
+	 * 
+	 * @return
+	 */
+	boolean ui() default false;
 }
