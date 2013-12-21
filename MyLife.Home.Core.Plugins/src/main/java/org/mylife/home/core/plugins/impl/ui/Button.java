@@ -7,7 +7,7 @@ import org.mylife.home.core.plugins.enhanced.annotations.PluginAction;
 import org.mylife.home.core.plugins.enhanced.annotations.PluginAttribute;
 import org.mylife.home.core.plugins.impl.Types;
 
-@Plugin(displayType = "Bouton")
+@Plugin(displayType = "Bouton", ui = true)
 public class Button {
 
 	/**
