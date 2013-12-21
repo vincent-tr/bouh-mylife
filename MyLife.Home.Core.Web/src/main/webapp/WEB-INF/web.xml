@@ -43,7 +43,13 @@
 		<servlet-class>org.mylife.home.core.web.WebDesignStructure</servlet-class>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
-	
+
+	<servlet>
+		<servlet-name>WebSchema</servlet-name>
+		<servlet-class>org.mylife.home.core.web.WebSchema</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+		
 	<servlet>
 		<servlet-name>JmxMiniConsoleServlet</servlet-name>
 		<servlet-class>org.jminix.console.servlet.MiniConsoleServlet</servlet-class>
@@ -74,7 +80,12 @@
 		<servlet-name>WebDesignStructure</servlet-name>
 		<url-pattern>/designStructure</url-pattern>
 	</servlet-mapping>
-	
+
+	<servlet-mapping>
+		<servlet-name>WebSchema</servlet-name>
+		<url-pattern>/schema</url-pattern>
+	</servlet-mapping>
+		
 	<servlet-mapping>
 		<servlet-name>JmxMiniConsoleServlet</servlet-name>
 		<url-pattern>/jmx/*</url-pattern>
