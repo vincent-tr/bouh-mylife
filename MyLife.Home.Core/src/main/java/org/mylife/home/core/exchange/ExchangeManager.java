@@ -8,6 +8,9 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
+import org.mylife.home.core.exchange.core.XmlCoreContainer;
+import org.mylife.home.core.exchange.design.XmlDesignContainer;
+
 /**
  * Gestion des échanges
  * 

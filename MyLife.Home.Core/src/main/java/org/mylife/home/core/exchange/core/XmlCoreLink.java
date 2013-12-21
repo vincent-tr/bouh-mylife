@@ -1,4 +1,4 @@
-package org.mylife.home.core.exchange;
+package org.mylife.home.core.exchange.core;
 
 /**
  * Lien entre composants

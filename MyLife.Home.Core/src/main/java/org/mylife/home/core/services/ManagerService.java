@@ -12,9 +12,9 @@ import java.util.logging.Logger;
 
 import org.mylife.home.common.services.BaseManagerService;
 import org.mylife.home.core.data.DataPluginPersistance;
-import org.mylife.home.core.exchange.XmlCoreComponent;
-import org.mylife.home.core.exchange.XmlCoreContainer;
-import org.mylife.home.core.exchange.XmlCoreLink;
+import org.mylife.home.core.exchange.core.XmlCoreComponent;
+import org.mylife.home.core.exchange.core.XmlCoreContainer;
+import org.mylife.home.core.exchange.core.XmlCoreLink;
 import org.mylife.home.core.links.Link;
 import org.mylife.home.core.links.LinkFactory;
 import org.mylife.home.core.plugins.PluginRuntimeContext;

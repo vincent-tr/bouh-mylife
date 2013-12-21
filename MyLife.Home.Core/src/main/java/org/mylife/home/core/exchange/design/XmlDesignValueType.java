@@ -1,4 +1,4 @@
-package org.mylife.home.core.exchange;
+package org.mylife.home.core.exchange.design;
 
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlEnumValue;
