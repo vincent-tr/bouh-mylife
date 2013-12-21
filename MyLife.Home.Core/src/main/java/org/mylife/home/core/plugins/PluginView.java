@@ -19,14 +19,9 @@ public class PluginView {
 	private final String id;
 
 	/**
-	 * Type du plugin
+	 * Fabrique du plugin
 	 */
-	private final String type;
-
-	/**
-	 * Type destiné à l'affichage
-	 */
-	private final String displayType;
+	private final PluginFactory factory;
 
 	/**
 	 * Configuration du plugin
@@ -38,12 +33,11 @@ public class PluginView {
 	 */
 	private final Collection<NetObject> publishedObjects;
 
-	public PluginView(String id, String type, String displayType,
+	public PluginView(String id, PluginFactory factory,
 			Map<String, String> configuration,
 			Collection<NetObject> publishedObjects) {
 		this.id = id;
-		this.type = type;
-		this.displayType = displayType;
+		this.factory = factory;
 		this.configuration = configuration;
 		this.publishedObjects = publishedObjects;
 	}
@@ -58,14 +52,21 @@ public class PluginView {
 	 * Type du plugin
 	 */
 	public String getType() {
-		return type;
+		return factory.getType();
 	}
 
 	/**
 	 * Type destiné à l'affichage
 	 */
 	public String getDisplayType() {
-		return displayType;
+		return factory.getDisplayType();
+	}
+
+	/**
+	 * Plugin d'ui ?
+	 */
+	public boolean isUi() {
+		return factory.getDesignMetadata().isUi();
 	}
 
 	/**

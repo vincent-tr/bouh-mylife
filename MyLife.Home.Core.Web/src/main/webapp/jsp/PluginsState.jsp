@@ -17,7 +17,7 @@
 		<table class="table_render">
 			<thead>
 				<tr>
-					<th colspan="2">Id : <%=WebTools.htmlEscape(item.getId())%></th>
+					<th colspan="2">Id : <%=WebTools.htmlEscape(item.getId())%> (UI : <%=item.isUi() ? "oui" : "non" %>)</th>
 				</tr>
 				<tr>
 					<th colspan="2">Caractéristiques :</th>

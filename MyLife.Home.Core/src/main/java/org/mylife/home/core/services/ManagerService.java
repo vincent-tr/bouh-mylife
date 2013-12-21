@@ -212,8 +212,7 @@ public class ManagerService extends BaseManagerService {
 			for (NetContainer container : plugin.getPublishedObjects()) {
 				netObjects.add(container.getObject());
 			}
-			list.add(new PluginView(plugin.getId(), plugin.getFactory()
-					.getType(), plugin.getFactory().getDisplayType(),
+			list.add(new PluginView(plugin.getId(), plugin.getFactory(),
 					Collections.unmodifiableMap(plugin.getConfiguration()),
 					netObjects));
 		}

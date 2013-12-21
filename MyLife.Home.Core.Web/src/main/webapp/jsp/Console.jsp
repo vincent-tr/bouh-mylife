@@ -145,8 +145,7 @@ self.setInterval(function() {
 	/* pas de refresh car pas de modification une fois en ligne */
 	/* $('#pluginsState').load('<%=WebTools.servlet(pageContext, "console")%>?action=pluginsState'); */
 	/* $('#designStructureState').load('<%=WebTools.servlet(pageContext, "console")%>?action=designStructureState'); */
-	$('#linksState').load('<%=WebTools.servlet(pageContext, "console")%>
-	?action=linksState');
+	$('#linksState').load('<%=WebTools.servlet(pageContext, "console")%>?action=linksState');
 					}, 5000);
 </script>
 
