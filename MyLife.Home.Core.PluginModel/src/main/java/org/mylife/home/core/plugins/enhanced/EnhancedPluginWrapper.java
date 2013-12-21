@@ -73,9 +73,7 @@ class EnhancedPluginWrapper implements Plugin {
 		for (MemberWrapper member : members) {
 			member.bind(netObject);
 		}
-		context.publishObject(netObject, false);
-		if(metadata.isUi())
-			context.publishObject(netObject, true);
+		context.publishObject(netObject, metadata.isUi());
 	}
 
 	private Collection<MemberWrapper> createMemberWrappers() throws Exception {
