@@ -7,7 +7,7 @@ import org.mylife.home.core.plugins.enhanced.annotations.PluginAction;
 import org.mylife.home.core.plugins.enhanced.annotations.PluginAttribute;
 import org.mylife.home.core.plugins.impl.Types;
 
-@Plugin(displayType = "Lumière")
+@Plugin(displayType = "Lumière", ui = true)
 public class Light {
 
 	/**
