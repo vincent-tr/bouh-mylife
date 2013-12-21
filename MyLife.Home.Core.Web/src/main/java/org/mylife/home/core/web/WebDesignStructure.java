@@ -15,7 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.JAXBException;
 
 import org.mylife.home.core.exchange.ExchangeManager;
-import org.mylife.home.core.exchange.XmlDesignContainer;
+import org.mylife.home.core.exchange.design.XmlDesignContainer;
 import org.mylife.home.core.services.ServiceAccess;
 
 /**
