@@ -7,8 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.mylife.home.core.exchange.XmlCoreComponent;
-import org.mylife.home.core.exchange.XmlCoreComponentConfigurationItem;
+import org.mylife.home.core.exchange.core.XmlCoreComponent;
+import org.mylife.home.core.exchange.core.XmlCoreComponentConfigurationItem;
 import org.mylife.home.core.services.ManagerService;
 import org.mylife.home.core.services.ServiceAccess;
 import org.mylife.home.net.NetContainer;
