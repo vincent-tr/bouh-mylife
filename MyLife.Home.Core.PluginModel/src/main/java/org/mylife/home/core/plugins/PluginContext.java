@@ -21,7 +21,7 @@ public interface PluginContext {
 	 * Publication d'un objet
 	 * @param obj
 	 */
-	public void publishObject(NetObject obj);
+	public void publishObject(NetObject obj, boolean ui);
 	
 	/**
 	 * Obtention de la configuration du plugin

@@ -28,12 +28,14 @@ import org.mylife.home.core.plugins.enhanced.metadata.PluginClassMetadata;
 class EnhancedPluginDesignMetadata implements PluginDesignMetadata {
 
 	private final byte[] image;
+	private final boolean ui;
 	private final Collection<PluginDesignConfiguration> configuration;
 	private final Collection<PluginDesignAttribute> attributes;
 	private final Collection<PluginDesignAction> actions;
 
 	public EnhancedPluginDesignMetadata(PluginClassMetadata metadata) {
 		image = metadata.getImage();
+		ui = metadata.isUi();
 		configuration = buildConfigurationMetadata(metadata
 				.getConfigurationInterface());
 
@@ -115,6 +117,11 @@ class EnhancedPluginDesignMetadata implements PluginDesignMetadata {
 	@Override
 	public byte[] getImage() {
 		return image;
+	}
+
+	@Override
+	public boolean isUi() {
+		return ui;
 	}
 
 	@Override

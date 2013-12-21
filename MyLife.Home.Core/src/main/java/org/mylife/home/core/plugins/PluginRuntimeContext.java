@@ -74,9 +74,9 @@ public class PluginRuntimeContext implements PluginContext {
 	}
 
 	@Override
-	public void publishObject(NetObject obj) {
+	public void publishObject(NetObject obj, boolean ui) {
 		NetContainer container = ServiceAccess.getInstance()
-				.getManagerService().registerPluginObject(this, obj);
+				.getManagerService().registerPluginObject(this, obj, ui);
 		publishedObjects.add(container);
 	}
 
