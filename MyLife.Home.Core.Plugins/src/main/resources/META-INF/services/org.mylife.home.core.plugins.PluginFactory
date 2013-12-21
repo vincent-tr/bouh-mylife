@@ -3,3 +3,7 @@
 org.mylife.home.core.plugins.impl.StepRelay$Factory
 org.mylife.home.core.plugins.impl.TimerSwitch$Factory
 org.mylife.home.core.plugins.impl.TwoWaySwitch$Factory
+
+# ui
+org.mylife.home.core.plugins.impl.ui.Button$Factory
+org.mylife.home.core.plugins.impl.ui.Light$Factory
