@@ -47,7 +47,7 @@ public class WebSchema extends HttpServlet {
 			ui(req, resp);
 		}
 		
-		throw new UnsupportedOperationException("You must speicify action");
+		throw new UnsupportedOperationException("You must specify action");
 	}
 
 	private void core(HttpServletRequest req, HttpServletResponse resp)
