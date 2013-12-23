@@ -67,6 +67,6 @@ public class WebDesignStructure extends HttpServlet {
 				+ buildTimestamp;
 		container.documentVersion = currentDate;
 
-		ExchangeManager.exportContainer(container, stream);
+		ExchangeManager.exportDesignContainer(container, stream);
 	}
 }

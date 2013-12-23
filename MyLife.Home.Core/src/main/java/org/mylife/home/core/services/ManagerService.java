@@ -15,6 +15,7 @@ import org.mylife.home.core.data.DataPluginPersistance;
 import org.mylife.home.core.exchange.core.XmlCoreComponent;
 import org.mylife.home.core.exchange.core.XmlCoreContainer;
 import org.mylife.home.core.exchange.core.XmlCoreLink;
+import org.mylife.home.core.exchange.ui.XmlUiContainer;
 import org.mylife.home.core.links.Link;
 import org.mylife.home.core.links.LinkFactory;
 import org.mylife.home.core.plugins.PluginRuntimeContext;
@@ -62,8 +63,9 @@ public class ManagerService extends BaseManagerService {
 		// Lecture de la configuration
 		List<XmlNetContainer> netList = new ArrayList<XmlNetContainer>();
 		List<XmlCoreContainer> coreList = new ArrayList<XmlCoreContainer>();
+		List<XmlUiContainer> uiList = new ArrayList<XmlUiContainer>();
 		ServiceAccess.getInstance().getConfigurationService()
-				.loadActives(netList, coreList);
+				.loadActives(netList, coreList, uiList);
 
 		// Vérification que chaque id soit unique
 		Set<String> ids = new HashSet<String>();
@@ -147,7 +149,8 @@ public class ManagerService extends BaseManagerService {
 	 */
 	public NetContainer registerPluginObject(PluginRuntimeContext context,
 			NetObject obj, boolean ui) {
-		return NetRepository.register(obj, ui ? NetRepository.CHANNL_UI : NetRepository.CHANNEL_DEBUG, true);
+		return NetRepository.register(obj, ui ? NetRepository.CHANNL_UI
+				: NetRepository.CHANNEL_DEBUG, true);
 	}
 
 	/**

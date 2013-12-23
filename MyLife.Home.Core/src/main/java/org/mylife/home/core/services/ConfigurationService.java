@@ -16,6 +16,7 @@ import org.mylife.home.common.services.Service;
 import org.mylife.home.core.data.DataConfigurationAccess;
 import org.mylife.home.core.data.DataConfiguration;
 import org.mylife.home.core.exchange.core.XmlCoreContainer;
+import org.mylife.home.core.exchange.ui.XmlUiContainer;
 import org.mylife.home.net.exchange.XmlNetContainer;
 
 /**
@@ -28,6 +29,7 @@ public class ConfigurationService implements Service {
 
 	public final static String TYPE_CORE = "core";
 	public final static String TYPE_NET = "net";
+	public final static String TYPE_UI = "ui";
 
 	private final Map<String, String> types;
 
@@ -36,6 +38,7 @@ public class ConfigurationService implements Service {
 		Map<String, String> map = new HashMap<String, String>();
 		map.put(TYPE_CORE, "Core");
 		map.put(TYPE_NET, "Net");
+		map.put(TYPE_UI, "Ui");
 		types = Collections.unmodifiableMap(map);
 	}
 
@@ -55,12 +58,14 @@ public class ConfigurationService implements Service {
 	 * @param coreList
 	 */
 	public void loadActives(List<XmlNetContainer> netList,
-			List<XmlCoreContainer> coreList) {
+			List<XmlCoreContainer> coreList, List<XmlUiContainer> uiList) {
 		List<DataConfiguration> list = listActives();
 		for (DataConfiguration item : list) {
 			if (tryReadNet(item.getContent(), netList))
 				continue;
 			if (tryReadCore(item.getContent(), coreList))
+				continue;
+			if (tryReadUi(item.getContent(), uiList))
 				continue;
 			throw new UnsupportedOperationException(
 					"Invalid configuration content wirth id : " + item.getId());
@@ -81,8 +86,19 @@ public class ConfigurationService implements Service {
 	private boolean tryReadCore(byte[] data, List<XmlCoreContainer> coreList) {
 		try {
 			XmlCoreContainer container = org.mylife.home.core.exchange.ExchangeManager
-					.importContainer(new ByteArrayInputStream(data));
+					.importCoreContainer(new ByteArrayInputStream(data));
 			coreList.add(container);
+			return true;
+		} catch (JAXBException e) {
+			return false;
+		}
+	}
+
+	private boolean tryReadUi(byte[] data, List<XmlUiContainer> uiList) {
+		try {
+			XmlUiContainer container = org.mylife.home.core.exchange.ExchangeManager
+					.importUiContainer(new ByteArrayInputStream(data));
+			uiList.add(container);
 			return true;
 		} catch (JAXBException e) {
 			return false;
@@ -220,6 +236,12 @@ public class ConfigurationService implements Service {
 			return;
 		}
 
+		config = tryReadUi(data);
+		if (config != null) {
+			create(config);
+			return;
+		}
+
 		throw new UnsupportedOperationException("Invalid file");
 	}
 
@@ -244,10 +266,26 @@ public class ConfigurationService implements Service {
 	private DataConfiguration tryReadCore(byte[] data) {
 		try {
 			XmlCoreContainer container = org.mylife.home.core.exchange.ExchangeManager
-					.importContainer(new ByteArrayInputStream(data));
+					.importCoreContainer(new ByteArrayInputStream(data));
 
 			DataConfiguration config = new DataConfiguration();
 			config.setType(TYPE_CORE);
+			config.setContent(data);
+			config.setComment("documentName : " + container.documentName
+					+ "\ndocumentVersion : " + container.documentVersion);
+			return config;
+		} catch (JAXBException e) {
+			return null;
+		}
+	}
+
+	private DataConfiguration tryReadUi(byte[] data) {
+		try {
+			XmlUiContainer container = org.mylife.home.core.exchange.ExchangeManager
+					.importUiContainer(new ByteArrayInputStream(data));
+
+			DataConfiguration config = new DataConfiguration();
+			config.setType(TYPE_UI);
 			config.setContent(data);
 			config.setComment("documentName : " + container.documentName
 					+ "\ndocumentVersion : " + container.documentVersion);
