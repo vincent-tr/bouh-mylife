@@ -31,7 +31,7 @@ public class ExchangeManager {
 	 * @param stream
 	 * @throws JAXBException
 	 */
-	public static void exportContainer(XmlCoreContainer container,
+	public static void exportCoreContainer(XmlCoreContainer container,
 			OutputStream stream) throws JAXBException {
 		JAXBContext jc = JAXBContext.newInstance(XmlCoreContainer.class);
 		Marshaller m = jc.createMarshaller();
@@ -46,7 +46,7 @@ public class ExchangeManager {
 	 * @return
 	 * @throws JAXBException
 	 */
-	public static XmlCoreContainer importContainer(InputStream stream)
+	public static XmlCoreContainer importCoreContainer(InputStream stream)
 			throws JAXBException {
 		JAXBContext jc = JAXBContext.newInstance(XmlCoreContainer.class);
 		Unmarshaller u = jc.createUnmarshaller();
@@ -60,12 +60,41 @@ public class ExchangeManager {
 	 * @param stream
 	 * @throws JAXBException
 	 */
-	public static void exportContainer(XmlDesignContainer container,
+	public static void exportDesignContainer(XmlDesignContainer container,
 			OutputStream stream) throws JAXBException {
 		JAXBContext jc = JAXBContext.newInstance(XmlDesignContainer.class);
 		Marshaller m = jc.createMarshaller();
 		m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 		m.marshal(container, stream);
+	}
+
+	/**
+	 * Export
+	 * 
+	 * @param container
+	 * @param stream
+	 * @throws JAXBException
+	 */
+	public static void exportUiContainer(XmlUiContainer container,
+			OutputStream stream) throws JAXBException {
+		JAXBContext jc = JAXBContext.newInstance(XmlUiContainer.class);
+		Marshaller m = jc.createMarshaller();
+		m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+		m.marshal(container, stream);
+	}
+
+	/**
+	 * Import
+	 * 
+	 * @param stream
+	 * @return
+	 * @throws JAXBException
+	 */
+	public static XmlUiContainer importUiContainer(InputStream stream)
+			throws JAXBException {
+		JAXBContext jc = JAXBContext.newInstance(XmlUiContainer.class);
+		Unmarshaller u = jc.createUnmarshaller();
+		return (XmlUiContainer) u.unmarshal(stream);
 	}
 
 	/**
