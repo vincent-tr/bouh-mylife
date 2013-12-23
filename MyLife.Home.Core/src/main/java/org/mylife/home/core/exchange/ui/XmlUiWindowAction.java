@@ -6,4 +6,5 @@ import javax.xml.bind.annotation.XmlType;
 public class XmlUiWindowAction extends XmlUiAction {
 
 	public String windowId;
+	public boolean popup;
 }
