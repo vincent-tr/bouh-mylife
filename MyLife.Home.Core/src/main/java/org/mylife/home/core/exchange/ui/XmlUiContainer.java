@@ -19,12 +19,6 @@ public class XmlUiContainer {
 	@XmlElement(name = "window")
 	public XmlUiWindow[] windows;
 	
-	@XmlElementWrapper(name = "panels")
-	@XmlElement(name = "panel")
-	public XmlUiPanel[] panels;
-	
-	// TODO : panel templates
-	
 	public String defaultWindowId;
 	
 	public String documentName;
