@@ -1,4 +1,4 @@
-package org.mylife.home.net.exchange;
+package org.mylife.home.net.exchange.net;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;

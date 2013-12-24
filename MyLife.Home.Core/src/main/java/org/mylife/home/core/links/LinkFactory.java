@@ -2,9 +2,9 @@ package org.mylife.home.core.links;
 
 import java.util.List;
 
-import org.mylife.home.core.exchange.core.XmlCoreLink;
 import org.mylife.home.net.NetContainer;
 import org.mylife.home.net.NetRepository;
+import org.mylife.home.net.exchange.core.XmlCoreLink;
 import org.mylife.home.net.structure.NetAction;
 import org.mylife.home.net.structure.NetAttribute;
 import org.mylife.home.net.structure.NetClass;

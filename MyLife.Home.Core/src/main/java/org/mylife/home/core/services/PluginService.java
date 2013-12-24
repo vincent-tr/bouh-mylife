@@ -13,19 +13,19 @@ import org.apache.commons.lang3.Validate;
 import org.mylife.home.common.services.Service;
 import org.mylife.home.core.data.DataPlugin;
 import org.mylife.home.core.data.DataPluginAccess;
-import org.mylife.home.core.exchange.design.XmlDesignAction;
-import org.mylife.home.core.exchange.design.XmlDesignAttribute;
-import org.mylife.home.core.exchange.design.XmlDesignConfiguration;
-import org.mylife.home.core.exchange.design.XmlDesignContainer;
-import org.mylife.home.core.exchange.design.XmlDesignPlugin;
-import org.mylife.home.core.exchange.design.XmlDesignValueType;
 import org.mylife.home.core.plugins.PluginFactory;
 import org.mylife.home.core.plugins.design.PluginDesignAction;
 import org.mylife.home.core.plugins.design.PluginDesignAttribute;
 import org.mylife.home.core.plugins.design.PluginDesignConfiguration;
 import org.mylife.home.core.plugins.design.PluginDesignMetadata;
 import org.mylife.home.net.exchange.ExchangeManager;
-import org.mylife.home.net.exchange.XmlNetType;
+import org.mylife.home.net.exchange.design.XmlDesignAction;
+import org.mylife.home.net.exchange.design.XmlDesignAttribute;
+import org.mylife.home.net.exchange.design.XmlDesignConfiguration;
+import org.mylife.home.net.exchange.design.XmlDesignContainer;
+import org.mylife.home.net.exchange.design.XmlDesignPlugin;
+import org.mylife.home.net.exchange.design.XmlDesignValueType;
+import org.mylife.home.net.exchange.net.XmlNetType;
 import org.mylife.home.net.structure.NetType;
 
 /**

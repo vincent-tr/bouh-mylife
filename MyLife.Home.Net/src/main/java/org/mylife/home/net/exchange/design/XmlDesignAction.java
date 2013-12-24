@@ -1,13 +1,17 @@
-package org.mylife.home.net.exchange;
+package org.mylife.home.net.exchange.design;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlType;
 
-@XmlType(name = "action")
-public class XmlNetAction extends XmlNetMember {
+import org.mylife.home.net.exchange.net.XmlNetType;
+
+public class XmlDesignAction {
+
+	public String name;
+	public String displayName;
 
 	@XmlElementWrapper(name = "arguments")
 	@XmlElement(name = "argument")
 	public XmlNetType[] arguments;
+
 }

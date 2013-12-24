@@ -1,5 +1,6 @@
 package org.mylife.home.net.exchange;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -8,9 +9,24 @@ import java.util.List;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+import javax.xml.bind.SchemaOutputResolver;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.transform.Result;
+import javax.xml.transform.stream.StreamResult;
 
 import org.mylife.home.net.NetObject;
+import org.mylife.home.net.exchange.core.XmlCoreContainer;
+import org.mylife.home.net.exchange.design.XmlDesignContainer;
+import org.mylife.home.net.exchange.net.XmlNetAction;
+import org.mylife.home.net.exchange.net.XmlNetAttribute;
+import org.mylife.home.net.exchange.net.XmlNetClass;
+import org.mylife.home.net.exchange.net.XmlNetContainer;
+import org.mylife.home.net.exchange.net.XmlNetEnum;
+import org.mylife.home.net.exchange.net.XmlNetMember;
+import org.mylife.home.net.exchange.net.XmlNetObject;
+import org.mylife.home.net.exchange.net.XmlNetRange;
+import org.mylife.home.net.exchange.net.XmlNetType;
+import org.mylife.home.net.exchange.ui.XmlUiContainer;
 import org.mylife.home.net.structure.NetAction;
 import org.mylife.home.net.structure.NetAttribute;
 import org.mylife.home.net.structure.NetClass;
@@ -34,7 +50,7 @@ public class ExchangeManager {
 	 * @param stream
 	 * @throws JAXBException
 	 */
-	public static void exportContainer(XmlNetContainer container,
+	public static void exportNetContainer(XmlNetContainer container,
 			OutputStream stream) throws JAXBException {
 		JAXBContext jc = JAXBContext.newInstance(XmlNetContainer.class);
 		Marshaller m = jc.createMarshaller();
@@ -49,7 +65,7 @@ public class ExchangeManager {
 	 * @return
 	 * @throws JAXBException
 	 */
-	public static XmlNetContainer importContainer(InputStream stream)
+	public static XmlNetContainer importNetContainer(InputStream stream)
 			throws JAXBException {
 		JAXBContext jc = JAXBContext.newInstance(XmlNetContainer.class);
 		Unmarshaller u = jc.createUnmarshaller();
@@ -171,5 +187,162 @@ public class ExchangeManager {
 		} else {
 			throw new UnsupportedOperationException();
 		}
+	}
+
+	/**
+	 * Export
+	 * 
+	 * @param container
+	 * @param stream
+	 * @throws JAXBException
+	 */
+	public static void exportCoreContainer(XmlCoreContainer container,
+			OutputStream stream) throws JAXBException {
+		JAXBContext jc = JAXBContext.newInstance(XmlCoreContainer.class);
+		Marshaller m = jc.createMarshaller();
+		m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+		m.marshal(container, stream);
+	}
+
+	/**
+	 * Import
+	 * 
+	 * @param stream
+	 * @return
+	 * @throws JAXBException
+	 */
+	public static XmlCoreContainer importCoreContainer(InputStream stream)
+			throws JAXBException {
+		JAXBContext jc = JAXBContext.newInstance(XmlCoreContainer.class);
+		Unmarshaller u = jc.createUnmarshaller();
+		return (XmlCoreContainer) u.unmarshal(stream);
+	}
+
+	/**
+	 * Export
+	 * 
+	 * @param container
+	 * @param stream
+	 * @throws JAXBException
+	 */
+	public static void exportDesignContainer(XmlDesignContainer container,
+			OutputStream stream) throws JAXBException {
+		JAXBContext jc = JAXBContext.newInstance(XmlDesignContainer.class);
+		Marshaller m = jc.createMarshaller();
+		m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+		m.marshal(container, stream);
+	}
+
+	/**
+	 * Export
+	 * 
+	 * @param container
+	 * @param stream
+	 * @throws JAXBException
+	 */
+	public static void exportUiContainer(XmlUiContainer container,
+			OutputStream stream) throws JAXBException {
+		JAXBContext jc = JAXBContext.newInstance(XmlUiContainer.class);
+		Marshaller m = jc.createMarshaller();
+		m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+		m.marshal(container, stream);
+	}
+
+	/**
+	 * Import
+	 * 
+	 * @param stream
+	 * @return
+	 * @throws JAXBException
+	 */
+	public static XmlUiContainer importUiContainer(InputStream stream)
+			throws JAXBException {
+		JAXBContext jc = JAXBContext.newInstance(XmlUiContainer.class);
+		Unmarshaller u = jc.createUnmarshaller();
+		return (XmlUiContainer) u.unmarshal(stream);
+	}
+
+	/**
+	 * Export du schéma
+	 * 
+	 * @param stream
+	 * @throws JAXBException
+	 * @throws IOException
+	 */
+	public static void exportNetSchema(final OutputStream stream)
+			throws JAXBException, IOException {
+		JAXBContext jc = JAXBContext.newInstance(XmlNetContainer.class);
+		jc.generateSchema(new SchemaOutputResolver() {
+			@Override
+			public Result createOutput(String namespaceUri,
+					String suggestedFileName) throws IOException {
+				StreamResult sr = new StreamResult(stream);
+				sr.setSystemId(String.valueOf(stream.hashCode()));
+				return sr;
+			}
+		});
+	}
+
+	/**
+	 * Export du schéma
+	 * 
+	 * @param stream
+	 * @throws JAXBException
+	 * @throws IOException
+	 */
+	public static void exportCoreSchema(final OutputStream stream)
+			throws JAXBException, IOException {
+		JAXBContext jc = JAXBContext.newInstance(XmlCoreContainer.class);
+		jc.generateSchema(new SchemaOutputResolver() {
+			@Override
+			public Result createOutput(String namespaceUri,
+					String suggestedFileName) throws IOException {
+				StreamResult sr = new StreamResult(stream);
+				sr.setSystemId(String.valueOf(stream.hashCode()));
+				return sr;
+			}
+		});
+	}
+
+	/**
+	 * Export du schéma
+	 * 
+	 * @param stream
+	 * @throws JAXBException
+	 * @throws IOException
+	 */
+	public static void exportDesignSchema(final OutputStream stream)
+			throws JAXBException, IOException {
+		JAXBContext jc = JAXBContext.newInstance(XmlDesignContainer.class);
+		jc.generateSchema(new SchemaOutputResolver() {
+			@Override
+			public Result createOutput(String namespaceUri,
+					String suggestedFileName) throws IOException {
+				StreamResult sr = new StreamResult(stream);
+				sr.setSystemId(String.valueOf(stream.hashCode()));
+				return sr;
+			}
+		});
+	}
+
+	/**
+	 * Export du schéma
+	 * 
+	 * @param stream
+	 * @throws JAXBException
+	 * @throws IOException
+	 */
+	public static void exportUiSchema(final OutputStream stream)
+			throws JAXBException, IOException {
+		JAXBContext jc = JAXBContext.newInstance(XmlUiContainer.class);
+		jc.generateSchema(new SchemaOutputResolver() {
+			@Override
+			public Result createOutput(String namespaceUri,
+					String suggestedFileName) throws IOException {
+				StreamResult sr = new StreamResult(stream);
+				sr.setSystemId(String.valueOf(stream.hashCode()));
+				return sr;
+			}
+		});
 	}
 }
