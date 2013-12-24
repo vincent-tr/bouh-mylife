@@ -1,5 +1,6 @@
 package org.mylife.home.core.services;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -12,12 +13,14 @@ import java.util.logging.Logger;
 
 import org.mylife.home.common.services.BaseManagerService;
 import org.mylife.home.core.data.DataPluginPersistance;
+import org.mylife.home.core.exchange.ExchangeManager;
 import org.mylife.home.core.exchange.core.XmlCoreComponent;
 import org.mylife.home.core.exchange.core.XmlCoreContainer;
 import org.mylife.home.core.exchange.core.XmlCoreLink;
 import org.mylife.home.core.exchange.ui.XmlUiContainer;
 import org.mylife.home.core.links.Link;
 import org.mylife.home.core.links.LinkFactory;
+import org.mylife.home.core.net.NetUiPublisher;
 import org.mylife.home.core.plugins.PluginRuntimeContext;
 import org.mylife.home.core.plugins.PluginView;
 import org.mylife.home.net.NetContainer;
@@ -47,6 +50,7 @@ public class ManagerService extends BaseManagerService {
 	private final List<NetContainer> internalObjects = new ArrayList<NetContainer>();
 	private final List<PluginRuntimeContext> plugins = new ArrayList<PluginRuntimeContext>();
 	private final List<Link> links = new ArrayList<Link>();
+	private NetUiPublisher netUiPublisher;
 
 	private void checkId(Set<String> ids, String id) {
 		if (!ids.add(id)) {
@@ -107,6 +111,15 @@ public class ManagerService extends BaseManagerService {
 				links.add(link);
 			}
 		}
+		
+		// Création du net ui publisher
+		if(uiList.size() < 1)
+			throw new UnsupportedOperationException("No ui data to publish");
+		if(uiList.size() > 1)
+			throw new UnsupportedOperationException("Too many ui data to publish");
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		ExchangeManager.exportUiContainer(uiList.get(0), baos);
+		netUiPublisher = new NetUiPublisher(baos.toByteArray());
 	}
 
 	/**
@@ -115,6 +128,9 @@ public class ManagerService extends BaseManagerService {
 	@Override
 	protected void executeStop() throws Exception {
 
+		netUiPublisher.close();
+		netUiPublisher = null;
+		
 		for (Link link : links) {
 			link.close();
 		}
