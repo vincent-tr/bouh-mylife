@@ -20,8 +20,8 @@ import javax.xml.bind.JAXBException;
 import org.mylife.home.components.providers.ComponentContext;
 import org.mylife.home.components.services.ServiceAccess;
 import org.mylife.home.net.exchange.ExchangeManager;
-import org.mylife.home.net.exchange.XmlNetContainer;
-import org.mylife.home.net.exchange.XmlNetObject;
+import org.mylife.home.net.exchange.net.XmlNetContainer;
+import org.mylife.home.net.exchange.net.XmlNetObject;
 
 /**
  * Servlet d'export de structure xml
@@ -79,6 +79,6 @@ public class WebStructure extends HttpServlet {
 		container.components = xmlComponents
 				.toArray(new XmlNetObject[xmlComponents.size()]);
 
-		ExchangeManager.exportContainer(container, stream);
+		ExchangeManager.exportNetContainer(container, stream);
 	}
 }

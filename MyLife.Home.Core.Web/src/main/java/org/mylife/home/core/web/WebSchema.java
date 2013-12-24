@@ -7,7 +7,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mylife.home.core.exchange.ExchangeManager;
+import org.mylife.home.net.exchange.ExchangeManager;
 
 /**
  * Export des schémas
@@ -21,7 +21,6 @@ public class WebSchema extends HttpServlet {
 	 * 
 	 */
 	private static final long serialVersionUID = -6306178097985223985L;
-
 
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp)
@@ -46,13 +45,13 @@ public class WebSchema extends HttpServlet {
 		} else if ("ui".equals(action)) {
 			ui(req, resp);
 		}
-		
+
 		throw new UnsupportedOperationException("You must specify action");
 	}
 
 	private void core(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		
+
 		resp.setContentType("application/xml");
 
 		try {
@@ -64,7 +63,7 @@ public class WebSchema extends HttpServlet {
 
 	private void design(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		
+
 		resp.setContentType("application/xml");
 
 		try {
@@ -76,7 +75,7 @@ public class WebSchema extends HttpServlet {
 
 	private void ui(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
-		
+
 		resp.setContentType("application/xml");
 
 		try {

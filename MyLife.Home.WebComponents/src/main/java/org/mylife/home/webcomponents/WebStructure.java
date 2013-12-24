@@ -17,8 +17,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.JAXBException;
 
 import org.mylife.home.net.exchange.ExchangeManager;
-import org.mylife.home.net.exchange.XmlNetContainer;
-import org.mylife.home.net.exchange.XmlNetObject;
+import org.mylife.home.net.exchange.net.XmlNetContainer;
+import org.mylife.home.net.exchange.net.XmlNetObject;
 
 /**
  * Servlet d'export de structure xml
@@ -64,7 +64,7 @@ public class WebStructure extends HttpServlet {
 		resp.setContentType("application/xml");
 		
 		try {
-			ExchangeManager.exportContainer(container, resp.getOutputStream());
+			ExchangeManager.exportNetContainer(container, resp.getOutputStream());
 		} catch (JAXBException e) {
 			throw new ServletException("error exporting", e);
 		}

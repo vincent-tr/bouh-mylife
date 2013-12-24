@@ -13,11 +13,12 @@ import javax.xml.bind.JAXBException;
 
 import org.apache.commons.io.IOUtils;
 import org.mylife.home.common.services.Service;
-import org.mylife.home.core.data.DataConfigurationAccess;
 import org.mylife.home.core.data.DataConfiguration;
-import org.mylife.home.core.exchange.core.XmlCoreContainer;
-import org.mylife.home.core.exchange.ui.XmlUiContainer;
-import org.mylife.home.net.exchange.XmlNetContainer;
+import org.mylife.home.core.data.DataConfigurationAccess;
+import org.mylife.home.net.exchange.ExchangeManager;
+import org.mylife.home.net.exchange.core.XmlCoreContainer;
+import org.mylife.home.net.exchange.net.XmlNetContainer;
+import org.mylife.home.net.exchange.ui.XmlUiContainer;
 
 /**
  * Service de gestion des configurations
@@ -75,7 +76,7 @@ public class ConfigurationService implements Service {
 	private boolean tryReadNet(byte[] data, List<XmlNetContainer> netList) {
 		try {
 			XmlNetContainer container = org.mylife.home.net.exchange.ExchangeManager
-					.importContainer(new ByteArrayInputStream(data));
+					.importNetContainer(new ByteArrayInputStream(data));
 			netList.add(container);
 			return true;
 		} catch (JAXBException e) {
@@ -85,7 +86,7 @@ public class ConfigurationService implements Service {
 
 	private boolean tryReadCore(byte[] data, List<XmlCoreContainer> coreList) {
 		try {
-			XmlCoreContainer container = org.mylife.home.core.exchange.ExchangeManager
+			XmlCoreContainer container = ExchangeManager
 					.importCoreContainer(new ByteArrayInputStream(data));
 			coreList.add(container);
 			return true;
@@ -96,7 +97,7 @@ public class ConfigurationService implements Service {
 
 	private boolean tryReadUi(byte[] data, List<XmlUiContainer> uiList) {
 		try {
-			XmlUiContainer container = org.mylife.home.core.exchange.ExchangeManager
+			XmlUiContainer container = ExchangeManager
 					.importUiContainer(new ByteArrayInputStream(data));
 			uiList.add(container);
 			return true;
@@ -248,7 +249,7 @@ public class ConfigurationService implements Service {
 	private DataConfiguration tryReadNet(byte[] data) {
 		try {
 			XmlNetContainer container = org.mylife.home.net.exchange.ExchangeManager
-					.importContainer(new ByteArrayInputStream(data));
+					.importNetContainer(new ByteArrayInputStream(data));
 
 			DataConfiguration config = new DataConfiguration();
 			config.setType(TYPE_NET);
@@ -265,7 +266,7 @@ public class ConfigurationService implements Service {
 
 	private DataConfiguration tryReadCore(byte[] data) {
 		try {
-			XmlCoreContainer container = org.mylife.home.core.exchange.ExchangeManager
+			XmlCoreContainer container = ExchangeManager
 					.importCoreContainer(new ByteArrayInputStream(data));
 
 			DataConfiguration config = new DataConfiguration();
@@ -281,7 +282,7 @@ public class ConfigurationService implements Service {
 
 	private DataConfiguration tryReadUi(byte[] data) {
 		try {
-			XmlUiContainer container = org.mylife.home.core.exchange.ExchangeManager
+			XmlUiContainer container = ExchangeManager
 					.importUiContainer(new ByteArrayInputStream(data));
 
 			DataConfiguration config = new DataConfiguration();

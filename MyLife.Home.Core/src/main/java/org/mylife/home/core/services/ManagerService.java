@@ -13,11 +13,6 @@ import java.util.logging.Logger;
 
 import org.mylife.home.common.services.BaseManagerService;
 import org.mylife.home.core.data.DataPluginPersistance;
-import org.mylife.home.core.exchange.ExchangeManager;
-import org.mylife.home.core.exchange.core.XmlCoreComponent;
-import org.mylife.home.core.exchange.core.XmlCoreContainer;
-import org.mylife.home.core.exchange.core.XmlCoreLink;
-import org.mylife.home.core.exchange.ui.XmlUiContainer;
 import org.mylife.home.core.links.Link;
 import org.mylife.home.core.links.LinkFactory;
 import org.mylife.home.core.net.NetUiPublisher;
@@ -26,8 +21,13 @@ import org.mylife.home.core.plugins.PluginView;
 import org.mylife.home.net.NetContainer;
 import org.mylife.home.net.NetObject;
 import org.mylife.home.net.NetRepository;
-import org.mylife.home.net.exchange.XmlNetContainer;
-import org.mylife.home.net.exchange.XmlNetObject;
+import org.mylife.home.net.exchange.ExchangeManager;
+import org.mylife.home.net.exchange.core.XmlCoreComponent;
+import org.mylife.home.net.exchange.core.XmlCoreContainer;
+import org.mylife.home.net.exchange.core.XmlCoreLink;
+import org.mylife.home.net.exchange.net.XmlNetContainer;
+import org.mylife.home.net.exchange.net.XmlNetObject;
+import org.mylife.home.net.exchange.ui.XmlUiContainer;
 
 /**
  * Service de gestion

@@ -14,9 +14,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.JAXBException;
 
-import org.mylife.home.core.exchange.ExchangeManager;
-import org.mylife.home.core.exchange.design.XmlDesignContainer;
 import org.mylife.home.core.services.ServiceAccess;
+import org.mylife.home.net.exchange.ExchangeManager;
+import org.mylife.home.net.exchange.design.XmlDesignContainer;
 
 /**
  * Servlet d'export de structure xml
