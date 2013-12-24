@@ -2,6 +2,7 @@ package org.mylife.home.core.exchange.ui;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * Conteneur pour la description de l'ui.
@@ -9,6 +10,7 @@ import javax.xml.bind.annotation.XmlElementWrapper;
  * @author pumbawoman
  * 
  */
+@XmlRootElement(name = "uiContainer")
 public class XmlUiContainer {
 
 	@XmlElementWrapper(name = "images")
