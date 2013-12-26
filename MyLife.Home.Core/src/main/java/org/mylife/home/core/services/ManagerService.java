@@ -1,6 +1,5 @@
 package org.mylife.home.core.services;
 
-import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -117,9 +116,18 @@ public class ManagerService extends BaseManagerService {
 			throw new UnsupportedOperationException("No ui data to publish");
 		if(uiList.size() > 1)
 			throw new UnsupportedOperationException("Too many ui data to publish");
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		ExchangeManager.exportUiContainer(uiList.get(0), baos);
-		netUiPublisher = new NetUiPublisher(baos.toByteArray());
+		
+		XmlNetContainer xmlContainer = new XmlNetContainer();
+		List<XmlNetObject> xmlComponents = new ArrayList<XmlNetObject>();
+		for(NetContainer container : internalObjects) {
+			if(!(container.getChannel().equals(NetRepository.CHANNL_UI)))
+				continue;
+			xmlComponents.add(ExchangeManager.marshal(container.getObject()));
+		}
+		xmlContainer.components = xmlComponents
+				.toArray(new XmlNetObject[xmlComponents.size()]);
+		
+		netUiPublisher = new NetUiPublisher(uiList.get(0), xmlContainer);
 	}
 
 	/**
