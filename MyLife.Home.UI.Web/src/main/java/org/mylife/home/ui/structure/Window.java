@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.Validate;
 import org.mylife.home.net.exchange.ui.XmlUiComponent;
 import org.mylife.home.net.exchange.ui.XmlUiWindow;
 
@@ -21,6 +22,7 @@ public class Window {
 	private final Map<String, Component> components;
 
 	/* internal */Window(XmlUiWindow source) {
+		Validate.notEmpty(source.id);
 		this.id = source.id;
 		this.backgroundId = source.backgroundId;
 

@@ -56,6 +56,7 @@ public class Component {
 	private final Action secondaryAction;
 
 	/* internal */Component(XmlUiComponent source, Window owner) {
+		Validate.notEmpty(source.id);
 		this.id = source.id;
 		this.owner = owner;
 		x = source.positionX;

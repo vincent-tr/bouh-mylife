@@ -32,6 +32,8 @@
 			<!-- onclic -->
 			<%
 				for (String iconId : component.getIcons()) {
+						if (StringUtils.isEmpty(iconId))
+							continue;
 			%>
 			<img src="<%=WebUiTools.image(pageContext, iconId)%>" hidden />
 			<%
