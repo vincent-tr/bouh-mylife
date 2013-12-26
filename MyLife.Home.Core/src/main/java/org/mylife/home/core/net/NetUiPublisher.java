@@ -113,14 +113,21 @@ public class NetUiPublisher implements IRCEventListener {
 		return baos.toByteArray();
 	}
 
+	private ZipEntry createZipEntry(String name) {
+		ZipEntry entry = new ZipEntry(name);
+		entry.setMethod(ZipEntry.DEFLATED);
+		entry.setTime(0); // Sinon le hash est tout le temps différent
+		return entry;
+	}
+	
 	private String buildZipBase64(byte[] uiDesignRaw, byte[] uiComponentsRaw)
 			throws IOException {
 		ByteArrayOutputStream store = new ByteArrayOutputStream();
 		ZipOutputStream zipStream = new ZipOutputStream(store);
-		zipStream.putNextEntry(new ZipEntry("ui-design-data.xml"));
+		zipStream.putNextEntry(createZipEntry("ui-design-data.xml"));
 		zipStream.write(uiDesignRaw);
 		zipStream.closeEntry();
-		zipStream.putNextEntry(new ZipEntry("ui-components-data.xml"));
+		zipStream.putNextEntry(createZipEntry("ui-components-data.xml"));
 		zipStream.write(uiComponentsRaw);
 		zipStream.closeEntry();
 		zipStream.close();
