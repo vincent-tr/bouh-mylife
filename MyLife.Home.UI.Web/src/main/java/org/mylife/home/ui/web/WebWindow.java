@@ -40,10 +40,15 @@ public class WebWindow extends HttpServlet {
 	private void dispatch(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
 
+		String action = req.getParameter("action");
+		String jsp = "/jsp/Window.jsp";
+		if("panel".equalsIgnoreCase(action))
+			jsp = "/jsp/Panel.jsp";
+		
 		Window window = findWindow(req);
 		
 		req.setAttribute("window", window);
-		req.getRequestDispatcher("/jsp/Window.jsp").forward(req, resp);
+		req.getRequestDispatcher(jsp).forward(req, resp);
 	}
 
 	private Window findWindow(HttpServletRequest req) {
