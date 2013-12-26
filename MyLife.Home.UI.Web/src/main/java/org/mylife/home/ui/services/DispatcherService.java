@@ -103,8 +103,10 @@ public class DispatcherService implements Service, AttributeChangeListener {
 				+ obj.getId());
 
 		Collection<Component> components = dependencies.get(obj.getId());
-		for (Component component : components) {
-			component.objectOnlineChanged(obj, online);
+		if (components != null) {
+			for (Component component : components) {
+				component.objectOnlineChanged(obj, online);
+			}
 		}
 	}
 
@@ -113,26 +115,31 @@ public class DispatcherService implements Service, AttributeChangeListener {
 			Object value) {
 
 		Collection<Component> components = dependencies.get(obj.getId());
-		for (Component component : components) {
-			component.objectAttributeChanged(obj, attribute, value);
+		if (components != null) {
+			for (Component component : components) {
+				component.objectAttributeChanged(obj, attribute, value);
+			}
 		}
 	}
-	
+
 	public void componentIconChanged(Component component, String iconId) {
 		Window window = component.getOwner();
-		SessionHandler[] localSessions = sessions.toArray(new SessionHandler[0]);
-		for(SessionHandler session : localSessions) {
-			if(session.hasWindow(window))
+		SessionHandler[] localSessions = sessions
+				.toArray(new SessionHandler[0]);
+		for (SessionHandler session : localSessions) {
+			if (session.hasWindow(window))
 				session.sendIcon(window.getId(), component.getId(), iconId);
 		}
 	}
-	
+
 	public void componentOnlineChanged(Component component, boolean online) {
 		Window window = component.getOwner();
-		SessionHandler[] localSessions = sessions.toArray(new SessionHandler[0]);
-		for(SessionHandler session : localSessions) {
-			if(session.hasWindow(window))
-				session.sendOnlineChanged(window.getId(), component.getId(), online);
+		SessionHandler[] localSessions = sessions
+				.toArray(new SessionHandler[0]);
+		for (SessionHandler session : localSessions) {
+			if (session.hasWindow(window))
+				session.sendOnlineChanged(window.getId(), component.getId(),
+						online);
 		}
 	}
 
@@ -248,12 +255,13 @@ public class DispatcherService implements Service, AttributeChangeListener {
 			}
 
 			// Envoi du statut des fenêtres
-			for(Window window : windows) {
-				for(Component component : window.getComponents()) {
+			for (Window window : windows) {
+				for (Component component : window.getComponents()) {
 					boolean online = component.isOnline();
 					sendOnlineChanged(window.getId(), component.getId(), online);
-					if(online)
-						sendIcon(window.getId(), component.getId(), component.getIconId());
+					if (online)
+						sendIcon(window.getId(), component.getId(),
+								component.getIconId());
 				}
 			}
 		}
@@ -332,7 +340,7 @@ public class DispatcherService implements Service, AttributeChangeListener {
 		public void sendStructureChanged() {
 			send("structureChanged");
 		}
-		
+
 		public boolean hasWindow(Window window) {
 			return windows.contains(window);
 		}
