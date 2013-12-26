@@ -6,6 +6,6 @@ import javax.xml.bind.annotation.XmlType;
 public class XmlUiCoreAction extends XmlUiAction {
 	
 	public String componentId;
-	public String componentMethod;
+	public String componentAction;
 	
 }
