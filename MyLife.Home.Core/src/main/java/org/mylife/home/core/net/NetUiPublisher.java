@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -270,7 +271,7 @@ public class NetUiPublisher implements IRCEventListener {
 	private void processCommand(IRCUser from, StringTokenizer tokenizer) {
 
 		String command = null;
-		Collection<String> args = new ArrayList<String>();
+		List<String> args = new ArrayList<String>();
 
 		if (tokenizer.hasMoreTokens()) {
 			command = tokenizer.nextToken();
@@ -292,19 +293,22 @@ public class NetUiPublisher implements IRCEventListener {
 	 * @param args
 	 */
 	private void processCommand(IRCUser from, String command,
-			Collection<String> args) {
+			List<String> args) {
 
-		if (!command.equalsIgnoreCase("getUiData"))
+		if (!command.equalsIgnoreCase(UI_DATA_COMMAND))
+			return;
+		if(args.size() < 1)
 			return;
 
-		log.info("Executing command : " + UI_DATA_COMMAND);
+		String reply = args.get(0);
+		log.info("Executing command : " + UI_DATA_COMMAND + " Reply to :" + reply);
 
 		// Ce mode de réponse permet d'être exécuté sur la partie distante comme
 		// une action
 		for (String line : lines) {
 			send(from.getNick(), UI_DATA_PREFIX + " " + line);
 		}
-		send(from.getNick(), UI_DATA_END);
+		send(reply, UI_DATA_END);
 
 		log.info("Command executed : " + UI_DATA_COMMAND);
 	}
