@@ -83,7 +83,7 @@ public class NetService extends BaseManagerService implements
 
 				dispatcher.objectNew(obj);
 				if (container.isConnected())
-					dispatcher.objectOnline(obj);
+					dispatcher.objectOnlineChanged(obj, true);
 			}
 		}
 	}
@@ -101,7 +101,7 @@ public class NetService extends BaseManagerService implements
 			for (NetContainer container : remoteObjects) {
 				NetObject obj = container.getObject();
 				if (container.isConnected())
-					dispatcher.objectOffline(obj);
+					dispatcher.objectOnlineChanged(obj, false);
 				dispatcher.objectDeleted(obj);
 
 				NetRepository.unregister(container);
@@ -115,9 +115,24 @@ public class NetService extends BaseManagerService implements
 		DispatcherService dispatcher = ServiceAccess.getInstance()
 				.getDispatcherService();
 
-		if (isConnected)
-			dispatcher.objectOnline(container.getObject());
-		else
-			dispatcher.objectOffline(container.getObject());
+		dispatcher.objectOnlineChanged(container.getObject(), isConnected);
+	}
+
+	/**
+	 * Obtention d'un composant par son id
+	 * 
+	 * @param id
+	 * @return
+	 */
+	public NetObject getNetObject(String id) {
+		synchronized (syncLock) {
+			for (NetContainer container : remoteObjects) {
+				NetObject obj = container.getObject();
+				if (obj.getId().equalsIgnoreCase(id))
+					return obj;
+			}
+
+			return null;
+		}
 	}
 }
