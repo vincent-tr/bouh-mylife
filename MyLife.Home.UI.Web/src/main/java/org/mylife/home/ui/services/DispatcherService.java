@@ -309,6 +309,7 @@ public class DispatcherService implements Service, AttributeChangeListener {
 		 * @throws IOException
 		 */
 		public void send(String message) {
+			log.info("Sending message : " + message);
 			try {
 				session.getBasicRemote().sendText(message);
 			} catch (IOException ioe) {
