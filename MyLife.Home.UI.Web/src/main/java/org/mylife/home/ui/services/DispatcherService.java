@@ -92,18 +92,6 @@ public class DispatcherService implements Service {
 	 */
 	private static class SessionHandler {
 
-		/*
-		 * Format de message : 
-		 * 
-		 * c -> s : window window1.id window2.id
-		 * c -> s : action component.id actionName arg1 arg2 arg3
-		 * 
-		 * s -> c : attribute component.id attributeName newValue
-		 * s -> c : online component.id
-		 * s -> c : offline component.id
-		 * s -> c : structureChanged
-		 */
-
 		/**
 		 * Session websocket
 		 */
@@ -124,6 +112,18 @@ public class DispatcherService implements Service {
 		public void close() {
 
 		}
+
+		/*
+		 * Format de message : 
+		 * 
+		 * c -> s : window window1.id window2.id
+		 * c -> s : action component.id actionName arg1 arg2 arg3
+		 * 
+		 * s -> c : attribute component.id attributeName newValue
+		 * s -> c : online component.id
+		 * s -> c : offline component.id
+		 * s -> c : structureChanged
+		 */
 
 		/**
 		 * Reception d'un message
