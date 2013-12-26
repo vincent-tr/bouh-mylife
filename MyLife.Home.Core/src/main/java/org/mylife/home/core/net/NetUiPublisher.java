@@ -11,9 +11,14 @@ import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import javax.xml.bind.JAXBException;
+
 import org.apache.commons.codec.binary.Base64;
 import org.mylife.home.net.Configuration;
 import org.mylife.home.net.NetRepository;
+import org.mylife.home.net.exchange.ExchangeManager;
+import org.mylife.home.net.exchange.net.XmlNetContainer;
+import org.mylife.home.net.exchange.ui.XmlUiContainer;
 import org.mylife.home.net.irc.IRCNetConnection;
 import org.schwering.irc.lib.IRCEventListener;
 import org.schwering.irc.lib.IRCModeParser;
@@ -72,11 +77,19 @@ public class NetUiPublisher implements IRCEventListener {
 	/**
 	 * Constructeur par défaut
 	 * 
+	 * @param uiDesign
+	 * @param uiComponents
 	 * @throws IOException
+	 * @throws JAXBException
 	 */
-	public NetUiPublisher(byte[] uiData) throws IOException {
-		hashCode = new String(uiData).hashCode();
-		lines = buildLines(uiData);
+	public NetUiPublisher(XmlUiContainer uiDesign, XmlNetContainer uiComponents)
+			throws IOException, JAXBException {
+		byte[] uiDesignRaw = containerToRaw(uiDesign);
+		byte[] uiComponentsRaw = containerToRaw(uiComponents);
+		String stringValue = buildZipBase64(uiDesignRaw, uiComponentsRaw);
+		hashCode = stringValue.hashCode();
+		lines = Collections.unmodifiableList(Splitter.fixedLength(LINE_LEN)
+				.splitToList(stringValue));
 
 		String server = Configuration.getInstance().getProperty("ircserver");
 		connection = new IRCNetConnection(server, 6667, getNick(), ID);
@@ -85,33 +98,42 @@ public class NetUiPublisher implements IRCEventListener {
 		connection.start();
 	}
 
+	private byte[] containerToRaw(XmlUiContainer container)
+			throws JAXBException {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		ExchangeManager.exportUiContainer(container, baos);
+		return baos.toByteArray();
+	}
+
+	private byte[] containerToRaw(XmlNetContainer container)
+			throws JAXBException {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		ExchangeManager.exportNetContainer(container, baos);
+		return baos.toByteArray();
+	}
+
+	private String buildZipBase64(byte[] uiDesignRaw, byte[] uiComponentsRaw)
+			throws IOException {
+		ByteArrayOutputStream store = new ByteArrayOutputStream();
+		ZipOutputStream zipStream = new ZipOutputStream(store);
+		zipStream.putNextEntry(new ZipEntry("ui-design-data.xml"));
+		zipStream.write(uiDesignRaw);
+		zipStream.closeEntry();
+		zipStream.putNextEntry(new ZipEntry("ui-components-data.xml"));
+		zipStream.write(uiComponentsRaw);
+		zipStream.closeEntry();
+		zipStream.close();
+		byte[] zipData = store.toByteArray();
+
+		return new String(Base64.encodeBase64(zipData), "UTF-8");
+	}
+
 	/**
 	 * Fermeture du publisher
 	 */
 	public void close() {
 		connection.doQuit();
 		connection.stop();
-	}
-
-	/**
-	 * Construction des données d'ui compressées, découpées en lignes
-	 * 
-	 * @param uiData
-	 * @return
-	 */
-	private Collection<String> buildLines(byte[] uiData) throws IOException {
-		ByteArrayOutputStream store = new ByteArrayOutputStream();
-		ZipOutputStream zipStream = new ZipOutputStream(store);
-		zipStream.putNextEntry(new ZipEntry("ui-publisher-data.xml"));
-		zipStream.write(uiData);
-		zipStream.closeEntry();
-		zipStream.close();
-		byte[] zipData = store.toByteArray();
-
-		String stringValue = new String(Base64.encodeBase64(zipData), "UTF-8");
-		return Collections.unmodifiableList(Splitter.fixedLength(LINE_LEN)
-				.splitToList(stringValue));
-
 	}
 
 	private String getNick() {
