@@ -15,6 +15,7 @@ import java.util.zip.ZipOutputStream;
 import javax.xml.bind.JAXBException;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.ArrayUtils;
 import org.mylife.home.net.Configuration;
 import org.mylife.home.net.NetRepository;
 import org.mylife.home.net.exchange.ExchangeManager;
@@ -87,10 +88,8 @@ public class NetUiPublisher implements IRCEventListener {
 			throws IOException, JAXBException {
 		byte[] uiDesignRaw = containerToRaw(uiDesign);
 		byte[] uiComponentsRaw = containerToRaw(uiComponents);
-		String stringValue = buildZipBase64(uiDesignRaw, uiComponentsRaw);
-		hashCode = stringValue.hashCode();
-		lines = Collections.unmodifiableList(Splitter.fixedLength(LINE_LEN)
-				.splitToList(stringValue));
+		hashCode = new String(ArrayUtils.addAll(uiDesignRaw, uiComponentsRaw), "UTF-8").hashCode();
+		lines = buildLines(uiDesignRaw, uiComponentsRaw);
 
 		String server = Configuration.getInstance().getProperty("ircserver");
 		connection = new IRCNetConnection(server, 6667, getNick(), ID);
@@ -116,11 +115,10 @@ public class NetUiPublisher implements IRCEventListener {
 	private ZipEntry createZipEntry(String name) {
 		ZipEntry entry = new ZipEntry(name);
 		entry.setMethod(ZipEntry.DEFLATED);
-		entry.setTime(0); // Sinon le hash est tout le temps différent
 		return entry;
 	}
 	
-	private String buildZipBase64(byte[] uiDesignRaw, byte[] uiComponentsRaw)
+	private Collection<String> buildLines(byte[] uiDesignRaw, byte[] uiComponentsRaw)
 			throws IOException {
 		ByteArrayOutputStream store = new ByteArrayOutputStream();
 		ZipOutputStream zipStream = new ZipOutputStream(store);
@@ -133,7 +131,9 @@ public class NetUiPublisher implements IRCEventListener {
 		zipStream.close();
 		byte[] zipData = store.toByteArray();
 
-		return new String(Base64.encodeBase64(zipData), "UTF-8");
+		String stringValue = new String(Base64.encodeBase64(zipData), "UTF-8");
+		return Collections.unmodifiableList(Splitter.fixedLength(LINE_LEN)
+				.splitToList(stringValue));
 	}
 
 	/**

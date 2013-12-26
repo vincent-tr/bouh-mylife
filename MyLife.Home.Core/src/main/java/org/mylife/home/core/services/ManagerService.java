@@ -173,8 +173,10 @@ public class ManagerService extends BaseManagerService {
 	 */
 	public NetContainer registerPluginObject(PluginRuntimeContext context,
 			NetObject obj, boolean ui) {
-		return NetRepository.register(obj, ui ? NetRepository.CHANNL_UI
+		NetContainer container = NetRepository.register(obj, ui ? NetRepository.CHANNL_UI
 				: NetRepository.CHANNEL_DEBUG, true);
+		internalObjects.add(container);
+		return container;
 	}
 
 	/**
@@ -186,6 +188,7 @@ public class ManagerService extends BaseManagerService {
 	public void unregisterPluginObject(PluginRuntimeContext context,
 			NetContainer obj) {
 		NetRepository.unregister(obj);
+		internalObjects.remove(obj);
 	}
 
 	/**
