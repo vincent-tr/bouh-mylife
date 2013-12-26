@@ -20,9 +20,20 @@
 		<servlet-class>org.mylife.home.ui.web.WebWindow</servlet-class>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
-			
+
+	<servlet>
+		<servlet-name>WebImage</servlet-name>
+		<servlet-class>org.mylife.home.ui.web.WebImage</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+				
 	<servlet-mapping>
 		<servlet-name>WebWindow</servlet-name>
 		<url-pattern>/window</url-pattern>
+	</servlet-mapping>
+			
+	<servlet-mapping>
+		<servlet-name>WebImage</servlet-name>
+		<url-pattern>/image</url-pattern>
 	</servlet-mapping>
 </web-app>

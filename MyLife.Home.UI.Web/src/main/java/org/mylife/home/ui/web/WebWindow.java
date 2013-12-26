@@ -9,7 +9,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
-import org.mylife.home.ui.services.DispatcherService;
 import org.mylife.home.ui.structure.Structure;
 import org.mylife.home.ui.structure.Window;
 

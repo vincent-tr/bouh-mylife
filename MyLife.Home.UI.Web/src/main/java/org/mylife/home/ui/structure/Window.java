@@ -1,6 +1,5 @@
 package org.mylife.home.ui.structure;
 
-import java.io.InputStream;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -45,8 +44,8 @@ public class Window {
 	/**
 	 * Fond
 	 */
-	public InputStream getBackground() {
-		return Structure.getImage(backgroundId);
+	public String getBackgroundId() {
+		return backgroundId;
 	}
 
 	/**
