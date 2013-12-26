@@ -306,16 +306,14 @@ public class NetUiPublisher implements IRCEventListener {
 			return;
 		if(args.size() < 1)
 			return;
-
-		String reply = args.get(0);
-		log.info("Executing command : " + UI_DATA_COMMAND + " Reply to :" + reply);
+		log.info("Executing command : " + UI_DATA_COMMAND + " from :" + from.getNick());
 
 		// Ce mode de réponse permet d'être exécuté sur la partie distante comme
 		// une action
 		for (String line : lines) {
 			send(from.getNick(), UI_DATA_PREFIX + " " + line);
 		}
-		send(reply, UI_DATA_END);
+		send(from.getNick(), UI_DATA_END);
 
 		log.info("Command executed : " + UI_DATA_COMMAND);
 	}
