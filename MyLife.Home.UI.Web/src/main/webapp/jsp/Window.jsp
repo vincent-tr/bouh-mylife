@@ -102,11 +102,14 @@
 				},
 				
 				receiveOnlineChanged : function(windowId, componentId, online) {
-					window.mylife.ui.changeIcon(windowId, componentId, 'null');
+					if(online === false) {
+						window.mylife.ui.changeIcon(windowId, componentId, 'null');
+						// TODO : offline icon
+					}
 				},
 				
 				receiveStructureChanged : function() {
-					
+					// TODO
 				},
 				
 				sendWindows : function() {
@@ -145,9 +148,11 @@
 					
 					if(imageId == 'null')
 						return;
-					
+					// on affiche l'icone demandé
 					$('#' + windowId + ':' + componentId + ':' + imageId).show();
-				}
+				},
+			
+				// TODO : actions 
 			},
 		};
 		
