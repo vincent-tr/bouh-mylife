@@ -34,7 +34,7 @@
 					if (StringUtils.isEmpty(iconId))
 						continue;
 		%>
-		<img src="<%=WebUiTools.image(pageContext, iconId)%>" hidden />
+		<img id="<%=window.getId()%>:<%=component.getId()%>:<%=iconId%>" src="<%=WebUiTools.image(pageContext, iconId)%>" hidden />
 		<%
 			}
 		%>
