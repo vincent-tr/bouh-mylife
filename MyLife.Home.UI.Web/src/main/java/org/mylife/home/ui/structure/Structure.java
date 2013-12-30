@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.mylife.home.net.exchange.ui.XmlUiContainer;
@@ -82,6 +83,10 @@ public final class Structure {
 
 	public static Window getWindow(String id) {
 		return windows.get(id);
+	}
+
+	public static Set<String> getImageIds() {
+		return Collections.unmodifiableSet(images.keySet());
 	}
 
 	public static InputStream getImage(String id) {

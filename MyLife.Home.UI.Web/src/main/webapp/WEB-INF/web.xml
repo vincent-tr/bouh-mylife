@@ -6,7 +6,7 @@
 	<display-name>MyLife.Home.UI.Web</display-name>
 
 	<welcome-file-list>
-		<welcome-file>window</welcome-file>
+		<welcome-file>main</welcome-file>
 	</welcome-file-list>
 
 	<servlet>
@@ -16,24 +16,14 @@
 	</servlet>
 
 	<servlet>
-		<servlet-name>WebWindow</servlet-name>
-		<servlet-class>org.mylife.home.ui.web.WebWindow</servlet-class>
-		<load-on-startup>1</load-on-startup>
-	</servlet>
-
-	<servlet>
-		<servlet-name>WebImage</servlet-name>
-		<servlet-class>org.mylife.home.ui.web.WebImage</servlet-class>
+		<servlet-name>WebMain</servlet-name>
+		<servlet-class>org.mylife.home.ui.web.WebMain</servlet-class>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 				
 	<servlet-mapping>
-		<servlet-name>WebWindow</servlet-name>
-		<url-pattern>/window</url-pattern>
+		<servlet-name>WebMain</servlet-name>
+		<url-pattern>/main</url-pattern>
 	</servlet-mapping>
-			
-	<servlet-mapping>
-		<servlet-name>WebImage</servlet-name>
-		<url-pattern>/image</url-pattern>
-	</servlet-mapping>
+		
 </web-app>
