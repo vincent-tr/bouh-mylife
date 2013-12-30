@@ -1,4 +1,4 @@
-package org.mylife.home.ui.web;
+package org.mylife.home.ui.web.old;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
