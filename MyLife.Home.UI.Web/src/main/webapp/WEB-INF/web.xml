@@ -20,10 +20,21 @@
 		<servlet-class>org.mylife.home.ui.web.WebMain</servlet-class>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
-				
+
+	<servlet>
+		<servlet-name>WebStructure</servlet-name>
+		<servlet-class>org.mylife.home.ui.web.WebStructure</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+					
 	<servlet-mapping>
 		<servlet-name>WebMain</servlet-name>
 		<url-pattern>/main</url-pattern>
 	</servlet-mapping>
-		
+				
+	<servlet-mapping>
+		<servlet-name>WebStructure</servlet-name>
+		<url-pattern>/structure</url-pattern>
+	</servlet-mapping>
+			
 </web-app>
