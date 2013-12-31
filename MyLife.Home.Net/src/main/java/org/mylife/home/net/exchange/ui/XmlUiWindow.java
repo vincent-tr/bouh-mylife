@@ -6,6 +6,7 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 public class XmlUiWindow {
 
 	public String id;
+	public String displayName;
 	public String backgroundId;
 	
 	@XmlElementWrapper(name = "components")
