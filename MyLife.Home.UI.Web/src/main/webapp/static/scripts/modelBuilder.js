@@ -4,8 +4,8 @@
 
 'use strict';
 
-angular.module('mylife.modelBuilder', ['mylife.structure', 'mylife.images'], function($provide) {
-	$provide.factory('modelBuilder', ['$log', '$q', 'structure', 'images', function($log, $q, structure, images) {
+angular.module('mylife.modelBuilder', ['mylife.structure', 'mylife.images', 'mylife.net'], function($provide) {
+	$provide.factory('modelBuilder', ['$log', '$q', 'structure', 'images', 'net', function($log, $q, structure, images, net) {
 
 		/**
 		 * Gestion du mouseup/mousedown
@@ -31,10 +31,13 @@ angular.module('mylife.modelBuilder', ['mylife.structure', 'mylife.images'], fun
 				if(this.mouseDownEvent.component.id == component.id) {
 					var elapsed = timestamp - this.mouseDownEvent.timestamp;
 					//$log.debug('elapsed : ' + elapsed);
-					if(elapsed < 2000)
-						component.primaryAction();
-					else
-						component.secondaryAction();
+					if(elapsed < 2000) {
+						$log.debug('primary action on component' + component.id);
+						component.primaryAction.execute();
+					} else {
+						$log.debug('secondary action on component' + component.id);
+						component.secondaryAction.execute();
+					}
 				}
 				this.mouseDownEvent = null;
 			}
@@ -98,23 +101,55 @@ angular.module('mylife.modelBuilder', ['mylife.structure', 'mylife.images'], fun
 			return keys;
 		};
 		
+		var actionBuilder = function(actionSource, owner, isprimary) {
+
+			var isdefined = actionSource != undefined && actionSource != null;
+			var iswindow = isdefined && actionSource.windowId != null && actionSource.windowId != undefined;
+			var iscore = isdefined && actionSource.componentId != null && actionSource.componentId != undefined;
+			
+			var action = {
+				__action : actionSource,
+				owner : owner,
+				isprimary : isprimary,
+				windowId : isdefined ? actionSource.windowId : undefined,
+				popup : isdefined ? actionSource.popup : undefined,
+				componentId : isdefined ? actionSource.componentId : undefined,
+				componentAction : isdefined ? actionSource.componentAction : undefined
+			};
+			
+			if(iswindow) {
+				action.execute = angular.bind(action, function() {
+					// TODO
+				});
+			} else if(iscore) {
+				action.execute = angular.bind(action, function() {
+					net.sendAction(this.owner.owner.id, this.owner.id, isprimary);
+				});
+			} else { // not defined
+				action.execute = angular.bind(action, function() {
+					// nothing
+				});
+			}
+			
+			return action;
+		};
+		
 		/**
 		 * Construction du composant du modèle avec le tableau d'images
 		 */
-		var componentBuilder = function(componentSource, imageMap) {
+		var componentBuilder = function(componentSource, owner, imageMap) {
 			
 			var component = {
 				__component : componentSource,
+				owner : owner,
 				id : componentSource.id,
 				displayName : componentSource.displayName,
 				staticIconId : imageMap['component/' + componentSource.id + '/staticIconId'],
 				defaultIconId : imageMap['component/' + componentSource.id + '/defaultIconId'],
 			};
 			
-			component.primaryAction = angular.bind(component, function() {
-				$log.debug('primary action on component' + this.id);
-				// TODO
-			});
+			component.primaryAction = actionBuilder(componentSource.primaryAction, component, true);
+			component.secondaryAction = actionBuilder(componentSource.secondaryAction, component, false);
 			
 			component.secondaryAction = angular.bind(component, function() {
 				$log.debug('secondary action on component' + this.id);
@@ -145,7 +180,7 @@ angular.module('mylife.modelBuilder', ['mylife.structure', 'mylife.images'], fun
 			var componentsSource = windowSource.components;
 			for(var i=0, len=componentsSource.length; i<len; i++) {
 				var componentSource = componentsSource[i];
-				var component = componentBuilder(componentSource, imageMap);
+				var component = componentBuilder(componentSource, window, imageMap);
 				window.components.push(component);
 			}
 				

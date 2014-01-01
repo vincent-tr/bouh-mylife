@@ -12,6 +12,7 @@
 <script src="<%=WebUiTools.root(pageContext)%>/lib/angular/angular.js"></script>
 <script src="<%=WebUiTools.root(pageContext)%>/lib/angular/angular-route.js"></script>
 <script src="<%=WebUiTools.root(pageContext)%>/lib/angular-ui/ui-bootstrap-tpls.js"></script>
+<script src="<%=WebUiTools.root(pageContext)%>/lib/angular-websocket/angular-websocket.js"></script>
 <script src="<%=WebTools.script(pageContext, "app.js")%>"></script>
 <script src="<%=WebTools.script(pageContext, "controllers.js")%>"></script>
 <script src="<%=WebTools.script(pageContext, "net.js")%>"></script>
@@ -21,7 +22,7 @@
 <script>
 'use strict';
 angular.module('mylife.urlHelper', [], function($provide) {
-	$provide.factory('urlHelper', function() {
+	$provide.provider('urlHelper', function() {
 		
 		var servlet = function(name) {
 			return '<%= WebTools.servlet(pageContext, "")%>' + name;
@@ -29,11 +30,22 @@ angular.module('mylife.urlHelper', [], function($provide) {
 		
 		var partial = function(name) {
 			return '<%= WebUiTools.partial(pageContext)%>' + name;
-		}
+		};
 		
-		return {
-			servlet : servlet,
-			partial : partial,
+		var webSocket = function() {
+			return '<%= WebUiTools.webSocketUrl(pageContext)%>';
+		};
+		
+		this.servlet = servlet;
+		this.partial = partial;
+		this.webSocket = webSocket;
+		
+		this.$get = function() {
+			return {
+				servlet : servlet,
+				partial : partial,
+				webSocket : webSocket,
+			};
 		};
 	});
 });

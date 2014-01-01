@@ -163,7 +163,7 @@ public class DispatcherService implements Service, AttributeChangeListener {
 	public void sessionMessage(String message, Session session) {
 		log.log(Level.INFO, "Session message : " + message);
 		SessionHandler handler = (SessionHandler) session.getUserProperties()
-				.remove(SESSION_HANDLER_KEY);
+				.get(SESSION_HANDLER_KEY);
 		handler.receive(message);
 	}
 
