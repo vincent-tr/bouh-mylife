@@ -11,11 +11,13 @@
 	href="<%=WebUiTools.root(pageContext)%>/lib/bootstrap/css/bootstrap.css">
 <script src="<%=WebUiTools.root(pageContext)%>/lib/angular/angular.js"></script>
 <script src="<%=WebUiTools.root(pageContext)%>/lib/angular/angular-route.js"></script>
+<script src="<%=WebUiTools.root(pageContext)%>/lib/angular-ui/ui-bootstrap-tpls.js"></script>
 <script src="<%=WebTools.script(pageContext, "app.js")%>"></script>
 <script src="<%=WebTools.script(pageContext, "controllers.js")%>"></script>
 <script src="<%=WebTools.script(pageContext, "net.js")%>"></script>
 <script src="<%=WebTools.script(pageContext, "structure.js")%>"></script>
 <script src="<%=WebTools.script(pageContext, "images.js")%>"></script>
+<script src="<%=WebTools.script(pageContext, "modelBuilder.js")%>"></script>
 <script>
 'use strict';
 angular.module('mylife.urlHelper', [], function($provide) {
