@@ -1,5 +1,9 @@
 <div class="container">
-	<div class="container" ng-repeat="component in window.components">
-		{{ component.id }}
+	{{ window.displayName }}	
+	<img src="{{ getImage(window.backgroundId) }}"></img>
+	<div class="container" ng-repeat="component in window.components" title="{{ component.displayName }}">
+		<button ng-mousedown="componentMouseDown(component)" ng-mouseup="componentMouseUp(component)">			
+			<img src="{{ componentImageSelector(component) }}" height="16" width="16"></img>
+		</button>
 	</div>
 </div>

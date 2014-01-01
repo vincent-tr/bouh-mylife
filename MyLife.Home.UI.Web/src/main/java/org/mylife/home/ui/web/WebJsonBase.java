@@ -3,6 +3,7 @@ package org.mylife.home.ui.web;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Type;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -27,6 +28,12 @@ import com.google.gson.JsonSerializer;
  *
  */
 public abstract class WebJsonBase extends HttpServlet {
+	
+	/**
+	 * Logger
+	 */
+	private final static Logger log = Logger.getLogger(WebJsonBase.class
+			.getName());
 
 	/**
 	 * 
@@ -47,6 +54,8 @@ public abstract class WebJsonBase extends HttpServlet {
 
 	private void dispatch(HttpServletRequest req, HttpServletResponse resp)
 			throws ServletException, IOException {
+		
+		log.info("Getting json data from " + this.getClass().toString());
 		
 		Object data = getObjectData(req);
 		
