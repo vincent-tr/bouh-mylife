@@ -1,4 +1,4 @@
-package org.mylife.home.ui.web.old;
+package org.mylife.home.ui.web;
 
 import java.io.IOException;
 import java.util.logging.Level;
