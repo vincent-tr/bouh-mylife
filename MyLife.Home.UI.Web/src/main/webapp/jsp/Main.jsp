@@ -6,8 +6,8 @@
 <head>
 <meta charset="utf-8">
 <title>MyLife.Home.UI.Web</title>
-<link rel="stylesheet" href="<%=WebTools.style(pageContext, "app.css")%>">
 <link rel="stylesheet" href="<%=WebUiTools.root(pageContext)%>/lib/bootstrap/css/bootstrap.css">
+<link rel="stylesheet" href="<%=WebTools.style(pageContext, "app.css")%>">
 <script src="<%=WebUiTools.root(pageContext)%>/lib/angular/angular.js"></script>
 <script src="<%=WebUiTools.root(pageContext)%>/lib/angular/angular-route.js"></script>
 <script src="<%=WebUiTools.root(pageContext)%>/lib/angular-ui/ui-bootstrap-tpls.js"></script>
