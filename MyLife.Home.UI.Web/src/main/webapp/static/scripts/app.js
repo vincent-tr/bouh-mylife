@@ -62,3 +62,63 @@ app.factory('showWindow', ['$modal', '$location', 'urlHelper', 'structure', 'net
 		}
 	};
 }]);
+
+// http://stackoverflow.com/questions/14507918/how-to-access-image-properties-after-angular-ng-repeat
+app.directive('mylifeResizeParent', function(){ 
+	return {
+		restrict: 'A',
+		link: function(scope, elem, attrs) {
+			elem.on('load', function() {
+				var w = this.width,
+					h = this.height;
+
+				var parent = elem.parent()[0];
+
+				// Application au parent
+				parent.style.width = w;
+				parent.style.height = h;
+			});
+		}
+	};
+});
+
+app.directive('mylifeComponentPosition', function() {
+	function link(scope, element, attrs) {
+		
+		var component = null;
+	 
+		var updatePosition = function() {
+			// Récupération des données
+			var componentContainer = element[0];
+			var componentWidth = componentContainer.offsetWidth;			
+			var componentHeight = componentContainer.offsetHeight;			
+			var container = element.parent()[0];
+			var containerWidth = container.clientWidth;
+			var containerHeight = container.clientHeight;
+			
+			var componentX = 0;
+			var componentY = 0;
+			if(component != null && component != undefined) {
+				componentX = component.positionX;
+				componentY = component.positionY;
+			}
+			
+			// Détermination de la position
+			var baseX = (containerWidth - componentWidth) / 2;
+			var x = baseX + (baseX * componentX);
+			var baseY = (containerHeight - componentHeight) / 2;
+			var y = baseY + (baseY * componentY);
+			
+			componentContainer.style.left = x;
+			componentContainer.style.top = y;
+		};
+		
+		component = scope.component;
+		updatePosition();
+	};
+	
+	return {
+		restrict: 'A',
+		link: link
+	};
+});
