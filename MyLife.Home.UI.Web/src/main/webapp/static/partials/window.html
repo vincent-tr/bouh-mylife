@@ -6,7 +6,7 @@
 		<div class="mylife-window center-block">
 			<img src="{{ window.backgroundImage }}" mylife-resize-parent></img>
 			<div class="mylife-component" ng-repeat="component in window.components" mylife-component-position title="{{ component.displayName }}">
-				<button class="btn btn-default" ng-mousedown="component.mouseDown()" ng-mouseup="component.mouseUp()">			
+				<button class="btn btn-default mylife-component-button" ng-mousedown="component.mouseDown()" ng-mouseup="component.mouseUp()">			
 					<img src="{{ component.image }}" height="16" width="16"></img>
 				</button>
 			</div>
