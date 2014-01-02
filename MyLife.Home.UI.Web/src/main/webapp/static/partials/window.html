@@ -2,14 +2,15 @@
 	<div class="panel-heading text-center">
 		<h3 class="panel-title">{{ window.displayName }}</h3>
 	</div>
-	<div class="panel-body">
-		<img src="{{ window.backgroundImage }}"></img>
-		
-		<div ng-repeat="component in window.components" title="{{ component.displayName }}">
-			<button class="btn btn-default" ng-mousedown="component.mouseDown()" ng-mouseup="component.mouseUp()">			
-				<img src="{{ component.image }}" height="16" width="16"></img>
-			</button>
+	<div class="panel-body text-center">
+	<!-- TODO : center -->
+		<div class="mylife-window">
+			<img src="{{ window.backgroundImage }}" mylife-resize-parent></img>
+			<div class="mylife-component" ng-repeat="component in window.components" mylife-component-position title="{{ component.displayName }}">
+				<button class="btn btn-default" ng-mousedown="component.mouseDown()" ng-mouseup="component.mouseUp()">			
+					<img src="{{ component.image }}" height="16" width="16"></img>
+				</button>
+			</div>
 		</div>
-		
 	</div>
 </div>

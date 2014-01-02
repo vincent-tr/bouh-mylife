@@ -146,6 +146,8 @@ angular.module('mylife.modelBuilder', ['mylife.structure', 'mylife.images', 'myl
 				owner : owner,
 				id : componentSource.id,
 				displayName : componentSource.displayName,
+				positionX : componentSource.positionX,
+				positionY : componentSource.positionY,
 				staticIcon : imageMap['component/' + componentSource.id + '/staticIconId'],
 				defaultIcon : imageMap['component/' + componentSource.id + '/defaultIconId'],
 				iconMap : {},
