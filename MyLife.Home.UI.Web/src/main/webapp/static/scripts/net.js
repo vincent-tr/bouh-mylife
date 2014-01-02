@@ -146,6 +146,8 @@ net.config(['$provide', 'WebSocketProvider', 'urlHelperProvider', function($prov
 		var receiveStructureChangedCallbacks = callbackManager();
 		
 		var receiveIcon = function(windowId, componentId, imageId) {
+			if(imageId == 'null')
+				imageId = null;
 			receiveIconCallbacks.fire(this, [windowId, componentId, imageId]);
 		};
 		
