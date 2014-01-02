@@ -83,19 +83,18 @@ app.directive('mylifeResizeParent', function(){
 });
 
 app.directive('mylifeComponentPosition', function() {
-	function link(scope, element, attrs) {
+	return function(scope, element, attrs) {
 		
-		var component = null;
-	 
 		var updatePosition = function() {
 			// Récupération des données
+			var component = scope.component;
 			var componentContainer = element[0];
+			var container = element.parent()[0];
+			
 			var componentWidth = componentContainer.offsetWidth;			
 			var componentHeight = componentContainer.offsetHeight;			
-			var container = element.parent()[0];
 			var containerWidth = container.clientWidth;
 			var containerHeight = container.clientHeight;
-			
 			var componentX = 0;
 			var componentY = 0;
 			if(component != null && component != undefined) {
@@ -113,12 +112,8 @@ app.directive('mylifeComponentPosition', function() {
 			componentContainer.style.top = y;
 		};
 		
-		component = scope.component;
-		updatePosition();
-	};
-	
-	return {
-		restrict: 'A',
-		link: link
+		element.ready(function() {
+			updatePosition();
+		});
 	};
 });
