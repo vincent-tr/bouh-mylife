@@ -1,9 +1,15 @@
-<div class="container">
-	{{ window.displayName }}	
-	<img src="{{ window.backgroundImage }}"></img>
-	<div class="container" ng-repeat="component in window.components" title="{{ component.displayName }}">
-		<button ng-mousedown="component.mouseDown()" ng-mouseup="component.mouseUp()">			
-			<img src="{{ component.image }}" height="16" width="16"></img>
-		</button>
+<div class="panel panel-primary">
+	<div class="panel-heading text-center">
+		<h3 class="panel-title">{{ window.displayName }}</h3>
+	</div>
+	<div class="panel-body">
+		<img src="{{ window.backgroundImage }}"></img>
+		
+		<div ng-repeat="component in window.components" title="{{ component.displayName }}">
+			<button class="btn btn-default" ng-mousedown="component.mouseDown()" ng-mouseup="component.mouseUp()">			
+				<img src="{{ component.image }}" height="16" width="16"></img>
+			</button>
+		</div>
+		
 	</div>
 </div>
