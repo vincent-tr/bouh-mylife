@@ -4,8 +4,8 @@
 
 'use strict';
 
-angular.module('mylife.modelBuilder', ['mylife.structure', 'mylife.images', 'mylife.net'], function($provide) {
-	$provide.factory('modelBuilder', ['$log', '$q', 'structure', 'images', 'net', function($log, $q, structure, images, net) {
+angular.module('mylife.modelBuilder', ['mylife.structure', 'mylife.images', 'mylife.net', 'mylife.app'], function($provide) {
+	$provide.factory('modelBuilder', ['$log', '$q', 'structure', 'images', 'net', 'showWindow', function($log, $q, structure, images, net, showWindow) {
 
 		/**
 		 * Gestion du mouseup/mousedown
@@ -93,9 +93,11 @@ angular.module('mylife.modelBuilder', ['mylife.structure', 'mylife.images', 'myl
 				keys['window/backgroundId'] = window.backgroundId;
 			
 			var components = window.components;
-			for(var i=0, len=components.length; i<len; i++) {
-				var component = components[i];
-				componentImageKeys(component, keys);
+			if(components != null && components != undefined) {
+				for(var i=0, len=components.length; i<len; i++) {
+					var component = components[i];
+					componentImageKeys(component, keys);
+				}
 			}
 			
 			return keys;
@@ -119,7 +121,7 @@ angular.module('mylife.modelBuilder', ['mylife.structure', 'mylife.images', 'myl
 			
 			if(iswindow) {
 				action.execute = angular.bind(action, function() {
-					// TODO
+					showWindow(this.windowId, this.popup);
 				});
 			} else if(iscore) {
 				action.execute = angular.bind(action, function() {
@@ -144,8 +146,8 @@ angular.module('mylife.modelBuilder', ['mylife.structure', 'mylife.images', 'myl
 				owner : owner,
 				id : componentSource.id,
 				displayName : componentSource.displayName,
-				staticIconId : imageMap['component/' + componentSource.id + '/staticIconId'],
-				defaultIconId : imageMap['component/' + componentSource.id + '/defaultIconId'],
+				staticIcon : imageMap['component/' + componentSource.id + '/staticIconId'],
+				defaultIcon : imageMap['component/' + componentSource.id + '/defaultIconId'],
 				iconMap : {},
 			};
 			
@@ -167,11 +169,11 @@ angular.module('mylife.modelBuilder', ['mylife.structure', 'mylife.images', 'myl
 			component.mouseUp = angular.bind(mouseManager, mouseManager.componentMouseUp, component);
 			
 			// Définition de l'icone actuelle
-			if(component.staticIconId != null && component.staticIconId != undefined)
-				component.image = component.staticIconId;
+			if(component.staticIcon != null && component.staticIcon != undefined)
+				component.image = component.staticIcon;
 			
-			if(component.defaultIconId != null && component.defaultIconId != undefined)
-				component.image = component.defaultIconId;
+			if(component.defaultIcon != null && component.defaultIcon != undefined)
+				component.image = component.defaultIcon;
 			
 			return component;
 		};
@@ -189,10 +191,12 @@ angular.module('mylife.modelBuilder', ['mylife.structure', 'mylife.images', 'myl
 				};
 			
 			var componentsSource = windowSource.components;
-			for(var i=0, len=componentsSource.length; i<len; i++) {
-				var componentSource = componentsSource[i];
-				var component = componentBuilder(componentSource, window, imageMap);
-				window.components.push(component);
+			if(componentsSource != null && componentsSource != undefined) {
+				for(var i=0, len=componentsSource.length; i<len; i++) {
+					var componentSource = componentsSource[i];
+					var component = componentBuilder(componentSource, window, imageMap);
+					window.components.push(component);
+				}
 			}
 				
 			return window;
@@ -217,10 +221,30 @@ angular.module('mylife.modelBuilder', ['mylife.structure', 'mylife.images', 'myl
 				return null;
 			};
 			
+			var setDefaultIcon = function(component) {
+				
+				// Si icone statique rien à faire
+				if(component.staticIconId != null && component.staticIconId != undefined)
+					return;
+				
+				// Sinon on met l'icone par défaut (et null si l'icone n'est pas définie)
+				$log.debug('setting image for window : ' + windowId + ', component : ' + componentId + ' to default');
+				component.image = component.defaultIconId;
+			};
+			
 			net.onReceiveIcon(function(windowId, componentId, imageId) {
 				var component = lookupComponent(windowId, componentId);
 				if(component == null)
 					return;
+
+				// Si icone statique rien à faire
+				if(component.staticIcon != null && component.staticIcon != undefined)
+					return;
+				
+				if(imageId == null) {
+					setDefaultIcon(component);
+					return;
+				}
 				
 				$log.debug('setting image for window : ' + windowId + ', component : ' + componentId + ' to : ' + imageId);
 				component.image = component.iconMap[imageId];
@@ -230,14 +254,12 @@ angular.module('mylife.modelBuilder', ['mylife.structure', 'mylife.images', 'myl
 				// Sur online rien à faire, on attend l'icone à définir dans un prochain message
 				if(online)
 					return;
-				
-				// Si icone statique rien à faire
-				if(component.staticIconId != null && component.staticIconId != undefined)
+
+				var component = lookupComponent(windowId, componentId);
+				if(component == null)
 					return;
 				
-				// Sinon on met l'icone par défaut (et null si l'icone n'est pas définie)
-				$log.debug('setting image for window : ' + windowId + ', component : ' + componentId + ' to default');
-				component.image = component.defaultIconId;
+				setDefaultIcon(component);
 			});
 		};
 		
