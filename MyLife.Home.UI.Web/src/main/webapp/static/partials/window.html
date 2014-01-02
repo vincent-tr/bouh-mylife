@@ -3,8 +3,7 @@
 		<h3 class="panel-title">{{ window.displayName }}</h3>
 	</div>
 	<div class="panel-body text-center">
-	<!-- TODO : center -->
-		<div class="mylife-window">
+		<div class="mylife-window center-block">
 			<img src="{{ window.backgroundImage }}" mylife-resize-parent></img>
 			<div class="mylife-component" ng-repeat="component in window.components" mylife-component-position title="{{ component.displayName }}">
 				<button class="btn btn-default" ng-mousedown="component.mouseDown()" ng-mouseup="component.mouseUp()">			
