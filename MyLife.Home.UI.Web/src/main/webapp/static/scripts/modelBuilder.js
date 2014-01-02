@@ -146,21 +146,32 @@ angular.module('mylife.modelBuilder', ['mylife.structure', 'mylife.images', 'myl
 				displayName : componentSource.displayName,
 				staticIconId : imageMap['component/' + componentSource.id + '/staticIconId'],
 				defaultIconId : imageMap['component/' + componentSource.id + '/defaultIconId'],
+				iconMap : {},
 			};
 			
+			// Mapping des icones possibles du composant si icon dynamique
+			var mappings = componentSource.icon.mappings;
+			if(mappings != undefined && mappings != null) {
+				for(var i=0, len=mappings.length; i<len; i++) {
+					var mapping = mappings[i];
+					var image = imageMap['component/' + component.id + '/mappings/' + i + '/iconId'];
+					component.iconMap[mapping.iconId] = image;
+				}
+			}
+			
+			// actions
 			component.primaryAction = actionBuilder(componentSource.primaryAction, component, true);
 			component.secondaryAction = actionBuilder(componentSource.secondaryAction, component, false);
-			
-			component.secondaryAction = angular.bind(component, function() {
-				$log.debug('secondary action on component' + this.id);
-				// TODO
-			});
 			
 			component.mouseDown = angular.bind(mouseManager, mouseManager.componentMouseDown, component);
 			component.mouseUp = angular.bind(mouseManager, mouseManager.componentMouseUp, component);
 			
-			// TODO
-			component.image = component.defaultIconId;
+			// Définition de l'icone actuelle
+			if(component.staticIconId != null && component.staticIconId != undefined)
+				component.image = component.staticIconId;
+			
+			if(component.defaultIconId != null && component.defaultIconId != undefined)
+				component.image = component.defaultIconId;
 			
 			return component;
 		};
@@ -187,6 +198,49 @@ angular.module('mylife.modelBuilder', ['mylife.structure', 'mylife.images', 'myl
 			return window;
 		};
 		
+		/*
+		 * Abonnement aux événements de net
+		 */
+		var registerNetEvents = function(window) {
+		
+			var lookupComponent = function(windowId, componentId) {
+				// Le modèle courant ne gère qu'une seule fenêtre
+				// Si l'événement ne concerne pas cette fenêtre, il n'y a rien à faire
+				if(window.id != windowId)
+					return null;
+				for(var i=0, len=window.components.length; i<len; i++) {
+					var component = window.components[i];
+					if(component.id == componentId)
+						return component;
+				}
+				// non trouvé
+				return null;
+			};
+			
+			net.onReceiveIcon(function(windowId, componentId, imageId) {
+				var component = lookupComponent(windowId, componentId);
+				if(component == null)
+					return;
+				
+				$log.debug('setting image for window : ' + windowId + ', component : ' + componentId + ' to : ' + imageId);
+				component.image = component.iconMap[imageId];
+			});
+			
+			net.onReceiveOnlineChanged(function(windowId, componentId, online) {
+				// Sur online rien à faire, on attend l'icone à définir dans un prochain message
+				if(online)
+					return;
+				
+				// Si icone statique rien à faire
+				if(component.staticIconId != null && component.staticIconId != undefined)
+					return;
+				
+				// Sinon on met l'icone par défaut (et null si l'icone n'est pas définie)
+				$log.debug('setting image for window : ' + windowId + ', component : ' + componentId + ' to default');
+				component.image = component.defaultIconId;
+			});
+		};
+		
 		/**
 		 * Fabrique
 		 */
@@ -195,7 +249,9 @@ angular.module('mylife.modelBuilder', ['mylife.structure', 'mylife.images', 'myl
 			var keys = {};
 			imageKeys(window, keys);
 			imagesBatch(keys).then(function(imageMap) {
-				$scope.window = builder(window, imageMap);
+				var windowModel = builder(window, imageMap);
+				registerNetEvents(windowModel);
+				$scope.window = windowModel;
 			});
 		};
 	}]);

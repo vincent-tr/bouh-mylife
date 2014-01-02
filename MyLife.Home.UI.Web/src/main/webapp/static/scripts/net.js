@@ -114,19 +114,55 @@ net.config(['$provide', 'WebSocketProvider', 'urlHelperProvider', function($prov
 			var msg = 'action ' + windowId + ' ' + componentId + ' ' + (isprimary ? 'primary' : 'secondary');
 			send(msg);
 		};
+		
+		/**
+		 * Gestion des appels de callbacks
+		 */
+		var callbackManager = function() {
+			var list = [];
+			
+			var add = function(callback) {
+				list.push(callback);
+			};
+			
+			var fire = function(thisFunc, args) {
+				for(var i=0, len = list.length; i<len; i++) {
+					list[i].apply(thisFunc, args);
+				}
+			};
+			
+			return {
+				add : add,
+				fire : fire,
+			};
+		};
 
+		var receiveIconCallbacks = callbackManager();
+		var receiveOnlineChangedCallbacks = callbackManager();
+		var receiveStructureChangedCallbacks = callbackManager();
+		
 		var receiveIcon = function(windowId, componentId, imageId) {
-			// TODO
+			receiveIconCallbacks.fire(this, [windowId, componentId, imageId]);
 		};
 		
 		var receiveOnlineChanged = function(windowId, componentId, online) {
-			if(!online) {
-				// TODO : offline icon
-			}
+			receiveOnlineChangedCallbacks.fire(this, [windowId, componentId, online]);
 		};
 		
 		var receiveStructureChanged = function() {
-			// TODO
+			receiveStructureChangedCallbacks.fire(this, []);
+		};
+
+		var onReceiveIcon = function(callback) {
+			receiveIconCallbacks.add(callback);
+		};
+		
+		var onReceiveOnlineChanged  = function(callback) {
+			receiveOnlineChangedCallbacks.add(callback);
+		};
+		
+		var onReceiveStructureChanged = function(callback) {
+			receiveStructureChangedCallbacks.add(callback);
 		};
 		
 		return {
@@ -134,7 +170,21 @@ net.config(['$provide', 'WebSocketProvider', 'urlHelperProvider', function($prov
 			windowPop : windowPop,
 			windowClear : windowClear,
 			sendAction : sendAction,
-			// TODO : events
+			
+			/**
+			 * prototype callback : function(windowId, componentId, imageId)
+			 */
+			onReceiveIcon : onReceiveIcon,
+			
+			/**
+			 * prototype callback : function(windowId, componentId, online)
+			 */
+			onReceiveOnlineChanged : onReceiveOnlineChanged,
+			
+			/**
+			 * prototype callback : function()
+			 */
+			onReceiveStructureChanged : onReceiveStructureChanged,
 		};
 	}]);
 }]);
