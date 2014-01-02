@@ -83,6 +83,10 @@ net.config(['$provide', 'WebSocketProvider', 'urlHelperProvider', function($prov
 		
 		var send = function(msg) {
 			$log.debug('ws send : ' + msg);
+			if(WebSocket.currentState() != 'OPEN') {
+				$log.info('ws send : not connected, message discarded');
+				return;
+			}
 			WebSocket.send(msg);
 		};
 		
