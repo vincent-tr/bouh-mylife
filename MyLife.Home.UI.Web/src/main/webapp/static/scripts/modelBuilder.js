@@ -224,12 +224,12 @@ angular.module('mylife.modelBuilder', ['mylife.structure', 'mylife.images', 'myl
 			var setDefaultIcon = function(component) {
 				
 				// Si icone statique rien à faire
-				if(component.staticIconId != null && component.staticIconId != undefined)
+				if(component.staticIcon != null && component.staticIcon != undefined)
 					return;
 				
 				// Sinon on met l'icone par défaut (et null si l'icone n'est pas définie)
-				$log.debug('setting image for window : ' + windowId + ', component : ' + componentId + ' to default');
-				component.image = component.defaultIconId;
+				$log.debug('setting image for window : ' + component.owner.id + ', component : ' + component.id + ' to default');
+				component.image = component.defaultIcon;
 			};
 			
 			net.onReceiveIcon(function(windowId, componentId, imageId) {
