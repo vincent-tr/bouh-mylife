@@ -48,6 +48,10 @@ public class NickCommand implements Command {
 		Network net = server.getNetwork();
 		User user = (User) src.getStructure();
 		String oldNick = user.getNick();
+		
+		// Si pas de changement, rien à faire
+		if(oldNick.equals(newNick))
+			return;
 
 		try {
 			net.userChangeNick(user, newNick);
