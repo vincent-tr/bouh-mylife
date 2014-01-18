@@ -40,6 +40,7 @@ extern void net_terminate();
 
 extern struct net_container *net_repository_register(struct net_object *object, const char *channel, int local);
 extern void net_repository_unregister(struct net_container *container);
+extern void net_repository_foreach(int (*callback)(struct net_container *container, void *ctx), void *ctx);
 extern struct net_object *net_container_get_object(struct net_container *container);
 extern const char *net_container_get_channel(struct net_container *container);
 extern int net_container_is_local(struct net_container *container);
