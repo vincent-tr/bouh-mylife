@@ -19,6 +19,7 @@
 #include "components.h"
 #include "net.h"
 #include "loop.h"
+#include "export.h"
 
 #define PID_FILE "/var/run/mylife-home-components.pid"
 
@@ -50,10 +51,12 @@ void init()
 	loop_init();
 	net_init();
 	components_init();
+	export_init();
 }
 
 void terminate()
 {
+	export_terminate();
 	components_terminate();
 	net_terminate();
 	loop_terminate();

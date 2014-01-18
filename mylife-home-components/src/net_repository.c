@@ -20,6 +20,7 @@
 
 struct net_container
 {
+	struct list_node node;
 	struct net_object *object;
 	int local;
 	char *channel;
@@ -63,6 +64,7 @@ struct local_call_param_data
 	char *saveptr;
 };
 
+static struct list repository;
 static irc_callbacks_t local_callbacks;
 static const char *server_address;
 static int server_port;
@@ -100,10 +102,13 @@ void net_init()
 
 	conf_assert(config_lookup_string(conf_get(), "net.server.address", &server_address));
 	conf_assert(config_lookup_int(conf_get(), "net.server.port", &server_port));
+
+	list_init(&repository);
 }
 
 void net_terminate()
 {
+	log_assert(list_is_empty(&repository));
 }
 
 struct net_container *net_repository_register(struct net_object *object, const char *channel, int local)
@@ -119,14 +124,21 @@ struct net_container *net_repository_register(struct net_object *object, const c
 	else
 		remote_register(container);
 
+	list_add(&repository, container);
 	return container;
 }
 
 void net_repository_unregister(struct net_container *container)
 {
+	list_remove(&repository, container);
 	container->unregister(container);
 	free(container->channel);
 	free(container);
+}
+
+void net_repository_foreach(int (*callback)(struct net_container *container, void *ctx), void *ctx)
+{
+	list_foreach(&repository, (int (*)(struct net_container *container, void *ctx))callback, ctx);
 }
 
 struct net_object *net_container_get_object(struct net_container *container)

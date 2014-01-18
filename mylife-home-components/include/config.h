@@ -14,6 +14,7 @@ extern void conf_init();
 extern void conf_terminate();
 
 extern config_t *conf_get();
+extern time_t conf_lastupdate();
 
 #define conf_assert(expr) log_assert(expr == CONFIG_TRUE)
 
