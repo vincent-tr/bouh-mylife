@@ -36,6 +36,7 @@
 							<tool id="cdt.managedbuild.tool.gnu.c.linker.base.1054997103" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.base">
 								<option id="gnu.c.link.option.libs.496563730" name="Libraries (-l)" superClass="gnu.c.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" value="ircclient"/>
+									<listOptionValue builtIn="false" value="mpdclient"/>
 									<listOptionValue builtIn="false" value="jansson"/>
 									<listOptionValue builtIn="false" value="microhttpd"/>
 									<listOptionValue builtIn="false" value="config"/>

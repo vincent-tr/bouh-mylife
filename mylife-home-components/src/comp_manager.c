@@ -31,7 +31,6 @@ static struct list components;
 
 static void sub_init();
 static void sub_terminate();
-static const char *conf_get_string(config_setting_t *setting, const char *name);
 static struct component *create_component(const char *type, const char *id, config_setting_t *config);
 static void free_component(void *node, void *ctx);
 static void free_type(void *node, void *ctx);
@@ -40,12 +39,14 @@ static int lookup_component_id_item(void *node, void *ctx);
 
 void sub_init()
 {
-	internal_comp_test_init();
+	comp_internal_test_init();
+	comp_internal_mpd_init();
 }
 
 void sub_terminate()
 {
-	internal_comp_test_terminate();
+	comp_internal_mpd_terminate();
+	comp_internal_test_terminate();
 }
 
 void components_init()
@@ -85,17 +86,6 @@ void components_terminate()
 	sub_terminate();
 
 	list_clear(&types, free_type, NULL);
-}
-
-const char *conf_get_string(config_setting_t *setting, const char *name)
-{
-	const config_setting_t *child;
-	const char *value;
-
-	log_assert((child = config_setting_get_member(setting, name)));
-	log_assert((value = config_setting_get_string(child)));
-
-	return value;
 }
 
 void component_register(struct component_type *type)
