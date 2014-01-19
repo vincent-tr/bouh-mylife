@@ -138,7 +138,7 @@ void net_repository_unregister(struct net_container *container)
 
 void net_repository_foreach(int (*callback)(struct net_container *container, void *ctx), void *ctx)
 {
-	list_foreach(&repository, (int (*)(struct net_container *container, void *ctx))callback, ctx);
+	list_foreach(&repository, (int (*)(void *node, void *ctx))callback, ctx);
 }
 
 struct net_object *net_container_get_object(struct net_container *container)
