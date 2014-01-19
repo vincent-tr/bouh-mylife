@@ -20,6 +20,7 @@
 #include "net.h"
 #include "loop.h"
 #include "export.h"
+#include "gpio.h"
 
 #define PID_FILE "/var/run/mylife-home-components.pid"
 
@@ -50,6 +51,8 @@ void init()
 	conf_init();
 	loop_init();
 	net_init();
+	gpio_init();
+
 	components_init();
 	export_init();
 }
@@ -58,6 +61,8 @@ void terminate()
 {
 	export_terminate();
 	components_terminate();
+
+	gpio_terminate();
 	net_terminate();
 	loop_terminate();
 	conf_terminate();
