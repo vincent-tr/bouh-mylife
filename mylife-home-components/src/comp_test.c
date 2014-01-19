@@ -28,7 +28,7 @@ static struct net_type *attr_type;
 
 static void action_callback(void *ctx, struct net_object *object, struct net_member *member, struct net_value *args[]);
 
-void internal_comp_test_init()
+void comp_internal_test_init()
 {
 	attr_type = net_type_create_range(0, 100);
 	test_class = net_class_create();
@@ -38,7 +38,7 @@ void internal_comp_test_init()
 	component_register(&type);
 }
 
-void internal_comp_test_terminate()
+void comp_internal_test_terminate()
 {
 	net_class_destroy(test_class);
 	net_type_destroy(attr_type);

@@ -25,7 +25,9 @@ extern void components_terminate();
 extern void component_register(struct component_type *type);
 
 // internal
-extern void internal_comp_test_init();
-extern void internal_comp_test_terminate();
+extern void comp_internal_test_init();
+extern void comp_internal_test_terminate();
+extern void comp_internal_mpd_init();
+extern void comp_internal_mpd_terminate();
 
 #endif /* COMPONENTS_H_ */

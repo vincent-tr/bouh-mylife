@@ -168,6 +168,9 @@ void irc_assert(irc_session_t * session, int irc_ret)
 		return;
 
 	int error = irc_errno(session);
+	if(error == 0) // ??
+		return;
+
 	const char *serror = irc_strerror(error);
 
 	log_fatal("irc error %d : %s", error, serror);

@@ -60,3 +60,22 @@ void conf_api_assert(int api_ret)
 		config_error_line(&conf),
 		config_error_text(&conf));
 }
+
+const char *conf_get_string(config_setting_t *setting, const char *name)
+{
+	const config_setting_t *child;
+	const char *value;
+
+	log_assert((child = config_setting_get_member(setting, name)));
+	log_assert((value = config_setting_get_string(child)));
+
+	return value;
+}
+
+int conf_get_int(config_setting_t *setting, const char *name)
+{
+	const config_setting_t *child;
+
+	log_assert((child = config_setting_get_member(setting, name)));
+	return config_setting_get_int(child);
+}

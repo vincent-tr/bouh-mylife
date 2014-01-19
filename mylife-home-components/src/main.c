@@ -5,6 +5,13 @@
  *      Author: pumbawoman
  */
 
+/*
+ * apt-get install libjansson-dev libjansson-doc
+ * apt-get install libircclient-dev libconfig-dev libconfig-doc
+ * apt-get install libmicrohttpd10 libmicrohttpd-dev
+ * apt-get install libmpdclient-dev libmpdclient-doc libmpdclient2
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
