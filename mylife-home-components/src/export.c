@@ -47,8 +47,14 @@ static struct MHD_Daemon *instance;
 static struct loop_handle *loop_handle;
 static char *content;
 
+// sinon probleme sur assertion failed
+extern void MHD_init();
+extern void MHD_fini();
+
 void export_init()
 {
+	MHD_init();
+
 	log_assert((instance = MHD_start_daemon(MHD_NO_FLAG, PORT, on_client_connect, NULL,
 			&request_handler, NULL, MHD_OPTION_END)));
 
@@ -62,6 +68,8 @@ void export_terminate()
 	loop_unregister(loop_handle);
 	MHD_stop_daemon(instance);
 	free(content);
+
+	MHD_fini();
 }
 
 void select_add(int *nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, void *ctx)
