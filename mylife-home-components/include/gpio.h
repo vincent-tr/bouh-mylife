@@ -72,24 +72,24 @@ enum gpio_direction
 	out
 };
 
-typedef void (*gpio_change_callback)(struct gpio *gpio, int value);
+typedef void (*gpio_change_callback)(struct gpio *gpio, int value, void *ctx);
 
-inline int gpio_get_pin_number(struct gpio *gpio) 											{ int val; log_assert(gpio_ctl(gpio, GPIO_CTL_GET_PIN_NUMBER, &val)); return val; }
-inline int gpio_get_gpio_number(struct gpio *gpio)											{ int val; log_assert(gpio_ctl(gpio, GPIO_CTL_GET_GPIO_NUMBER, &val)); return val; }
-inline int gpio_get_type(struct gpio *gpio)													{ int val; log_assert(gpio_ctl(gpio, GPIO_CTL_GET_TYPE, &val)); return val; }
-inline const char *gpio_get_usage(struct gpio *gpio)										{ const char *val; log_assert(gpio_ctl(gpio, GPIO_CTL_GET_USAGE, &val)); return val; }
+inline int gpio_get_pin_number(struct gpio *gpio) 														{ int val; log_assert(gpio_ctl(gpio, GPIO_CTL_GET_PIN_NUMBER, &val)); return val; }
+inline int gpio_get_gpio_number(struct gpio *gpio)														{ int val; log_assert(gpio_ctl(gpio, GPIO_CTL_GET_GPIO_NUMBER, &val)); return val; }
+inline int gpio_get_type(struct gpio *gpio)																{ int val; log_assert(gpio_ctl(gpio, GPIO_CTL_GET_TYPE, &val)); return val; }
+inline const char *gpio_get_usage(struct gpio *gpio)													{ const char *val; log_assert(gpio_ctl(gpio, GPIO_CTL_GET_USAGE, &val)); return val; }
 
-inline int gpio_io_get_value(struct gpio *gpio)												{ int val; log_assert(gpio_ctl(gpio, GPIO_CTL_GET_VALUE, &val)); return val; }
-inline void gpio_io_set_value(struct gpio *gpio, int value)									{ log_assert(gpio_ctl(gpio, GPIO_CTL_SET_VALUE, value)); }
-inline enum gpio_direction gpio_io_get_direction(struct gpio *gpio)							{ enum gpio_direction val; log_assert(gpio_ctl(gpio, GPIO_CTL_GET_DIRECTION, &val)); return val; }
-inline void gpio_io_set_direction(struct gpio *gpio, enum gpio_direction value)				{ log_assert(gpio_ctl(gpio, GPIO_CTL_SET_DIRECTION, value)); }
-inline void gpio_io_set_change_callback(struct gpio *gpio, gpio_change_callback callback)	{ log_assert(gpio_ctl(gpio, GPIO_CTL_SET_CHANGE_CALLBACK, callback)); }
+inline int gpio_io_get_value(struct gpio *gpio)															{ int val; log_assert(gpio_ctl(gpio, GPIO_CTL_GET_VALUE, &val)); return val; }
+inline void gpio_io_set_value(struct gpio *gpio, int value)												{ log_assert(gpio_ctl(gpio, GPIO_CTL_SET_VALUE, value)); }
+inline enum gpio_direction gpio_io_get_direction(struct gpio *gpio)										{ enum gpio_direction val; log_assert(gpio_ctl(gpio, GPIO_CTL_GET_DIRECTION, &val)); return val; }
+inline void gpio_io_set_direction(struct gpio *gpio, enum gpio_direction value)							{ log_assert(gpio_ctl(gpio, GPIO_CTL_SET_DIRECTION, value)); }
+inline void gpio_io_set_change_callback(struct gpio *gpio, gpio_change_callback callback, void *ctx)	{ log_assert(gpio_ctl(gpio, GPIO_CTL_SET_CHANGE_CALLBACK, callback, ctx)); }
 
-inline int gpio_pwm_get_period(struct gpio *gpio)											{ int val; log_assert(gpio_ctl(gpio, GPIO_CTL_GET_PERIOD, &val)); return val; }
-inline void gpio_pwm_set_period(struct gpio *gpio, int value)								{ log_assert(gpio_ctl(gpio, GPIO_CTL_SET_PERIOD, value)); }
-inline int gpio_pwm_get_pulse(struct gpio *gpio)											{ int val; log_assert(gpio_ctl(gpio, GPIO_CTL_GET_PULSE, &val)); return val; }
-inline void gpio_pwm_set_pulse(struct gpio *gpio, int value)								{ log_assert(gpio_ctl(gpio, GPIO_CTL_SET_PULSE, value)); }
-inline int gpio_pwm_get_pulses(struct gpio *gpio)											{ int val; log_assert(gpio_ctl(gpio, GPIO_CTL_GET_PULSES, &val)); return val; }
-inline void gpio_pwm_set_pulses(struct gpio *gpio, int value)								{ log_assert(gpio_ctl(gpio, GPIO_CTL_SET_PULSES, value)); }
+inline int gpio_pwm_get_period(struct gpio *gpio)														{ int val; log_assert(gpio_ctl(gpio, GPIO_CTL_GET_PERIOD, &val)); return val; }
+inline void gpio_pwm_set_period(struct gpio *gpio, int value)											{ log_assert(gpio_ctl(gpio, GPIO_CTL_SET_PERIOD, value)); }
+inline int gpio_pwm_get_pulse(struct gpio *gpio)														{ int val; log_assert(gpio_ctl(gpio, GPIO_CTL_GET_PULSE, &val)); return val; }
+inline void gpio_pwm_set_pulse(struct gpio *gpio, int value)											{ log_assert(gpio_ctl(gpio, GPIO_CTL_SET_PULSE, value)); }
+inline int gpio_pwm_get_pulses(struct gpio *gpio)														{ int val; log_assert(gpio_ctl(gpio, GPIO_CTL_GET_PULSES, &val)); return val; }
+inline void gpio_pwm_set_pulses(struct gpio *gpio, int value)											{ log_assert(gpio_ctl(gpio, GPIO_CTL_SET_PULSES, value)); }
 
 #endif /* GPIO_H_ */

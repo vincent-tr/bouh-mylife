@@ -29,5 +29,9 @@ extern void comp_internal_test_init();
 extern void comp_internal_test_terminate();
 extern void comp_internal_mpd_init();
 extern void comp_internal_mpd_terminate();
+extern void comp_internal_gpioin_init();
+extern void comp_internal_gpioin_terminate();
+extern void comp_internal_gpioout_init();
+extern void comp_internal_gpioout_terminate();
 
 #endif /* COMPONENTS_H_ */

@@ -34,6 +34,7 @@ struct io
 {
 	enum gpio_direction direction;
 	gpio_change_callback change_callback;
+	void *change_callback_ctx;
 	int value;
 	struct monitor_data *monitor;
 };
@@ -95,6 +96,7 @@ int io_open(struct gpio *gpio, va_list args)
 	io->direction = (!strcmp(sysfs_read(&sysfs, gpionb, "direction"), "out")) ? out : in;
 	io->value = (!strcmp(sysfs_read(&sysfs, gpionb, "value"), "1")) ? 1 : 0;
 	io->change_callback = NULL;
+	io->change_callback_ctx = NULL;
 	sysfs_write(&sysfs, gpionb, "edge", "both");
 
 	if(io->direction == in)
@@ -176,8 +178,10 @@ int io_ctl(struct gpio *gpio, int ctl, va_list args)
 
 	case GPIO_CTL_SET_CHANGE_CALLBACK:
 		{
-			gpio_change_callback *change_callback = va_arg(args, gpio_change_callback *);
-			*change_callback = io->change_callback;
+			gpio_change_callback change_callback = va_arg(args, gpio_change_callback);
+			void *change_callback_ctx = va_arg(args, void *);
+			io->change_callback = change_callback;
+			io->change_callback_ctx = change_callback_ctx;
 			ret = 1;
 		}
 		break;
@@ -265,7 +269,7 @@ int select_process_item(void *node, void *ctx)
 		// read value and call callback
 		io->value = (!strcmp(sysfs_read(&sysfs, gpionb, "value"), "1")) ? 1 : 0;
 		if(io->change_callback)
-			io->change_callback(gpio, io->value);
+			io->change_callback(gpio, io->value, io->change_callback_ctx);
 	}
 
 	return 1;
