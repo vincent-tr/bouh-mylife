@@ -89,25 +89,23 @@ struct net_type *net_type_create_enum(const char *first, ...) // NULL terminated
 	// petit gaspillage mais bon ..
 	size_t size = sizeof(*type);
 	const char *ptr = first;
-	char **walker;
 	va_list ap;
+	size_t index = 0;
 
 	va_start(ap, first);
 
 	realloc_nofail(type, size);
 	type->type = NET_TYPE_ENUM;
-	walker = type->enum_values.names;
 
 	while(ptr)
 	{
 		size += sizeof(ptr);
 		realloc_nofail(type, size);
-		strdup_nofail(*walker, ptr);
-		++walker;
+		strdup_nofail(type->enum_values.names[index++], ptr);
 
 		ptr = va_arg(ap, const char *);
 	}
-	*walker = NULL;
+	type->enum_values.names[index] = NULL;
 
 	va_end(ap);
 	return type;
