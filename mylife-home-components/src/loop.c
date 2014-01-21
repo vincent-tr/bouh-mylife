@@ -8,6 +8,7 @@
 #include <stddef.h>
 #include <sys/select.h>
 #include <sys/time.h>
+#include <errno.h>
 
 #include "logger.h"
 #include "loop.h"
@@ -15,6 +16,8 @@
 #include "tools.h"
 
 #define LOOP_MS 300
+
+static int safe_select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct timeval *timeout);
 
 struct tick
 {
@@ -155,8 +158,19 @@ void run_listeners(struct list *handles_copy)
 	ms2tv(&tv, LOOP_MS);
 
 	list_foreach(handles_copy, list_run_item_listener_add, &data);
-	log_assert(select(nfds + 1, &readfds, &writefds, &exceptfds, &tv) != -1);
+	log_assert(safe_select(nfds + 1, &readfds, &writefds, &exceptfds, &tv) != -1);
 	list_foreach(handles_copy, list_run_item_listener_process, &data);
+}
+
+int safe_select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct timeval *timeout)
+{
+	int ret = select(nfds, readfds, writefds, exceptfds, timeout);
+
+	// EINTR = got signal, not an error
+	if(ret == -1 && errno == EINTR)
+		ret = 0;
+
+	return ret;
 }
 
 void list_free_item(void *node, void *ctx)
