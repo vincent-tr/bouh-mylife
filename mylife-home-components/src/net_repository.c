@@ -417,6 +417,13 @@ int local_call_param(struct net_type *type, void *ctx)
 	switch(net_type_get_type(type))
 	{
 	case NET_TYPE_ENUM:
+		if(!net_type_enum_exists(type, svalue))
+		{
+			// bad enum value
+			free(value);
+			return 0;
+		}
+
 		strdup_nofail(value->enum_value, svalue);
 		break;
 
