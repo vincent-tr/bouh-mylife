@@ -2,7 +2,7 @@ var assert = require('assert');
 var events = require('events');
 var util = require('util');
 
-var structure = require('./netstructure.js');
+var netstructure = require('./netstructure.js');
 
 function NetObject(id, clazz) {
 	events.EventEmitter.call(this);
@@ -13,7 +13,7 @@ function NetObject(id, clazz) {
 	this.attributeValues = {};
 	for(var i=0, l=this.clazz.members.length; i<l; i++) {
 		var member = this.clazz.members[i];
-		if(!(member instanceof structure.NetAttribute)) {
+		if(!(member instanceof netstructure.NetAttribute)) {
 			continue;
 		}
 		
@@ -33,14 +33,14 @@ NetObject.prototype.getMember = function(name) {
 };
 
 var checkArg = function(arg, type) {
-	if(type instanceof structure.NetRange) {
+	if(type instanceof netstructure.NetRange) {
 		var val = parseInt(arg, 10);
 		if(isNaN(val) || val < type.min || val > type.max) {
 			throw new Error('invalid argument');
 		}
 	}
 
-	if(type instanceof structure.NetEnum) {
+	if(type instanceof netstructure.NetEnum) {
 		for(var i=0, l=type.values.length; i<l; i++) {
 			if(type.values[i] === arg) {
 				return;
@@ -55,7 +55,7 @@ NetObject.prototype.executeAction = function(name) {
 	
 	var member = this.getMember(name);
 	assert(member);
-	assert(member instanceof structure.NetAction);
+	assert(member instanceof netstructure.NetAction);
 	
 	var args = Array.prototype.slice.call(arguments, 1);
 	if(args.length !== member.args.length) {
@@ -73,7 +73,7 @@ NetObject.prototype.setAttribute = function(name, value) {
 
 	var member = this.getMember(name);
 	assert(member);
-	assert(member instanceof structure.NetAttribute);
+	assert(member instanceof netstructure.NetAttribute);
 	
 	checkArg(value, member.arg);
 
@@ -87,7 +87,7 @@ NetObject.prototype.getAttribute = function(name) {
 	
 	var member = this.getMember(name);
 	assert(member);
-	assert(member instanceof structure.NetAttribute);
+	assert(member instanceof netstructure.NetAttribute);
 	
 	return this.attributeValues[member.name];
 };
