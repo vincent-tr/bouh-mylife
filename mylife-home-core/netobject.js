@@ -21,6 +21,8 @@ function NetObject(id, clazz) {
 	}
 }
 
+util.inherits(NetObject, events.EventEmitter);
+
 NetObject.prototype.getMember = function(name) {
 	for(var i=0, l=this.clazz.members.length; i<l; i++) {
 		var member = this.clazz.members[i];
@@ -91,7 +93,5 @@ NetObject.prototype.getAttribute = function(name) {
 	
 	return this.attributeValues[member.name];
 };
-
-util.inherits(NetObject, events.EventEmitter);
 
 module.exports.NetObject = NetObject;
