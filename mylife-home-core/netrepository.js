@@ -54,7 +54,7 @@ var publishLocal = function(object, channel) {
 		}
 		
 		try {
-			object.executeAction.call(object, args);
+			object.executeAction.apply(object, args);
 		} catch(err) {
 			ircclient.notice(from, err.message);
 		}
