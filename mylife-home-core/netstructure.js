@@ -1,60 +1,43 @@
-var assert = require('assert');
-var util = require('util');
 
-function NetType() {
+function netRange(min, max) {
+	return {
+		type: "range",
+		min: min,
+		max: max
+	};
 }
 
-function NetEnum() {
-	NetType.call(this);
-	this.values = Array.prototype.slice.call(arguments, 0);
+function netEnum() {
+	return {
+		type: "enum",
+		values: Array.prototype.slice.call(arguments, 0)
+	};
 }
 
-util.inherits(NetEnum, NetType);
-
-function NetRange(min, max) {
-	NetType.call(this);
-	this.min = min;
-	this.max = max;
+function netAttribute(name, type) {
+	return {
+		name: name,
+        membertype: "attribute",
+        type: type
+	};
 }
 
-util.inherits(NetRange, NetType);
-
-function NetMember(name) {
-	this.name = name;
+function netAction(name) {
+	return {
+		name: name,
+		membertype: "action",
+		arguments: Array.prototype.slice.call(arguments, 1)
+	};
 }
 
-function NetAction(name) {
-	NetMember.call(this, name);
-	
-	this.args = Array.prototype.slice.call(arguments, 1);
-	
-	for(var i=0, l=this.args.length; i<l; i++) {
-		assert(this.args[i] instanceof NetType);
-	}
+function netClass() {
+	return {
+		members: Array.prototype.slice.call(arguments, 0)
+	};
 }
 
-util.inherits(NetAction, NetMember);
-
-function NetAttribute(name, type) {
-	NetMember.call(this, name);
-	this.arg = type;
-	assert(this.arg instanceof NetType);
-}
-
-util.inherits(NetAttribute, NetMember);
-
-function NetClass() {
-	this.members = Array.prototype.slice.call(arguments, 0);
-	
-	for(var i=0, l=this.members; i<l; i++) {
-		assert(this.members[i] instanceof NetMember);
-	}
-}
-
-module.exports.NetType = NetType;
-module.exports.NetEnum = NetEnum;
-module.exports.NetRange = NetRange;
-module.exports.NetMember = NetMember;
-module.exports.NetAction = NetAction;
-module.exports.NetAttribute = NetAttribute;
-module.exports.NetClass = NetClass;
+module.exports.netRange = netRange;
+module.exports.netEnum = netEnum;
+module.exports.netAttribute = netAttribute;
+module.exports.netAction = netAction;
+module.exports.netClass = netClass;

@@ -4,94 +4,95 @@ var util = require('util');
 
 var netstructure = require('./netstructure.js');
 
-function NetObject(id, clazz) {
-	events.EventEmitter.call(this);
+function netObject(id, clazz) {
 	
-	this.id = id;
-	this.clazz = clazz;
+	var obj = Object.create(events.EventEmitter);
+	obj.id = id;
+	obj.clazz = clazz;
 	
-	this.attributeValues = {};
+	var attributeValues = {};
+	
 	for(var i=0, l=this.clazz.members.length; i<l; i++) {
 		var member = this.clazz.members[i];
-		if(!(member instanceof netstructure.NetAttribute)) {
+		if(member.membertype !== 'attribute') {
 			continue;
 		}
 		
-		this.attributeValues[member.name] = null;
-	}
-}
-
-util.inherits(NetObject, events.EventEmitter);
-
-NetObject.prototype.getMember = function(name) {
-	for(var i=0, l=this.clazz.members.length; i<l; i++) {
-		var member = this.clazz.members[i];
-		if(member.name === name) {
-			return member;
-		}
+		attributeValues[member.name] = null;
 	}
 	
-	return null;
-};
-
-var checkArg = function(arg, type) {
-	if(type instanceof netstructure.NetRange) {
-		var val = parseInt(arg, 10);
-		if(isNaN(val) || val < type.min || val > type.max) {
-			throw new Error('invalid argument');
-		}
-	}
-
-	if(type instanceof netstructure.NetEnum) {
-		for(var i=0, l=type.values.length; i<l; i++) {
-			if(type.values[i] === arg) {
-				return;
+	obj.getMember = function(name) {
+		for(var i=0, l=this.clazz.members.length; i<l; i++) {
+			var member = this.clazz.members[i];
+			if(member.name === name) {
+				return member;
 			}
 		}
 		
-		throw new Error('invalid value');
-	}
-};
+		return null;
+	};
 
-NetObject.prototype.executeAction = function(name) {
-	
-	var member = this.getMember(name);
-	assert(member);
-	assert(member instanceof netstructure.NetAction);
-	
-	var args = Array.prototype.slice.call(arguments, 1);
-	if(args.length !== member.args.length) {
-		throw new Error('invalid arguments count');
-	}
-	for(var i=0, l=args.length; i<l; i++) {
-		checkArg(args[i], member.args[i]);
-	}
-	
-    this.emit('action#' + member.name, args);
-    this.emit('action', member.name, args);
-};
+	var checkArg = function(arg, type) {
+		if(type.type === 'range') {
+			var val = parseInt(arg, 10);
+			if(isNaN(val) || val < type.min || val > type.max) {
+				throw new Error('invalid argument');
+			}
+		}
 
-NetObject.prototype.setAttribute = function(name, value) {
+		if(type.type === 'enum') {
+			for(var i=0, l=type.values.length; i<l; i++) {
+				if(type.values[i] === arg) {
+					return;
+				}
+			}
+			
+			throw new Error('invalid value');
+		}
+	};
 
-	var member = this.getMember(name);
-	assert(member);
-	assert(member instanceof netstructure.NetAttribute);
-	
-	checkArg(value, member.arg);
+	obj.executeAction = function(name) {
+		
+		var member = this.getMember(name);
+		assert(member);
+		assert(member.membertype === 'action');
+		
+		var args = Array.prototype.slice.call(arguments, 1);
+		if(args.length !== member.args.length) {
+			throw new Error('invalid arguments count');
+		}
+		for(var i=0, l=args.length; i<l; i++) {
+			checkArg(args[i], member.args[i]);
+		}
+		
+		obj.emit('action#' + member.name, args);
+		obj.emit('action', member.name, args);
+	};
 
-	this.attributeValues[member.name] = value;
-	
-	this.emit('attribute#' + member.name, value);
-    this.emit('attribute', member.name, value);
-};
+	obj.setAttribute = function(name, value) {
 
-NetObject.prototype.getAttribute = function(name) {
-	
-	var member = this.getMember(name);
-	assert(member);
-	assert(member instanceof netstructure.NetAttribute);
-	
-	return this.attributeValues[member.name];
-};
+		var member = this.getMember(name);
+		assert(member);
+		assert(member.membertype === 'attribute');
+		
+		checkArg(value, member.arg);
 
-module.exports.NetObject = NetObject;
+		attributeValues[member.name] = value;
+		
+		obj.emit('attribute#' + member.name, value);
+		obj.emit('attribute', member.name, value);
+	};
+
+	obj.getAttribute = function(name) {
+		
+		var member = this.getMember(name);
+		assert(member);
+		assert(member.membertype === 'attribute');
+		
+		return attributeValues[member.name];
+	};
+	
+	return obj;
+}
+
+module.exports.netObject = netObject;
