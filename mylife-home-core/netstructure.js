@@ -44,7 +44,7 @@ function NetAttribute(name, type) {
 util.inherits(NetAttribute, NetMember);
 
 function NetClass() {
-	this.members = Array.prototype.slice.call(arguments, 1);
+	this.members = Array.prototype.slice.call(arguments, 0);
 	
 	for(var i=0, l=this.members; i<l; i++) {
 		assert(this.members[i] instanceof NetMember);
