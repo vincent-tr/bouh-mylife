@@ -31,6 +31,6 @@
         "sourceAttribute": "output",
         "destinationComponent": "test-light",
         "destinationAction" : "input"
-}
+	}
 	]
 }
