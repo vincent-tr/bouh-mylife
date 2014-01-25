@@ -3,6 +3,35 @@
 		"server": "rpi-devel"
 	},
 	"hardware": [
+	{
+        "id": "dev-test-component",
+        "class": {
+            "members": [
+                {
+                    "index": 0,
+                    "name": "attribute",
+                    "membertype": "attribute",
+                    "type": {
+                        "type": "range",
+                        "min": 0,
+                        "max": 100
+                    }
+                },
+                {
+                    "index": 1,
+                    "name": "action",
+                    "membertype": "action",
+                    "arguments": [
+                        {
+                            "type": "range",
+                            "min": 0,
+                            "max": 100
+                        }
+                    ]
+                }
+            ]
+        }
+    }
 	],
 	"components": [
 	{
