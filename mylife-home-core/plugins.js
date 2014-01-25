@@ -17,7 +17,7 @@ var loadPlugin = function(name) {
 			plugin : plugin,
 			clazz : clazz,
 			ui : plugin.ui,
-			create: plugin.create
+			create : plugin.create
 		};
 		pluginTypes[name] = pluginType;
 	}
@@ -32,30 +32,27 @@ var create = function(config) {
 	var pluginType = loadPlugin(type);
 
 	var object = netobject.netObject(id, pluginType.clazz);
-	
+
 	var context = {
 		object : object,
 		parameters : config.parameters
 	};
 
 	var pluginInstance = pluginType.create(context);
-	
-	var channels = ['#mylife-home-core'];
-	if(pluginType.ui) {
+
+	var channels = [ '#mylife-home-core' ];
+	if (pluginType.ui) {
 		channels.push('#mylife-home-ui');
 	}
-	
+
 	var netContainer = netobject.publish(object, channels, true);
 
-	var container = {
+	return {
 		id : id,
 		pluginType : pluginType,
 		pluginInstance : pluginInstance,
-		netContainer: netContainer
+		netContainer : netContainer
 	};
-
-	pluginContainers[id] = container;
-	return container;
 };
 
 var destroy = function(container) {
@@ -63,7 +60,7 @@ var destroy = function(container) {
 	if (typeof (destroy) === 'function') {
 		destroy();
 	}
-	
+
 	netobject.unpublish(container.netContainer);
 };
 
@@ -72,6 +69,7 @@ var initialize = function() {
 	for (var i = 0, l = components.length; i < l; i++) {
 		var component = components[i];
 		var container = create(component);
+		pluginContainers[container.id] = container;
 	}
 };
 

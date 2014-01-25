@@ -2,11 +2,35 @@
 	"irc": {
 		"server": "rpi-devel"
 	},
+	"hardware": [
+	],
 	"components": [
-	               {
-	            	   "id": "test",
-	            	   "type": "button",
-	            	   "parameters": { "name": "value" }
-	               }
+	{
+		"id": "test-button",
+		"type": "button"
+	},
+	{
+		"id": "test-light",
+		"type": "light"
+	},
+	{
+		"id": "test-stepRelay",
+		"type": "stepRelay",
+		"parameters": { "name": "value" }
+	}
+	],
+	"links": [
+	{
+		"sourceComponent": "test-button",
+		"sourceAttribute": "output",
+		"destinationComponent": "test-stepRelay",
+		"destinationAction" : "input"
+	},
+	{
+        "sourceComponent": "test-stepRelay",
+        "sourceAttribute": "output",
+        "destinationComponent": "test-light",
+        "destinationAction" : "input"
+}
 	]
 }
