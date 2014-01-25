@@ -36,7 +36,7 @@ var initialize = function() {
 
 var terminate = function() {
 	for (var i = 0, l = links.length; i < l; i++) {
-		var link = links;
+		var link = links[i];
 		link.destroy();
 	}
 	links.length = 0;
