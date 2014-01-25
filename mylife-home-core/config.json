@@ -1,5 +1,12 @@
 {
 	"irc": {
 		"server": "rpi-devel"
-	}
+	},
+	"components": [
+	               {
+	            	   "id": "test",
+	            	   "type": "button",
+	            	   "parameters": { "name": "value" }
+	               }
+	]
 }
