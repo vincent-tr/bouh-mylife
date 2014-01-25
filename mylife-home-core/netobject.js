@@ -212,15 +212,23 @@ var publishLocal = function(object, channels) {
 	};
 };
 
+var netRepository = {};
+
 var publish = function(object, channels, local) {
+	var container;
+	
 	if (local) {
-		return publishLocal(object, channels);
+		container = publishLocal(object, channels);
 	} else {
 		throw new Error('not implemented');
 	}
+	
+	netRepository[container.object.id] = container;
+	return container;
 };
 
 var unpublish = function(container) {
+	delete netRepository[container.object.id];
 	container.destroy();
 };
 
@@ -232,3 +240,4 @@ module.exports.netClass = netClass;
 module.exports.netObject = netObject;
 module.exports.publish = publish;
 module.exports.unpublish = unpublish;
+module.exports.netRepository = netRepository;
