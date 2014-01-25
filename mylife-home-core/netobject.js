@@ -1,6 +1,7 @@
 var assert = require('assert');
 var events = require('events');
 var util = require('util');
+var os = require("os");
 
 var irc = require('irc');
 
@@ -212,6 +213,37 @@ var publishLocal = function(object, channels) {
 	};
 };
 
+var watcher;
+
+var loadWatcher = function() {
+	if(watcher !== null) {
+		return watcher;
+	}
+	
+	var nick = os.hostname() + '-' + process.pid;
+	var ircconf = JSON.parse(JSON.stringify(config.irc));
+	ircconf.channels = [];
+	var ircclient = new irc.Client(ircconf.server, nick, ircconf);
+	
+	var addRef = function(channel) {
+		
+	};
+	
+	var removeRef = function(channel) {
+		
+	};
+	
+	// TODO
+	watcher = {
+	};
+	
+	return watcher;
+};
+
+var publishRemote = function(object, channels) {
+	
+};
+
 var netRepository = {};
 
 var publish = function(object, channels, local) {
@@ -220,7 +252,7 @@ var publish = function(object, channels, local) {
 	if (local) {
 		container = publishLocal(object, channels);
 	} else {
-		throw new Error('not implemented');
+		container = publishRemote(object, channels);
 	}
 	
 	netRepository[container.object.id] = container;
