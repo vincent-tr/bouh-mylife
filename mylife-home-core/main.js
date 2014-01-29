@@ -13,12 +13,12 @@ var port = config.http.port;
 
 var app = express();
 app.set('port', port);
-//app.use(express.favicon());
+app.use(express.favicon(path.join(__dirname, 'public/images/MyLife.ico')));
 //app.use(express.logger('dev'));
 //app.use(express.bodyParser());
 //app.use(express.methodOverride());
 app.use(app.router);
-//app.use(express.static(path.join(__dirname, 'public')));
+app.use('/static', express.static(path.join(__dirname, 'public')));
 app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
 
 app.get('/api', function(req, res) {
