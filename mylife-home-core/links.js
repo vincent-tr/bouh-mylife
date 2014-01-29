@@ -1,9 +1,18 @@
 var netobject = require('./netobject.js');
-var config = require('./config.json');
+//var config = require('./config.json');
 
-var links = [];
+var links = {};
+
+var makeId = function(config) {
+	return config.sourceComponent + '|' + config.sourceAttribute + '|' + config.destinationComponent + '|' + config.destinationAction;
+};
 
 var create = function(config) {
+	
+	var id = makeId(config);
+	if(links[id] !== undefined) {
+		throw new Error('link already exists');
+	}
 	
 	var sourceComponent = netobject.netRepository[config.sourceComponent].object;
 	var destinationComponent = netobject.netRepository[config.destinationComponent].object;
@@ -18,29 +27,28 @@ var create = function(config) {
 	
 	sourceComponent.on(eventName, eventHandler);
 	
-	return {
+	var link = {
+		id: id,
 		destroy: function() {
 			sourceComponent.removeListener(eventName, eventHandler);
 		}
 	};
+	
+	links[link.id] = link;
+	return link;
 };
 
-var initialize = function() {
-	var linksConfig = config.links;
-	for (var i = 0, l = linksConfig.length; i < l; i++) {
-		var linkConfig = linksConfig[i];
-		var link = create(linkConfig);
-		links.push(link);
+var destroy = function(config) {
+	var id = makeId(config);
+	var link = links[id];
+	if(link === undefined) {
+		return false;
 	}
+	
+	link.destroy();
+	delete links[id];
+	return true;
 };
 
-var terminate = function() {
-	for (var i = 0, l = links.length; i < l; i++) {
-		var link = links[i];
-		link.destroy();
-	}
-	links.length = 0;
-};
-
-module.exports.initialize = initialize;
-module.exports.terminate = terminate;
+module.exports.create = create;
+module.exports.destroy = destroy;

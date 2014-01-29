@@ -1,5 +1,5 @@
 var netobject = require('./netobject.js');
-var config = require('./config.json');
+//var config = require('./config.json');
 
 var api = {
 	netobject : netobject,
@@ -28,6 +28,11 @@ var loadPlugin = function(name) {
 var create = function(config) {
 
 	var id = config.id;
+	
+	if(pluginContainers[id] !== undefined) {
+		throw new Error('container already exists');
+	}
+	
 	var type = config.type;
 	var pluginType = loadPlugin(type);
 
@@ -47,42 +52,32 @@ var create = function(config) {
 
 	var netContainer = netobject.publish(object, channels, true);
 
-	return {
+	var container = {
 		id : id,
 		pluginType : pluginType,
 		pluginInstance : pluginInstance,
 		netContainer : netContainer
 	};
+	
+	pluginContainers[container.id] = container;
+	return container;
 };
 
-var destroy = function(container) {
+var destroy = function(id) {
+	var container = pluginContainers[id];
+	if(container === undefined) {
+		return false;
+	}
+	
 	var destroy = container.destroy();
 	if (typeof (destroy) === 'function') {
 		destroy();
 	}
 
 	netobject.unpublish(container.netContainer);
+	delete pluginContainers[id];
+	return true;
 };
 
-var initialize = function() {
-	var components = config.components;
-	for (var i = 0, l = components.length; i < l; i++) {
-		var component = components[i];
-		var container = create(component);
-		pluginContainers[container.id] = container;
-	}
-};
-
-var terminate = function() {
-	for ( var id in pluginContainers) {
-		if (pluginContainers.hasOwnProperty(id)) {
-
-			var container = pluginContainers[id];
-			delete pluginContainers[id];
-			destroy(container);
-		}
-	}
-};
-
-module.exports.initialize = initialize;
-module.exports.terminate = terminate;
+module.exports.create = create;
+module.exports.destroy = destroy;
