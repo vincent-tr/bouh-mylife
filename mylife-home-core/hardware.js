@@ -1,5 +1,4 @@
 var netobject = require('./netobject.js');
-var config = require('./config.json');
 
 var hardware = {};
 
