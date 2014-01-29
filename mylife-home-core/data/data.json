@@ -1,5 +1,62 @@
 {
-	"hardware": {},
-	"plugins": {},
-	"links": {}
+	"hardware": {
+		"dev-test-component" : {
+			"id": "dev-test-component",
+			"class": {
+				"members": [
+					{
+						"index": 0,
+						"name": "attribute",
+						"membertype": "attribute",
+						"type": {
+							"type": "range",
+							"min": 0,
+							"max": 100
+						}
+					},
+					{
+						"index": 1,
+						"name": "action",
+						"membertype": "action",
+						"arguments": [
+							{
+								"type": "range",
+								"min": 0,
+								"max": 100
+							}
+						]
+					}
+				]
+			}
+		}
+	},
+	"plugins": {
+		"test-button": {
+			"id": "test-button",
+			"type": "button"
+		},
+		"test-light": {
+			"id": "test-light",
+			"type": "light"
+		},
+		"test-stepRelay": {
+			"id": "test-stepRelay",
+			"type": "stepRelay",
+			"parameters": { "name": "value" }
+		}
+	},
+	"links": {
+		"test-button|output|test-stepRelay|input": {
+			"sourceComponent": "test-button",
+			"sourceAttribute": "output",
+			"destinationComponent": "test-stepRelay",
+			"destinationAction" : "input"
+		},
+		"test-stepRelay|output|test-light|input": {
+			"sourceComponent": "test-stepRelay",
+			"sourceAttribute": "output",
+			"destinationComponent": "test-light",
+			"destinationAction" : "input"
+		}
+	}
 }
