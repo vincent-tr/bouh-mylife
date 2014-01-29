@@ -2,6 +2,12 @@
 	"irc": {
 		"server": "rpi-devel"
 	},
+	"data": {
+		"directory": "data"
+	},
+	"http": {
+		"port": 8888
+	},
 	"hardware": [
 	{
         "id": "dev-test-component",

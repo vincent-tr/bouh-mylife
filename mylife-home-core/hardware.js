@@ -15,6 +15,7 @@ var create = function(config) {
 
 	var item = {
 		id : id,
+		config: config,
 		clazz : clazz,
 		object : object,
 		container : container,
@@ -34,9 +35,14 @@ var destroy = function(id) {
 	}
 	
 	item.destroy();
-	delete hardware[id]
+	delete hardware[id];
 	return true;
+};
+
+var list = function() {
+	return hardware;
 };
 
 module.exports.create = create;
 module.exports.destroy = destroy;
+module.exports.list = list;

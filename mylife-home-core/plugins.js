@@ -53,6 +53,7 @@ var create = function(config) {
 
 	var container = {
 		id : id,
+		config: config,
 		pluginType : pluginType,
 		pluginInstance : pluginInstance,
 		netContainer : netContainer
@@ -78,5 +79,10 @@ var destroy = function(id) {
 	return true;
 };
 
+var list = function() {
+	return pluginContainers;
+};
+
 module.exports.create = create;
 module.exports.destroy = destroy;
+module.exports.list = list;
