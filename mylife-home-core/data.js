@@ -4,6 +4,7 @@ var path = require('path');
 var config = require('./config.json');
 
 var data;
+var uiData;
 
 var loadData = function() {
 	var filename = path.join(config.data.directory, 'data.json');
@@ -18,8 +19,26 @@ var saveData = function() {
 };
 
 var checkData = function() {
-	if(data === null) {
+	if(!data) {
 		loadData();
+	}
+};
+
+var loadUiData = function() {
+	var filename = path.join(config.data.directory, 'ui.json');
+	var content = fs.readFileSync(filename);
+	uiData = JSON.parse(content);
+};
+
+var saveUiData = function() {
+	var filename = path.join(config.data.directory, 'ui.json');
+	var content = JSON.stringify(uiData);
+	fs.writeFileSync(filename, content);
+};
+
+var checkUiData = function() {
+	if(uiData === null) {
+		loadUiData();
 	}
 };
 
@@ -74,6 +93,16 @@ var removeLink = function(id) {
 	saveData();
 };
 
+var getUi = function() {
+	checkUiData();
+	return uiData;
+};
+
+var setUi = function(data) {
+	uiData = data;
+	saveUiData();
+};
+
 module.exports.getPlugins = getPlugins;
 module.exports.addPlugin = addPlugin;
 module.exports.removePlugin = removePlugin;
@@ -83,3 +112,5 @@ module.exports.removeHardware = removeHardware;
 module.exports.getLinks = getLinks;
 module.exports.addLink = addLink;
 module.exports.removeLink = removeLink;
+module.exports.getUi = getUi;
+module.exports.setUi = setUi;

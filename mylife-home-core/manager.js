@@ -1,6 +1,7 @@
 var assert = require('assert');
 var events = require('events');
 var util = require('util');
+var console = require('console');
 
 var plugins = require('./plugins.js');
 var hardware = require('./hardware.js');
@@ -75,6 +76,9 @@ var getPlugins = function() {
 var addPlugin = function(config) {
 	var plugin = plugins.create(config);
 	data.addPlugin(plugin.id, config);
+	
+	console.info('plugin %s created', plugin.id);
+	
 	return plugin.id;
 };
 	
@@ -87,6 +91,8 @@ var removePlugin = function(id) {
 	}
 	
 	data.removePlugin(id);
+
+	console.info('plugin %s destroyed', id);
 };
 
 var getHardware = function() {
@@ -96,6 +102,9 @@ var getHardware = function() {
 var addHardware = function(config) {
 	var hw = hardware.create(config);
 	data.addHardware(hw.id, config);
+
+	console.info('hardware %s created', hw.id);
+	
 	return hw.id;
 };
 
@@ -108,6 +117,8 @@ var removeHardware = function(id) {
 	}
 	
 	data.removeHardware(id);
+
+	console.info('hardware %s destroyed', id);
 };
 
 var getLinks = function() {
@@ -117,6 +128,9 @@ var getLinks = function() {
 var addLink = function(config) {
 	var link = links.create(config);
 	data.addLink(link.id, config);
+
+	console.info('link %s created', link.id);
+	
 	return link.id;
 };
 
@@ -126,6 +140,8 @@ var removeLink = function(id) {
 	}
 	
 	data.removeLink(id);
+	
+	console.info('link %s destroyed', id);
 };
 
 module.exports.initialize = initialize;
@@ -139,3 +155,5 @@ module.exports.removeHardware = removeHardware;
 module.exports.getLinks = getLinks;
 module.exports.addLink = addLink;
 module.exports.removeLink = removeLink;
+module.exports.getUiData = data.getUi;
+module.exports.setUiData = data.setUi;
