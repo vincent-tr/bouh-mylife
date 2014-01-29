@@ -241,7 +241,7 @@ var loadWatcher = function() {
 };
 
 var publishRemote = function(object, channels) {
-	
+	// TODO : declencher event 'connected' et 'disconnected' pour object distant
 };
 
 var netRepository = {};
