@@ -1,7 +1,6 @@
 var assert = require('assert');
 var events = require('events');
 var util = require('util');
-var console = require('console');
 
 var plugins = require('./plugins.js');
 var hardware = require('./hardware.js');
