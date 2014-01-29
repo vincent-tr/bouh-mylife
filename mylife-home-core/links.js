@@ -28,6 +28,7 @@ var create = function(config) {
 	
 	var link = {
 		id: id,
+		config: config,
 		destroy: function() {
 			sourceComponent.removeListener(eventName, eventHandler);
 		}
@@ -37,8 +38,8 @@ var create = function(config) {
 	return link;
 };
 
-var destroy = function(config) {
-	var id = makeId(config);
+var destroy = function(id) {
+	//var id = makeId(config);
 	var link = links[id];
 	if(link === undefined) {
 		return false;
@@ -49,5 +50,10 @@ var destroy = function(config) {
 	return true;
 };
 
+var list = function() {
+	return links;
+};
+
 module.exports.create = create;
 module.exports.destroy = destroy;
+module.exports.list = list;
