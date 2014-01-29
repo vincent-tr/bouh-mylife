@@ -18,13 +18,15 @@ var create = function(config) {
 	
 	var eventName = 'attribute#' + config.sourceAttribute;
 	
-	var eventHandler = function() {
-		var args = Array.prototype.slice.call(arguments, 0);
-		args.unshift(config.destinationAction);
-		destinationComponent.executeAction.apply(destinationComponent, args);
+	var eventHandler = function(value) {
+		if(value === undefined) {
+			value = sourceComponent.getAttribute(config.sourceAttribute);
+		}
+		destinationComponent.executeAction.apply(destinationComponent,  [value]);
 	};
 	
 	sourceComponent.on(eventName, eventHandler);
+	sourceComponent.on('connected', eventHandler);
 	
 	var link = {
 		id: id,
