@@ -1,15 +1,20 @@
 var netobject = require('./netobject.js');
 var config = require('./config.json');
 
-var hardware = [];
+var hardware = {};
 
 var create = function(config) {
 	var id = config.id;
+	
+	if(hardware[id] !== undefined) {
+		throw new Error('hardware already exists');
+	}
+	
 	var clazz = config.class;
 	var object = netobject.netObject(id, clazz);
 	var container = netobject.publish(object, [ '#mylife-home-hardware' ], false);
 
-	return {
+	var item = {
 		id : id,
 		clazz : clazz,
 		object : object,
@@ -18,24 +23,21 @@ var create = function(config) {
 			netobject.unpublish(container);
 		}
 	};
+	
+	hardware[id] = item;
+	return item;
 };
 
-var initialize = function() {
-	var hardwareConfig = config.hardware;
-	for (var i = 0, l = hardwareConfig.length; i < l; i++) {
-		var configItem = hardwareConfig[i];
-		var container = create(configItem);
-		hardware.push(container);
+var destroy = function(id) {
+	var item = hardware[id];
+	if(item === undefined) {
+		return false;
 	}
+	
+	item.destroy();
+	delete hardware[id]
+	return true;
 };
 
-var terminate = function() {
-	for (var i = 0, l = hardware.length; i < l; i++) {
-		var item = hardware[i];
-		item.destroy();
-	}
-	hardware.length = 0;
-};
-
-module.exports.initialize = initialize;
-module.exports.terminate = terminate;
+module.exports.create = create;
+module.exports.destroy = destroy;
