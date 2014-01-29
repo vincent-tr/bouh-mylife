@@ -22,7 +22,7 @@ var create = function(config) {
 		if(value === undefined) {
 			value = sourceComponent.getAttribute(config.sourceAttribute);
 		}
-		destinationComponent.executeAction.apply(destinationComponent,  [value]);
+		destinationComponent.executeAction.apply(destinationComponent, [config.destinationAction, value]);
 	};
 	
 	sourceComponent.on(eventName, eventHandler);
