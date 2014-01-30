@@ -1,27 +1,45 @@
+var fs = require('fs');
+var path = require('path');
+
 var netobject = require('./netobject.js');
 
 var api = {
 	netobject : netobject,
 };
 
-var pluginTypes = {};
+var pluginTypes;
 var pluginContainers = {};
 
-var loadPlugin = function(name) {
-	var pluginType = pluginTypes[name];
-	if (pluginType === undefined) {
-		var plugin = require('./plugins/' + name + '.js');
-		var clazz = plugin.init(api);
-		pluginType = {
+var loadPluginTypes = function() {
+	var plugins = {};
+	var directory = path.join(__dirname, 'plugins');
+	var files = fs.readdirSync(directory);
+	for(var i=0, l=files.length; i<l; i++) {
+		var file = path.join(directory, files[i]);
+		if(path.extname(file) !== '.js') {
+			continue;
+		}
+		
+		var name = path.basename(file, path.extname(file));
+		var plugin = require(file);
+		var initData = plugin.init(api);
+		var pluginType = {
 			plugin : plugin,
-			clazz : clazz,
+			clazz : initData.clazz,
+			displayName : initData.displayName,
+			arguments : initData.arguments,
 			ui : plugin.ui,
 			create : plugin.create
 		};
-		pluginTypes[name] = pluginType;
+		plugins[name] = pluginType;
 	}
+	return plugins;
+};
 
-	return pluginType;
+var checkPluginTypes = function() {
+	if(!pluginTypes) {
+		pluginTypes = loadPluginTypes();
+	}
 };
 
 var create = function(config) {
@@ -33,7 +51,8 @@ var create = function(config) {
 	}
 	
 	var type = config.type;
-	var pluginType = loadPlugin(type);
+	checkPluginTypes();
+	var pluginType = pluginTypes[type];
 
 	var object = netobject.netObject(id, pluginType.clazz);
 
@@ -83,6 +102,12 @@ var list = function() {
 	return pluginContainers;
 };
 
+var types = function() {
+	checkPluginTypes();
+	return pluginTypes;
+};
+
 module.exports.create = create;
 module.exports.destroy = destroy;
 module.exports.list = list;
+module.exports.types = types;

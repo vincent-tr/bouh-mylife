@@ -46,6 +46,11 @@ var create = function(port) {
 		}
 	});
 	
+	app.get('/api/pluginTypes', function(req, res) {
+		res.setHeader('Content-Type', 'application/json');
+		res.send(manager.getPluginTypes());
+	});
+	
 	app.get('/api/hardware', function(req, res) {
 		res.setHeader('Content-Type', 'application/json');
 		res.send(manager.getHardware());
