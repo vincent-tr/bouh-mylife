@@ -4,14 +4,22 @@ var express = require('express');
 
 var manager = require('./manager.js');
 
+var errorToObject = function(err) {
+	var plainObject = {};
+	Object.getOwnPropertyNames(err).forEach(function(key) {
+		plainObject[key] = err[key];
+	});
+	return JSON.stringify(plainObject);
+};
+
 var create = function(port) {
 	
 	var app = express();
 	app.set('port', port);
 	app.use(express.favicon(path.join(__dirname, 'public/images/MyLife.ico')));
-	//app.use(express.logger('dev'));
-	//app.use(express.bodyParser());
-	//app.use(express.methodOverride());
+	// app.use(express.logger('dev'));
+	app.use(express.bodyParser());
+	// app.use(express.methodOverride());
 	app.use(app.router);
 	app.use('/static', express.static(path.join(__dirname, 'public')));
 	app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
@@ -21,101 +29,96 @@ var create = function(port) {
 	});
 	
 	app.get('/api/plugins', function(req, res) {
-		res.setHeader('Content-Type', 'application/json');
-		res.send(manager.getPlugins());
+		res.json(manager.getPlugins());
 	});
 	
 	app.post('/api/plugins', function(req, res) {
-		res.setHeader('Content-Type', 'application/json');
 		try {
 			var config = req.body;
 			var id = manager.addPlugin(config);
-			res.send(id);
+			res.json(id);
 		}catch(err) {
-			res.send(err, 500);
+			console.error(err);
+			res.json(500, errorToObject(err));
 		}
 	});
 	
 	app['delete']('/api/plugins/:id', function(req, res) {
-		res.setHeader('Content-Type', 'application/json');
 		try {
 			manager.removePlugin(req.params.id);
-			res.send({});
+			res.json({});
 		}catch(err) {
-			res.send(err, 500);
+			console.error(err);
+			res.json(500, errorToObject(err));
 		}
 	});
 	
 	app.get('/api/pluginTypes', function(req, res) {
-		res.setHeader('Content-Type', 'application/json');
-		res.send(manager.getPluginTypes());
+		res.json(manager.getPluginTypes());
 	});
 	
 	app.get('/api/hardware', function(req, res) {
-		res.setHeader('Content-Type', 'application/json');
-		res.send(manager.getHardware());
+		res.json(manager.getHardware());
 	});
 	
 	app.post('/api/hardware', function(req, res) {
-		res.setHeader('Content-Type', 'application/json');
 		try {
 			var config = req.body;
 			var id = manager.addHardware(config);
-			res.send(id);
+			res.json(id);
 		}catch(err) {
-			res.send(err, 500);
+			console.error(err);
+			res.json(500, errorToObject(err));
 		}
 	});
 	
 	app['delete']('/api/hardware/:id', function(req, res) {
-		res.setHeader('Content-Type', 'application/json');
 		try {
 			manager.removeHardware(req.params.id);
-			res.send({});
+			res.json({});
 		}catch(err) {
-			res.send(err, 500);
+			console.error(err);
+			res.json(500, errorToObject(err));
 		}
 	});
 	
 	app.get('/api/links', function(req, res) {
-		res.setHeader('Content-Type', 'application/json');
-		res.send(manager.getLinks());
+		res.json(manager.getLinks());
 	});
 	
 	app.post('/api/links', function(req, res) {
-		res.setHeader('Content-Type', 'application/json');
 		try {
 			var config = req.body;
 			var id = manager.addLinks(config);
-			res.send(id);
+			res.json(id);
 		}catch(err) {
-			res.send(err, 500);
+			console.error(err);
+			res.json(500, errorToObject(err));
 		}
 	});
 	
 	app['delete']('/api/links/:id', function(req, res) {
-		res.setHeader('Content-Type', 'application/json');
 		try {
 			manager.removeLinks(req.params.id);
-			res.send({});
+			res.json({});
 		}catch(err) {
-			res.send(err, 500);
+			console.error(err);
+			res.json(500, errorToObject(err));
 		}
 	});
 	
 	app.get('/api/ui', function(req, res) {
-		res.setHeader('Content-Type', 'application/json');
-		res.send(manager.getUiData());
+		res.json(manager.getUiData());
 	});
 	
 	app.post('/api/ui', function(req, res) {
-		res.setHeader('Content-Type', 'application/json');
 		try {
 			var data = req.body;
 			manager.setUiData(data);
-			res.send({});
+			res.json({});
 		}catch(err) {
-			res.send(err, 500);
+			console.error(err);
+			res.json(500, errorToObject(err));
 		}
 	});
 	

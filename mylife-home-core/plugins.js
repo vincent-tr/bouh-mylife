@@ -88,7 +88,7 @@ var destroy = function(id) {
 		return false;
 	}
 	
-	var destroy = container.destroy();
+	var destroy = container.pluginInstance.destroy;
 	if (typeof (destroy) === 'function') {
 		destroy();
 	}
