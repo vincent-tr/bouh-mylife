@@ -27,7 +27,9 @@ var create = function(port) {
 	app.use('/static', express.static(path.join(__dirname, 'public')));
 	app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
 	
-	// todo : redirect / => /static/index.html
+	app.get('/', function(req, res) {
+		res.redirect('/static/index.html');
+	});
 	
 	api.use('/core*', function(req, res) {
 		var url = coreUrl + req.url;
