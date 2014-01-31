@@ -34,8 +34,8 @@ var create = function(port) {
 		res.redirect('/static/index.html');
 	});
 	
-	app.all(/^\/(.+)/, function(req, res) {
-		var url = coreUrl + req.params.target;
+	app.all(/^\/core\/(.+)/, function(req, res) {
+		var url = coreUrl + req.params[0];
 		req.pipe(request(url)).pipe(res);
 	});
 	
