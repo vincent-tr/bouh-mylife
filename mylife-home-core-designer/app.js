@@ -16,6 +16,9 @@ var errorToObject = function(err) {
 var create = function(port) {
 	
 	var coreUrl = config.core.url;
+	if (coreUrl.substr(-1) != '/') {
+		coreUrl += '/';
+	}
 	
 	var app = express();
 	app.set('port', port);
@@ -31,8 +34,8 @@ var create = function(port) {
 		res.redirect('/static/index.html');
 	});
 	
-	app.use(/core/toto, function(req, res) {
-		var url = coreUrl + req.url;
+	app.all(/^\/(.+)/, function(req, res) {
+		var url = coreUrl + req.params.target;
 		req.pipe(request(url)).pipe(res);
 	});
 	
