@@ -98,6 +98,10 @@ var getPluginTypes = function() {
 	return plugins.types();
 };
 
+var addPluginType = function(name, content) {
+	plugins.register(name, content);
+};
+
 var getHardware = function() {
 	return hardware.list();
 };
@@ -153,6 +157,7 @@ module.exports.getPlugins = getPlugins;
 module.exports.addPlugin = addPlugin;
 module.exports.removePlugin = removePlugin;
 module.exports.getPluginTypes = getPluginTypes;
+module.exports.addPluginType = addPluginType;
 module.exports.getHardware = getHardware;
 module.exports.addHardware = addHardware;
 module.exports.removeHardware = removeHardware;

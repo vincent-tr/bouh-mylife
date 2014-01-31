@@ -57,6 +57,17 @@ var create = function(port) {
 		res.json(manager.getPluginTypes());
 	});
 	
+	app.post('/api/pluginTypes', function(req, res) {
+		try {
+			var type = req.body;
+			manager.addPluginType(type.name, type.content);
+			res.json({});
+		}catch(err) {
+			console.error(err);
+			res.json(500, errorToObject(err));
+		}
+	});
+	
 	app.get('/api/hardware', function(req, res) {
 		res.json(manager.getHardware());
 	});
