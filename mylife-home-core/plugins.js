@@ -10,8 +10,7 @@ var api = {
 var pluginTypes;
 var pluginContainers = {};
 
-var loadPluginTypes = function() {
-	var plugins = {};
+var refreshPluginTypes = function() {
 	var directory = path.join(__dirname, 'plugins');
 	var files = fs.readdirSync(directory);
 	for(var i=0, l=files.length; i<l; i++) {
@@ -21,24 +20,30 @@ var loadPluginTypes = function() {
 		}
 		
 		var name = path.basename(file, path.extname(file));
+		if(pluginTypes[name]) {
+			// already exists
+			continue;
+		}
+		
 		var plugin = require(file);
 		var initData = plugin.init(api);
 		var pluginType = {
 			plugin : plugin,
 			clazz : initData.clazz,
 			displayName : initData.displayName,
+			imageUrl : initData.imageUrl,
 			arguments : initData.arguments,
 			ui : plugin.ui,
 			create : plugin.create
 		};
-		plugins[name] = pluginType;
+		pluginTypes[name] = pluginType;
 	}
-	return plugins;
 };
 
 var checkPluginTypes = function() {
 	if(!pluginTypes) {
-		pluginTypes = loadPluginTypes();
+		var plugins = {};
+		refreshPluginTypes();
 	}
 };
 
@@ -107,7 +112,22 @@ var types = function() {
 	return pluginTypes;
 };
 
+var register = function(name, content) {
+	checkPluginTypes();
+	
+	// check if exists
+	if(pluginTypes[name]) {
+		throw new Error('A plugin with same name already exists');
+	}
+	
+	var filename = path.join(__dirname, 'plugins', name + '.js');
+	fs.writeFileSync(filename, content);
+	
+	refreshPluginTypes();
+};
+
 module.exports.create = create;
 module.exports.destroy = destroy;
 module.exports.list = list;
 module.exports.types = types;
+module.exports.register = register;
