@@ -1,15 +1,9 @@
 var http = require('http');
 
 var config = require('./config.json');
-var manager = require('./manager.js');
 var app = require('./app.js');
 
 var port = config.http.port;
-
-manager.initialize();
-process.on('exit', function() {
-	manager.terminate();
-});
 
 var server = http.createServer(app.create(port));
 server.listen(port, function() {
