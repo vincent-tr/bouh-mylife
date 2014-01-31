@@ -42,7 +42,7 @@ var refreshPluginTypes = function() {
 
 var checkPluginTypes = function() {
 	if(!pluginTypes) {
-		var plugins = {};
+		pluginTypes = {};
 		refreshPluginTypes();
 	}
 };
