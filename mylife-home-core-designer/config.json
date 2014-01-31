@@ -1,0 +1,8 @@
+{
+	"http": {
+		"port": 8889
+	},
+	"core": {
+		"url": "http://localhost:8888",
+	}
+}
