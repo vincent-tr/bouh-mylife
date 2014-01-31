@@ -31,7 +31,7 @@ var create = function(port) {
 		res.redirect('/static/index.html');
 	});
 	
-	api.use('/core*', function(req, res) {
+	app.use(/core/toto, function(req, res) {
 		var url = coreUrl + req.url;
 		req.pipe(request(url)).pipe(res);
 	});
