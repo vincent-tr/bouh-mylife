@@ -13,21 +13,22 @@ var pluginContainers = {};
 var refreshPluginTypes = function() {
 	var directory = path.join(__dirname, 'plugins');
 	var files = fs.readdirSync(directory);
-	for(var i=0, l=files.length; i<l; i++) {
+	for (var i = 0, l = files.length; i < l; i++) {
 		var file = path.join(directory, files[i]);
-		if(path.extname(file) !== '.js') {
+		if (path.extname(file) !== '.js') {
 			continue;
 		}
-		
+
 		var name = path.basename(file, path.extname(file));
-		if(pluginTypes[name]) {
+		if (pluginTypes[name]) {
 			// already exists
 			continue;
 		}
-		
+
 		var plugin = require(file);
 		var initData = plugin.init(api);
 		var pluginType = {
+			id : name,
 			plugin : plugin,
 			clazz : initData.clazz,
 			displayName : initData.displayName,
@@ -41,7 +42,7 @@ var refreshPluginTypes = function() {
 };
 
 var checkPluginTypes = function() {
-	if(!pluginTypes) {
+	if (!pluginTypes) {
 		pluginTypes = {};
 		refreshPluginTypes();
 	}
@@ -50,11 +51,11 @@ var checkPluginTypes = function() {
 var create = function(config) {
 
 	var id = config.id;
-	
-	if(pluginContainers[id] !== undefined) {
+
+	if (pluginContainers[id] !== undefined) {
 		throw new Error('container already exists');
 	}
-	
+
 	var type = config.type;
 	checkPluginTypes();
 	var pluginType = pluginTypes[type];
@@ -77,22 +78,23 @@ var create = function(config) {
 
 	var container = {
 		id : id,
-		config: config,
+		typeId : pluginType.id,
+		config : config,
 		pluginType : pluginType,
 		pluginInstance : pluginInstance,
 		netContainer : netContainer
 	};
-	
+
 	pluginContainers[container.id] = container;
 	return container;
 };
 
 var destroy = function(id) {
 	var container = pluginContainers[id];
-	if(container === undefined) {
+	if (container === undefined) {
 		return false;
 	}
-	
+
 	var destroy = container.pluginInstance.destroy;
 	if (typeof (destroy) === 'function') {
 		destroy();
@@ -114,15 +116,15 @@ var types = function() {
 
 var register = function(name, content) {
 	checkPluginTypes();
-	
+
 	// check if exists
-	if(pluginTypes[name]) {
+	if (pluginTypes[name]) {
 		throw new Error('A plugin with same name already exists');
 	}
-	
+
 	var filename = path.join(__dirname, 'plugins', name + '.js');
 	fs.writeFileSync(filename, content);
-	
+
 	refreshPluginTypes();
 };
 
