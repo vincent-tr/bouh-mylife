@@ -6,16 +6,21 @@ var config = require('./config.json');
 var data;
 var uiData;
 
+var dataFilename = function() {
+	var filePath = path.join(config.data.directory, 'data.json');
+	var filename = path.resolve(__dirname, filePath);
+	console.info('using data file : %s', filename);
+	return filename;
+} ;
+
 var loadData = function() {
-	var filename = path.join(config.data.directory, 'data.json');
-	var content = fs.readFileSync(filename);
+	var content = fs.readFileSync(dataFilename());
 	data = JSON.parse(content);
 };
 
 var saveData = function() {
-	var filename = path.join(config.data.directory, 'data.json');
 	var content = JSON.stringify(data);
-	fs.writeFileSync(filename, content);
+	fs.writeFileSync(dataFilename(), content);
 };
 
 var checkData = function() {
