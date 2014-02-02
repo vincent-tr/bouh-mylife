@@ -116,6 +116,10 @@ app.controller('designerController', ['$scope', 'pluginTypes', 'plugins', functi
 		var m = new module(plugin, plugin, designer.x, designer.y);
 		$scope.schema.push(m);
 	};
+	
+	$scope.createPlugin = function(typeId) {
+		// TODO
+	};
 
 	$scope.removeState = function(schema_id) {
 		console.log("Remove state " + schema_id + " in array of length " + $scope.schema.length);
@@ -226,7 +230,7 @@ app.directive('droppable', function($compile) {
 				drop:function(event,ui) {
 					// angular uses angular.element to get jQuery element, subsequently data() of jQuery is used to get
 					// the data-identifier attribute
-					var dragIndex = angular.element(ui.draggable).data('identifier'),
+					var typeId = angular.element(ui.draggable).data('identifier'),
 					dragEl = angular.element(ui.draggable),
 					dropEl = angular.element(this);
 
@@ -236,7 +240,7 @@ app.directive('droppable', function($compile) {
 						var x = event.pageX - scope.module_css.width / 2;
 						var y = event.pageY - scope.module_css.height / 2;
 
-						scope.addModuleToSchema(dragIndex, x, y);
+						scope.createPlugin(typeId, x, y);
 					}
 
 					scope.$apply();
