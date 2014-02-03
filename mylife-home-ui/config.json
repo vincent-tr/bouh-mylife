@@ -1,0 +1,10 @@
+{
+	"http": {
+		"port": 8886
+	},
+
+	"irc": {
+		"server": "rpi-devel",
+		"channels": ["#mylife-home-ui"]
+	}
+}
