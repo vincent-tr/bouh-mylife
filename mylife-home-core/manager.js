@@ -69,7 +69,14 @@ var checkLink = function(id) {
 };
 
 var getPlugins = function() {
-	return plugins.list();
+	var data = [];
+	var source = plugins.list();
+	for(var id in source) {
+		if (source.hasOwnProperty(id)) {
+			data.push(source[id].config);
+		}
+	}
+	return data;
 };
 
 var addPlugin = function(config) {
@@ -95,7 +102,21 @@ var removePlugin = function(id) {
 };
 
 var getPluginTypes = function() {
-	return plugins.types();
+	var data = [];
+	var source = plugins.types();
+	for(var id in source) {
+		if (source.hasOwnProperty(id)) {
+			var item = source[id];
+			data.push({
+				id: item.id,
+				clazz: item.clazz,
+				displayName: item.displayName,
+				arguments: item.arguments,
+				ui: item.ui
+			});
+		}
+	}
+	return data;
 };
 
 var addPluginType = function(name, content) {
@@ -103,7 +124,14 @@ var addPluginType = function(name, content) {
 };
 
 var getHardware = function() {
-	return hardware.list();
+	var data = [];
+	var source = hardware.list();
+	for(var id in source) {
+		if (source.hasOwnProperty(id)) {
+			data.push(source[id].config);
+		}
+	}
+	return data;
 };
 
 var addHardware = function(config) {
@@ -129,7 +157,21 @@ var removeHardware = function(id) {
 };
 
 var getLinks = function() {
-	return links.list();
+	var data = [];
+	var source = links.list();
+	for(var id in source) {
+		if (source.hasOwnProperty(id)) {
+			var item = source[id];
+			data.push({
+				id: item.id,
+				sourceComponent: item.config.sourceComponent,
+				sourceAttribute: item.config.sourceAttribute,
+				destinationComponent: item.config.destinationComponent,
+				destinationAction: item.config.destinationAction
+			});
+		}
+	}
+	return data;
 };
 
 var addLink = function(config) {
