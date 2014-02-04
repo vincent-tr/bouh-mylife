@@ -30,7 +30,7 @@ var refreshPluginTypes = function() {
 		var pluginType = {
 			id : name,
 			plugin : plugin,
-			clazz : initData.clazz,
+			'class' : initData['class'],
 			displayName : initData.displayName,
 			imageUrl : initData.imageUrl,
 			arguments : initData.arguments,
@@ -60,7 +60,7 @@ var create = function(config) {
 	checkPluginTypes();
 	var pluginType = pluginTypes[type];
 
-	var object = netobject.netObject(id, pluginType.clazz);
+	var object = netobject.netObject(id, pluginType['class']);
 
 	var context = {
 		object : object,

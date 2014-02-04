@@ -109,7 +109,7 @@ var getPluginTypes = function() {
 			var item = source[id];
 			data.push({
 				id: item.id,
-				clazz: item.clazz,
+				'class': item['class'],
 				displayName: item.displayName,
 				arguments: item.arguments,
 				ui: item.ui

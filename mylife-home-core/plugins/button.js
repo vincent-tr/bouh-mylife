@@ -8,7 +8,7 @@ var init = function(apiarg) {
 			boolean), api.netobject.netAction('input'));
 	
 	return {
-		clazz : clazz,
+		'class' : clazz,
 		displayName : 'Bouton',
 		arguments : []
 	};

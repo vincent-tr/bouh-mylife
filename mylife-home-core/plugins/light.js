@@ -9,7 +9,7 @@ var init = function(apiarg) {
 			api.netobject.netAction('input', boolean));
 
 	return {
-		clazz : clazz,
+		'class' : clazz,
 		displayName : 'Eclairage',
 		arguments : []
 	};
