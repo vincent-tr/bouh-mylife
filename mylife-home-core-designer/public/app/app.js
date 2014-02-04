@@ -8,7 +8,7 @@
 
 var app = angular.module('mylife.app', ['mylife.api'/*, 'ui.bootstrap'*/]);
 
-app.controller('designerController', ['$scope', 'pluginTypes', 'plugins', function($scope, pluginTypes, plugins) {
+app.controller('designerController', ['$scope', 'api', function($scope, api) {
 
 	// define a module with library id, schema id, etc.
 	function module(data, x, y) {
@@ -50,35 +50,18 @@ app.controller('designerController', ['$scope', 'pluginTypes', 'plugins', functi
 			y: $scope.library_topleft.y+$scope.library_topleft.margin
 		};
 
-		pluginTypes.get({}, function(data) {
-			for(var key in data) {
-				 if (data.hasOwnProperty(key)) {
+		api.all.get({}, function(data) {
+			var types = data.pluginTypes;
+			for(var i = 0, l = types.length; i<l; i++) {
+				var type = types[i];
 					 
-					 var type = data[key];
-					 
-					 // toutes les définitions de plugins contiennent un sous-type plugin.
-					 // si inexistant, c'est un truc rajouté par angular
-					 if(type.plugin === undefined)
-						 continue;
-					 
-					 $scope.addModuleToLibrary(type);
-				}			
+				$scope.addModuleToLibrary(type);
 			}
-		});
-		
-		plugins.get({}, function(data) {
-			for(var key in data) {
-				 if (data.hasOwnProperty(key)) {
-
-					 var plugin = data[key];
-					 
-					 // toutes les définitions de plugins contiennent un sous-type plugin.
-					 // si inexistant, c'est un truc rajouté par angular
-					 if(plugin.id === undefined)
-						 continue;
-					 
-					 $scope.addModuleToSchema(plugin);
-				 }
+			
+			var plugins = data.plugins;
+			for(var i = 0, l = plugins.length; i<l; i++) {
+				var plugin = plugins[i];
+				$scope.addModuleToSchema(plugin);
 			}
 		});
 	};
@@ -98,22 +81,22 @@ app.controller('designerController', ['$scope', 'pluginTypes', 'plugins', functi
 	$scope.addModuleToSchema = function(plugin) {
 		console.log("Add module " + plugin.id + " to schema");
 		
-		var library;
+		var library = undefined;
 		for (var i = 0, l = $scope.library.length; i < l; i++) {
-			if ($scope.library[i].data.id == plugin.typeId) {
+			if ($scope.library[i].data.id == plugin.type) {
 				library = $scope.library[i];
 			}
 		}
 		
-		var designer = plugin.config.designer;
+		var designer = plugin.designer;
 		if(!designer) {
-			plugin.config.designer = designer = {
+			plugin.designer = designer = {
 				x: 0,
 				y: 0,
 				library: library
 			};
 		}
-		var m = new module(plugin, plugin, designer.x, designer.y);
+		var m = new module(plugin, designer.x, designer.y);
 		$scope.schema.push(m);
 	};
 	
