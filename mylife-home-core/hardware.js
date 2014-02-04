@@ -16,7 +16,7 @@ var create = function(config) {
 	var item = {
 		id : id,
 		config: config,
-		clazz : clazz,
+		'class' : clazz,
 		object : object,
 		container : container,
 		destroy : function() {
