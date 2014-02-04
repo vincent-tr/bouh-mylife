@@ -28,6 +28,15 @@ var create = function(port) {
 		res.send('api up and running');
 	});
 	
+	app.get('/api/all', function(req, res) {
+		res.json({
+			plugins: manager.getPlugins(),
+			pluginTypes: manager.getPluginTypes(),
+			hardware: manager.getHardware(),
+			links: manager.getLinks()
+		});
+	});
+	
 	app.get('/api/plugins', function(req, res) {
 		res.json(manager.getPlugins());
 	});
