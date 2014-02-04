@@ -34,13 +34,13 @@
 		<div plumb-item class="item" ng-repeat="module in schema" ng-style="{ 'left':module.x, 'top':module.y }"
 			data-identifier="{{module.data.id}}">
 			<div class="title">{{module.data.id}}</div>
-			<div ng-repeat="(key, value) in module.data.config.parameters">
+			<div ng-repeat="(key, value) in module.data.parameters">
 				{{key}} : {{value}}<br/>
 			</div>
-			<div ng-repeat="member in module.data.pluginType.clazz.members | filter:{membertype:'attribute'}">
+			<div ng-repeat="member in module.data.designer.library.data.class.members | filter:{membertype:'attribute'}">
 				<div plumb-connect class="connect">{{member.name}}</div>
 			</div>
-			<div ng-repeat="member in module.data.pluginType.clazz.members | filter:{membertype:'action'}">
+			<div ng-repeat="member in module.data.designer.library.data.class.members | filter:{membertype:'action'}">
 				<div plumb-connect class="connect">{{member.name}}</div>
 			</div>
 		</div>
