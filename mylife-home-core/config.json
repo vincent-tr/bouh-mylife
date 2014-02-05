@@ -6,7 +6,7 @@
 		"directory": "data"
 	},
 	"http": {
-		"port": 8888
+		"port": 8887
 	},
 	"hardware": [
 	{
