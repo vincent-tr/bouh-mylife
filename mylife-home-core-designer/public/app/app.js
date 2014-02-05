@@ -10,94 +10,52 @@ var app = angular.module('mylife.app', ['mylife.api'/*, 'ui.bootstrap'*/]);
 
 app.controller('designerController', ['$scope', 'api', function($scope, api) {
 
-	// define a module with library id, schema id, etc.
-	function module(data, x, y) {
-		this.data = data;
-		this.x = x;
-		this.y = y;
-	}
-
-	// module should be visualized by title, icon
-	$scope.library = [];
-
-	// state is [identifier, x position, y position, title, description]
-	$scope.schema = [];
-
-	// todo: find out how to go back and forth between css and angular
-	$scope.library_topleft = {
-			x: 15,
-			y: 145,
-			item_height: 50,
-			margin: 5,
-	};
-
-	$scope.module_css = {
-			width: 150,
-			height: 100, // actually variable
-	};
-	
-	$scope.library_pos = {
-	};
+	$scope.pluginTypes = [];
+	$scope.plugins = [];
+	$scope.hardware = [];
 
 	$scope.reload = function() {
-		$scope.schema_uuid = 0;
 		jsPlumb.detachEveryConnection();
-		$scope.schema = [];
-		$scope.library = [];
+		$scope.pluginTypes = [];
+		$scope.plugins = [];
+		$scope.hardware = [];
 		
-		$scope.library_pos = {
-			x: $scope.library_topleft.x+$scope.library_topleft.margin,
-			y: $scope.library_topleft.y+$scope.library_topleft.margin
+		var checkDesignerData = function(item) {
+			var designer = item.designer;
+			if(!designer) {
+				item.designer = designer = {
+					x: 0,
+					y: 0
+				};
+			}
 		};
-
-		api.all.get({}, function(data) {
-			var types = data.pluginTypes;
-			for(var i = 0, l = types.length; i<l; i++) {
-				var type = types[i];
-					 
-				$scope.addModuleToLibrary(type);
+		
+		var attachTypeToPlugin = function(plugin) {
+			
+			if(!plugin.internal) {
+				plugin.internal = {};
 			}
 			
-			var plugins = data.plugins;
-			for(var i = 0, l = plugins.length; i<l; i++) {
-				var plugin = plugins[i];
-				$scope.addModuleToSchema(plugin);
+			for (var i = 0, l = $scope.pluginTypes.length; i < l; i++) {
+				var type = $scope.pluginTypes[i];
+				if (type.id === plugin.type) {
+					// à virer au merge
+					plugin.internal.type = type;
+					break;
+				}
 			}
+		};
+		
+		api.data.get({}, function(data) {
+			$scope.pluginTypes = data.pluginTypes;
+			$scope.plugins = data.plugins;
+			$scope.hardware = data.hardware;
+
+			$scope.plugins.forEach(attachTypeToPlugin);
+			
+			$scope.plugins.forEach(checkDesignerData);
+			$scope.hardware.forEach(checkDesignerData);
 		});
-	};
-
-	// add a module to the library
-	$scope.addModuleToLibrary = function(type) {
-		
-		console.log("Add module " + type.displayName + " to library");
-		
-		var m = new module(type, $scope.library_pos.x, $scope.library_pos.y);
-		$scope.library.push(m);
-		
-		$scope.library_pos.y += $scope.library_topleft.item_height;
-	};
-
-	// add a module to the schema
-	$scope.addModuleToSchema = function(plugin) {
-		console.log("Add module " + plugin.id + " to schema");
-		
-		var library = undefined;
-		for (var i = 0, l = $scope.library.length; i < l; i++) {
-			if ($scope.library[i].data.id == plugin.type) {
-				library = $scope.library[i];
-			}
-		}
-		
-		var designer = plugin.designer;
-		if(!designer) {
-			plugin.designer = designer = {
-				x: 0,
-				y: 0,
-				library: library
-			};
-		}
-		var m = new module(plugin, designer.x, designer.y);
-		$scope.schema.push(m);
 	};
 	
 	$scope.createPlugin = function(typeId) {

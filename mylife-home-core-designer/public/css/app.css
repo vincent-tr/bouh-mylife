@@ -20,7 +20,7 @@
 }
 
 .menu-item {
-	position: absolute;        
+	/*position: absolute;*/        
 	border: 1px solid black;
 	width: 150px;
 	font-size: 80%;
