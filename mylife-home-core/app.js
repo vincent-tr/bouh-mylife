@@ -27,7 +27,7 @@ var create = function(port) {
 	app.get('/api', function(req, res) {
 		res.send('api up and running');
 	});
-	
+	/*
 	app.get('/api/all', function(req, res) {
 		res.json({
 			plugins: manager.getPlugins(),
@@ -35,7 +35,7 @@ var create = function(port) {
 			hardware: manager.getHardware(),
 			links: manager.getLinks()
 		});
-	});
+	});*/
 	
 	app.get('/api/plugins', function(req, res) {
 		res.json(manager.getPlugins());
