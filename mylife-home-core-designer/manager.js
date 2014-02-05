@@ -53,8 +53,39 @@ var doMerge = function(oldData, newData, callback) {
 	var mergedHardware = mergeData(oldData.hardware, newData.hardware);
 	var mergedLinks = mergeData(oldData.links, newData.links);
 
-	// TODO : rajouter en destroy/add toutes les links touchées par les
-	// plugins/hardware
+	// on cherche les links des oldData qui sont référencés dans les delete et qui ne sont pas dans les links a delete
+	// on les delete et recrée
+	oldData.links.forEach(function(link) {
+		var recreateLink = function(link) {
+			mergedLinks.destroy.push(link);
+			mergedLinks.create.push(link);
+		};
+		
+		if(findById(mergedLinks.destroy, link.id)) {
+			// déjà présent rien à faire
+			return;
+		}
+		
+		if(findById(mergedHardware.destroy, link.sourceComponent)) {
+			recreateLink(link);
+			return;
+		}
+		
+		if(findById(mergedPlugins.destroy, link.destinationComponent)) {
+			recreateLink(link);
+			return;
+		}
+
+		if(findById(mergedHardware.destroy, link.sourceComponent)) {
+			recreateLink(link);
+			return;
+		}
+		
+		if(findById(mergedPlugins.destroy, link.destinationComponent)) {
+			recreateLink(link);
+			return;
+		}
+	});
 
 	return {
 		destroy : {
@@ -68,6 +99,17 @@ var doMerge = function(oldData, newData, callback) {
 			links : mergedLinks.create
 		}
 	};
+};
+
+var findById = function(array, id) {
+	for (var i = 0, l = array.length; i < l; i++) {
+		var item = array[i];
+		if(item.id === id) {
+			return item;
+		}
+	}
+	
+	return undefined;
 };
 
 var deepExists = function(array, item) {
