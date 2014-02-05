@@ -1,10 +1,8 @@
 var path = require('path');
-var request = require('request');
 
 var express = require('express');
-var async = require('async');
 
-var config = require('./config.json');
+var manager = require('./manager.js');
 
 var errorToObject = function(err) {
 	var plainObject = {};
@@ -15,11 +13,6 @@ var errorToObject = function(err) {
 };
 
 var create = function(port) {
-
-	var coreUrl = config.core.url;
-	if (coreUrl.substr(-1) != '/') {
-		coreUrl += '/';
-	}
 
 	var app = express();
 	app.set('port', port);
@@ -44,23 +37,7 @@ var create = function(port) {
 	 */
 
 	app.get('/data', function(req, res) {
-
-		var fetch = function(url, callback) {
-			request.get(url, function(err, response, body) {
-				if (err) {
-					callback(err);
-				} else {
-					callback(null, JSON.parse(body));
-				}
-			});
-		};
-		
-		async.parallel({
-			plugins : function(cb) { fetch(coreUrl + 'api/plugins', cb); },
-			pluginTypes : function(cb) { fetch(coreUrl + 'api/pluginTypes', cb); },
-			hardware : function(cb) { fetch(coreUrl + 'api/hardware', cb); },
-			links : function(cb) { fetch(coreUrl + 'api/links', cb); }
-		}, function(err, ret) {
+		manager.data(function(err, ret) {
 			if (err) {
 				console.error(err);
 				res.json(500, errorToObject(err));
@@ -71,6 +48,32 @@ var create = function(port) {
 		});
 	});
 
+	app.post('/merge', function(req, res) {
+		var newData = JSON.parse(req.body);
+		manager.merge(newData, function(err, ret) {
+			if (err) {
+				console.error(err);
+				res.json(500, errorToObject(err));
+				return;
+			}
+
+			res.json(ret);
+		});
+	});
+	
+	app.post('/apply', function(req, res) {
+		var mergeData = JSON.parse(req.body);
+		manager.apply(mergeData, function(err, ret) {
+			if (err) {
+				console.error(err);
+				res.json(500, errorToObject(err));
+				return;
+			}
+
+			res.json(ret);
+		});
+	});
+	
 	return app;
 };
 
