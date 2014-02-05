@@ -3,6 +3,6 @@
 		"port": 8889
 	},
 	"core": {
-		"url": "http://rpi-devel:8887"
+		"url": "http://localhost:8888"
 	}
 }
