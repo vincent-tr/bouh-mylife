@@ -36,6 +36,10 @@ var data = function(callback) {
 	}, callback);
 };
 
+var updateHardware = function(url, callback) {
+	// TODO
+};
+
 var merge = function(newData, callback) {
 	data(function(err, ret) {
 		if (err) {
@@ -193,5 +197,6 @@ var createArray = function(map, array, type) {
 };
 
 module.exports.data = data;
+module.exports.updateHardware = updateHardware;
 module.exports.merge = merge;
 module.exports.apply = apply;

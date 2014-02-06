@@ -48,6 +48,19 @@ var create = function(port) {
 		});
 	});
 
+	app.post('/updateHardware', function(req, res) {
+		var urlObject = JSON.parse(req.body);
+		manager.updateHardware(urlObject.url, function(err, ret) {
+			if (err) {
+				console.error(err);
+				res.json(500, errorToObject(err));
+				return;
+			}
+
+			res.json(ret);
+		});
+	});
+
 	app.post('/merge', function(req, res) {
 		var newData = JSON.parse(req.body);
 		manager.merge(newData, function(err, ret) {
