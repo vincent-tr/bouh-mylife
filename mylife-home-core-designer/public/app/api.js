@@ -11,11 +11,14 @@ api.factory('api', ['$resource', function($resource) {
 		data:  $resource('/data', {}, {
 			get: { method: 'GET' }
 		}),
+		updateHardware: $resource('/updateHardware', {}, {
+			post: { method: 'POST' }
+		}),
 		merge: $resource('/merge', {}, {
-			add: { method: 'POST' }
+			post: { method: 'POST' }
 		}),
 		apply: $resource('/apply', {}, {
-			add: { method: 'POST' }
+			post: { method: 'POST' }
 		})
 	};
 }]);

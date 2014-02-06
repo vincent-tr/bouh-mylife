@@ -14,12 +14,8 @@ app.controller('designerController', ['$scope', 'api', function($scope, api) {
 	$scope.plugins = [];
 	$scope.hardware = [];
 
-	$scope.reload = function() {
-		jsPlumb.detachEveryConnection();
-		$scope.pluginTypes = [];
-		$scope.plugins = [];
-		$scope.hardware = [];
-		
+	var applyData = function(data) {
+
 		var checkDesignerData = function(item) {
 			var designer = item.designer;
 			if(!designer) {
@@ -39,22 +35,69 @@ app.controller('designerController', ['$scope', 'api', function($scope, api) {
 			for (var i = 0, l = $scope.pluginTypes.length; i < l; i++) {
 				var type = $scope.pluginTypes[i];
 				if (type.id === plugin.type) {
-					// à virer au merge
 					plugin.internal.type = type;
 					break;
 				}
 			}
 		};
 		
-		api.data.get({}, function(data) {
-			$scope.pluginTypes = data.pluginTypes;
-			$scope.plugins = data.plugins;
-			$scope.hardware = data.hardware;
+		jsPlumb.detachEveryConnection();
+		$scope.pluginTypes = [];
+		$scope.plugins = [];
+		$scope.hardware = [];
+		$scope.links = [];
+	
+		$scope.pluginTypes = data.pluginTypes;
+		$scope.plugins = data.plugins;
+		$scope.hardware = data.hardware;
+		$scope.links = data.links;
 
-			$scope.plugins.forEach(attachTypeToPlugin);
-			
-			$scope.plugins.forEach(checkDesignerData);
-			$scope.hardware.forEach(checkDesignerData);
+		$scope.plugins.forEach(attachTypeToPlugin);
+		
+		$scope.plugins.forEach(checkDesignerData);
+		$scope.hardware.forEach(checkDesignerData);
+		
+		// TODO : liens
+	};
+	
+	$scope.reload = function() {
+		api.data.get({}, function(data) {
+			applyData(data);
+		});
+	};
+	
+	$scope.updateHardware = function(url) {
+		// on envoie l'url et on récupère une version du schéma avec le nouveau matériel dessus (non sauvegardé)
+		api.updateHardware.post({}, {url: url}, function(data) {
+			applyData(data);
+		});
+	};
+	
+	$scope.save = function() {
+		
+		var removeInternal = function(item) {
+			if(item.internal) {
+				delete item.internal;
+			}
+		};
+		
+		var clone = function(obj) {
+			return JSON.parse(JSON.stringify(obj));
+		};
+		
+		var prepareArray = function(source) {
+			var dest = clone(source);
+			dest.forEach(removeInternal);
+		};
+		
+		var data = {
+			plugins: prepareArray($scope.plugins),
+			hardware: prepareArray($scope.hardware),
+			links: prepareArray($scope.links)
+		};
+		
+		api.merge.post({}, data, function(data) {
+			// TODO
 		});
 	};
 	
@@ -91,7 +134,7 @@ app.directive('postRender', [ '$timeout', function($timeout) {
 //now we extend html with <div plumb-item>, we can define a template <> to replace it with "proper" html, or we can 
 //replace it with something more sophisticated, e.g. setting jsPlumb arguments and attach it to a double-click 
 //event
-app.directive('plumbItem', function() {
+app.directive('plumbSchemaItem', function() {
 	return {
 		replace: true,
 		controller: 'designerController',
@@ -125,7 +168,7 @@ app.directive('plumbItem', function() {
  * This directive should allow an element to be dragged onto the main canvas. Then after it is dropped, it should be
  * painted again on its original position, and the full module should be displayed on the dragged to location.
  */
-app.directive('plumbMenuItem', function() {
+app.directive('plumbToolboxItem', function() {
 	return {
 		replace: true,
 		controller: 'designerController',
@@ -165,19 +208,17 @@ app.directive('droppable', function($compile) {
 	return {
 		restrict: 'A',
 		link: function(scope, element, attrs){
-			console.log("Make this element droppable");
 
 			element.droppable({
-				drop:function(event,ui) {
+				drop: function(event,ui) {
 					// angular uses angular.element to get jQuery element, subsequently data() of jQuery is used to get
 					// the data-identifier attribute
 					var typeId = angular.element(ui.draggable).data('identifier'),
-					dragEl = angular.element(ui.draggable),
-					dropEl = angular.element(this);
+					dragElement = angular.element(ui.draggable),
+					dropElement = angular.element(this);
 
 					// if dragged item has class menu-item and dropped div has class drop-container, add module 
-					if (dragEl.hasClass('menu-item') && dropEl.hasClass('drop-container')) {
-						console.log("Drag event on " + dragIndex);
+					if (dragElement.hasClass('menu-item') && dropElement.hasClass('drop-container')) {
 						var x = event.pageX - scope.module_css.width / 2;
 						var y = event.pageY - scope.module_css.height / 2;
 
@@ -193,13 +234,10 @@ app.directive('droppable', function($compile) {
 
 app.directive('draggable', function() {
 	return {
-		// A = attribute, E = Element, C = Class and M = HTML Comment
 		restrict:'A',
-		//The link function is responsible for registering DOM listeners as well as updating the DOM.
 		link: function(scope, element, attrs) {
 			element.draggable({
-				// let it go back to its original position
-				revert:true,
+				revert: true,
 			});
 		}
 	};
