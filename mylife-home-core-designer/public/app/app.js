@@ -129,6 +129,23 @@ app.directive('postRender', [ '$timeout', function($timeout) {
 	return def;
 }]);
 
+/**
+ * This directive should allow an element to be dragged onto the main canvas. Then after it is dropped, it should be
+ * painted again on its original position, and the full module should be displayed on the dragged to location.
+ */
+app.directive('plumbToolboxItem', function() {
+	return {
+		replace: true,
+		controller: 'designerController',
+		link: function (scope, element, attrs) {
+
+			// jsPlumb uses the containment from the underlying library, in our case that is jQuery.
+			jsPlumb.draggable(element, {
+				containment: element.parent().parent()
+			});
+		}
+	};
+});
 
 //directives link user interactions with $scope behaviours
 //now we extend html with <div plumb-item>, we can define a template <> to replace it with "proper" html, or we can 
@@ -141,10 +158,6 @@ app.directive('plumbSchemaItem', function() {
 		link: function (scope, element, attrs) {
 			console.log("Add plumbing for the 'item' element");
 
-			jsPlumb.makeTarget(element, {
-				anchor: 'Continuous',
-				maxConnections: 2,
-			});
 			jsPlumb.draggable(element, {
 				containment: 'parent'
 			});
@@ -164,25 +177,36 @@ app.directive('plumbSchemaItem', function() {
 	};
 });
 
-/**
- * This directive should allow an element to be dragged onto the main canvas. Then after it is dropped, it should be
- * painted again on its original position, and the full module should be displayed on the dragged to location.
- */
-app.directive('plumbToolboxItem', function() {
+app.directive('componentAttribute', function() {
 	return {
 		replace: true,
 		controller: 'designerController',
 		link: function (scope, element, attrs) {
-			console.log("Add plumbing for the 'menu-item' element");
 
-			// jsPlumb uses the containment from the underlying library, in our case that is jQuery.
-			jsPlumb.draggable(element, {
-				containment: element.parent().parent()
+			jsPlumb.makeTarget(element, {
+				anchor: 'Continuous',
+				maxConnections: -1,
 			});
 		}
 	};
 });
 
+
+app.directive('componentAction', function() {
+	return {
+		replace: true,
+		controller: 'designerController',
+		link: function (scope, element, attrs) {
+
+			jsPlumb.makeSource(element, {
+				anchor: 'Continuous',
+				maxConnections: -1,
+			});
+		}
+	};
+});
+
+/*
 app.directive('plumbConnect', function() {
 	return {
 		replace: true,
@@ -202,7 +226,7 @@ app.directive('plumbConnect', function() {
 
 		}
 	};
-});
+});*/
 
 app.directive('droppable', function($compile) {
 	return {

@@ -4,39 +4,48 @@
 	font-weight: bold;
 	font-size: 120%;
 }
-	
-.connect {
+
+.component-attribute {
 	width: 100%;
 	height: 20px;
 	cursor: pointer;
 	background-color: #40B3DF;
 }
 
-.summary {
-	padding: 10px;
-	cursor: move;
-	font-weight: bold;
-	font-size: 120%;
+.component-action {
+	width: 100%;
+	height: 20px;
+	cursor: pointer;
+	background-color: #40B3DF;
 }
 
 .menu-item {
-	/*position: absolute;*/        
-	border: 1px solid black;
-	width: 150px;
-	font-size: 80%;
-    background-color:#FFFFFF;
+	position: absolute;
+	width: 70px;
+	height: 70px;
+	border: 1px solid #346789;
+	box-shadow: 2px 2px 19px #aaa;
+	-o-box-shadow: 2px 2px 19px #aaa;
+	-webkit-box-shadow: 2px 2px 19px #aaa;
+	-moz-box-shadow: 2px 2px 19px #aaa;
+	-moz-border-radius: 0.5em;
+	border-radius: 0.5em;
+	opacity: 0.8;
+	filter: alpha(opacity = 80);
+	cursor: move;
 	text-align: center;
-	-moz-box-shadow: 2px 2px 3px 1px #AAA;
-	-webkit-box-shadow: 2px 2px 3px 1px #AAA;
-	box-shadow: 2px 2px 3px 1px #AAA;
+}
+
+.menu-item-title {
+	font-size: xx-small;
 }
 
 .item {
-	position: absolute;        
+	position: absolute;
 	border: 1px solid black;
 	width: 150px;
 	font-size: 80%;
-    background-color:#FFFFFF;
+	background-color: #FFFFFF;
 	text-align: center;
 	-moz-box-shadow: 2px 2px 3px 1px #AAA;
 	-webkit-box-shadow: 2px 2px 3px 1px #AAA;
@@ -45,7 +54,7 @@
 
 /* the container is 200px (size of menu-container) plus 3 times 250px + 2px per border*/
 #container {
-	border: 2px solid gray;
+	border: 4px solid gray;
 	width: 958px;
 	height: 500px;
 }
@@ -59,11 +68,3 @@
 	height: 497px;
 	background-color: #F3F2F4;
 }
-
-.verticalLine {
-	float: left;
-	border-right: 2px solid gray;
-	width: 1px;
-	height: 498px;
-}
-
