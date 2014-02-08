@@ -6,6 +6,7 @@
 
 <script src="lib/jquery/jquery.js"></script>
 <script src="lib/jquery/jquery-ui.js"></script>
+<link rel="stylesheet" href="lib/jquery/themes/smoothness/jquery-ui.css">
 <script src="lib/jsplumb/jquery.jsPlumb.js"></script>
 <!--  <script src="lib/bootstrap/js/bootstrap.js"></script>  -->
 <script src="lib/angular/angular.js"></script>
@@ -24,14 +25,17 @@
 <body ng-controller="designerController">
 
 	<div id="main">
-		<div id="toolbox-container">
-			<div plumb-toolbox-item class="toolbox-item" ng-repeat="type in pluginTypes"
-				data-identifier="{{type.id}}" draggable title="{{type.displayName}}">
-				<span class="toolbox-item-title">{{type.displayName}}</span>
-				<img class="toolbox-item-image" src="{{type.imageUrl}}" height="48" width="48"></img>
+		<div id="toolbox-container" splitter>
+			<div id="toolbox">
+				<div plumb-toolbox-item class="toolbox-item" ng-repeat="type in pluginTypes"
+					data-identifier="{{type.id}}" draggable title="{{type.displayName}}">
+					<span class="toolbox-item-title">{{type.displayName}}</span>
+					<img class="toolbox-item-image" src="{{type.imageUrl}}" height="48" width="48"></img>
+				</div>
 			</div>
 		</div>
-		<div id="container" class="drop-container" ng-click="addEvent($event)" droppable>
+		<div id="schema-container"> <!-- class="drop-container" ng-click="addEvent($event)" droppable> -->
+		<!--
 			<div plumb-schema-item class="item" ng-repeat="plugin in plugins" ng-style="{ 'left':plugin.designer.x, 'top':plugin.designer.y }"
 				data-identifier="{{plugin.id}}">
 				<div class="title">{{plugin.id}}</div>
@@ -55,6 +59,7 @@
 					<div component-action class="component-action">{{member.name}}</div>
 				</div>
 			</div>
+		-->
 		</div>
 	</div>
 

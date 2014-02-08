@@ -266,3 +266,22 @@ app.directive('draggable', function() {
 		}
 	};
 });
+
+app.directive('splitter', function() {
+	return {
+		restrict:'A',
+		link: function(scope, element, attrs) {
+			$(element).resizable({
+				handles: 'e',
+				minWidth: '50',
+				maxWidth: '350',
+				resize: function() {
+					var remainingSpace = $(this).parent().width() - $(this).outerWidth();
+					var divTwo = $(this).next();
+					var divTwoWidth = remainingSpace - (divTwo.outerWidth() - divTwo.width());
+					divTwo.width(divTwoWidth);
+				}
+			});
+		}
+	};
+});
