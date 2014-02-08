@@ -24,11 +24,11 @@
 <body ng-controller="designerController">
 
 	<div id="main">
-		<div id="menu-container">
-			<div plumb-toolbox-item class="menu-item" ng-repeat="type in pluginTypes"
+		<div id="toolbox-container">
+			<div plumb-toolbox-item class="toolbox-item" ng-repeat="type in pluginTypes"
 				data-identifier="{{type.id}}" draggable title="{{type.displayName}}">
-				<span class="menu-item-title">{{type.displayName}}</span>
-				<img src="{{type.imageUrl}}"></img>
+				<span class="toolbox-item-title">{{type.displayName}}</span>
+				<img class="toolbox-item-image" src="{{type.imageUrl}}" height="48" width="48"></img>
 			</div>
 		</div>
 		<div id="container" class="drop-container" ng-click="addEvent($event)" droppable>
