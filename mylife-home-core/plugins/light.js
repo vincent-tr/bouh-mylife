@@ -11,6 +11,7 @@ var init = function(apiarg) {
 	return {
 		'class' : clazz,
 		displayName : 'Eclairage',
+		imageUrl : api.tools.loadDefaultIcon(__filename),
 		arguments : []
 	};
 };
