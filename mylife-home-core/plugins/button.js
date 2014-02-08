@@ -10,6 +10,7 @@ var init = function(apiarg) {
 	return {
 		'class' : clazz,
 		displayName : 'Bouton',
+		imageUrl : api.tools.loadDefaultIcon(__filename),
 		arguments : []
 	};
 };

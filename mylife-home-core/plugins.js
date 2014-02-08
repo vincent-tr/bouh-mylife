@@ -2,9 +2,11 @@ var fs = require('fs');
 var path = require('path');
 
 var netobject = require('./netobject.js');
+var pluginTools = require('./pluginTools.js');
 
 var api = {
 	netobject : netobject,
+	tools: pluginTools
 };
 
 var pluginTypes;

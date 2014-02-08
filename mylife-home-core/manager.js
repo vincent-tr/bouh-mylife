@@ -111,6 +111,7 @@ var getPluginTypes = function() {
 				id: item.id,
 				'class': item['class'],
 				displayName: item.displayName,
+				imageUrl: item.imageUrl,
 				arguments: item.arguments,
 				ui: item.ui
 			});
