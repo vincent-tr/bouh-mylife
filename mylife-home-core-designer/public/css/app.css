@@ -1,8 +1,12 @@
 #main {
     width: 100%;
-    height: 500px;
     border: 1px black solid;
     font-size: 0;
+    position: relative;
+}
+
+#commands {
+	position: relative;
 }
 
 .title {
@@ -27,33 +31,28 @@
 }
 
 #toolbox-container {
-    width: 20%;
-    height: 100%;
-    display: inline-block;
+    width: 200px;
+    height: 500px;
+    position: absolute;
+    top: 0px;
+    left: 0px;
 }
 
 #toolbox {
 	border: 2px solid gray;
 	border-right: 4px solid gray;
-	/*
 	width: 100%;
 	height: 100%;
-	*/
 	background-color: #F3F2F4;
-	/*
-    -moz-column-count: 3;
-    -moz-column-gap: 1em;
-    -webkit-column-count: 3;
-    -webkit-column-gap: 1em;
-    column-count: 3;
-    column-gap: 1em;
-    */
+	
+	display: inline-block;
 }
 
 .toolbox-item {
 	/*position: absolute;*/
 	width: 70px;
 	height: 70px;
+	display: inline-block;
 	border: 1px solid #346789;
 	box-shadow: 2px 2px 19px #aaa;
 	-o-box-shadow: 2px 2px 19px #aaa;
@@ -68,10 +67,6 @@
 	
 	margin: 10px;
 }
-/*
-.toolbox-item:nth-child(3n+1){
-    clear:left;
-}*/
 
 .toolbox-item-title {
 	font-size: xx-small;
@@ -94,8 +89,8 @@
 }
 
 #schema-container {
-    width: 80%;
-    height: 100%;
+    height: 500px;
     background-color: red;
-    display: inline-block;
+    position: absolute;
+    top: 0px;
 }

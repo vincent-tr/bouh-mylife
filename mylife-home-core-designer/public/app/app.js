@@ -267,21 +267,33 @@ app.directive('draggable', function() {
 	};
 });
 
-app.directive('splitter', function() {
+app.directive('splitter', ['$timeout', function($timeout) {
 	return {
 		restrict:'A',
 		link: function(scope, element, attrs) {
-			$(element).resizable({
+			
+			var jqLeft = $(element);
+			var jqRight = jqLeft.next();
+			var jqContainer = jqLeft.parent();
+			
+			var resizeRight = function() {
+				var remainingSpace = jqContainer.width() - jqLeft.outerWidth();
+				var rightPos = jqLeft.outerWidth();
+				var rightWidth = remainingSpace - (jqRight.outerWidth() - jqRight.width());
+				jqRight.width(rightWidth);
+				jqRight.css({left:rightPos,top:0});
+			};
+			
+			jqLeft.resizable({
 				handles: 'e',
-				minWidth: '50',
-				maxWidth: '350',
-				resize: function() {
-					var remainingSpace = $(this).parent().width() - $(this).outerWidth();
-					var divTwo = $(this).next();
-					var divTwoWidth = remainingSpace - (divTwo.outerWidth() - divTwo.width());
-					divTwo.width(divTwoWidth);
-				}
+				minWidth: '100',
+				maxWidth: '500',
+				resize: resizeRight
+			});
+			
+			$timeout(function(){
+				resizeRight();
 			});
 		}
 	};
-});
+}]);
