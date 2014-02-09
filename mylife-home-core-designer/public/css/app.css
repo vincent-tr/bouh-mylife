@@ -1,12 +1,19 @@
 #main {
+	font-size: 0;
     width: 100%;
-    border: 1px black solid;
-    font-size: 0;
-    position: relative;
+    position: fixed;
+    left: 0px;
+	top: 15px;
+	right: 0px;
+	bottom: 60px;
 }
 
 #commands {
-	position: relative;
+	position: fixed;
+	padding: 5px;
+	width: 100%;
+	bottom: 0;
+	height: 60px;
 }
 
 .title {
@@ -32,7 +39,7 @@
 
 #toolbox-container {
     width: 200px;
-    height: 500px;
+    height: 100%;
     position: absolute;
     top: 0px;
     left: 0px;
@@ -46,6 +53,14 @@
 	background-color: #F3F2F4;
 	
 	display: inline-block;
+
+	border: 1px solid #346789;
+	box-shadow: 2px 2px 19px #aaa;
+	-o-box-shadow: 2px 2px 19px #aaa;
+	-webkit-box-shadow: 2px 2px 19px #aaa;
+	-moz-box-shadow: 2px 2px 19px #aaa;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
 }
 
 .toolbox-item {
@@ -89,7 +104,7 @@
 }
 
 #schema-container {
-    height: 500px;
+    height: 100%;
     background-color: red;
     position: absolute;
     top: 0px;
