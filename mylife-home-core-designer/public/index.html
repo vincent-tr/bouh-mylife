@@ -27,10 +27,11 @@
 	<div id="main">
 		<div id="toolbox-container" splitter>
 			<div id="toolbox">
-				<div plumb-toolbox-item class="toolbox-item" ng-repeat="type in pluginTypes"
-					data-identifier="{{type.id}}" draggable title="{{type.displayName}}">
-					<span class="toolbox-item-title">{{type.displayName}}</span>
-					<img class="toolbox-item-image" src="{{type.imageUrl}}" height="48" width="48"></img>
+				<div class="toolbox-item-wrapper" ng-repeat="type in pluginTypes">
+					<div class="toolbox-item" plumb-toolbox-item draggable data-identifier="{{type.id}}" title="{{type.displayName}}">
+						<span class="toolbox-item-title">{{type.displayName}}</span>
+						<img class="toolbox-item-image" src="{{type.imageUrl}}" height="48" width="48"></img>
+					</div>
 				</div>
 			</div>
 		</div>
