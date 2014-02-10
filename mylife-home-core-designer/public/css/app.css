@@ -64,10 +64,9 @@
 }
 
 .toolbox-item {
-	/*position: absolute;*/
+	position: fixed;
 	width: 70px;
 	height: 70px;
-	display: inline-block;
 	border: 1px solid #346789;
 	box-shadow: 2px 2px 19px #aaa;
 	-o-box-shadow: 2px 2px 19px #aaa;
@@ -79,6 +78,12 @@
 	filter: alpha(opacity = 80);
 	cursor: move;
 	text-align: center;
+}
+
+.toolbox-item-wrapper {
+	width: 70px;
+	height: 70px;
+	display: inline-block;
 	
 	margin: 10px;
 }
@@ -105,7 +110,7 @@
 
 #schema-container {
     height: 100%;
-    background-color: red;
+    background-color: lightgray;
     position: absolute;
     top: 0px;
 }
