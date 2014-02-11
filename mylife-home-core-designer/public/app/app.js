@@ -141,7 +141,10 @@ app.directive('plumbToolboxItem', function() {
 
 			// jsPlumb uses the containment from the underlying library, in our case that is jQuery.
 			jsPlumb.draggable(element, {
-				containment: element.parent().parent()
+				revert: true,
+				//helper: 'clone',
+				zIndex: 100,
+				containment: $('#main')
 			});
 		}
 	};
@@ -255,7 +258,7 @@ app.directive('droppable', function($compile) {
 		}
 	};
 });
-
+/*
 app.directive('draggable', function() {
 	return {
 		restrict:'A',
@@ -265,7 +268,7 @@ app.directive('draggable', function() {
 			});
 		}
 	};
-});
+});*/
 
 app.directive('splitter', ['$timeout', function($timeout) {
 	return {
