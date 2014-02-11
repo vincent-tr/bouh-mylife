@@ -8,35 +8,6 @@
 	bottom: 60px;
 }
 
-#commands {
-	position: fixed;
-	padding: 5px;
-	width: 100%;
-	bottom: 0;
-	height: 60px;
-}
-
-.title {
-	padding: 10px;
-	cursor: move;
-	font-weight: bold;
-	font-size: 120%;
-}
-
-.component-attribute {
-	width: 100%;
-	height: 20px;
-	cursor: pointer;
-	background-color: #40B3DF;
-}
-
-.component-action {
-	width: 100%;
-	height: 20px;
-	cursor: pointer;
-	background-color: #40B3DF;
-}
-
 #toolbox-container {
     width: 200px;
     height: 100%;
@@ -50,7 +21,7 @@
 	border-right: 4px solid gray;
 	width: 100%;
 	height: 100%;
-	background-color: #F3F2F4;
+	background-color: lightgray;
 	
 	display: inline-block;
 
@@ -67,7 +38,7 @@
 	position: fixed;
 	width: 70px;
 	height: 70px;
-	border: 1px solid #346789;
+	border: 1px solid black;
 	box-shadow: 2px 2px 19px #aaa;
 	-o-box-shadow: 2px 2px 19px #aaa;
 	-webkit-box-shadow: 2px 2px 19px #aaa;
@@ -78,6 +49,7 @@
 	filter: alpha(opacity = 80);
 	cursor: move;
 	text-align: center;
+	background-color: #F3F3F3;
 }
 
 .toolbox-item-wrapper {
@@ -96,21 +68,72 @@
 	border: 1px solid black;
 }
 
-.item {
-	position: absolute;
-	border: 1px solid black;
-	width: 150px;
-	font-size: 80%;
-	background-color: #FFFFFF;
-	text-align: center;
-	-moz-box-shadow: 2px 2px 3px 1px #AAA;
-	-webkit-box-shadow: 2px 2px 3px 1px #AAA;
-	box-shadow: 2px 2px 3px 1px #AAA;
-}
-
 #schema-container {
     height: 100%;
-    background-color: lightgray;
+    background-color: #F3F3F3;
     position: absolute;
     top: 0px;
+}
+
+.item {
+	position: absolute;
+	width: 150px;
+	border: 1px solid black;
+	box-shadow: 2px 2px 19px #aaa;
+	-o-box-shadow: 2px 2px 19px #aaa;
+	-webkit-box-shadow: 2px 2px 19px #aaa;
+	-moz-box-shadow: 2px 2px 19px #aaa;
+	-moz-border-radius: 0.5em;
+	border-radius: 0.5em;
+	/*
+	opacity: 1;
+	filter: alpha(opacity = 80);
+	*/
+}
+
+.item-image {
+	height: 16px;
+	width: 16px;
+}
+
+.item-title {
+	padding: 2px;
+	cursor: move;
+	font-size: x-small;
+	vertical-align: middle;
+}
+
+.component-parameter {
+	width: 100%;
+	font-size: x-small;
+	background-color: #CCCCCC;
+	vertical-align: middle;
+	border-top: 1px solid black;
+	text-indent: 10px;
+}
+
+.component-attribute {
+	width: 100%;
+	font-size: x-small;
+	cursor: pointer;
+	background-color: #40DFB3;
+	border-top: 1px solid black;
+	text-indent: 10px;
+}
+
+.component-action {
+	width: 100%;
+	font-size: x-small;
+	cursor: pointer;
+	background-color: #40B3DF;
+	border-top: 1px solid black;
+	text-indent: 10px;
+}
+
+#commands {
+	position: fixed;
+	padding: 5px;
+	width: 100%;
+	bottom: 0;
+	height: 60px;
 }

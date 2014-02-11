@@ -101,7 +101,7 @@ app.controller('designerController', ['$scope', 'api', function($scope, api) {
 		});
 	};
 	
-	$scope.createPlugin = function(typeId) {
+	$scope.createPlugin = function(typeId, x, y) {
 		// TODO
 	};
 
@@ -133,7 +133,7 @@ app.directive('postRender', [ '$timeout', function($timeout) {
  * This directive should allow an element to be dragged onto the main canvas. Then after it is dropped, it should be
  * painted again on its original position, and the full module should be displayed on the dragged to location.
  */
-app.directive('plumbToolboxItem', function() {
+app.directive('toolboxItem', function() {
 	return {
 		replace: true,
 		controller: 'designerController',
@@ -154,12 +154,11 @@ app.directive('plumbToolboxItem', function() {
 //now we extend html with <div plumb-item>, we can define a template <> to replace it with "proper" html, or we can 
 //replace it with something more sophisticated, e.g. setting jsPlumb arguments and attach it to a double-click 
 //event
-app.directive('plumbSchemaItem', function() {
+app.directive('schemaItem', function() {
 	return {
 		replace: true,
 		controller: 'designerController',
 		link: function (scope, element, attrs) {
-			console.log("Add plumbing for the 'item' element");
 
 			jsPlumb.draggable(element, {
 				containment: 'parent'
@@ -231,23 +230,21 @@ app.directive('plumbConnect', function() {
 	};
 });*/
 
-app.directive('droppable', function($compile) {
+app.directive('schemaContainer', function($compile) {
 	return {
 		restrict: 'A',
 		link: function(scope, element, attrs){
 
 			element.droppable({
 				drop: function(event,ui) {
-					// angular uses angular.element to get jQuery element, subsequently data() of jQuery is used to get
-					// the data-identifier attribute
 					var typeId = angular.element(ui.draggable).data('identifier'),
 					dragElement = angular.element(ui.draggable),
 					dropElement = angular.element(this);
 
 					// if dragged item has class menu-item and dropped div has class drop-container, add module 
-					if (dragElement.hasClass('menu-item') && dropElement.hasClass('drop-container')) {
-						var x = event.pageX - scope.module_css.width / 2;
-						var y = event.pageY - scope.module_css.height / 2;
+					if (dragElement.hasClass('toolbox-item') && dropElement.hasClass('drop-container')) {
+						var x = event.pageX - dropElement.offset().left;
+						var y = event.pageY - dropElement.offset().top;
 
 						scope.createPlugin(typeId, x, y);
 					}
