@@ -10,43 +10,47 @@ var app = angular.module('mylife.app', ['mylife.api'/*, 'ui.bootstrap'*/]);
 
 app.factory('plumbHelper', function() {
 	
-	var epPaintStyle = { 
-			strokeStyle:"#7AB02C",
-			fillStyle:"transparent",
-			radius:4,
-			lineWidth:3 
+	var epPaintStyle = {
+		strokeStyle:"#7AB02C",
+		fillStyle:"transparent",
+		radius:4,
+		lineWidth:3 
 	};
 	
 	var epHoverPaintStyle = {
-			strokeStyle:"#7AB02C",
-			fillStyle:"black",
-			radius:4,
-			lineWidth:3 
+		strokeStyle:"#7AB02C",
+		fillStyle:"black",
+		radius:4,
+		lineWidth:3 
 	};
+	
+	var container = $('#schema-container');
 	
 	return {
 		makeSource: function(element) {
 			jsPlumb.makeSource(element, {
-				//endpoint:["Dot", {radius: 5}],
+				container: container,
 				anchor:[ ["Left"], ["Right"] ],
 				maxConnections: -1,
-				/*connector: [ "Flowchart", { stub:[40, 60], gap:10, cornerRadius:5, alwaysRespectStubs:true } ],*/
 				paintStyle: epPaintStyle,
 				hoverPaintStyle: epHoverPaintStyle,
-				connectorPaintStyle: {
+				
+				connector: [ "Flowchart", { stub:[40, 60], gap:3, cornerRadius:5, alwaysRespectStubs:true } ],
+				connectorStyle: {
 					lineWidth:4,
-					strokeStyle:"#216477",
+					strokeStyle:"lightgray",
 				},
 				connectorHoverStyle: {
 					lineWidth:4,
-					strokeStyle:"#216477",
+					strokeStyle:"darkgray",
 				},
+				connectorOverlays: [ [ "Arrow", { location:1, width: 10, length: 10 } ] ]
 			});
 		},
 		
 		makeTarget: function(element) {
 			jsPlumb.makeTarget(element, {
-				//endpoint:["Dot", {radius: 5}],
+				container: container,
 				anchor:[ ["Left"], ["Right"] ],
 				maxConnections: -1,
 				paintStyle: epPaintStyle,
