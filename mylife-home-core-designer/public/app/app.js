@@ -8,6 +8,54 @@
 
 var app = angular.module('mylife.app', ['mylife.api'/*, 'ui.bootstrap'*/]);
 
+app.factory('plumbHelper', function() {
+	
+	var epPaintStyle = { 
+			strokeStyle:"#7AB02C",
+			fillStyle:"transparent",
+			radius:4,
+			lineWidth:3 
+	};
+	
+	var epHoverPaintStyle = {
+			strokeStyle:"#7AB02C",
+			fillStyle:"black",
+			radius:4,
+			lineWidth:3 
+	};
+	
+	return {
+		makeSource: function(element) {
+			jsPlumb.makeSource(element, {
+				//endpoint:["Dot", {radius: 5}],
+				anchor:[ ["Left"], ["Right"] ],
+				maxConnections: -1,
+				/*connector: [ "Flowchart", { stub:[40, 60], gap:10, cornerRadius:5, alwaysRespectStubs:true } ],*/
+				paintStyle: epPaintStyle,
+				hoverPaintStyle: epHoverPaintStyle,
+				connectorPaintStyle: {
+					lineWidth:4,
+					strokeStyle:"#216477",
+				},
+				connectorHoverStyle: {
+					lineWidth:4,
+					strokeStyle:"#216477",
+				},
+			});
+		},
+		
+		makeTarget: function(element) {
+			jsPlumb.makeTarget(element, {
+				//endpoint:["Dot", {radius: 5}],
+				anchor:[ ["Left"], ["Right"] ],
+				maxConnections: -1,
+				paintStyle: epPaintStyle,
+				hoverPaintStyle: epHoverPaintStyle,
+			});
+		}
+	};
+});
+
 app.controller('designerController', ['$scope', 'api', function($scope, api) {
 
 	$scope.pluginTypes = [];
@@ -179,56 +227,26 @@ app.directive('schemaItem', function() {
 	};
 });
 
-app.directive('componentAttribute', function() {
+app.directive('componentAttribute', ['plumbHelper', function(plumbHelper) {
 	return {
 		replace: true,
 		controller: 'designerController',
 		link: function (scope, element, attrs) {
-
-			jsPlumb.makeTarget(element, {
-				anchor: 'Continuous',
-				maxConnections: -1,
-			});
+			plumbHelper.makeSource(element);
 		}
 	};
-});
+}]);
 
 
-app.directive('componentAction', function() {
+app.directive('componentAction', ['plumbHelper', function(plumbHelper) {
 	return {
 		replace: true,
 		controller: 'designerController',
 		link: function (scope, element, attrs) {
-			
-			jsPlumb.addEndpoint(element, {
-			    endpoint:["Dot", {radius: 5}],
-			    anchor:[ ["Left"], ["Right"] ]
-			});
+			plumbHelper.makeTarget(element);
 		}
 	};
-});
-
-/*
-app.directive('plumbConnect', function() {
-	return {
-		replace: true,
-		link: function (scope, element, attrs) {
-			console.log("Add plumbing for the 'connect' element");
-
-			jsPlumb.makeSource(element, {
-				parent: $(element).parent(),
-//				anchor: 'Continuous',
-				paintStyle:{ 
-					strokeStyle:"#225588",
-					fillStyle:"transparent",
-					radius:7,
-					lineWidth:2 
-				},
-			});
-
-		}
-	};
-});*/
+}]);
 
 app.directive('schemaContainer', function($compile) {
 	return {
