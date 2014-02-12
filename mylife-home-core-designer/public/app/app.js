@@ -199,10 +199,10 @@ app.directive('componentAction', function() {
 		replace: true,
 		controller: 'designerController',
 		link: function (scope, element, attrs) {
-
-			jsPlumb.makeSource(element, {
-				anchor: 'Continuous',
-				maxConnections: -1,
+			
+			jsPlumb.addEndpoint(element, {
+			    endpoint:["Dot", {radius: 5}],
+			    anchor:[ ["Left"], ["Right"] ]
 			});
 		}
 	};
