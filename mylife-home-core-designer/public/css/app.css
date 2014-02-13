@@ -91,6 +91,10 @@
 	*/
 }
 
+.item-selected {
+	border: 5px solid red;
+}
+
 .item-image {
 	height: 16px;
 	width: 16px;

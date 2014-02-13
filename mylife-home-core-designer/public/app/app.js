@@ -297,6 +297,11 @@ app.directive('schemaItem', ['plumbHelper', function(plumbHelper) {
 			jsPlumb.draggable(element, {
 				containment: 'parent'
 			});
+			
+			element.bind('click', function() {
+				$(element).addClass('item-selected').siblings().removeClass('item-selected');
+				// TODO : afficher les propriétés
+			});
 /*
 			scope.$on('$destroy', function() {
 				plumbHelper.destroyConnectionFromItem(scope.plugin);
