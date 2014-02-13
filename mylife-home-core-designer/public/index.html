@@ -36,8 +36,8 @@
 			</div>
 		</div>
 		<div id="schema-container" class="drop-container" ng-click="addEvent($event)" schema-container>
-			<div schema-item class="item" ng-repeat="plugin in plugins" ng-style="{ 'left':plugin.designer.x, 'top':plugin.designer.y }"
-				data-identifier="{{plugin.id}}">
+			<div class="item" schema-id="plugin:{{plugin.id}}" ng-repeat="plugin in plugins" ng-style="{ 'left':plugin.designer.x, 'top':plugin.designer.y }"
+				data-identifier="{{plugin.id}}" schema-item>
 				<div class="item-title">
 					<img class="item-image" src="{{plugin.internal.type.imageUrl}}" title="{{plugin.internal.type.displayName}}"></img>
 					<span>{{plugin.id}}</span>
@@ -46,25 +46,26 @@
 					<div class="component-parameter" title="Paramètre">{{key}} : {{value}}</div>
 				</div>
 				<div ng-repeat="member in plugin.internal.type.class.members | filter:{membertype:'attribute'}">
-					<div component-attribute class="component-attribute" title="Attribut">{{member.name}}</div>
+					<div schema-id="attribute:{{plugin.id}}:{{member.name}}" class="component-attribute" title="Attribut" component-attribute>{{member.name}}</div>
 				</div>
 				<div ng-repeat="member in plugin.internal.type.class.members | filter:{membertype:'action'}">
-					<div component-action class="component-action" title="Action">{{member.name}}</div>
+					<div schema-id="action:{{plugin.id}}:{{member.name}}" class="component-action" title="Action" component-action>{{member.name}}</div>
 				</div>
 			</div>
-			<div schema-item class="item" ng-repeat="hwitem in hardware" ng-style="{ 'left':hwitem.designer.x, 'top':hwitem.designer.y }"
-				data-identifier="{{hwitem.id}}">
+			<div class="item" schema-id="hardware:{{hwitem.id}}" ng-repeat="hwitem in hardware" ng-style="{ 'left':hwitem.designer.x, 'top':hwitem.designer.y }"
+				data-identifier="{{hwitem.id}}" schema-item>
 				<div class="item-title">
 					<img class="item-image" src="images/hardware.jpeg" title="Matériel"></img>
 					<span>{{hwitem.id}}</span>
 				</div>
 				<div ng-repeat="member in hwitem.class.members | filter:{membertype:'attribute'}">
-					<div component-attribute class="component-attribute" title="Attribut">{{member.name}}</div>
+					<div schema-id="attribute:{{plugin.id}}:{{member.name}}" class="component-attribute" title="Attribut" component-attribute>{{member.name}}</div>
 				</div>
 				<div ng-repeat="member in hwitem.class.members | filter:{membertype:'action'}">
-					<div component-action class="component-action" title="Action">{{member.name}}</div>
+					<div schema-id="action:{{plugin.id}}:{{member.name}}" class="component-action" title="Action" component-action>{{member.name}}</div>
 				</div>
 			</div>
+			<div schema-id="link:{{link.id}}" ng-repeat="link in links" schema-link></div>
 		</div>
 	</div>
 	
@@ -74,7 +75,7 @@
 	</div>
 
 	<!--  does not render what comes behind it, so it's probably wrong -->
-	<div post-render></div>
+	<div initializer></div>
 
 </body>
 </html>
