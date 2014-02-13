@@ -8,7 +8,7 @@
 
 var app = angular.module('mylife.app', ['mylife.api'/*, 'ui.bootstrap'*/]);
 
-app.factory('plumbHelper', function() {
+app.factory('plumbHelper', ['$timeout', function($timeout) {
 	
 	var epPaintStyle = {
 		strokeStyle:"#7AB02C",
@@ -19,55 +19,116 @@ app.factory('plumbHelper', function() {
 	
 	var epHoverPaintStyle = {
 		strokeStyle:"#7AB02C",
-		fillStyle:"black",
+		fillStyle:"darkgray",
 		radius:4,
 		lineWidth:3 
 	};
 	
 	var container = $('#schema-container');
 	
-	return {
-		makeSource: function(element) {
-			jsPlumb.makeSource(element, {
-				container: container,
-				anchor:[ ["Left"], ["Right"] ],
-				maxConnections: -1,
-				paintStyle: epPaintStyle,
-				hoverPaintStyle: epHoverPaintStyle,
-				
-				connector: [ "Flowchart", { stub:[40, 60], gap:3, cornerRadius:5, alwaysRespectStubs:true } ],
-				connectorStyle: {
-					lineWidth:4,
-					strokeStyle:"lightgray",
-				},
-				connectorHoverStyle: {
-					lineWidth:4,
-					strokeStyle:"darkgray",
-				},
-				connectorOverlays: [ [ "Arrow", { location:1, width: 10, length: 10 } ] ]
-			});
-		},
-		
-		makeTarget: function(element) {
-			jsPlumb.makeTarget(element, {
-				container: container,
-				anchor:[ ["Left"], ["Right"] ],
-				maxConnections: -1,
-				paintStyle: epPaintStyle,
-				hoverPaintStyle: epHoverPaintStyle,
-			});
-		}
+	var makeSource = function(element) {
+		jsPlumb.makeSource(element, {
+			container: container,
+			deleteEndpointsOnDetach: true,
+			anchor:[ ["Left"], ["Right"] ],
+			maxConnections: -1,
+			paintStyle: epPaintStyle,
+			hoverPaintStyle: epHoverPaintStyle,
+			
+			connector: [ "Flowchart", { stub:[40, 60], gap:3, cornerRadius:5, alwaysRespectStubs:true } ],
+			connectorStyle: {
+				lineWidth:4,
+				strokeStyle:"lightgray",
+			},
+			connectorHoverStyle: {
+				lineWidth:4,
+				strokeStyle:"darkgray",
+			},
+			connectorOverlays: [ [ "Arrow", { location:1, width: 10, length: 10 } ] ]
+		});
 	};
-});
+	
+	var makeTarget = function(element) {
+		jsPlumb.makeTarget(element, {
+			container: container,
+			deleteEndpointsOnDetach: true,
+			anchor:[ ["Left"], ["Right"] ],
+			maxConnections: -1,
+			paintStyle: epPaintStyle,
+			hoverPaintStyle: epHoverPaintStyle,
+		});
+	};
+	
+	/**********************************/
+	
+	var getSourceId = function(link) {
+		return 'attribute:' + link.sourceComponent + ':' + link.sourceAttribute;
+	};
+	
+	var getTargetId = function(link) {
+		return 'action:' + link.destinationComponent + ':' + link.destinationAction;;
+	};
+	
+	var createConnection = function(link) {
+		var sourceId = getSourceId(link);
+		var targetId = getTargetId(link);
+		
+		$timeout(function(){
+			var source = $("div[schema-id='" + sourceId +"']");
+			var target = $("div[schema-id='" + targetId +"']");
+			var connection = jsPlumb.connect({source : source, target : target });
+			
+			link.internal.connection = connection;
+			connection.link = link;
+		});
+	};
+	
+	var destroyConnection = function(link) {
+		var connection = link.internal.connection;
+		if(!connection)
+			return;
+		jsPlumb.doWhileSuspended(function() {
+			jsPlumb.detach(connection);
+		}, true);
+		delete link.internal.connection;
+	};
+	
+	var destroyConnectionFromItem = function(plugin) {
+		// TODO
+	};
+	
+	var onConnectionCreated = function(info, originalEvent) {
+		// programmatically
+		if(!originalEvent)
+			return;
+		
+		// if a connection with same source/dest already exists, delete
+		alert('onConnectionCreated');
+	};
+	
+	var onConnectionDblClick = function(connection, originalEvent) {
+		alert('onConnectionDblClick');
+	};
+	
+	return {
+		makeSource: makeSource,
+		makeTarget: makeTarget,
+		createConnection: createConnection,
+		destroyConnection: destroyConnection,
+		destroyConnectionFromItem: destroyConnectionFromItem,
+		onConnectionCreated: onConnectionCreated,
+		onConnectionDblClick: onConnectionDblClick
+	};
+}]);
 
-app.controller('designerController', ['$scope', 'api', function($scope, api) {
+app.controller('designerController', ['$scope', '$timeout', 'api', 'plumbHelper', function($scope, $timeout, api, plumbHelper) {
 
 	$scope.pluginTypes = [];
 	$scope.plugins = [];
 	$scope.hardware = [];
 
 	var applyData = function(data) {
-
+		
 		var checkDesignerData = function(item) {
 			var designer = item.designer;
 			if(!designer) {
@@ -77,12 +138,14 @@ app.controller('designerController', ['$scope', 'api', function($scope, api) {
 				};
 			}
 		};
+
+		var attachInternal = function(item) {
+			if(!item.internal) {
+				item.internal = {};
+			}
+		};
 		
 		var attachTypeToPlugin = function(plugin) {
-			
-			if(!plugin.internal) {
-				plugin.internal = {};
-			}
 			
 			for (var i = 0, l = $scope.pluginTypes.length; i < l; i++) {
 				var type = $scope.pluginTypes[i];
@@ -93,7 +156,6 @@ app.controller('designerController', ['$scope', 'api', function($scope, api) {
 			}
 		};
 		
-		jsPlumb.detachEveryConnection();
 		$scope.pluginTypes = [];
 		$scope.plugins = [];
 		$scope.hardware = [];
@@ -104,12 +166,15 @@ app.controller('designerController', ['$scope', 'api', function($scope, api) {
 		$scope.hardware = data.hardware;
 		$scope.links = data.links;
 
+		$scope.pluginTypes.forEach(attachInternal);
+		$scope.plugins.forEach(attachInternal);
+		$scope.hardware.forEach(attachInternal);
+		$scope.links.forEach(attachInternal);
+		
 		$scope.plugins.forEach(attachTypeToPlugin);
 		
 		$scope.plugins.forEach(checkDesignerData);
 		$scope.hardware.forEach(checkDesignerData);
-		
-		// TODO : liens
 	};
 	
 	$scope.reload = function() {
@@ -167,18 +232,36 @@ app.controller('designerController', ['$scope', 'api', function($scope, api) {
 			}
 		}
 	};
+	
+	var plumbBind = function() {
+		jsPlumb.bind('connection', function(info, originalEvent) {
+			$scope.$apply(function() {
+				plumbHelper.onConnectionCreated(info, originalEvent);
+			});
+		});
+		
+		jsPlumb.bind('dblclick', function(connection, originalEvent) {
+			$scope.$apply(function() {
+				plumbHelper.onConnectionDblClick(connection, originalEvent);
+			});
+		});
+	};
+	
+	$scope.init = function() {
+		plumbBind();
+		$scope.reload();
+	};
 }]);
 
-app.directive('postRender', [ '$timeout', function($timeout) {
-	var def = {
-			restrict : 'A', 
-			terminal : true,
-			transclude : true,
-			link : function(scope, element, attrs) {
-				$timeout(scope.reload, 0);  //Calling a scoped method
-			}
+app.directive('initializer', [ '$timeout', function($timeout) {
+	return {
+		restrict : 'A', 
+		terminal : true,
+		transclude : true,
+		link : function(scope, element, attrs) {
+			$timeout(scope.init, 0);
+		}
 	};
-	return def;
 }]);
 
 /**
@@ -191,7 +274,6 @@ app.directive('toolboxItem', function() {
 		controller: 'designerController',
 		link: function (scope, element, attrs) {
 
-			// jsPlumb uses the containment from the underlying library, in our case that is jQuery.
 			jsPlumb.draggable(element, {
 				revert: true,
 				//helper: 'clone',
@@ -206,7 +288,7 @@ app.directive('toolboxItem', function() {
 //now we extend html with <div plumb-item>, we can define a template <> to replace it with "proper" html, or we can 
 //replace it with something more sophisticated, e.g. setting jsPlumb arguments and attach it to a double-click 
 //event
-app.directive('schemaItem', function() {
+app.directive('schemaItem', ['plumbHelper', function(plumbHelper) {
 	return {
 		replace: true,
 		controller: 'designerController',
@@ -215,7 +297,12 @@ app.directive('schemaItem', function() {
 			jsPlumb.draggable(element, {
 				containment: 'parent'
 			});
-
+/*
+			scope.$on('$destroy', function() {
+				plumbHelper.destroyConnectionFromItem(scope.plugin);
+			});
+*/			
+/*
 			// this should actually done by a AngularJS template and subsequently a controller attached to the dbl-click event
 			element.bind('dblclick', function(e) {
 				jsPlumb.detachAllConnections($(this));
@@ -226,10 +313,10 @@ app.directive('schemaItem', function() {
 				scope.$parent.removeState(attrs.identifier);
 				scope.$parent.$digest();
 			});
-
+*/
 		}
 	};
-});
+}]);
 
 app.directive('componentAttribute', ['plumbHelper', function(plumbHelper) {
 	return {
@@ -252,26 +339,42 @@ app.directive('componentAction', ['plumbHelper', function(plumbHelper) {
 	};
 }]);
 
+app.directive('schemaLink', ['plumbHelper', function(plumbHelper) {
+	return {
+		replace: true,
+		controller: 'designerController',
+		link: function(scope, element, attrs){
+			plumbHelper.createConnection(scope.link);
+			
+			scope.$on('$destroy', function() {
+				plumbHelper.destroyConnection(scope.link);
+			});
+		}
+	};
+}]);
+
+
 app.directive('schemaContainer', function($compile) {
 	return {
 		restrict: 'A',
 		link: function(scope, element, attrs){
 
 			element.droppable({
-				drop: function(event,ui) {
-					var typeId = angular.element(ui.draggable).data('identifier'),
-					dragElement = angular.element(ui.draggable),
-					dropElement = angular.element(this);
-
-					// if dragged item has class menu-item and dropped div has class drop-container, add module 
-					if (dragElement.hasClass('toolbox-item') && dropElement.hasClass('drop-container')) {
-						var x = event.pageX - dropElement.offset().left;
-						var y = event.pageY - dropElement.offset().top;
-
-						scope.createPlugin(typeId, x, y);
-					}
-
-					scope.$apply();
+				drop: function(event, ui) {
+					scope.$apply(function() {
+						
+						var typeId = angular.element(ui.draggable).data('identifier'),
+						dragElement = angular.element(ui.draggable),
+						dropElement = angular.element(this);
+	
+						// if dragged item has class menu-item and dropped div has class drop-container, add module 
+						if (dragElement.hasClass('toolbox-item') && dropElement.hasClass('drop-container')) {
+							var x = event.pageX - dropElement.offset().left;
+							var y = event.pageY - dropElement.offset().top;
+	
+							scope.createPlugin(typeId, x, y);
+						}
+					});
 				}
 			});
 		}
