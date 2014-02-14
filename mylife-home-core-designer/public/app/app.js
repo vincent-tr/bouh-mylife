@@ -126,6 +126,8 @@ app.controller('designerController', ['$scope', '$timeout', 'api', 'plumbHelper'
 	$scope.pluginTypes = [];
 	$scope.plugins = [];
 	$scope.hardware = [];
+	$scope.links = [];
+	$scope.selectedComponent = null;
 
 	var applyData = function(data) {
 		
@@ -160,6 +162,7 @@ app.controller('designerController', ['$scope', '$timeout', 'api', 'plumbHelper'
 		$scope.plugins = [];
 		$scope.hardware = [];
 		$scope.links = [];
+		$scope.selectedComponent = null;
 	
 		$scope.pluginTypes = data.pluginTypes;
 		$scope.plugins = data.plugins;
@@ -300,7 +303,14 @@ app.directive('schemaItem', ['plumbHelper', function(plumbHelper) {
 			
 			element.bind('click', function() {
 				$(element).addClass('item-selected').siblings().removeClass('item-selected');
-				// TODO : afficher les propriétés
+				
+				// Soit un plugin soit un hwitem (dans les ng-repeat)
+				var component = scope.plugin;
+				if(!component)
+					component = scope.hwitem;
+				
+				// Scope parent du ng-repeat
+				scope.$parent.selectedComponent = component;
 			});
 /*
 			scope.$on('$destroy', function() {
