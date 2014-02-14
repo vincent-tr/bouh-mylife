@@ -91,6 +91,20 @@
 	vertical-align: middle;
 }
 
+#propertybox-wrapper {
+	margin: 5px;
+	
+	border: 1px solid black;
+	box-shadow: 2px 2px 19px darkgray;
+	-o-box-shadow: 2px 2px 19px darkgray;
+	-webkit-box-shadow: 2px 2px 19px darkgray;
+	-moz-box-shadow: 2px 2px 19px darkgray;
+	opacity: 0.8;
+	filter: alpha(opacity = 80);
+	text-align: center;
+	background-color: #F3F3F3;
+}
+
 .propertybox-title {
 } 
 
@@ -110,10 +124,6 @@
 	-moz-box-shadow: 2px 2px 19px darkgray;
 	-moz-border-radius: 0.5em;
 	border-radius: 0.5em;
-	/*
-	opacity: 1;
-	filter: alpha(opacity = 80);
-	*/
 }
 
 .item-selected {

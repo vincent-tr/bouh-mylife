@@ -36,25 +36,32 @@
 			</div>
 			<div id="propertybox-container">
 				<div id="propertybox">
-					<span class="propertybox-title">{{selectedComponent.id}}</span>
-					<table ng-show="selectedComponent.internal.type">
-						<thead>
-							<tr>
-								<th>Nom</th>
-								<th>Valeur</th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr>
-								<td>ID</td>
-								<td><input type="text" ng-model="selectedComponent.id"></input></td>
-							</tr>
-							<tr ng-repeat="(key, value) in selectedComponent.parameters">
-								<td>{{key}}</td>
-								<td><input type="text" ng-model="value"></input></td>
-							</tr>
-						</tbody>
-					</table>
+					<div id="propertybox-wrapper">
+						<div class="propertybox-title">
+							<img ng-show="selectedComponent.internal.type" class="item-image" src="{{selectedComponent.internal.type.imageUrl}}" title="{{selectedComponent.internal.type.displayName}}"></img>
+							<img ng-show="selectedComponent&&!selectedComponent.internal.type" class="item-image" src="images/hardware.jpeg" title="Matériel"></img>
+							<span>{{selectedComponent.id}}</span>
+							<span ng-show="!selectedComponent">Pas de selection</span>
+						</div>
+						<table ng-show="selectedComponent.internal.type">
+							<thead>
+								<tr>
+									<th>Nom</th>
+									<th>Valeur</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td>ID</td>
+									<td><input type="text" ng-model="selectedComponent.id"></input></td>
+								</tr>
+								<tr ng-repeat="(key, value) in selectedComponent.parameters">
+									<td>{{key}}</td>
+									<td><input type="text" ng-model="value"></input></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
 				</div>
 			</div>
 		</div>
