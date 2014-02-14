@@ -128,7 +128,22 @@ app.controller('designerController', ['$scope', '$timeout', 'api', 'plumbHelper'
 	$scope.hardware = [];
 	$scope.links = [];
 	$scope.selectedComponent = null;
+	$scope.id_generator = 0;
+	
+	var newId = function() {
+		return ++($scope.id_generator);
+	};
 
+	var findType = function(typeId) {
+		var pluginTypes = $scope.pluginTypes;
+		for(var i=0, l=pluginTypes.length; i<l; i++) {
+			var type = pluginTypes[i];
+			if(type.id === typeId)
+				return type;
+		}
+		return undefined;
+	};
+	
 	var applyData = function(data) {
 		
 		var checkDesignerData = function(item) {
@@ -222,7 +237,28 @@ app.controller('designerController', ['$scope', '$timeout', 'api', 'plumbHelper'
 	};
 	
 	$scope.createPlugin = function(typeId, x, y) {
-		// TODO
+		
+		var type = findType(typeId);
+		
+		var parameters = {};
+		for(var i=0, l=type.arguments.length; i<l; i++) {
+			parameters[type.arguments[i]] = null;
+		}
+		
+		var plugin = {
+			id: 'new_plugin_' + newId(),
+			type: type.id,
+			parameters: parameters,
+			designer: {
+				x: x,
+				y: y
+			},
+			internal: {
+				type: type
+			}
+		};
+		
+		$scope.plugins.push(plugin);
 	};
 
 	$scope.removeState = function(schema_id) {
@@ -368,7 +404,6 @@ app.directive('schemaLink', ['plumbHelper', function(plumbHelper) {
 	};
 }]);
 
-
 app.directive('schemaContainer', function($compile) {
 	return {
 		restrict: 'A',
@@ -380,7 +415,7 @@ app.directive('schemaContainer', function($compile) {
 						
 						var typeId = angular.element(ui.draggable).data('identifier'),
 						dragElement = angular.element(ui.draggable),
-						dropElement = angular.element(this);
+						dropElement = element;
 	
 						// if dragged item has class menu-item and dropped div has class drop-container, add module 
 						if (dragElement.hasClass('toolbox-item') && dropElement.hasClass('drop-container')) {
