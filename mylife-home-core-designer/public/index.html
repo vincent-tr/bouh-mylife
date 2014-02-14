@@ -33,7 +33,24 @@
 						<img class="toolbox-item-image" src="{{type.imageUrl}}" height="48" width="48"></img>
 					</div>
 				</div>
-				<div id="propertybox-container">
+			</div>
+			<div id="propertybox-container">
+				<div id="propertybox">
+					<span class="propertybox-title">{{selectedComponent.id}}</span>
+					<table>
+						<thead>
+							<tr>
+								<th>Nom</th>
+								<th>Valeur</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td>ID</td>
+								<td><input type="text" ng-model="selectedComponent.id"></input></td>
+							</tr>
+						</tbody>
+					</table>
 				</div>
 			</div>
 		</div>
@@ -74,7 +91,6 @@
 	<div id="commands">
 		<button type="button" class="btn btn-primary" ng-click="reload()">Annuler</button>
 		<button type="button" class="btn btn-primary" ng-click="save()">Enregistrer</button>
-		{{selectedComponent.id}}
 	</div>
 
 	<!--  does not render what comes behind it, so it's probably wrong -->
