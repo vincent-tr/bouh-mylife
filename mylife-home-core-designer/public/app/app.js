@@ -467,10 +467,10 @@ app.directive('splitter', ['$timeout', function($timeout) {
 				var jqContainer = jqTop.parent();
 				
 				var resizeBottom = function() {
-					var remainingSpace = jqContainer.height() - jqTop.outerWidth();
+					var remainingSpace = jqContainer.height() - jqTop.outerHeight();
 					var bottomPos = jqTop.outerHeight();
 					var bottomHeight = remainingSpace - (jqBottom.outerHeight() - jqBottom.height());
-					jqBottom.width(bottomHeight);
+					jqBottom.height(bottomHeight);
 					jqBottom.css({top:bottomPos,left:0});
 				};
 				
