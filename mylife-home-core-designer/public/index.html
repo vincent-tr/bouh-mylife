@@ -25,13 +25,15 @@
 <body ng-controller="designerController">
 
 	<div id="main">
-		<div id="toolbox-container" splitter>
-			<div id="toolbox">
-				<div class="toolbox-item-wrapper" ng-repeat="type in pluginTypes">
-					<div class="toolbox-item" toolbox-item data-identifier="{{type.id}}" title="{{type.displayName}}">
+		<div id="leftpane" splitter="vertical">
+			<div id="toolbox-container" splitter="horizontal">
+				<div id="toolbox">
+					<div class="toolbox-item" toolbox-item data-identifier="{{type.id}}" title="{{type.displayName}}" ng-repeat="type in pluginTypes">
 						<span class="toolbox-item-title">{{type.displayName}}</span>
 						<img class="toolbox-item-image" src="{{type.imageUrl}}" height="48" width="48"></img>
 					</div>
+				</div>
+				<div id="propertybox-container">
 				</div>
 			</div>
 		</div>
