@@ -79,10 +79,10 @@
 	position: absolute;
 	width: 150px;
 	border: 1px solid black;
-	box-shadow: 2px 2px 19px #aaa;
-	-o-box-shadow: 2px 2px 19px #aaa;
-	-webkit-box-shadow: 2px 2px 19px #aaa;
-	-moz-box-shadow: 2px 2px 19px #aaa;
+	box-shadow: 2px 2px 19px darkgray;
+	-o-box-shadow: 2px 2px 19px darkgray;
+	-webkit-box-shadow: 2px 2px 19px darkgray;
+	-moz-box-shadow: 2px 2px 19px darkgray;
 	-moz-border-radius: 0.5em;
 	border-radius: 0.5em;
 	/*
@@ -92,7 +92,12 @@
 }
 
 .item-selected {
-	border: 5px solid red;
+	box-shadow: 2px 2px 30px black;
+	-o-box-shadow: 2px 2px 30px black;
+	-webkit-box-shadow: 2px 2px 30px black;
+	-moz-box-shadow: 2px 2px 30px black;
+	-moz-border-radius: 0.5em;
+	border-radius: 0.5em;
 }
 
 .item-image {
