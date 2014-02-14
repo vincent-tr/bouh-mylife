@@ -276,12 +276,12 @@ app.directive('toolboxItem', function() {
 		replace: true,
 		controller: 'designerController',
 		link: function (scope, element, attrs) {
-
-			jsPlumb.draggable(element, {
+			
+			$(element).draggable({
 				revert: true,
-				//helper: 'clone',
-				zIndex: 100,
-				containment: $('#main')
+				helper: 'clone',
+				containment: $('#main'),
+				zIndex: 100
 			});
 		}
 	};
@@ -401,28 +401,64 @@ app.directive('splitter', ['$timeout', function($timeout) {
 		restrict:'A',
 		link: function(scope, element, attrs) {
 			
-			var jqLeft = $(element);
-			var jqRight = jqLeft.next();
-			var jqContainer = jqLeft.parent();
-			
-			var resizeRight = function() {
-				var remainingSpace = jqContainer.width() - jqLeft.outerWidth();
-				var rightPos = jqLeft.outerWidth();
-				var rightWidth = remainingSpace - (jqRight.outerWidth() - jqRight.width());
-				jqRight.width(rightWidth);
-				jqRight.css({left:rightPos,top:0});
+			var verticalSplitter = function() {
+				var jqLeft = $(element);
+				var jqRight = jqLeft.next();
+				var jqContainer = jqLeft.parent();
+				
+				var resizeRight = function() {
+					var remainingSpace = jqContainer.width() - jqLeft.outerWidth();
+					var rightPos = jqLeft.outerWidth();
+					var rightWidth = remainingSpace - (jqRight.outerWidth() - jqRight.width());
+					jqRight.width(rightWidth);
+					jqRight.css({left:rightPos,top:0});
+				};
+				
+				jqLeft.resizable({
+					handles: 'e',
+					minWidth: '110',
+					maxWidth: '500',
+					resize: resizeRight
+				});
+				
+				$timeout(function(){
+					resizeRight();
+				});
 			};
 			
-			jqLeft.resizable({
-				handles: 'e',
-				minWidth: '100',
-				maxWidth: '500',
-				resize: resizeRight
-			});
+			var horizontalSplitter = function() {
+				var jqTop = $(element);
+				var jqBottom = jqTop.next();
+				var jqContainer = jqTop.parent();
+				
+				var resizeBottom = function() {
+					var remainingSpace = jqContainer.height() - jqTop.outerWidth();
+					var bottomPos = jqTop.outerHeight();
+					var bottomHeight = remainingSpace - (jqBottom.outerHeight() - jqBottom.height());
+					jqBottom.width(bottomHeight);
+					jqBottom.css({top:bottomPos,left:0});
+				};
+				
+				jqTop.resizable({
+					handles: 's',
+					minHeight: '100',
+					resize: resizeBottom
+				});
+				
+				$timeout(function(){
+					resizeBottom();
+				});
+			};
 			
-			$timeout(function(){
-				resizeRight();
-			});
+			var direction = attrs.splitter;
+			if(direction !== 'horizontal' && direction !== 'vertical')
+				direction = 'vertical';
+			
+			if(direction === 'vertical') {
+				verticalSplitter();
+			} else {
+				horizontalSplitter();
+			}
 		}
 	};
 }]);
