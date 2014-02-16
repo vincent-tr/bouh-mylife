@@ -10,7 +10,7 @@ var init = function(apiarg) {
 	
 	return {
 		'class' : clazz,
-		displayName : 'Interrupteur -> Bouton',
+		displayName : 'Int -> Btn',
 		imageUrl : api.tools.loadDefaultIcon(__filename),
 		arguments : []
 	};
