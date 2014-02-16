@@ -290,6 +290,45 @@ app.controller('designerController', ['$scope', '$timeout', 'api', 'plumbHelper'
 		plumbBind();
 		$scope.reload();
 	};
+	
+	$scope.memberTitle = function(member) {
+		var newLine = '\n'; // '&#10;';
+		
+		var formatType = function(type) {
+			if(type.type === 'enum') {
+				var text = '[';
+				for(var i=0, l=type.values.length; i<l; i++) {
+					if(i > 0) {
+						text += ',';
+					}
+					text += type.values[i];
+				}
+				return text + ']';
+			} else {
+				return '(' + type.min + ';' + type.max + ')';
+			}
+		};
+		
+		var formatAttribute = function(member) {
+			var text = 'Attribut: ' + member.name;
+			text += newLine + 'Type: ' + formatType(member.type);
+			return text;
+		};
+		
+		var formatAction = function(member) {
+			var text = 'Action: ' + member.name;
+			for(var i=0, l=member.arguments.length; i<l; i++) {
+				text += newLine + 'Argument #' + i + ': ' + formatType(member.arguments[i]);
+			}
+			return text;
+		};
+		
+		if(member.membertype === 'attribute') {
+			return formatAttribute(member);
+		} else {
+			return formatAction(member);
+		}
+	};
 }]);
 
 app.directive('initializer', [ '$timeout', function($timeout) {
