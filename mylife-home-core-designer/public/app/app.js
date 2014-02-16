@@ -329,6 +329,13 @@ app.controller('designerController', ['$scope', '$timeout', 'api', 'plumbHelper'
 			return formatAction(member);
 		}
 	};
+	
+	$scope.toolboxTitle = function(pluginType) {
+		var text = pluginType.displayName;
+		if(pluginType.ui)
+			text += ' (ui)';
+		return text;
+	};
 }]);
 
 app.directive('initializer', [ '$timeout', function($timeout) {

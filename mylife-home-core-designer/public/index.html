@@ -28,9 +28,12 @@
 		<div id="leftpane" splitter="vertical">
 			<div id="toolbox-container" splitter="horizontal">
 				<div id="toolbox">
-					<div class="toolbox-item" toolbox-item data-identifier="{{type.id}}" title="{{type.displayName}}" ng-repeat="type in pluginTypes">
+					<div class="toolbox-item" toolbox-item data-identifier="{{type.id}}" title="{{toolboxTitle(type)}}" ng-repeat="type in pluginTypes">
 						<span class="toolbox-item-title">{{type.displayName}}</span>
-						<img class="toolbox-item-image" src="{{type.imageUrl}}" height="48" width="48"></img>
+						<div class="toolbox-item-image-wrapper">
+							<img class="toolbox-item-image" src="{{type.imageUrl}}" height="48" width="48"></img>
+							<img ng-show={{type.ui}} class="toolbox-item-image-ui" src="images/ui.png" height="16" width="16"></img>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -71,6 +74,7 @@
 				<div class="item-title">
 					<img class="item-image" src="{{plugin.internal.type.imageUrl}}" title="{{plugin.internal.type.displayName}}"></img>
 					<span>{{plugin.id}}</span>
+					<img ng-show={{plugin.internal.type.ui}} class="item-image-ui" title="ui" src="images/ui.png"></img>
 				</div>
 				<div ng-repeat="(key, value) in plugin.parameters">
 					<div class="component-parameter" title="Paramètre">{{key}} : {{value}}</div>

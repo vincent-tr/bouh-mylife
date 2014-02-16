@@ -64,8 +64,26 @@
 	font-size: xx-small;
 }
 
-.toolbox-item-image {
+.toolbox-item-image-wrapper {
+	display: inline-block;
 	border: 1px solid black;
+	position: relative;
+	height: 50px;
+	width: 50px;
+}
+
+.toolbox-item-image {
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	z-index: 1;
+}
+
+.toolbox-item-image-ui {
+	position: absolute;
+	right: 0px;
+	bottom: 0px;
+	z-index: 2;
 }
 
 #propertybox-container {
@@ -138,6 +156,13 @@
 .item-image {
 	height: 16px;
 	width: 16px;
+}
+
+.item-image-ui {
+	height: 16px;
+	width: 16px;
+	right: 3px;
+	position: absolute;
 }
 
 .item-title {
