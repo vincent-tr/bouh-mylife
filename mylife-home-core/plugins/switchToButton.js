@@ -6,11 +6,11 @@ var init = function(apiarg) {
 	var boolean = api.netobject.netEnum('off', 'on');
 	var clazz = api.netobject.netClass(
 			api.netobject.netAttribute('output', boolean),
-			api.netobject.netAction('input'));
+			api.netobject.netAction('input', boolean));
 	
 	return {
 		'class' : clazz,
-		displayName : 'Bouton',
+		displayName : 'Interrupteur -> Bouton',
 		imageUrl : api.tools.loadDefaultIcon(__filename),
 		arguments : []
 	};
@@ -29,6 +29,6 @@ var create = function(context) {
 	return {};
 };
 
-module.exports.ui = true;
+module.exports.ui = false;
 module.exports.init = init;
 module.exports.create = create;
