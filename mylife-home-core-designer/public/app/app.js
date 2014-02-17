@@ -6,7 +6,7 @@
 
 'use strict';
 
-var app = angular.module('mylife.app', ['mylife.api'/*, 'ui.bootstrap'*/]);
+var app = angular.module('mylife.app', ['mylife.api', 'ui.bootstrap']);
 
 app.factory('plumbHelper', ['$timeout', function($timeout) {
 	
