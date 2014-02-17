@@ -33,7 +33,7 @@
 	height: 100%;
 	background-color: lightgray;
 	
-	border: 1px solid #346789;
+	border: 1px solid black;
 	border-radius: 5px;
 
     overflow-y: auto;
@@ -100,7 +100,7 @@
 	height: 100%;
 	background-color: lightgray;
 	
-	border: 1px solid #346789;
+	border: 1px solid black;
 	border-radius: 5px;
 
     overflow-y: auto;
