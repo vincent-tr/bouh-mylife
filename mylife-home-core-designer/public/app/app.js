@@ -130,6 +130,10 @@ app.controller('designerController', ['$scope', '$timeout', 'api', 'plumbHelper'
 	$scope.selectedComponent = null;
 	$scope.id_generator = 0;
 	
+	$scope.selectedComponentDelete = function() {
+		alert('delete comp ' + $scope.selectedComponent.id);
+	};
+	
 	var newId = function() {
 		return ++($scope.id_generator);
 	};
@@ -394,23 +398,6 @@ app.directive('schemaItem', ['plumbHelper', function(plumbHelper) {
 				// Scope parent du ng-repeat
 				scope.$parent.selectedComponent = component;
 			});
-/*
-			scope.$on('$destroy', function() {
-				plumbHelper.destroyConnectionFromItem(scope.plugin);
-			});
-*/			
-/*
-			// this should actually done by a AngularJS template and subsequently a controller attached to the dbl-click event
-			element.bind('dblclick', function(e) {
-				jsPlumb.detachAllConnections($(this));
-				$(this).remove();
-				// stop event propagation, so it does not directly generate a new state
-				e.stopPropagation();
-				//we need the scope of the parent, here assuming <plumb-item> is part of the <plumbApp>			
-				scope.$parent.removeState(attrs.identifier);
-				scope.$parent.$digest();
-			});
-*/
 		}
 	};
 }]);
