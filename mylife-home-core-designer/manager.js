@@ -36,8 +36,14 @@ var data = function(callback) {
 	}, callback);
 };
 
-var updateHardware = function(url, callback) {
-	// TODO
+var hardware = function(url, callback) {
+	request.post(url, function(err, response, body) {
+		if (err) {
+			callback(err);
+		} else {
+			callback(null, JSON.parse(body));
+		}
+	});
 };
 
 var merge = function(newData, callback) {
@@ -57,8 +63,8 @@ var doMerge = function(oldData, newData, callback) {
 	var mergedHardware = mergeData(oldData.hardware, newData.hardware);
 	var mergedLinks = mergeData(oldData.links, newData.links);
 
-	// on cherche les links des oldData qui sont référencés dans les delete et qui ne sont pas dans les links a delete
-	// on les delete et recrée
+	// on cherche les links des oldData qui sont rï¿½fï¿½rencï¿½s dans les delete et qui ne sont pas dans les links a delete
+	// on les delete et recrï¿½e
 	oldData.links.forEach(function(link) {
 		var recreateLink = function(link) {
 			mergedLinks.destroy.push(link);
@@ -66,7 +72,7 @@ var doMerge = function(oldData, newData, callback) {
 		};
 		
 		if(findById(mergedLinks.destroy, link.id)) {
-			// déjà présent rien à faire
+			// dï¿½jï¿½ prï¿½sent rien ï¿½ faire
 			return;
 		}
 		
@@ -197,6 +203,6 @@ var createArray = function(map, array, type) {
 };
 
 module.exports.data = data;
-module.exports.updateHardware = updateHardware;
+module.exports.hardware = hardware;
 module.exports.merge = merge;
 module.exports.apply = apply;
