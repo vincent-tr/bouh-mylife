@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html ng-app="mylife.app">
 <head>
-<meta charset="ISO-8859-1">
+<meta charset="UTF8">
 <title>mylife-home-core-designer</title>
 
 <script src="lib/jquery/jquery.js"></script>
@@ -16,6 +16,11 @@
 
 <script src="app/app.js"></script>
 <script src="app/api.js"></script>
+<script src="app/tools.js"></script>
+<script src="app/designer.js"></script>
+<script src="app/plumbHelper.js"></script>
+<script src="app/schemaHelper.js"></script>
+<script src="app/idGenerator.js"></script>
 
 <link rel="stylesheet" href="lib/bootstrap/css/bootstrap.css">
 <!--  <link rel="stylesheet" href="lib/bootstrap/css/bootstrap-theme.css">  -->
@@ -25,10 +30,10 @@
 <body ng-controller="designerController">
 
 	<div id="main">
-		<div id="leftpane" splitter="vertical">
-			<div id="toolbox-container" splitter="horizontal">
+		<div id="leftpane" splitter="{direction:'vertical',min:'110',max:'500'}">
+			<div id="toolbox-container" splitter="{direction:'horizontal',min:'100'}">
 				<div id="toolbox">
-					<div class="toolbox-item" toolbox-item data-identifier="{{type.id}}" title="{{toolboxTitle(type)}}" ng-repeat="type in pluginTypes">
+					<div class="toolbox-item" toolbox-item data-identifier="{{type.id}}" title="{{schemaHelper.toolboxTitle(type)}}" ng-repeat="type in pluginTypes">
 						<span class="toolbox-item-title">{{type.displayName}}</span>
 						<div class="toolbox-item-image-wrapper">
 							<img class="toolbox-item-image" src="{{type.imageUrl}}" height="48" width="48"></img>
@@ -42,7 +47,7 @@
 					<div id="propertybox-wrapper">
 						<div class="propertybox-title">
 							<img ng-show="selectedComponent.internal.type" class="item-image" src="{{selectedComponent.internal.type.imageUrl}}" title="{{selectedComponent.internal.type.displayName}}"></img>
-							<img ng-show="selectedComponent&&!selectedComponent.internal.type" class="item-image" src="images/hardware.jpeg" title="Matériel"></img>
+							<img ng-show="selectedComponent&&!selectedComponent.internal.type" class="item-image" src="images/hardware.jpeg" title="MatÃ©riel"></img>
 							<span>{{selectedComponent.id}}</span>
 							<span ng-show="!selectedComponent">Pas de selection</span>
 						</div>
@@ -80,26 +85,26 @@
 					<img ng-show={{plugin.internal.type.ui}} class="item-image-ui" title="ui" src="images/ui.png"></img>
 				</div>
 				<div ng-repeat="(key, value) in plugin.parameters">
-					<div class="component-parameter" title="Paramètre">{{key}} : {{value}}</div>
+					<div class="component-parameter" title="ParamÃ¨tre">{{key}} : {{value}}</div>
 				</div>
 				<div ng-repeat="member in plugin.internal.type.class.members | filter:{membertype:'attribute'}">
-					<div schema-id="attribute:{{plugin.id}}:{{member.name}}" class="component-attribute" title="{{memberTitle(member)}}" component-attribute>{{member.name}}</div>
+					<div schema-id="attribute:{{plugin.id}}:{{member.name}}" class="component-attribute" title="{{schemaHelper.memberTitle(member)}}" component-attribute>{{member.name}}</div>
 				</div>
 				<div ng-repeat="member in plugin.internal.type.class.members | filter:{membertype:'action'}">
-					<div schema-id="action:{{plugin.id}}:{{member.name}}" class="component-action" title="{{memberTitle(member)}}" component-action>{{member.name}}</div>
+					<div schema-id="action:{{plugin.id}}:{{member.name}}" class="component-action" title="{{schemaHelper.memberTitle(member)}}" component-action>{{member.name}}</div>
 				</div>
 			</div>
 			<div class="item" schema-id="hardware:{{hwitem.id}}" ng-repeat="hwitem in hardware" ng-style="{ 'left':hwitem.designer.x, 'top':hwitem.designer.y }"
 				data-identifier="{{hwitem.id}}" schema-item>
 				<div class="item-title">
-					<img class="item-image" src="images/hardware.jpeg" title="Matériel"></img>
+					<img class="item-image" src="images/hardware.jpeg" title="MatÃ©riel"></img>
 					<span>{{hwitem.id}}</span>
 				</div>
 				<div ng-repeat="member in hwitem.class.members | filter:{membertype:'attribute'}">
-					<div schema-id="attribute:{{plugin.id}}:{{member.name}}" class="component-attribute" title="{{memberTitle(member)}}" component-attribute>{{member.name}}</div>
+					<div schema-id="attribute:{{hwitem.id}}:{{member.name}}" class="component-attribute" title="{{schemaHelper.memberTitle(member)}}" component-attribute>{{member.name}}</div>
 				</div>
 				<div ng-repeat="member in hwitem.class.members | filter:{membertype:'action'}">
-					<div schema-id="action:{{plugin.id}}:{{member.name}}" class="component-action" title="{{memberTitle(member)}}" component-action>{{member.name}}</div>
+					<div schema-id="action:{{hwitem.id}}:{{member.name}}" class="component-action" title="{{schemaHelper.memberTitle(member)}}" component-action>{{member.name}}</div>
 				</div>
 			</div>
 			<div schema-id="link:{{link.id}}" ng-repeat="link in links" schema-link></div>

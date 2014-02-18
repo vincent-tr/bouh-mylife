@@ -4,9 +4,17 @@
 
 'use strict';
 
-var app = angular.module('mylife.tools', ['ui.bootstrap']);
+var module = angular.module('mylife.tools', ['ui.bootstrap']);
 
-app.factory('mylife.tools.dialog.confirm', ['$modal', function($modal) {
+module.factory('tools', [function() {
+	
+	var removeFromArray = function(array, item) {
+		var index = array.indexOf(item);
+		if(index < 0)
+			return false;
+		array.splice(index, 1);
+		return true;
+	};
 	
 	var checkParam = function(param, defaultValue) {
 		if(param)
@@ -14,15 +22,23 @@ app.factory('mylife.tools.dialog.confirm', ['$modal', function($modal) {
 		return defaultValue;
 	};
 	
+	return {
+		removeFromArray: removeFromArray,
+		checkParam: checkParam
+	};
+}]);
+
+module.factory('dialogConfirm', ['$modal', 'tools', function($modal, tools) {
+	
 	return function (params) {
 
 		var modalInstance = $modal.open({
 			templateUrl: 'templates/confirm.html',
 			controller: function ($scope, $modalInstance) {
-				$scope.title = checkParam(params.title, 'title');
-				$scope.text = checkParam(params.text, 'text');
-				$scope.labelOk = checkParam(params.labelOk, 'Ok');
-				$scope.labelCancel = checkParam(params.labelCancel, 'Annuler');
+				$scope.title = tools.checkParam(params.title, '');
+				$scope.text = tools.checkParam(params.text, '');
+				$scope.labelOk = tools.checkParam(params.labelOk, 'Ok');
+				$scope.labelCancel = tools.checkParam(params.labelCancel, 'Annuler');
 
 				$scope.ok = function () {
 					$modalInstance.close();
@@ -38,8 +54,128 @@ app.factory('mylife.tools.dialog.confirm', ['$modal', function($modal) {
 			if(params.callbackOk)
 				params.callbackOk();
 		}, function () {
+			if(params.callbackOk)
+				params.callbackOk();
+		});
+	};
+}]);
+
+module.factory('dialogAlert', ['$modal', 'tools', function($modal, tools) {
+	
+	return function(params) {
+		
+		var modalInstance = $modal.open({
+			templateUrl: 'templates/alert.html',
+			controller: function ($scope, $modalInstance) {
+				$scope.title = tools.checkParam(params.title, '');
+				$scope.text = tools.checkParam(params.text, '');
+				$scope.labelOk = tools.checkParam(params.labelOk, 'Ok');
+
+				$scope.ok = function () {
+					$modalInstance.close();
+				};
+			}
+		});
+
+		modalInstance.result.then(function () {
+			if(params.callbackOk)
+				params.callbackOk();
+		}, function () {
 			if(params.callbackCancel)
 				params.callbackCancel();
 		});
+	};
+}]);
+
+module.directive('splitter', ['$timeout', '$window', function($timeout, $window) {
+	return {
+		restrict:'A',
+		link: function(scope, element, attrs) {
+			
+			var verticalSplitter = function(min, max) {
+				var jqLeft = $(element);
+				var jqRight = jqLeft.next();
+				var jqContainer = jqLeft.parent();
+				
+				var resizeRight = function() {
+					var remainingSpace = jqContainer.width() - jqLeft.outerWidth();
+					var rightPos = jqLeft.outerWidth();
+					var rightWidth = remainingSpace - (jqRight.outerWidth() - jqRight.width());
+					jqRight.width(rightWidth);
+					jqRight.css({left:rightPos,top:0});
+				};
+				
+				jqLeft.resizable({
+					handles: 'e',
+					minWidth: min,
+					maxWidth: max,
+					resize: resizeRight
+				});
+
+				$timeout(function(){
+					resizeRight();
+				}, 100); // TODO : better
+				
+				angular.element($window).bind('resize', function() {
+					resizeRight();
+				});
+			};
+			
+			var horizontalSplitter = function(min, max) {
+				var jqTop = $(element);
+				var jqBottom = jqTop.next();
+				var jqContainer = jqTop.parent();
+				
+				var resizeBottom = function() {
+					var remainingSpace = jqContainer.height() - jqTop.outerHeight();
+					var bottomPos = jqTop.outerHeight();
+					var bottomHeight = remainingSpace - (jqBottom.outerHeight() - jqBottom.height());
+					jqBottom.height(bottomHeight);
+					jqBottom.css({top:bottomPos,left:0});
+				};
+				
+				jqTop.resizable({
+					handles: 's',
+					minHeight: min,
+					maxHeight: max,
+					resize: resizeBottom
+				});
+				
+				$timeout(function(){
+					resizeBottom();
+				}, 100); // TODO : better
+				
+				angular.element($window).bind('resize', function() {
+					resizeBottom();
+				});
+			};
+			
+			var options = attrs.splitter;
+			if(options) {
+				options = eval('(' + options + ')');
+			}
+			
+			var direction = undefined;
+			if(options) {
+				direction = options.direction;
+			}
+			if(direction !== 'horizontal' && direction !== 'vertical')
+				direction = 'vertical';
+			
+			var min = undefined;
+			if(options) {
+				min = options.min;
+			}
+			var max = undefined;
+			if(options) {
+				max = options.max;
+			}
+			
+			if(direction === 'vertical') {
+				verticalSplitter(min, max);
+			} else {
+				horizontalSplitter(min, max);
+			}
+		}
 	};
 }]);
