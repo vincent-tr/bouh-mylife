@@ -48,9 +48,9 @@ var create = function(port) {
 		});
 	});
 
-	app.post('/updateHardware', function(req, res) {
-		var urlObject = JSON.parse(req.body);
-		manager.updateHardware(urlObject.url, function(err, ret) {
+	app.post('/hardware', function(req, res) {
+		var urlObject = req.body;
+		manager.hardware(urlObject.url, function(err, ret) {
 			if (err) {
 				console.error(err);
 				res.json(500, errorToObject(err));
@@ -62,7 +62,7 @@ var create = function(port) {
 	});
 
 	app.post('/merge', function(req, res) {
-		var newData = JSON.parse(req.body);
+		var newData = req.body;
 		manager.merge(newData, function(err, ret) {
 			if (err) {
 				console.error(err);

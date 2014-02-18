@@ -22,9 +22,13 @@ module.factory('tools', [function() {
 		return defaultValue;
 	};
 	
+	var appTitle = '';
+	
 	return {
 		removeFromArray: removeFromArray,
-		checkParam: checkParam
+		checkParam: checkParam,
+		getAppTitle: function() { return appTitle; },
+		setAppTitle: function(title) { appTitle = title; }
 	};
 }]);
 
@@ -35,7 +39,7 @@ module.factory('dialogConfirm', ['$modal', 'tools', function($modal, tools) {
 		var modalInstance = $modal.open({
 			templateUrl: 'templates/confirm.html',
 			controller: function ($scope, $modalInstance) {
-				$scope.title = tools.checkParam(params.title, '');
+				$scope.title = tools.checkParam(params.title, tools.getAppTitle());
 				$scope.text = tools.checkParam(params.text, '');
 				$scope.labelOk = tools.checkParam(params.labelOk, 'Ok');
 				$scope.labelCancel = tools.checkParam(params.labelCancel, 'Annuler');
@@ -67,7 +71,7 @@ module.factory('dialogAlert', ['$modal', 'tools', function($modal, tools) {
 		var modalInstance = $modal.open({
 			templateUrl: 'templates/alert.html',
 			controller: function ($scope, $modalInstance) {
-				$scope.title = tools.checkParam(params.title, '');
+				$scope.title = tools.checkParam(params.title, tools.getAppTitle());
 				$scope.text = tools.checkParam(params.text, '');
 				$scope.labelOk = tools.checkParam(params.labelOk, 'Ok');
 
@@ -80,6 +84,39 @@ module.factory('dialogAlert', ['$modal', 'tools', function($modal, tools) {
 		modalInstance.result.then(function () {
 			if(params.callbackOk)
 				params.callbackOk();
+		}, function () {
+			if(params.callbackCancel)
+				params.callbackCancel();
+		});
+	};
+}]);
+
+module.factory('dialogPrompt', ['$modal', 'tools', function($modal, tools) {
+	
+	return function (params) {
+
+		var modalInstance = $modal.open({
+			templateUrl: 'templates/prompt.html',
+			controller: function ($scope, $modalInstance) {
+				$scope.value = tools.checkParam(params.defaultValue, '');
+				$scope.title = tools.checkParam(params.title, tools.getAppTitle());
+				$scope.text = tools.checkParam(params.text, '');
+				$scope.labelOk = tools.checkParam(params.labelOk, 'Ok');
+				$scope.labelCancel = tools.checkParam(params.labelCancel, 'Annuler');
+
+				$scope.ok = function () {
+					$modalInstance.close($scope.value);
+				};
+
+				$scope.cancel = function () {
+					$modalInstance.dismiss();
+				};
+			}
+		});
+
+		modalInstance.result.then(function (value) {
+			if(params.callbackOk)
+				params.callbackOk(value);
 		}, function () {
 			if(params.callbackCancel)
 				params.callbackCancel();

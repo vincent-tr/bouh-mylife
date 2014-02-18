@@ -1,0 +1,11 @@
+<div class="modal-header">
+	<h3>{{title}}</h3>
+</div>
+<div class="modal-body">
+{{text}}<br/>
+<input type="text" ng-model="$parent.value"></input>
+</div>
+<div class="modal-footer">
+	<button class="btn btn-primary" ng-click="ok()">{{labelOk}}</button>
+	<button class="btn btn-default" ng-click="cancel()">{{labelCancel}}</button>
+</div>

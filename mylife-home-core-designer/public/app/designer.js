@@ -6,7 +6,7 @@
 
 var module = angular.module('mylife.designer', ['mylife.api', 'mylife.tools', 'mylife.plumbHelper', 'mylife.schemaHelper']);
 
-module.controller('designerController', ['$scope', '$timeout', 'dataAccess', 'plumbHelper', 'schemaHelper', function($scope, $timeout, dataAccess, plumbHelper, schemaHelper) {
+module.controller('designerController', ['$scope', '$timeout', 'dataAccess', 'plumbHelper', 'schemaHelper', 'dialogPrompt', function($scope, $timeout, dataAccess, plumbHelper, schemaHelper, dialogPrompt) {
 
 	$scope.pluginTypes = [];
 	$scope.plugins = [];
@@ -34,8 +34,10 @@ module.controller('designerController', ['$scope', '$timeout', 'dataAccess', 'pl
 		});
 	};
 	
-	$scope.loadHardware = function(url) {
-		dataAccess.loadHardware(url, $scope);
+	$scope.addHardware = function() {
+		dialogPrompt({text: 'Saissez l\'url du matériel', defaultValue: 'http://host:8888', callbackOk: function(url) {
+			dataAccess.loadHardware($scope, url);
+		}});
 	};
 	
 	$scope.createPlugin = function(typeId, x, y) {

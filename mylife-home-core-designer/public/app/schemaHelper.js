@@ -6,7 +6,7 @@
 
 var module = angular.module('mylife.schemaHelper', ['mylife.tools', 'mylife.idGenerator']);
 
-module.factory('schemaHelper', ['tools', 'idGenerator', function(tools, toolsidGenerator) {
+module.factory('schemaHelper', ['tools', 'idGenerator', function(tools, idGenerator) {
 
 	var memberTitle = function(member) {
 		var newLine = '\n'; // '&#10;';

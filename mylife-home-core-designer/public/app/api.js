@@ -11,7 +11,7 @@ module.factory('api', ['$resource', function($resource) {
 		data:  $resource('/data', {}, {
 			get: { method: 'GET' }
 		}),
-		updateHardware: $resource('/updateHardware', {}, {
+		hardware: $resource('/hardware', {}, {
 			post: { method: 'POST' }
 		}),
 		merge: $resource('/merge', {}, {
@@ -104,7 +104,14 @@ module.factory('dataAccess', ['api', function(api) {
 	};
 	
 	var loadHardware = function(data, url) {
-		// TODO
+		
+		var sendData = {
+			url: url
+		};
+		
+		api.hardware.post({}, sendData, function(res) {
+			// TODO : merge
+		});
 	};
 	
 	return {
