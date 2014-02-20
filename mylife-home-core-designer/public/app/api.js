@@ -4,7 +4,7 @@
 
 'use strict';
 
-var module = angular.module('mylife.api', ['ngResource']);
+var module = angular.module('mylife.api', ['ngResource', 'mylife.tools', 'mylife.schemaHelper']);
 
 module.factory('api', ['$resource', function($resource) {
 	return {
@@ -23,41 +23,35 @@ module.factory('api', ['$resource', function($resource) {
 	};
 }]);
 
-module.factory('dataAccess', ['api', function(api) {
+module.factory('dataAccess', ['api', 'tools', 'schemaHelper', function(api, tools, schemaHelper) {
 	
-	var prepareData = function(data) {
-		
-		var checkDesignerData = function(item) {
-			var designer = item.designer;
-			if(!designer) {
-				item.designer = designer = {
-					x: 0,
-					y: 0
-				};
-			}
-		};
+	var checkDesignerData = function(item) {
+		var designer = item.designer;
+		if(!designer) {
+			item.designer = designer = {
+				x: 0,
+				y: 0
+			};
+		}
+	};
 
-		var attachInternal = function(item) {
-			if(!item.internal) {
-				item.internal = {};
-			}
-		};
+	var prepareData = function(data) {
 		
 		var attachTypeToPlugin = function(plugin) {
 			
 			for (var i = 0, l = data.pluginTypes.length; i < l; i++) {
 				var type = data.pluginTypes[i];
 				if (type.id === plugin.type) {
-					plugin.internal.type = type;
+					plugin.internal().type = type;
 					break;
 				}
 			}
 		};
 	
-		data.pluginTypes.forEach(attachInternal);
-		data.plugins.forEach(attachInternal);
-		data.hardware.forEach(attachInternal);
-		data.links.forEach(attachInternal);
+		data.pluginTypes.forEach(tools.attachInternal);
+		data.plugins.forEach(tools.attachInternal);
+		data.hardware.forEach(tools.attachInternal);
+		data.links.forEach(tools.attachInternal);
 		
 		data.plugins.forEach(attachTypeToPlugin);
 		
@@ -76,19 +70,8 @@ module.factory('dataAccess', ['api', function(api) {
 	
 	var save = function(data, callback) {
 		
-		var removeInternal = function(item) {
-			if(item.internal) {
-				delete item.internal;
-			}
-		};
-		
-		var clone = function(obj) {
-			return JSON.parse(JSON.stringify(obj));
-		};
-		
 		var prepareArray = function(source) {
-			var dest = clone(source);
-			dest.forEach(removeInternal);
+			return tools.clone(source);
 		};
 		
 		var sendData = {
@@ -105,12 +88,83 @@ module.factory('dataAccess', ['api', function(api) {
 	
 	var loadHardware = function(data, url) {
 		
+		var findItem = function(id) {
+			for(var i=0, l=data.hardware.length; i<l; i++) {
+				var hwitem = data.hardware[i];
+				if(hwitem.id === id) {
+					return hwitem;
+				}
+			}
+			return undefined;
+		};
+		
 		var sendData = {
 			url: url
 		};
 		
 		api.hardware.post({}, sendData, function(res) {
-			// TODO : merge
+			
+			var hwitems = res.components;
+			var failedLinks = [];
+			
+			// check si l'item existe déjà,
+			// s'il n'existe pas ajout, 
+			// sinon sauvegarde des links, suppression, ajout, et recreation des links si possible (si les membres existent encore et sont du bon type)
+			
+			var recreateLinks = [];
+			
+			// en 1er on rassemble tous les liens et on vire tout l'existant
+			hwitems.forEach(function(item) {
+				
+				var existingItem = findItem(item.id);
+				if(existingItem) {
+					recreateLinks = recreateLinks.concat(schemaHelper.findLinksFromComponent(data, existingItem));
+					schemaHelper.deleteComponent(data, existingItem);
+				}
+			});
+			
+			// Puis on ajoute tout
+			hwitems.forEach(function(item) {
+				
+				var existingItem = findItem(item.id);
+				
+				tools.attachInternal(item);
+
+				if(existingItem) {
+					// copie des infos de design
+					item.designer = existingItem.designer;
+				}
+				
+				checkDesignerData(item);
+				data.hardware.push(item);
+				
+				recreateLinks.forEach(function(link) {
+					
+					var sourceMember = schemaHelper.getMember(data, link.sourceComponent, link.sourceAttribute);
+					var destMember = schemaHelper.getMember(data, link.destinationComponent, link.destinationAction);
+					
+					if(!sourceMember || !destMember) {
+						failedLinks.push({link: link, reason: 'Le membre n\'existe plus'});
+						return;
+					}
+					
+					if(!schemaHelper.checkLinkTypes(sourceMember, destMember)) {
+						failedLinks.push({link: link, reason: 'Les types ne correspondent plus'});
+						return;
+					}
+					
+					var newLink = {
+						sourceComponent: link.sourceComponent,
+						sourceAttribute: link.sourceAttribute,
+						destinationComponent: link.destinationComponent,
+						destinationAction: link.destinationAction
+					};
+					tools.attachInternal(newLink);
+					data.links.push(newLink);
+				});
+			});
+			
+			// TODO : afficher failedLinks
 		});
 	};
 	
