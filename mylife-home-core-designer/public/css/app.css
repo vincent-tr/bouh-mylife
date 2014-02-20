@@ -1,29 +1,28 @@
 #main {
 	font-size: 0;
-    width: 100%;
-    position: fixed;
-    left: 0px;
+	width: 100%;
+	position: fixed;
+	left: 0px;
 	top: 15px;
 	right: 0px;
 	bottom: 60px;
-
-    background-color: #F3F3F3;
+	background-color: #F3F3F3;
 }
 
 #leftpane {
-    width: 200px;
+	width: 200px;
 	height: 100%;
-    position: absolute;
-    top: 0px;
-    left: 0px;
+	position: absolute;
+	top: 0px;
+	left: 0px;
 }
 
 #toolbox-container {
 	height: 200px;
-    width: 100%;
-    position: absolute;
-    top: 0px;
-    left: 0px;
+	width: 100%;
+	position: absolute;
+	top: 0px;
+	left: 0px;
 }
 
 #toolbox {
@@ -32,11 +31,9 @@
 	width: 100%;
 	height: 100%;
 	background-color: lightgray;
-	
 	border: 1px solid black;
 	border-radius: 5px;
-
-    overflow-y: auto;
+	overflow-y: auto;
 }
 
 .toolbox-item {
@@ -44,9 +41,7 @@
 	height: 70px;
 	margin: 10px;
 	display: inline-block;
-
 	cursor: pointer;
-	
 	border: 1px solid black;
 	box-shadow: 2px 2px 19px #aaa;
 	-o-box-shadow: 2px 2px 19px #aaa;
@@ -87,9 +82,9 @@
 }
 
 #propertybox-container {
-    left: 0px;
+	left: 0px; width : 100%;
+	position: absolute;
 	width: 100%;
-    position: absolute;
 }
 
 #propertybox {
@@ -99,20 +94,22 @@
 	width: 100%;
 	height: 100%;
 	background-color: lightgray;
-	
 	border: 1px solid black;
 	border-radius: 5px;
-
-    overflow-y: auto;
-
+	overflow-y: auto;
 	font-size: x-small;
 	vertical-align: middle;
 }
 
 #propertybox-wrapper {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
 	margin: 5px;
-	
 	border: 1px solid black;
+	border-radius: 5px;
 	box-shadow: 2px 2px 19px darkgray;
 	-o-box-shadow: 2px 2px 19px darkgray;
 	-webkit-box-shadow: 2px 2px 19px darkgray;
@@ -123,13 +120,69 @@
 	background-color: #F3F3F3;
 }
 
-.propertybox-title {
-} 
+#propertybox-title {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 30px;
+	margin: 8px;
+	font-weight: 
+}
+
+#propertybox-content {
+	position: absolute;
+	top: 30px;
+	left: 0;
+	right: 0;
+	bottom: 30px;
+}
+
+#propertybox-commands {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	height: 30px;
+}
+
+#propertybox-content table {
+	display: block;
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	margin: 5px;
+}
+
+#propertybox-content th {
+	text-align: center;
+}
+
+#propertybox-content tbody {
+	text-align: left;
+}
+
+#propertybox-content input {
+	border-collapse: collapse;
+	border: 1px solid darkgray;
+}
+
+#propertybox-content table {
+	border-collapse: collapse;
+	border: 1px solid darkgray;
+}
+
+#propertybox-content td {
+	/*border: 1px solid darkgray;*/
+	padding-left: 5px;
+}
 
 #schema-container {
-    height: 100%;
-    position: absolute;
-    top: 0px;
+	height: 100%;
+	position: absolute;
+	top: 0px;
 }
 
 .item {
