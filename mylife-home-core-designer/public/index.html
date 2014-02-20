@@ -98,30 +98,33 @@
 			<div id="propertybox-container">
 				<div id="propertybox">
 					<div id="propertybox-wrapper">
-						<div class="propertybox-title">
+						<div id="propertybox-title">
 							<img ng-show="selectedComponent.internal().type" class="item-image" src="{{selectedComponent.internal().type.imageUrl}}" title="{{selectedComponent.internal().type.displayName}}"></img>
+							&nbsp;&nbsp;&nbsp;
 							<img ng-show="selectedComponent&&!selectedComponent.internal().type" class="item-image" src="images/hardware.jpeg" title="Matériel"></img>
 							<span>{{selectedComponent.id}}</span>
 							<span ng-show="!selectedComponent">Pas de selection</span>
 						</div>
-						<table ng-show="selectedComponent.internal().type">
-							<thead>
-								<tr>
-									<th>Nom</th>
-									<th>Valeur</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr>
-									<td>ID</td>
-									<td><input type="text" ng-model="selectedComponent.id"></input></td>
-								</tr>
-								<tr ng-repeat="(key, value) in selectedComponent.parameters">
-									<td>{{key}}</td>
-									<td><input type="text" ng-model="value"></input></td>
-								</tr>
-							</tbody>
-						</table>
+						<div id="propertybox-content">
+							<table ng-show="selectedComponent.internal().type">
+								<thead>
+									<tr>
+										<th width="35%">Nom</th>
+										<th width="65%">Valeur</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td>ID</td>
+										<td><input type="text" ng-model="selectedComponent.id"></input></td>
+									</tr>
+									<tr ng-repeat="(key, value) in selectedComponent.parameters">
+										<td>{{key}}</td>
+										<td><input type="text" ng-model="value"></input></td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
 						<div id="propertybox-commands" ng-show="selectedComponent">
 							<button type="button" class="btn btn-default btn-xs" ng-click="selectedComponentDelete()" title="Supprimer"><img src="images/delete.png" height="16" width="16"></src></button>
 						</div>
