@@ -9,7 +9,7 @@ var errorToObject = function(err) {
 	Object.getOwnPropertyNames(err).forEach(function(key) {
 		plainObject[key] = err[key];
 	});
-	return JSON.stringify(plainObject);
+	return plainObject;
 };
 
 var create = function(port) {
@@ -109,7 +109,7 @@ var create = function(port) {
 	app.post('/api/links', function(req, res) {
 		try {
 			var config = req.body;
-			var id = manager.addLinks(config);
+			var id = manager.addLink(config);
 			res.json(id);
 		}catch(err) {
 			console.error(err);
@@ -119,7 +119,7 @@ var create = function(port) {
 	
 	app['delete']('/api/links/:id', function(req, res) {
 		try {
-			manager.removeLinks(req.params.id);
+			manager.removeLink(req.params.id);
 			res.json({});
 		}catch(err) {
 			console.error(err);
