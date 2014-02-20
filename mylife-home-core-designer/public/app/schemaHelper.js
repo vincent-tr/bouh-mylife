@@ -80,11 +80,11 @@ module.factory('schemaHelper', ['tools', 'idGenerator', function(tools, idGenera
 			designer: {
 				x: x,
 				y: y
-			},
-			internal: {
-				type: type
 			}
 		};
+		
+		tools.attachInternal(plugin);
+		plugin.internal().type = type;
 		
 		data.plugins.push(plugin);
 	};
@@ -109,7 +109,7 @@ module.factory('schemaHelper', ['tools', 'idGenerator', function(tools, idGenera
 		});
 		
 		// suppression du composant
-		var isPlugin = comp.internal.type ? true : false;
+		var isPlugin = comp.internal().type ? true : false;
 		if(isPlugin) {
 			tools.removeFromArray(data.plugins, comp);
 		} else {
@@ -117,10 +117,88 @@ module.factory('schemaHelper', ['tools', 'idGenerator', function(tools, idGenera
 		}
 	};
 
+	var typeEquals = function(type1, type2) {
+		if(type1.type !== type2.type) {
+			return false;
+		}
+		
+		switch(type1.type) {
+		case 'range':
+			return type1.min === type2.min && type1.max === type2.max;
+			
+		case 'enum':
+			if(type1.values.length !== type2.values.length) {
+				return false;
+			}
+			
+			for(var i=0, l=type1.values.length; i<l; i++) {
+				if(type1.values[i] !== type2.values[i]) {
+					return false;
+				}
+			}
+			return true;
+			
+		default:
+			return false;
+		}
+	};
+	
+	var getMember = function(data, compId, memberId) {
+		
+		var clazz = undefined;
+		
+		// recherche hardware
+		if(!clazz) {
+			for(var i=0, l=data.hardware.length; i<l; i++) {
+				var hwitem = data.hardware[i];
+				if(hwitem.id == compId) {
+					clazz = hwitem['class'];
+					break;
+				}
+			}
+		}
+		
+		// recherche plugin
+		if(!clazz) {
+			for(var i=0, l=data.plugins.length; i<l; i++) {
+				var plugin = data.plugins[i];
+				if(plugin.id == compId) {
+					clazz = plugin.internal().type['class'];
+					break;
+				}
+			}
+		}
+		
+		if(!clazz) {
+			return undefined;
+		}
+		
+		for(var i=0, l=clazz.members.length; i<l; i++) {
+			var member = clazz.members[i];
+			if(member.name === memberId) {
+				return member;
+			}
+		}
+		
+		return undefined;
+	};
+
+	var checkLinkTypes = function(sourceMember, targetMember) {
+		if(targetMember.arguments.length === 0)
+			return true;
+		if(targetMember.arguments.length > 1)
+			return false;
+		return typeEquals(targetMember.arguments[0], sourceMember.type);
+	};
+	
 	return {
 		memberTitle: memberTitle,
 		toolboxTitle: toolboxTitle,
 		createPlugin: createPlugin,
-		deleteComponent: deleteComponent
+		deleteComponent: deleteComponent,
+		findLinksFromComponent: findLinksFromComponent,
+		typeEquals: typeEquals,
+		getMember: getMember,
+		checkLinkTypes: checkLinkTypes
 	};
 }]);

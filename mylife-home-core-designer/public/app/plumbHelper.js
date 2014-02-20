@@ -5,9 +5,9 @@
 
 'use strict';
 
-var module = angular.module('mylife.plumbHelper', ['mylife.tools']);
+var module = angular.module('mylife.plumbHelper', ['mylife.tools', 'mylife.schemaHelper']);
 
-module.factory('plumbHelper', ['$timeout', '$rootScope', 'tools', 'dialogAlert', function($timeout, $rootScope, tools, dialogAlert) {
+module.factory('plumbHelper', ['$timeout', '$rootScope', 'tools', 'dialogAlert', 'schemaHelper', function($timeout, $rootScope, tools, dialogAlert, schemaHelper) {
 	
 	var epPaintStyle = {
 		strokeStyle:"#7AB02C",
@@ -77,19 +77,19 @@ module.factory('plumbHelper', ['$timeout', '$rootScope', 'tools', 'dialogAlert',
 			var target = $("div[schema-id='" + targetId +"']");
 			var connection = jsPlumb.connect({source : source, target : target });
 			
-			link.internal.connection = connection;
+			link.internal().connection = connection;
 			connection.link = link;
 		});
 	};
 	
 	var destroyConnection = function(link) {
-		var connection = link.internal.connection;
+		var connection = link.internal().connection;
 		if(!connection)
 			return;
 		jsPlumb.doWhileSuspended(function() {
 			jsPlumb.detach(connection);
 		}, true);
-		delete link.internal.connection;
+		delete link.internal().connection;
 	};
 	
 	var findConnection = function(data, 
@@ -124,36 +124,11 @@ module.factory('plumbHelper', ['$timeout', '$rootScope', 'tools', 'dialogAlert',
 			sourceAttribute: source[2],
 			destinationComponent: target[1],
 			destinationAction: target[2],
-			internal: {}
 		};
 		
-		data.links.push(link);
-	};
-	
-	var typeEquals = function(type1, type2) {
-		if(type1.type !== type2.type) {
-			return false;
-		}
+		tools.attachInternal(link);
 		
-		switch(type1.type) {
-		case 'range':
-			return type1.min === type2.min && type1.max === type2.max;
-			
-		case 'enum':
-			if(type1.values.length !== type2.values.length) {
-				return false;
-			}
-			
-			for(var i=0, l=type1.values.length; i<l; i++) {
-				if(type1.values[i] !== type2.values[i]) {
-					return false;
-				}
-			}
-			return true;
-			
-		default:
-			return false;
-		}
+		data.links.push(link);
 	};
 	
 	var getMemberFromId = function(data, id) {
@@ -161,53 +136,14 @@ module.factory('plumbHelper', ['$timeout', '$rootScope', 'tools', 'dialogAlert',
 		var compId = split[1];
 		var memberId = split[2];
 		
-		var clazz = undefined;
-		
-		// recherche hardware
-		if(!clazz) {
-			for(var i=0, l=data.hardware.length; i<l; i++) {
-				var hwitem = data.hardware[i];
-				if(hwitem.id == compId) {
-					clazz = hwitem['class'];
-					break;
-				}
-			}
-		}
-		
-		// recherche plugin
-		if(!clazz) {
-			for(var i=0, l=data.plugins.length; i<l; i++) {
-				var plugin = data.plugins[i];
-				if(plugin.id == compId) {
-					clazz = plugin.internal.type['class'];
-					break;
-				}
-			}
-		}
-		
-		if(!clazz) {
-			return undefined;
-		}
-		
-		for(var i=0, l=clazz.members.length; i<l; i++) {
-			var member = clazz.members[i];
-			if(member.name === memberId) {
-				return member;
-			}
-		}
-		
-		return undefined;
+		return schemaHelper.getMember(data, compId, memberId);
 	};
 	
 	var checkLinkTypes = function(data, sourceId, targetId) {
 		var sourceMember = getMemberFromId(data, sourceId);
 		var targetMember = getMemberFromId(data, targetId);
 		
-		if(targetMember.arguments.length === 0)
-			return true;
-		if(targetMember.arguments.length > 1)
-			return false;
-		return typeEquals(targetMember.arguments[0], sourceMember.type);
+		return schemaHelper.checkLinkTypes(sourceMember, targetMember);
 	};
 	
 	var onConnectionCreated = function(data, info, originalEvent) {

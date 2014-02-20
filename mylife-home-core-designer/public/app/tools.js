@@ -22,11 +22,28 @@ module.factory('tools', [function() {
 		return defaultValue;
 	};
 	
+	var attachInternal = function(item) {
+		if(!item.internal) {
+			
+			var internalObject = {};
+			
+			item.internal = function() {
+				return internalObject;
+			};
+		}
+	};
+	
+	var clone = function(obj) {
+		return JSON.parse(JSON.stringify(obj));
+	};
+	
 	var appTitle = '';
 	
 	return {
 		removeFromArray: removeFromArray,
 		checkParam: checkParam,
+		attachInternal: attachInternal,
+		clone: clone,
 		getAppTitle: function() { return appTitle; },
 		setAppTitle: function(title) { appTitle = title; }
 	};
