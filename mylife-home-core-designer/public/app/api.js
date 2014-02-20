@@ -111,22 +111,15 @@ module.factory('dataAccess', ['api', 'tools', 'schemaHelper', function(api, tool
 			// s'il n'existe pas ajout, 
 			// sinon sauvegarde des links, suppression, ajout, et recreation des links si possible (si les membres existent encore et sont du bon type)
 			
-			var recreateLinks = [];
-			
-			// en 1er on rassemble tous les liens et on vire tout l'existant
 			hwitems.forEach(function(item) {
 				
 				var existingItem = findItem(item.id);
+				var recreateLinks = [];
+				
 				if(existingItem) {
-					recreateLinks = recreateLinks.concat(schemaHelper.findLinksFromComponent(data, existingItem));
+					recreateLinks = schemaHelper.findLinksFromComponent(data, existingItem);
 					schemaHelper.deleteComponent(data, existingItem);
 				}
-			});
-			
-			// Puis on ajoute tout
-			hwitems.forEach(function(item) {
-				
-				var existingItem = findItem(item.id);
 				
 				tools.attachInternal(item);
 

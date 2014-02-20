@@ -88,17 +88,23 @@ module.directive('schemaItem', ['plumbHelper', function(plumbHelper) {
 		controller: 'designerController',
 		link: function (scope, element, attrs) {
 
+			// Soit un plugin soit un hwitem (dans les ng-repeat)
+			var component = scope.plugin;
+			if(!component)
+				component = scope.hwitem;
+			
 			jsPlumb.draggable(element, {
-				containment: 'parent'
+				containment: 'parent',
+				drag: function( event, ui ) {
+					scope.$apply(function() {
+						component.designer.x = ui.position.left;
+						component.designer.y = ui.position.top;
+					});
+				}
 			});
 			
 			element.bind('click', function() {
 				$(element).addClass('item-selected').siblings().removeClass('item-selected');
-				
-				// Soit un plugin soit un hwitem (dans les ng-repeat)
-				var component = scope.plugin;
-				if(!component)
-					component = scope.hwitem;
 				
 				// Scope parent du ng-repeat
 				scope.$parent.selectedComponent = component;
