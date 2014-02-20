@@ -4,7 +4,7 @@
 
 'use strict';
 
-var module = angular.module('mylife.api', ['ngResource', 'mylife.tools', 'mylife.schemaHelper']);
+var module = angular.module('mylife.api', ['ngResource', 'ui.bootstrap', 'mylife.tools', 'mylife.schemaHelper']);
 
 module.factory('api', ['$resource', function($resource) {
 	return {
@@ -23,7 +23,7 @@ module.factory('api', ['$resource', function($resource) {
 	};
 }]);
 
-module.factory('dataAccess', ['api', 'tools', 'schemaHelper', function(api, tools, schemaHelper) {
+module.factory('dataAccess', ['$modal', 'api', 'tools', 'schemaHelper', 'dialogAlert', function($modal, api, tools, schemaHelper, dialogAlert) {
 	
 	var checkDesignerData = function(item) {
 		var designer = item.designer;
@@ -80,9 +80,30 @@ module.factory('dataAccess', ['api', 'tools', 'schemaHelper', function(api, tool
 			links: prepareArray(data.links)
 		};
 		
-		api.merge.post({}, sendData, function(res) {
-			// TODO
-			callback();
+		api.merge.post({}, sendData, function(mergeData) {
+			
+			var modalInstance = $modal.open({
+				templateUrl: 'mergeConfirm.html',
+				controller: function ($scope, $modalInstance) {
+
+					$scope.destroy = mergeData.destroy;
+					$scope.create = mergeData.create;
+					
+					$scope.ok = function () {
+						$modalInstance.close();
+					};
+
+					$scope.cancel = function () {
+						$modalInstance.dismiss();
+					};
+				}
+			});
+
+			modalInstance.result.then(function () {
+				api.apply.post({}, mergeData, function() {
+					dialogAlert({text: 'Enregistrement effectué'});
+				});
+			});
 		});
 	};
 	
@@ -150,7 +171,8 @@ module.factory('dataAccess', ['api', 'tools', 'schemaHelper', function(api, tool
 						sourceComponent: link.sourceComponent,
 						sourceAttribute: link.sourceAttribute,
 						destinationComponent: link.destinationComponent,
-						destinationAction: link.destinationAction
+						destinationAction: link.destinationAction,
+						id: link.id
 					};
 					tools.attachInternal(newLink);
 					data.links.push(newLink);

@@ -9,7 +9,7 @@ var errorToObject = function(err) {
 	Object.getOwnPropertyNames(err).forEach(function(key) {
 		plainObject[key] = err[key];
 	});
-	return JSON.stringify(plainObject);
+	return plainObject;
 };
 
 var create = function(port) {
@@ -75,7 +75,7 @@ var create = function(port) {
 	});
 	
 	app.post('/apply', function(req, res) {
-		var mergeData = JSON.parse(req.body);
+		var mergeData = req.body;
 		manager.apply(mergeData, function(err, ret) {
 			if (err) {
 				console.error(err);

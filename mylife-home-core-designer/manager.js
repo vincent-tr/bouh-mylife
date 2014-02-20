@@ -13,7 +13,7 @@ var data = function(callback) {
 	var fetch = function(url, callback) {
 		request.get(url, function(err, response, body) {
 			if (err) {
-				callback(err);
+				callback(JSON.parse(err));
 			} else {
 				callback(null, JSON.parse(body));
 			}
@@ -53,7 +53,8 @@ var merge = function(newData, callback) {
 			return;
 		}
 
-		doMerge(ret, newData, callback);
+		var mergedData = doMerge(ret, newData, callback);
+		callback(null, mergedData);
 	});
 };
 
@@ -186,7 +187,7 @@ var destroyArray = function(map, array, type) {
 	array.forEach(function(item) {
 		map['destroy:' + item.id] = function(callback) {
 			var url = coreUrl + 'api/' + type + '/' + encodeURIComponent(item.id);
-			console.log('delete %s' + url);
+			console.log('delete ' + url);
 			request.del(url, fetchCallback(callback));
 		};
 	});
@@ -196,7 +197,7 @@ var createArray = function(map, array, type) {
 	array.forEach(function(item) {
 		map['create:' + item.id] = function(callback) {
 			var url = coreUrl + 'api/' + type;
-			console.log('post %s' + url);
+			console.log('post ' + url);
 			request.post(url, { json : true, body : item, }, fetchCallback(callback));
 		};
 	});

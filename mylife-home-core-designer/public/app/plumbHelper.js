@@ -126,6 +126,8 @@ module.factory('plumbHelper', ['$timeout', '$rootScope', 'tools', 'dialogAlert',
 			destinationAction: target[2],
 		};
 		
+		link.id = link.sourceComponent + '|' + link.sourceAttribute + '|' + link.destinationComponent + '|' + link.destinationAction
+		
 		tools.attachInternal(link);
 		
 		data.links.push(link);
