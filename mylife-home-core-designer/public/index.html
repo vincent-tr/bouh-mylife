@@ -26,6 +26,59 @@
 <!--  <link rel="stylesheet" href="lib/bootstrap/css/bootstrap-theme.css">  -->
 <link rel="stylesheet" href="css/app.css">
 
+<script type="text/ng-template" id="mergeConfirm.html">
+	<div class="modal-header">
+		<h3>mylife-home-core-designer</h3>
+	</div>
+	<div class="modal-body">
+		Opérations à effectuer pour enregistrement :
+		<ul>
+			<li>Elements supprimés
+				<ul>
+					<li>Plugins
+						<ul>
+							<li ng-repeat="plugin in destroy.plugins">{{plugin.id}}</li>
+						</ul>
+					</li>
+					<li>Matériel
+						<ul>
+							<li ng-repeat="hwitem in destroy.hardware">{{hwitem.id}}</li>
+						</ul>
+					</li>
+					<li>Liens
+						<ul>
+							<li ng-repeat="link in destroy.links">{{link.sourceComponent}}:{{link.sourceAttribute}}&nbsp;-&gt;&nbsp;{{link.destinationComponent}}:{{link.destinationAction}}</li>
+						</ul>
+					</li>
+				</ul>
+			</li>
+			<li>Elements ajoutés
+				<ul>
+					<li>Plugins
+						<ul>
+							<li ng-repeat="plugin in create.plugins">{{plugin.id}}</li>
+						</ul>
+					</li>
+					<li>Matériel
+						<ul>
+							<li ng-repeat="hwitem in create.hardware">{{hwitem.id}}</li>
+						</ul>
+					</li>
+					<li>Liens
+						<ul>
+							<li ng-repeat="link in create.links">{{link.sourceComponent}}:{{link.sourceAttribute}} -&gt;{{link.destinationComponent}}:{{link.destinationAction}}</li>
+						</ul>
+					</li>
+				</ul>
+			</li>
+		</ul>
+	</div>
+	<div class="modal-footer">
+		<button class="btn btn-primary" ng-click="ok()">OK</button>
+		<button class="btn btn-warning" ng-click="cancel()">Annuler</button>
+	</div>
+</script>
+
 </head>
 <body ng-controller="designerController">
 
