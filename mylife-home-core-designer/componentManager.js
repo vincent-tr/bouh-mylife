@@ -2,12 +2,7 @@ var request = require('request');
 var async = require('async');
 var deepEquals = require('deep-equal');
 
-var config = require('./config.json');
-
-var coreUrl = config.core.url;
-if (coreUrl.substr(-1) != '/') {
-	coreUrl += '/';
-}
+var utils = require('./utils.js');
 
 var data = function(callback) {
 	var fetch = function(url, callback) {
@@ -22,16 +17,16 @@ var data = function(callback) {
 
 	async.parallel({
 		plugins : function(cb) {
-			fetch(coreUrl + 'api/plugins', cb);
+			fetch(utils.coreUrl + 'api/plugins', cb);
 		},
 		pluginTypes : function(cb) {
-			fetch(coreUrl + 'api/pluginTypes', cb);
+			fetch(utils.coreUrl + 'api/pluginTypes', cb);
 		},
 		hardware : function(cb) {
-			fetch(coreUrl + 'api/hardware', cb);
+			fetch(utils.coreUrl + 'api/hardware', cb);
 		},
 		links : function(cb) {
-			fetch(coreUrl + 'api/links', cb);
+			fetch(utils.coreUrl + 'api/links', cb);
 		}
 	}, callback);
 };
@@ -64,8 +59,8 @@ var doMerge = function(oldData, newData, callback) {
 	var mergedHardware = mergeData(oldData.hardware, newData.hardware);
 	var mergedLinks = mergeData(oldData.links, newData.links);
 
-	// on cherche les links des oldData qui sont r�f�renc�s dans les delete et qui ne sont pas dans les links a delete
-	// on les delete et recr�e
+	// on cherche les links des oldData qui sont rï¿½fï¿½rencï¿½s dans les delete et qui ne sont pas dans les links a delete
+	// on les delete et recrï¿½e
 	oldData.links.forEach(function(link) {
 		var recreateLink = function(link) {
 			mergedLinks.destroy.push(link);
@@ -73,7 +68,7 @@ var doMerge = function(oldData, newData, callback) {
 		};
 		
 		if(findById(mergedLinks.destroy, link.id)) {
-			// d�j� pr�sent rien � faire
+			// dï¿½jï¿½ prï¿½sent rien ï¿½ faire
 			return;
 		}
 		
@@ -186,7 +181,7 @@ var fetchCallback = function(callback) {
 var destroyArray = function(map, array, type) {
 	array.forEach(function(item) {
 		map['destroy:' + item.id] = function(callback) {
-			var url = coreUrl + 'api/' + type + '/' + encodeURIComponent(item.id);
+			var url = utils.coreUrl + 'api/' + type + '/' + encodeURIComponent(item.id);
 			console.log('delete ' + url);
 			request.del(url, fetchCallback(callback));
 		};
@@ -196,7 +191,7 @@ var destroyArray = function(map, array, type) {
 var createArray = function(map, array, type) {
 	array.forEach(function(item) {
 		map['create:' + item.id] = function(callback) {
-			var url = coreUrl + 'api/' + type;
+			var url = utils.coreUrl + 'api/' + type;
 			console.log('post ' + url);
 			request.post(url, { json : true, body : item, }, fetchCallback(callback));
 		};
