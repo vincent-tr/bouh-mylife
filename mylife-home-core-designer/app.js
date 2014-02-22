@@ -2,7 +2,8 @@ var path = require('path');
 
 var express = require('express');
 
-var manager = require('./manager.js');
+var componentManager = require('./componentManager.js');
+var uiManager = require('./uiManager.js');
 
 var errorToObject = function(err) {
 	var plainObject = {};
@@ -31,13 +32,8 @@ var create = function(port) {
 		res.redirect('/static/index.html');
 	});
 
-	/*
-	 * app.all(/^\/core\/(.+)/, function(req, res) { var url = coreUrl +
-	 * req.params[0]; req.pipe(request(url)).pipe(res); });
-	 */
-
-	app.get('/data', function(req, res) {
-		manager.data(function(err, ret) {
+	app.get('/component/data', function(req, res) {
+		componentManager.data(function(err, ret) {
 			if (err) {
 				console.error(err);
 				res.json(500, errorToObject(err));
@@ -48,9 +44,9 @@ var create = function(port) {
 		});
 	});
 
-	app.post('/hardware', function(req, res) {
+	app.post('/component/hardware', function(req, res) {
 		var urlObject = req.body;
-		manager.hardware(urlObject.url, function(err, ret) {
+		componentManager.hardware(urlObject.url, function(err, ret) {
 			if (err) {
 				console.error(err);
 				res.json(500, errorToObject(err));
@@ -61,7 +57,7 @@ var create = function(port) {
 		});
 	});
 
-	app.post('/merge', function(req, res) {
+	app.post('/component/merge', function(req, res) {
 		var newData = req.body;
 		manager.merge(newData, function(err, ret) {
 			if (err) {
@@ -74,9 +70,46 @@ var create = function(port) {
 		});
 	});
 	
-	app.post('/apply', function(req, res) {
+	app.post('/component/apply', function(req, res) {
 		var mergeData = req.body;
-		manager.apply(mergeData, function(err, ret) {
+		componentManager.apply(mergeData, function(err, ret) {
+			if (err) {
+				console.error(err);
+				res.json(500, errorToObject(err));
+				return;
+			}
+
+			res.json(ret);
+		});
+	});
+
+	app.get('/ui/data', function(req, res) {
+		uiManager.getUiData(function(err, ret) {
+			if (err) {
+				console.error(err);
+				res.json(500, errorToObject(err));
+				return;
+			}
+
+			res.json(ret);
+		});
+	});
+
+	app.post('/ui/data', function(req, res) {
+		var data = req.body;
+		uiManager.setUiData(data, function(err, ret) {
+			if (err) {
+				console.error(err);
+				res.json(500, errorToObject(err));
+				return;
+			}
+
+			res.json(ret);
+		});
+	});
+	
+	app.get('/ui/components', function(req, res) {
+		uiManager.components(function(err, ret) {
 			if (err) {
 				console.error(err);
 				res.json(500, errorToObject(err));

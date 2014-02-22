@@ -8,18 +8,29 @@ var module = angular.module('mylife.api', ['ngResource', 'ui.bootstrap', 'mylife
 
 module.factory('api', ['$resource', function($resource) {
 	return {
-		data:  $resource('/data', {}, {
-			get: { method: 'GET' }
-		}),
-		hardware: $resource('/hardware', {}, {
-			post: { method: 'POST' }
-		}),
-		merge: $resource('/merge', {}, {
-			post: { method: 'POST' }
-		}),
-		apply: $resource('/apply', {}, {
-			post: { method: 'POST' }
-		})
+		component: {
+			data: $resource('/component/data', {}, {
+				get: { method: 'GET' }
+			}),
+			hardware: $resource('/component/hardware', {}, {
+				post: { method: 'POST' }
+			}),
+			merge: $resource('/component/merge', {}, {
+				post: { method: 'POST' }
+			}),
+			apply: $resource('/component/apply', {}, {
+				post: { method: 'POST' }
+			})
+		},
+		ui: {
+			data: $resource('/ui/data', {}, {
+				get: { method: 'GET' },
+				post: { method: 'POST' }
+			}),
+			components: $resource('/ui/components', {}, {
+				get: { method: 'GET' }
+			})
+		}
 	};
 }]);
 
@@ -60,7 +71,7 @@ module.factory('dataAccess', ['$modal', 'api', 'tools', 'schemaHelper', 'dialogA
 	};
 	
 	var load = function(callback) {
-		api.data.get({}, function(data) {
+		api.component.data.get({}, function(data) {
 			prepareData(data);
 			if(callback) {
 				callback(data);
@@ -80,7 +91,7 @@ module.factory('dataAccess', ['$modal', 'api', 'tools', 'schemaHelper', 'dialogA
 			links: prepareArray(data.links)
 		};
 		
-		api.merge.post({}, sendData, function(mergeData) {
+		api.component.merge.post({}, sendData, function(mergeData) {
 			
 			var modalInstance = $modal.open({
 				templateUrl: 'mergeConfirm.html',
@@ -100,7 +111,7 @@ module.factory('dataAccess', ['$modal', 'api', 'tools', 'schemaHelper', 'dialogA
 			});
 
 			modalInstance.result.then(function () {
-				api.apply.post({}, mergeData, function() {
+				api.component.apply.post({}, mergeData, function() {
 					dialogAlert({text: 'Enregistrement effectué'});
 				});
 			});
@@ -123,7 +134,7 @@ module.factory('dataAccess', ['$modal', 'api', 'tools', 'schemaHelper', 'dialogA
 			url: url
 		};
 		
-		api.hardware.post({}, sendData, function(res) {
+		api.component.hardware.post({}, sendData, function(res) {
 			
 			var hwitems = res.components;
 			var failedLinks = [];
