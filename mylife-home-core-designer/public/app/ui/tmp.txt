@@ -1,0 +1,12 @@
+ui
+	images
+	windows
+		bg
+		commands
+			img
+				static
+				comp attribute (map -> range / enum)
+			action
+				comp action
+				window (popup - open)
+	defaultWindow

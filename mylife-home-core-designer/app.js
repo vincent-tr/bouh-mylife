@@ -84,7 +84,7 @@ var create = function(port) {
 	});
 
 	app.get('/ui/data', function(req, res) {
-		uiManager.getUiData(function(err, ret) {
+		uiManager.get(function(err, ret) {
 			if (err) {
 				console.error(err);
 				res.json(500, errorToObject(err));
@@ -97,7 +97,7 @@ var create = function(port) {
 
 	app.post('/ui/data', function(req, res) {
 		var data = req.body;
-		uiManager.setUiData(data, function(err, ret) {
+		uiManager.set(data, function(err, ret) {
 			if (err) {
 				console.error(err);
 				res.json(500, errorToObject(err));
