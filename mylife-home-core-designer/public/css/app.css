@@ -8,14 +8,20 @@
 }
 
 #main {
-	font-size: 0;
 	width: 100%;
 	position: fixed;
 	left: 0px;
 	top: 50px;
 	right: 0px;
 	bottom: 60px;
+}
+
+.dark {
 	background-color: #F3F3F3;
+}
+
+.light {
+	background-color: #FFFFFF;
 }
 
 #leftpane {
@@ -35,6 +41,7 @@
 }
 
 #toolbox {
+	font-size: 0;
 	border: 2px solid gray;
 	border-right: 4px solid gray;
 	width: 100%;

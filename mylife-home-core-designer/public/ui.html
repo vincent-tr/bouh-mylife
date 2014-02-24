@@ -1,23 +1,30 @@
 <meta charset="UTF8">
 
-ui
-
 <div id="ui" ng-controller="uiController">
 
-	<div id="main">
-	
-		<div>
-			<div ng-repeat="resource in resources">
-				<img src="{{resource.data}}" style="max-height: 50px; max-width: 50px;"></img>
-				<button type="button" class="btn btn-primary" ng-click="destroyResource(resource)">Supprimer</button>
-			</div>
-			<div>
-				<input type="file" input-data="newResourceData" style="font-size:medium;"></input>
-				<img src="{{newResourceData}}" style="max-height: 50px; max-width: 50px;"></img>
-				<input type="text" ng-model="newResourceId"></input>
-				<button type="button" class="btn btn-primary" ng-click="newResource()">Ajouter</button>
-			</div>
-		</div>
+	<div id="main" class="light">
+		<tabset>
+		    <tab>
+		    	<tab-heading><img class="tab-image" src="images/window.jpeg"></img>&nbsp;Fenêtres</tab-heading>
+				<div>
+				</div>
+			</tab>
+		    <tab>
+		    	<tab-heading><img class="tab-image" src="images/resource.jpeg"></img>&nbsp;Ressources</tab-heading>
+				<div>
+					<div ng-repeat="resource in resources">
+						<img src="{{resource.data}}" style="max-height: 50px; max-width: 50px;"></img>
+						<button type="button" class="btn btn-primary" ng-click="destroyResource(resource)">Supprimer</button>
+					</div>
+					<div>
+						<input type="file" input-data="newResourceData" style="font-size:medium;"></input>
+						<img src="{{newResourceData}}" style="max-height: 50px; max-width: 50px;"></img>
+						<input type="text" ng-model="newResourceId"></input>
+						<button type="button" class="btn btn-primary" ng-click="newResource()">Ajouter</button>
+					</div>
+				</div>
+			</tab>
+		</tabset>
 	</div>
 
 	<div id="commands">
