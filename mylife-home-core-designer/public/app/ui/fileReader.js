@@ -5,9 +5,9 @@
 
 'use strict';
 
-var module = angular.module('mylife.ui.fileReader');
+var module = angular.module('mylife.ui.fileReader', []);
 
-module.factory('fileReader', ["$q", "$log", function($q, $log) {
+module.factory('fileReader', ["$q", function($q) {
 	
 	var onLoad = function(reader, deferred, scope) {
         return function () {
@@ -57,23 +57,20 @@ module.factory('fileReader', ["$q", "$log", function($q, $log) {
     };
 }]);
 
-// TODO : directive pour input file pour attacher le onchange à un élément du scope
 module.directive('inputData', ['fileReader', function(fileReader) {
 	return {
-		replace: true,
-		//controller: 'designerController',
 		link: function (scope, element, attrs) {
 			var name = attrs.inputData;
 			
-			element.onchange = function() {
-				var file = element.files[0];
-				if(element.files.length === 0)
+			element.on('change', function() {
+				var files = element[0].files;
+				if(files.length === 0)
 					return;
 				
-				fileReader.readAsDataUrl(file).then(function(url) {
+				fileReader.readAsDataUrl(files[0], scope).then(function(url) {
 					scope[name] = url;
 				});
-			};
+			});
 		}
 	};
 }]);

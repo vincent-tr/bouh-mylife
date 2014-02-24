@@ -4,9 +4,9 @@ ui
 
 <div id="images">
 	<div ng-repeat="resource in resources">
-		<img>
 	</div>
+	<img src="{{dataUrl}}"></img>
 	<div>
-		<input type="file"></input>
+		<input type="file" input-data="dataUrl"></input>
 	</div>
 </div>
