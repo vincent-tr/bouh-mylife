@@ -20,9 +20,9 @@ var set = function(data, callback) {
 	request.post(url, { json : true, body : data, }, 
 			function(err, response, body) {
 		if (err) {
-			callback(JSON.parse(err));
+			callback(err);
 		} else {
-			callback(null, JSON.parse(body));
+			callback(null, body);
 		}
 	});
 };
