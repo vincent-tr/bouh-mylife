@@ -12,7 +12,7 @@ module.controller('uiController', ['$scope', '$timeout', 'uiDataAccess', functio
 	$scope.windows = [];
 	$scope.defaultWindow = '';
 	$scope.components = [];
-
+	
 	var applyData = function(data) {
 		$scope.resources = data.resources;
 		$scope.windows = data.windows;
@@ -21,6 +21,10 @@ module.controller('uiController', ['$scope', '$timeout', 'uiDataAccess', functio
 	
 	var applyComponents = function(components) {
 		$scope.components = components;
+	};
+	
+	var checkSchema = function() {
+		
 	};
 	
 	$scope.reload = function() {
@@ -36,6 +40,23 @@ module.controller('uiController', ['$scope', '$timeout', 'uiDataAccess', functio
 	
 	$scope.init = function() {
 		$scope.reload();
+	};
+
+	$scope.newResource = function() {
+		var res = {
+			id: $scope.newResourceId, 
+			data : $scope.newResourceData
+		};
+		$scope.resources.push(res);
+	};
+	
+	$scope.destroyResource = function(resource) {
+		var index = $scope.resources.indexOf(resource);
+		if (index === -1) {
+			return;
+		}
+		$scope.resources.splice(index, 1);
+		checkSchema();
 	};
 	
 }]);
