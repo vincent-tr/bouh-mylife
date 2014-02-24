@@ -17,164 +17,25 @@
 <script src="app/app.js"></script>
 <script src="app/api.js"></script>
 <script src="app/tools.js"></script>
-<script src="app/designer.js"></script>
-<script src="app/plumbHelper.js"></script>
-<script src="app/schemaHelper.js"></script>
 <script src="app/idGenerator.js"></script>
+<script src="app/component/designer.js"></script>
+<script src="app/component/plumbHelper.js"></script>
+<script src="app/component/schemaHelper.js"></script>
+<script src="app/component/dataAccess.js"></script>
 
 <link rel="stylesheet" href="lib/bootstrap/css/bootstrap.css">
 <!--  <link rel="stylesheet" href="lib/bootstrap/css/bootstrap-theme.css">  -->
 <link rel="stylesheet" href="css/app.css">
 
-<script type="text/ng-template" id="mergeConfirm.html">
-	<div class="modal-header">
-		<h3>mylife-home-core-designer</h3>
-	</div>
-	<div class="modal-body">
-		Opérations à effectuer pour enregistrement :
-		<ul>
-			<li>Elements supprimés
-				<ul>
-					<li>Plugins
-						<ul>
-							<li ng-repeat="plugin in destroy.plugins">{{plugin.id}}</li>
-						</ul>
-					</li>
-					<li>Matériel
-						<ul>
-							<li ng-repeat="hwitem in destroy.hardware">{{hwitem.id}}</li>
-						</ul>
-					</li>
-					<li>Liens
-						<ul>
-							<li ng-repeat="link in destroy.links">{{link.sourceComponent}}:{{link.sourceAttribute}}&nbsp;-&gt;&nbsp;{{link.destinationComponent}}:{{link.destinationAction}}</li>
-						</ul>
-					</li>
-				</ul>
-			</li>
-			<li>Elements ajoutés
-				<ul>
-					<li>Plugins
-						<ul>
-							<li ng-repeat="plugin in create.plugins">{{plugin.id}}</li>
-						</ul>
-					</li>
-					<li>Matériel
-						<ul>
-							<li ng-repeat="hwitem in create.hardware">{{hwitem.id}}</li>
-						</ul>
-					</li>
-					<li>Liens
-						<ul>
-							<li ng-repeat="link in create.links">{{link.sourceComponent}}:{{link.sourceAttribute}} -&gt;{{link.destinationComponent}}:{{link.destinationAction}}</li>
-						</ul>
-					</li>
-				</ul>
-			</li>
-		</ul>
-	</div>
-	<div class="modal-footer">
-		<button class="btn btn-primary" ng-click="ok()">OK</button>
-		<button class="btn btn-warning" ng-click="cancel()">Annuler</button>
-	</div>
-</script>
-
 </head>
-<body ng-controller="designerController">
-
-	<div id="main">
-		<div id="leftpane" splitter="{direction:'vertical',min:'110',max:'500'}">
-			<div id="toolbox-container" splitter="{direction:'horizontal',min:'100'}">
-				<div id="toolbox">
-					<div class="toolbox-item" toolbox-item data-identifier="{{type.id}}" title="{{schemaHelper.toolboxTitle(type)}}" ng-repeat="type in pluginTypes">
-						<span class="toolbox-item-title">{{type.displayName}}</span>
-						<div class="toolbox-item-image-wrapper">
-							<img class="toolbox-item-image" src="{{type.imageUrl}}" height="48" width="48"></img>
-							<img ng-show={{type.ui}} class="toolbox-item-image-ui" src="images/ui.png" height="16" width="16"></img>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div id="propertybox-container">
-				<div id="propertybox">
-					<div id="propertybox-wrapper">
-						<div id="propertybox-title">
-							<img ng-show="selectedComponent.internal().type" class="item-image" src="{{selectedComponent.internal().type.imageUrl}}" title="{{selectedComponent.internal().type.displayName}}"></img>
-							&nbsp;&nbsp;&nbsp;
-							<img ng-show="selectedComponent&&!selectedComponent.internal().type" class="item-image" src="images/hardware.jpeg" title="Matériel"></img>
-							<span>{{selectedComponent.id}}</span>
-							<span ng-show="!selectedComponent">Pas de selection</span>
-						</div>
-						<div id="propertybox-content">
-							<table ng-show="selectedComponent.internal().type">
-								<thead>
-									<tr>
-										<th width="35%">Nom</th>
-										<th width="65%">Valeur</th>
-									</tr>
-								</thead>
-								<tbody>
-									<tr>
-										<td>ID</td>
-										<td><input type="text" ng-model="selectedComponent.id"></input></td>
-									</tr>
-									<tr ng-repeat="(key, value) in selectedComponent.parameters">
-										<td>{{key}}</td>
-										<td><input type="text" ng-model="value"></input></td>
-									</tr>
-								</tbody>
-							</table>
-						</div>
-						<div id="propertybox-commands" ng-show="selectedComponent">
-							<button type="button" class="btn btn-default btn-xs" ng-click="selectedComponentDelete()" title="Supprimer"><img src="images/delete.png" height="16" width="16"></src></button>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-		<div id="schema-container" class="drop-container" ng-click="addEvent($event)" schema-container>
-			<div class="item" schema-id="plugin:{{plugin.id}}" ng-repeat="plugin in plugins" ng-style="{ 'left':plugin.designer.x, 'top':plugin.designer.y }"
-				data-identifier="{{plugin.id}}" schema-item>
-				<div class="item-title">
-					<img class="item-image" src="{{plugin.internal().type.imageUrl}}" title="{{plugin.internal().type.displayName}}"></img>
-					<span>{{plugin.id}}</span>
-					<img ng-show={{plugin.internal().type.ui}} class="item-image-ui" title="ui" src="images/ui.png"></img>
-				</div>
-				<div ng-repeat="(key, value) in plugin.parameters">
-					<div class="component-parameter" title="Paramètre">{{key}} : {{value}}</div>
-				</div>
-				<div ng-repeat="member in plugin.internal().type.class.members | filter:{membertype:'attribute'}">
-					<div schema-id="attribute:{{plugin.id}}:{{member.name}}" class="component-attribute" title="{{schemaHelper.memberTitle(member)}}" component-attribute>{{member.name}}</div>
-				</div>
-				<div ng-repeat="member in plugin.internal().type.class.members | filter:{membertype:'action'}">
-					<div schema-id="action:{{plugin.id}}:{{member.name}}" class="component-action" title="{{schemaHelper.memberTitle(member)}}" component-action>{{member.name}}</div>
-				</div>
-			</div>
-			<div class="item" schema-id="hardware:{{hwitem.id}}" ng-repeat="hwitem in hardware" ng-style="{ 'left':hwitem.designer.x, 'top':hwitem.designer.y }"
-				data-identifier="{{hwitem.id}}" schema-item>
-				<div class="item-title">
-					<img class="item-image" src="images/hardware.jpeg" title="Matériel"></img>
-					<span>{{hwitem.id}}</span>
-				</div>
-				<div ng-repeat="member in hwitem.class.members | filter:{membertype:'attribute'}">
-					<div schema-id="attribute:{{hwitem.id}}:{{member.name}}" class="component-attribute" title="{{schemaHelper.memberTitle(member)}}" component-attribute>{{member.name}}</div>
-				</div>
-				<div ng-repeat="member in hwitem.class.members | filter:{membertype:'action'}">
-					<div schema-id="action:{{hwitem.id}}:{{member.name}}" class="component-action" title="{{schemaHelper.memberTitle(member)}}" component-action>{{member.name}}</div>
-				</div>
-			</div>
-			<div schema-id="link:{{link.id}}" ng-repeat="link in links" schema-link></div>
-		</div>
-	</div>
-	
-	<div id="commands">
-		<button type="button" class="btn btn-primary" ng-click="reload()">Annuler</button>
-		<button type="button" class="btn btn-primary" ng-click="save()">Enregistrer</button>
-		<button type="button" class="btn btn-primary" ng-click="addHardware()">Ajout de matériel</button>
-	</div>
-
-	<!--  does not render what comes behind it, so it's probably wrong -->
-	<div initializer></div>
-
+<body>
+	<tabset>
+	    <tab heading="Composants">
+			<div ng-include="'component.html'"></div>
+		</tab>
+	    <tab heading="UI">
+			<div ng-include="'ui.html'"></div>
+		</tab>
+	</tabset>
 </body>
 </html>

@@ -6,7 +6,7 @@
 
 'use strict';
 
-var module = angular.module('mylife.app', ['mylife.designer', 'mylife.tools']);
+var module = angular.module('mylife.app', ['mylife.component.designer', 'mylife.tools']);
 
 module.run(['tools', function(tools) {
 	tools.setAppTitle('mylife-home-core-designer');
