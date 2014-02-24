@@ -6,12 +6,23 @@ var config = require('./config.json');
 var data;
 var uiData;
 
-var dataFilename = function() {
-	var filePath = path.join(config.data.directory, 'data.json');
+var getFilename = function(name) {
+	var filePath = path.join(config.data.directory, name);
 	var filename = path.resolve(__dirname, filePath);
+	return filename;
+};
+
+var dataFilename = function() {
+	var filename = getFilename('data.json');
 	console.info('using data file : %s', filename);
 	return filename;
-} ;
+};
+
+var uiFilename = function() {
+	var filename = getFilename('ui.json');
+	console.info('using ui file : %s', filename);
+	return filename;
+};
 
 var loadData = function() {
 	var content = fs.readFileSync(dataFilename());
@@ -30,15 +41,13 @@ var checkData = function() {
 };
 
 var loadUiData = function() {
-	var filename = path.join(config.data.directory, 'ui.json');
-	var content = fs.readFileSync(filename);
+	var content = fs.readFileSync(uiFilename());
 	uiData = JSON.parse(content);
 };
 
 var saveUiData = function() {
-	var filename = path.join(config.data.directory, 'ui.json');
 	var content = JSON.stringify(uiData);
-	fs.writeFileSync(filename, content);
+	fs.writeFileSync(uiFilename(), content);
 };
 
 var checkUiData = function() {
