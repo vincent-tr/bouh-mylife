@@ -5,8 +5,10 @@ ui
 <div id="images">
 	<div ng-repeat="resource in resources">
 	</div>
-	<img src="{{dataUrl}}"></img>
 	<div>
 		<input type="file" input-data="dataUrl"></input>
+		<div style="max-height: 50px; max-width: 50px;">
+			<img src="{{dataUrl}}"></img>
+		</div>
 	</div>
 </div>
