@@ -7,7 +7,7 @@
 
 var module = angular.module('mylife.ui.dataAccess', ['mylife.api', 'mylife.tools', 'ui.bootstrap']);
 
-module.factory('dataAccess', ['$modal', 'api', 'tools', 'dialogAlert', function($modal, api, tools, dialogAlert) {
+module.factory('uiDataAccess', ['$modal', 'api', 'tools', 'dialogAlert', function($modal, api, tools, dialogAlert) {
 	
 	var load = function(callback) {
 		

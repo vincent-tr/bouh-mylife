@@ -6,7 +6,7 @@
 
 var module = angular.module('mylife.component.designer', ['mylife.component.dataAccess', 'mylife.tools', 'mylife.component.plumbHelper', 'mylife.component.schemaHelper']);
 
-module.controller('designerController', ['$scope', '$timeout', 'dataAccess', 'plumbHelper', 'schemaHelper', 'dialogPrompt', function($scope, $timeout, dataAccess, plumbHelper, schemaHelper, dialogPrompt) {
+module.controller('componentController', ['$scope', '$timeout', 'componentDataAccess', 'plumbHelper', 'schemaHelper', 'dialogPrompt', function($scope, $timeout, componentDataAccess, plumbHelper, schemaHelper, dialogPrompt) {
 
 	$scope.pluginTypes = [];
 	$scope.plugins = [];
@@ -25,18 +25,18 @@ module.controller('designerController', ['$scope', '$timeout', 'dataAccess', 'pl
 	};
 	
 	$scope.reload = function() {
-		dataAccess.load(applyData);
+		componentDataAccess.load(applyData);
 	};
 	
 	$scope.save = function() {
-		dataAccess.save($scope, function() {
+		componentDataAccess.save($scope, function() {
 			// TODO
 		});
 	};
 	
 	$scope.addHardware = function() {
 		dialogPrompt({text: 'Saissez l\'url du matériel', defaultValue: 'http://host:8888', callbackOk: function(url) {
-			dataAccess.loadHardware($scope, url);
+			componentDataAccess.loadHardware($scope, url);
 		}});
 	};
 	
@@ -69,7 +69,7 @@ module.directive('initializer', [ '$timeout', function($timeout) {
 module.directive('toolboxItem', function() {
 	return {
 		replace: true,
-		controller: 'designerController',
+		controller: 'componentController',
 		link: function (scope, element, attrs) {
 			
 			$(element).draggable({
@@ -85,7 +85,7 @@ module.directive('toolboxItem', function() {
 module.directive('schemaItem', ['plumbHelper', function(plumbHelper) {
 	return {
 		replace: true,
-		controller: 'designerController',
+		controller: 'componentController',
 		link: function (scope, element, attrs) {
 
 			// Soit un plugin soit un hwitem (dans les ng-repeat)
@@ -116,7 +116,7 @@ module.directive('schemaItem', ['plumbHelper', function(plumbHelper) {
 module.directive('componentAttribute', ['plumbHelper', function(plumbHelper) {
 	return {
 		replace: true,
-		controller: 'designerController',
+		controller: 'componentController',
 		link: function (scope, element, attrs) {
 			plumbHelper.makeSource(element);
 		}
@@ -127,7 +127,7 @@ module.directive('componentAttribute', ['plumbHelper', function(plumbHelper) {
 module.directive('componentAction', ['plumbHelper', function(plumbHelper) {
 	return {
 		replace: true,
-		controller: 'designerController',
+		controller: 'componentController',
 		link: function (scope, element, attrs) {
 			plumbHelper.makeTarget(element);
 		}
@@ -137,7 +137,7 @@ module.directive('componentAction', ['plumbHelper', function(plumbHelper) {
 module.directive('schemaLink', ['plumbHelper', function(plumbHelper) {
 	return {
 		replace: true,
-		controller: 'designerController',
+		controller: 'componentController',
 		link: function(scope, element, attrs){
 			plumbHelper.createConnection(scope.link);
 			
