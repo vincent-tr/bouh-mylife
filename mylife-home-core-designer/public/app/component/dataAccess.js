@@ -7,7 +7,7 @@
 
 var module = angular.module('mylife.component.dataAccess', ['mylife.api', 'mylife.tools', 'ui.bootstrap', 'mylife.component.schemaHelper']);
 
-module.factory('dataAccess', ['$modal', 'api', 'tools', 'schemaHelper', 'dialogAlert', function($modal, api, tools, schemaHelper, dialogAlert) {
+module.factory('componentDataAccess', ['$modal', 'api', 'tools', 'schemaHelper', 'dialogAlert', function($modal, api, tools, schemaHelper, dialogAlert) {
 	
 	var checkDesignerData = function(item) {
 		var designer = item.designer;
