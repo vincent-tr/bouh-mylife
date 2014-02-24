@@ -6,7 +6,7 @@
 
 var module = angular.module('mylife.component.designer', ['mylife.component.dataAccess', 'mylife.tools', 'mylife.component.plumbHelper', 'mylife.component.schemaHelper']);
 
-module.controller('componentController', ['$scope', '$timeout', 'componentDataAccess', 'plumbHelper', 'schemaHelper', 'dialogPrompt', function($scope, $timeout, componentDataAccess, plumbHelper, schemaHelper, dialogPrompt) {
+module.controller('componentController', ['$scope', '$timeout', 'componentDataAccess', 'plumbHelper', 'schemaHelper', 'dialogPrompt', 'dialogAlert', function($scope, $timeout, componentDataAccess, plumbHelper, schemaHelper, dialogPrompt, dialogAlert) {
 
 	$scope.pluginTypes = [];
 	$scope.plugins = [];
@@ -30,7 +30,7 @@ module.controller('componentController', ['$scope', '$timeout', 'componentDataAc
 	
 	$scope.save = function() {
 		componentDataAccess.save($scope, function() {
-			// TODO
+			dialogAlert({text: 'Enregistrement effectué'});
 		});
 	};
 	
@@ -55,16 +55,6 @@ module.controller('componentController', ['$scope', '$timeout', 'componentDataAc
 	};
 }]);
 
-module.directive('initializer', [ '$timeout', function($timeout) {
-	return {
-		restrict : 'A', 
-		terminal : true,
-		transclude : true,
-		link : function(scope, element, attrs) {
-			$timeout(scope.init, 0);
-		}
-	};
-}]);
 
 module.directive('toolboxItem', function() {
 	return {
