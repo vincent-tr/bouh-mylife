@@ -1,3 +1,7 @@
+.nav,.pagination,.carousel,.panel-title a {
+	cursor: pointer;
+}
+
 .tab-image {
 	width: 16px;
 	height: 16px;
@@ -87,7 +91,8 @@
 }
 
 #propertybox-container {
-	left: 0px; width : 100%;
+	left: 0px;
+	width: 100%;
 	position: absolute;
 	width: 100%;
 }
@@ -132,7 +137,7 @@
 	right: 0;
 	height: 30px;
 	margin: 8px;
-	font-weight: 
+	font-weight:
 }
 
 #propertybox-content {
