@@ -7,7 +7,7 @@
 
 var module = angular.module('mylife.component.dataAccess', ['mylife.api', 'mylife.tools', 'ui.bootstrap', 'mylife.component.schemaHelper']);
 
-module.factory('componentDataAccess', ['$modal', 'api', 'tools', 'schemaHelper', 'dialogAlert', function($modal, api, tools, schemaHelper, dialogAlert) {
+module.factory('componentDataAccess', ['$modal', 'api', 'tools', 'schemaHelper', function($modal, api, tools, schemaHelper) {
 	
 	var checkDesignerData = function(item) {
 		var designer = item.designer;
@@ -85,7 +85,7 @@ module.factory('componentDataAccess', ['$modal', 'api', 'tools', 'schemaHelper',
 
 			modalInstance.result.then(function () {
 				api.component.apply.post({}, mergeData, function() {
-					dialogAlert({text: 'Enregistrement effectué'});
+					callback();
 				});
 			});
 		});

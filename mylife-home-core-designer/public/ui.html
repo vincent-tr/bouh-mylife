@@ -2,13 +2,20 @@
 
 ui
 
-<div id="images">
-	<div ng-repeat="resource in resources">
-	</div>
-	<div>
-		<input type="file" input-data="dataUrl"></input>
-		<div style="max-height: 50px; max-width: 50px;">
-			<img src="{{dataUrl}}"></img>
+<div id="ui" ng-controller="uiController">
+
+	<div id="images">
+		<div ng-repeat="resource in resources">
+		</div>
+		<div>
+			<input type="file" input-data="dataUrl"></input>
+			<div style="max-height: 50px; max-width: 50px;">
+				<img src="{{dataUrl}}"></img>
+			</div>
 		</div>
 	</div>
+
+	<!--  does not render what comes behind it, so it's probably wrong -->
+	<div initializer></div>
+	
 </div>

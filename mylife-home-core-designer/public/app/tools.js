@@ -233,3 +233,14 @@ module.directive('splitter', ['$timeout', '$window', function($timeout, $window)
 		}
 	};
 }]);
+
+module.directive('initializer', [ '$timeout', function($timeout) {
+	return {
+		restrict : 'A', 
+		terminal : true,
+		transclude : true,
+		link : function(scope, element, attrs) {
+			$timeout(scope.init, 0);
+		}
+	};
+}]);
