@@ -64,8 +64,12 @@ module.directive('inputData', ['fileReader', function(fileReader) {
 			
 			element.on('change', function() {
 				var files = element[0].files;
-				if(files.length === 0)
+				if(files.length === 0) {
+					scope.$apply(function () {
+						scope[name] = '';
+					});
 					return;
+				}
 				
 				fileReader.readAsDataUrl(files[0], scope).then(function(url) {
 					scope[name] = url;
