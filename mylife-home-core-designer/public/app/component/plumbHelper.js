@@ -5,7 +5,7 @@
 
 'use strict';
 
-var module = angular.module('mylife.plumbHelper', ['mylife.tools', 'mylife.schemaHelper']);
+var module = angular.module('mylife.component.plumbHelper', ['mylife.tools', 'mylife.component.schemaHelper']);
 
 module.factory('plumbHelper', ['$timeout', '$rootScope', 'tools', 'dialogAlert', 'schemaHelper', function($timeout, $rootScope, tools, dialogAlert, schemaHelper) {
 	

@@ -4,7 +4,7 @@
 
 'use strict';
 
-var module = angular.module('mylife.designer', ['mylife.api', 'mylife.tools', 'mylife.plumbHelper', 'mylife.schemaHelper']);
+var module = angular.module('mylife.component.designer', ['mylife.component.dataAccess', 'mylife.tools', 'mylife.component.plumbHelper', 'mylife.component.schemaHelper']);
 
 module.controller('designerController', ['$scope', '$timeout', 'dataAccess', 'plumbHelper', 'schemaHelper', 'dialogPrompt', function($scope, $timeout, dataAccess, plumbHelper, schemaHelper, dialogPrompt) {
 

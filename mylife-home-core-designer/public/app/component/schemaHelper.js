@@ -4,7 +4,7 @@
 
 'use strict';
 
-var module = angular.module('mylife.schemaHelper', ['mylife.tools', 'mylife.idGenerator']);
+var module = angular.module('mylife.component.schemaHelper', ['mylife.tools', 'mylife.idGenerator']);
 
 module.factory('schemaHelper', ['tools', 'idGenerator', function(tools, idGenerator) {
 

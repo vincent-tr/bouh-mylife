@@ -59,7 +59,7 @@ var create = function(port) {
 
 	app.post('/component/merge', function(req, res) {
 		var newData = req.body;
-		manager.merge(newData, function(err, ret) {
+		componentManager.merge(newData, function(err, ret) {
 			if (err) {
 				console.error(err);
 				res.json(500, errorToObject(err));
