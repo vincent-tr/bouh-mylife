@@ -6,14 +6,16 @@ ui
 
 	<div id="main">
 	
-		<div id="images">
+		<div>
 			<div ng-repeat="resource in resources">
+				<img src="{{resource.data}}" style="max-height: 50px; max-width: 50px;"></img>
+				<button type="button" class="btn btn-primary" ng-click="destroyResource(resource)">Supprimer</button>
 			</div>
 			<div>
-				<input type="file" input-data="dataUrl"></input>
-				<div style="max-height: 50px; max-width: 50px;">
-					<img src="{{dataUrl}}"></img>
-				</div>
+				<input type="file" input-data="newResourceData" style="font-size:medium;"></input>
+				<img src="{{newResourceData}}" style="max-height: 50px; max-width: 50px;"></img>
+				<input type="text" ng-model="newResourceId"></input>
+				<button type="button" class="btn btn-primary" ng-click="newResource()">Ajouter</button>
 			</div>
 		</div>
 	</div>
