@@ -64,7 +64,7 @@ static struct sysfs_def sysfs =
 struct select_data
 {
 	int *nfds;
-	fd_set *readfds;
+	fd_set *exceptfds;
 };
 
 static struct list monitors;
@@ -171,6 +171,8 @@ int io_ctl(struct gpio *gpio, int ctl, va_list args)
 				if(io->direction == in)
 					monitor(gpio);
 				sysfs_write(&sysfs, gpionb, "direction", direction == in ? "in" : "out");
+				if(io->direction == in)
+					sysfs_write(&sysfs, gpionb, "edge", "both");
 			}
 			ret = 1;
 		}
@@ -224,7 +226,7 @@ void select_add(int *nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
 {
 	struct select_data data;
 	data.nfds = nfds;
-	data.readfds = readfds;
+	data.exceptfds = exceptfds;
 	list_foreach(&monitors, select_add_item, &data);
 }
 
@@ -233,7 +235,7 @@ int select_add_item(void *node, void *ctx)
 	struct monitor_data *monitor = node;
 	struct select_data *select = ctx;
 
-	FD_SET(monitor->pollfd, select->readfds);
+	FD_SET(monitor->pollfd, select->exceptfds);
 	if(*(select->nfds) < (monitor->pollfd + 1))
 		*(select->nfds) = monitor->pollfd + 1;
 
@@ -244,7 +246,7 @@ void select_process(fd_set *readfds, fd_set *writefds, fd_set *exceptfds, void *
 {
 	struct select_data data;
 	data.nfds = NULL;
-	data.readfds = readfds;
+	data.exceptfds = exceptfds;
 	list_foreach(&monitors, select_process_item, &data);
 }
 
@@ -253,21 +255,23 @@ int select_process_item(void *node, void *ctx)
 	struct monitor_data *monitor = node;
 	struct select_data *select = ctx;
 
-	if(FD_ISSET(monitor->pollfd, select->readfds))
+	if(FD_ISSET(monitor->pollfd, select->exceptfds))
 	{
 		// value changed
 
 		// read file to reset readable state
 		char c;
+		log_assert(lseek(monitor->pollfd, 0, SEEK_SET) != (off_t)-1);
 		log_assert(read(monitor->pollfd, &c, 1) != -1);
 
 		// access gpio
 		struct gpio *gpio = monitor->gpio;
-		int gpionb = gpio->gpio;
+		//int gpionb = gpio->gpio;
 		struct io *io = gpio->type_data;
 
 		// read value and call callback
-		io->value = (!strcmp(sysfs_read(&sysfs, gpionb, "value"), "1")) ? 1 : 0;
+		//io->value = (!strcmp(sysfs_read(&sysfs, gpionb, "value"), "1")) ? 1 : 0;
+		io->value = (c == '1') ? 1 : 0;
 		if(io->change_callback)
 			io->change_callback(gpio, io->value, io->change_callback_ctx);
 	}
