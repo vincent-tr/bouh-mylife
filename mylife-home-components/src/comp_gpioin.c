@@ -84,19 +84,3 @@ void change_callback(struct gpio *gpio, int value, void *ctx)
 	struct net_value net_value = { .enum_value = value ? "on" : "off" };
 	net_object_attribute_change(comp->object, "value", net_value);
 }
-
-void action_callback(void *ctx, struct net_object *object, struct net_member *member, struct net_value *args[])
-{
-	struct component *comp = ctx;
-	struct net_value value = *args[0];
-	const char *sval = value.enum_value;
-
-	if(!strcmp(sval, "off"))
-		gpio_io_set_value(comp->gpio, 0);
-	else if(!strcmp(sval, "on"))
-		gpio_io_set_value(comp->gpio, 0);
-	else
-		log_fatal("unknown value : %s", sval);
-
-	net_object_attribute_change(object, "value", value);
-}
