@@ -90,7 +90,7 @@ void action_callback(void *ctx, struct net_object *object, struct net_member *me
 	if(!strcmp(sval, "off"))
 		gpio_io_set_value(comp->gpio, 0);
 	else if(!strcmp(sval, "on"))
-		gpio_io_set_value(comp->gpio, 0);
+		gpio_io_set_value(comp->gpio, 1);
 	else
 		log_fatal("unknown value : %s", sval);
 
