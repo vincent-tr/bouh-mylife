@@ -51,7 +51,7 @@ var saveUiData = function() {
 };
 
 var checkUiData = function() {
-	if(uiData === null) {
+	if(!uiData) {
 		loadUiData();
 	}
 };
