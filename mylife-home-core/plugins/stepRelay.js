@@ -6,7 +6,9 @@ var init = function(apiarg) {
 	var boolean = api.netobject.netEnum('off', 'on');
 	var clazz = api.netobject.netClass(
 			api.netobject.netAttribute('output', boolean),
-			api.netobject.netAction('input', boolean));
+			api.netobject.netAction('input', boolean),
+			api.netobject.netAction('on', boolean),
+			api.netobject.netAction('off', boolean));
 
 	return {
 		'class' : clazz,
@@ -29,6 +31,21 @@ var create = function(context) {
 		var val = obj.getAttribute('output');
 		val = val === 'on' ? 'off' : 'on';
 		obj.setAttribute('output', val);
+	});
+	
+	var setValue = function(value) {
+		var val = obj.getAttribute('output');
+		if(val !== value) {
+			obj.setAttribute('output', value);
+		}
+	};
+	
+	obj.on('action#on', function(args) {
+		setValue('on');
+	});
+
+	obj.on('action#off', function(args) {
+		setValue('off');
 	});
 
 	return {};
