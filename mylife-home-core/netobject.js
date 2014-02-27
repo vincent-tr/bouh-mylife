@@ -234,6 +234,14 @@ var loadWatcher = function() {
 	var objects = {};
 	var online = false;
 
+	var send = function(channels, msg) {
+		if(!online) {
+			return;
+		}
+		
+		ircclient.say(channels[0], msg);
+	};
+	
 	var addChannel = function(channel) {
 		var count = channels[channel];
 		if (count) {
@@ -333,12 +341,12 @@ var loadWatcher = function() {
 	};
 
 	ircclient.on('part', function(channel, nick) {
-		// on considere qu'on a qu'un seul chan en commun avec le user spécifié
+		// on considere qu'on a qu'un seul chan en commun avec le user spï¿½cifiï¿½
 		nickOffline(nick);
 	});
 	
 	ircclient.on('kick', function(channel, nick) {
-		// on considere qu'on a qu'un seul chan en commun avec le user spécifié
+		// on considere qu'on a qu'un seul chan en commun avec le user spï¿½cifiï¿½
 		nickOffline(nick);
 	});
 
@@ -399,7 +407,8 @@ var loadWatcher = function() {
 		removeChannel : removeChannel,
 		addObject : addObject,
 		removeObject : removeObject,
-		checkClean : checkClean
+		checkClean : checkClean,
+		send : send
 	};
 
 	return watcher;
@@ -414,7 +423,22 @@ var publishRemote = function(object, channels) {
 	}
 	watcher.addObject(object);
 	
+	var executeAction = function(name, args) {
+		var msg = object.id + ' ' + name;
+		if(args) {
+			for(var i=0, l=args.length; i<l; i++) {
+				msg += ' ' + args[i];
+			}
+		}
+		watcher.send(channels, msg);
+	};
+	
+	object.addListener('action', executeAction);
+
 	var destroy = function() {
+		
+		object.removeListener('action', executeAction);
+		
 		watcher.removeObject(object);
 		for(var i=0, l=channels.length; i<l; i++) {
 			watcher.removeChannel(channels[i]);
@@ -422,7 +446,7 @@ var publishRemote = function(object, channels) {
 		
 		watcher.checkClean();
 	};
-
+	
 	return {
 		object : object,
 		channels : channels,
