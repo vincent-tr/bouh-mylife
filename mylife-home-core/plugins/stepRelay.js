@@ -41,10 +41,18 @@ var create = function(context) {
 	};
 	
 	obj.on('action#on', function(args) {
+		if(args[0] !== 'on') {
+			return;
+		}
+		
 		setValue('on');
 	});
 
 	obj.on('action#off', function(args) {
+		if(args[0] !== 'on') {
+			return;
+		}
+		
 		setValue('off');
 	});
 
