@@ -11,16 +11,46 @@
 			</tab>
 		    <tab>
 		    	<tab-heading><img class="tab-image" src="images/resource.jpeg"></img>&nbsp;Ressources</tab-heading>
-				<div>
-					<div ng-repeat="resource in resources">
-						<img src="{{resource.data}}" style="max-height: 50px; max-width: 50px;"></img>
-						<button type="button" class="btn btn-primary" ng-click="destroyResource(resource)">Supprimer</button>
+				<div class="ui-resource-wrapper">
+					<div class="page-header "><h3>Ressources présentes dans le système</h3></div>
+					
+					<div class="panel panel-default">
+						<div class="thumbnail ui-resource-list" ng-repeat="resource in resources">
+							<img class="ui-resource-list" src="{{resource.data}}" tooltip-html-unsafe="<img class=&quot;ui-resource-tooltip&quot; src=&quot;{{resource.data}}&quot;></img>"></img>
+							<div class="caption">
+								<span class="ui-resource-list">{{resource.id}}</span>
+								<p><button type="button" class="btn btn-default btn-xs" ng-click="destroyResource(resource)" title="Supprimer"><img src="images/delete.png" height="16" width="16"></src></button></p>
+							</div>
+						</div>
 					</div>
-					<div>
-						<input type="file" input-data="newResourceData" style="font-size:medium;"></input>
-						<img src="{{newResourceData}}" style="max-height: 50px; max-width: 50px;"></img>
-						<input type="text" ng-model="newResourceId"></input>
-						<button type="button" class="btn btn-primary" ng-click="newResource()">Ajouter</button>
+
+					<div class="panel panel-default">
+						<div class="panel-heading">Ajout d'une ressource</div>
+	  					<div class="panel-body">
+							<div>
+								<table class="ui-resource-new">
+									<tr>
+										<td>Id</td>
+										<td><input type="text" ng-model="$parent.newResourceId"></input></td>
+									</tr>
+									<tr>
+										<td>Contenu</td>
+										<td>
+											<span class="btn btn-default btn-xs btn-file">
+												<img src="images/upload.png" height="16" width="16"></img>
+											    <input type="file" input-data="$parent.newResourceData" />
+											</span>						
+											<img src="{{$parent.newResourceData}}" class="ui-resource-new" tooltip-html-unsafe="<img class=&quot;ui-resource-tooltip&quot; src=&quot;{{$parent.newResourceData}}&quot;></img>"></img>
+										</td>
+									</tr>
+									<tr>
+										<td class="ui-resource-new-commands" colspan="2">
+											<button type="button" class="btn btn-default btn-xs" ng-click="newResource()" title="Ajouter"><img src="images/new.png" height="16" width="16"></src></button>
+										</td>
+									</tr>
+								</table>
+							</div>
+						</div>
 					</div>
 				</div>
 			</tab>

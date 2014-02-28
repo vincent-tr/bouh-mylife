@@ -57,22 +57,24 @@ module.factory('fileReader', ["$q", function($q) {
     };
 }]);
 
-module.directive('inputData', ['fileReader', function(fileReader) {
+module.directive('inputData', ['$parse', 'fileReader', function($parse, fileReader) {
 	return {
 		link: function (scope, element, attrs) {
-			var name = attrs.inputData;
+			var expr = attrs.inputData;
+			var getter = $parse(expr);
+			var setter = getter.assign;
 			
 			element.on('change', function() {
 				var files = element[0].files;
 				if(files.length === 0) {
 					scope.$apply(function () {
-						scope[name] = '';
+						setter(scope, '');
 					});
 					return;
 				}
 				
 				fileReader.readAsDataUrl(files[0], scope).then(function(url) {
-					scope[name] = url;
+					setter(scope, url);
 				});
 			});
 		}
