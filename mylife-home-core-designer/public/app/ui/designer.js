@@ -6,7 +6,7 @@
 
 var module = angular.module('mylife.ui.designer', ['mylife.ui.dataAccess', 'mylife.tools', 'mylife.ui.fileReader']);
 
-module.controller('uiController', ['$scope', '$timeout', 'uiDataAccess', function($scope, $timeout, uiDataAccess) {
+module.controller('uiController', ['$scope', '$timeout', 'uiDataAccess', 'dialogAlert', function($scope, $timeout, uiDataAccess, dialogAlert) {
 	
 	$scope.resources = [];
 	$scope.windows = [];
@@ -43,11 +43,25 @@ module.controller('uiController', ['$scope', '$timeout', 'uiDataAccess', functio
 	};
 
 	$scope.newResource = function() {
+		
+		if(!$scope.newResourceId) {
+			dialogAlert({text: 'Saisissez un id'});
+			return;
+		}
+		
+		if(!$scope.newResourceData) {
+			dialogAlert({text: 'Saisissez un contenu'});
+			return;
+		}
+		
 		var res = {
 			id: $scope.newResourceId, 
 			data : $scope.newResourceData
 		};
 		$scope.resources.push(res);
+		
+		$scope.newResourceId = undefined;
+		$scope.newResourceData = undefined;
 	};
 	
 	$scope.destroyResource = function(resource) {
