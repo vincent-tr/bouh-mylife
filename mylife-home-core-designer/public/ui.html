@@ -6,13 +6,63 @@
 		<tabset>
 		    <tab>
 		    	<tab-heading><img class="tab-image" src="images/window.jpeg"></img>&nbsp;Fenêtres</tab-heading>
-				<div>
+				<div id="ui-windows">
+					<div id="ui-leftpane" splitter="{direction:'vertical',min:'110',max:'500'}">
+						<div id="ui-toolbox-container" splitter="{direction:'horizontal',min:'100'}">
+							<div id="ui-toolbox">
+								<div class="ui-toolbox-item" window-toolbox-item data-identifier="{{window.id}}" ng-repeat="window in windows">
+									<span class="ui-toolbox-item-title">{{window.id}}</span>
+									<div class="ui-toolbox-item-image-wrapper">
+										<img class="ui-toolbox-item-image" src="images/ui.png" height="48" width="48"></img>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div id="ui-propertybox-container">
+							<div id="ui-propertybox">
+								<div id="ui-propertybox-wrapper">
+									<div id="ui-propertybox-title">
+										<img ng-show="selectedWindow" class="item-image" src="images/ui.png" title="{{selectedWindow.id}}"></img>
+										&nbsp;&nbsp;&nbsp;
+										<span>{{selectedWindow.id}}</span>
+										<span ng-show="!selectedWindow">Pas de selection</span>
+									</div>
+									<div id="propertybox-content">
+										<table ng-show="selectedWindow.internal().type">
+											<thead>
+												<tr>
+													<th width="35%">Nom</th>
+													<th width="65%">Valeur</th>
+												</tr>
+											</thead>
+											<tbody>
+												<tr>
+													<td>ID</td>
+													<td><input type="text" ng-model="selectedWindow.id"></input></td>
+												</tr>
+												<tr ng-repeat="(key, value) in selectedWindow.parameters">
+													<td>{{key}}</td>
+													<td><input type="text" ng-model="value"></input></td>
+												</tr>
+											</tbody>
+										</table>
+									</div>
+									<div id="ui-propertybox-commands">
+										<button ng-show="selectedWindow" type="button" class="btn btn-default btn-xs" ng-click="selectedWindowDelete()" title="Supprimer"><img src="images/delete.png" height="16" width="16"></src></button>
+										<button type="button" class="btn btn-default btn-xs" ng-click="selectedWindowCreate()" title="Nouveau"><img src="images/new.png" height="16" width="16"></src></button>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div id="schema-container" class="drop-container" ng-click="addEvent($event)" schema-container>
+					</div>
 				</div>
 			</tab>
 		    <tab>
 		    	<tab-heading><img class="tab-image" src="images/resource.jpeg"></img>&nbsp;Ressources</tab-heading>
 				<div class="ui-resource-wrapper">
-					<div class="page-header "><h3>Ressources présentes dans le système</h3></div>
+					<!-- <div class="page-header "><h3>Ressources présentes dans le système</h3></div> -->
 					
 					<div class="panel panel-default">
 						<div class="thumbnail ui-resource-list" ng-repeat="resource in resources">
