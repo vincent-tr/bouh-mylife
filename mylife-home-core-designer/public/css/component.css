@@ -1,0 +1,245 @@
+
+#leftpane {
+	width: 200px;
+	height: 100%;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+}
+
+#toolbox-container {
+	height: 200px;
+	width: 100%;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+}
+
+#toolbox {
+	font-size: 0;
+	border: 2px solid gray;
+	border-right: 4px solid gray;
+	width: 100%;
+	height: 100%;
+	background-color: lightgray;
+	border: 1px solid black;
+	border-radius: 5px;
+	overflow-y: auto;
+}
+
+.toolbox-item {
+	width: 70px;
+	height: 70px;
+	margin: 10px;
+	display: inline-block;
+	cursor: pointer;
+	border: 1px solid black;
+	box-shadow: 2px 2px 19px #aaa;
+	-o-box-shadow: 2px 2px 19px #aaa;
+	-webkit-box-shadow: 2px 2px 19px #aaa;
+	-moz-box-shadow: 2px 2px 19px #aaa;
+	-moz-border-radius: 0.5em;
+	border-radius: 0.5em;
+	opacity: 0.8;
+	filter: alpha(opacity = 80);
+	text-align: center;
+	background-color: #F3F3F3;
+}
+
+.toolbox-item-title {
+	font-size: xx-small;
+}
+
+.toolbox-item-image-wrapper {
+	display: inline-block;
+	border: 1px solid black;
+	position: relative;
+	height: 50px;
+	width: 50px;
+}
+
+.toolbox-item-image {
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	z-index: 1;
+}
+
+.toolbox-item-image-ui {
+	position: absolute;
+	right: 0px;
+	bottom: 0px;
+	z-index: 2;
+}
+
+#propertybox-container {
+	left: 0px;
+	width: 100%;
+	position: absolute;
+	width: 100%;
+}
+
+#propertybox {
+	margin-top: 1px;
+	border: 2px solid gray;
+	border-right: 4px solid gray;
+	width: 100%;
+	height: 100%;
+	background-color: lightgray;
+	border: 1px solid black;
+	border-radius: 5px;
+	overflow-y: auto;
+	font-size: x-small;
+	vertical-align: middle;
+}
+
+#propertybox-wrapper {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	margin: 5px;
+	border: 1px solid black;
+	border-radius: 5px;
+	box-shadow: 2px 2px 19px darkgray;
+	-o-box-shadow: 2px 2px 19px darkgray;
+	-webkit-box-shadow: 2px 2px 19px darkgray;
+	-moz-box-shadow: 2px 2px 19px darkgray;
+	opacity: 0.8;
+	filter: alpha(opacity = 80);
+	text-align: center;
+	background-color: #F3F3F3;
+}
+
+#propertybox-title {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 30px;
+	margin: 8px;
+	font-weight:
+}
+
+#propertybox-content {
+	position: absolute;
+	top: 30px;
+	left: 0;
+	right: 0;
+	bottom: 30px;
+}
+
+#propertybox-commands {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	height: 30px;
+}
+
+#propertybox-content table {
+	display: block;
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	margin: 5px;
+}
+
+#propertybox-content th {
+	text-align: center;
+}
+
+#propertybox-content tbody {
+	text-align: left;
+}
+
+#propertybox-content input {
+	border-collapse: collapse;
+	border: 1px solid darkgray;
+}
+
+#propertybox-content table {
+	border-collapse: collapse;
+	border: 1px solid darkgray;
+}
+
+#propertybox-content td {
+	/*border: 1px solid darkgray;*/
+	padding-left: 5px;
+}
+
+#schema-container {
+	height: 100%;
+	position: absolute;
+	top: 0px;
+}
+
+.item {
+	position: absolute;
+	width: 150px;
+	border: 1px solid black;
+	box-shadow: 2px 2px 19px darkgray;
+	-o-box-shadow: 2px 2px 19px darkgray;
+	-webkit-box-shadow: 2px 2px 19px darkgray;
+	-moz-box-shadow: 2px 2px 19px darkgray;
+	-moz-border-radius: 0.5em;
+	border-radius: 0.5em;
+}
+
+.item-selected {
+	box-shadow: 2px 2px 30px black;
+	-o-box-shadow: 2px 2px 30px black;
+	-webkit-box-shadow: 2px 2px 30px black;
+	-moz-box-shadow: 2px 2px 30px black;
+	-moz-border-radius: 0.5em;
+	border-radius: 0.5em;
+}
+
+.item-image {
+	height: 16px;
+	width: 16px;
+}
+
+.item-image-ui {
+	height: 16px;
+	width: 16px;
+	right: 3px;
+	position: absolute;
+}
+
+.item-title {
+	padding: 2px;
+	cursor: move;
+	font-size: x-small;
+	vertical-align: middle;
+}
+
+.component-parameter {
+	width: 100%;
+	font-size: x-small;
+	background-color: #CCCCCC;
+	vertical-align: middle;
+	border-top: 1px solid black;
+	text-indent: 10px;
+}
+
+.component-attribute {
+	width: 100%;
+	font-size: x-small;
+	cursor: pointer;
+	background-color: #40DFB3;
+	border-top: 1px solid black;
+	text-indent: 10px;
+}
+
+.component-action {
+	width: 100%;
+	font-size: x-small;
+	cursor: pointer;
+	background-color: #40B3DF;
+	border-top: 1px solid black;
+	text-indent: 10px;
+}

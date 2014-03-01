@@ -4,9 +4,9 @@
 
 'use strict';
 
-var module = angular.module('mylife.ui.designer', ['mylife.ui.dataAccess', 'mylife.tools', 'mylife.ui.fileReader']);
+var module = angular.module('mylife.ui.designer', ['mylife.ui.dataAccess', 'mylife.tools', 'mylife.ui.fileReader', 'mylife.idGenerator']);
 
-module.controller('uiController', ['$scope', '$timeout', 'uiDataAccess', 'dialogAlert', function($scope, $timeout, uiDataAccess, dialogAlert) {
+module.controller('uiController', ['$scope', '$timeout', 'uiDataAccess', 'dialogAlert', 'idGenerator', 'tools', function($scope, $timeout, uiDataAccess, dialogAlert, idGenerator, tools) {
 	
 	$scope.resources = [];
 	$scope.windows = [];
@@ -73,4 +73,37 @@ module.controller('uiController', ['$scope', '$timeout', 'uiDataAccess', 'dialog
 		checkSchema();
 	};
 	
+	$scope.selectedWindowDelete = function() {
+		
+	};
+	
+	$scope.selectedWindowCreate = function() {
+		var window = {
+			id: 'new_window_' + idGenerator()
+		};
+		
+		tools.attachInternal(window);
+		
+		$scope.windows.push(window);
+		$scope.selectedWindow = window;
+	};
+	
+}]);
+
+module.directive('windowToolboxItem', [function() {
+	return {
+		replace: true,
+		controller: 'uiController',
+		link: function (scope, element, attrs) {
+
+			var window = scope.window;
+			
+			element.bind('click', function() {
+				$(element).addClass('ui-item-selected').siblings().removeClass('ui-item-selected');
+				
+				// Scope parent du ng-repeat
+				scope.$parent.selectedComponent = window;
+			});
+		}
+	};
 }]);
