@@ -12,6 +12,7 @@ module.controller('uiController', ['$scope', '$timeout', 'uiDataAccess', 'dialog
 	$scope.windows = [];
 	$scope.defaultWindow = '';
 	$scope.components = [];
+	$scope.selectedWindow = null;
 	
 	var applyData = function(data) {
 		$scope.resources = data.resources;
@@ -70,11 +71,20 @@ module.controller('uiController', ['$scope', '$timeout', 'uiDataAccess', 'dialog
 			return;
 		}
 		$scope.resources.splice(index, 1);
+		
 		checkSchema();
 	};
 	
 	$scope.selectedWindowDelete = function() {
+		var window = $scope.selectedWindow; 
+		var index = $scope.windows.indexOf(window);
+		if (index === -1) {
+			return;
+		}
+		$scope.windows.splice(index, 1);
+		$scope.selectedWindow = null;
 		
+		checkSchema();
 	};
 	
 	$scope.selectedWindowCreate = function() {
@@ -85,7 +95,6 @@ module.controller('uiController', ['$scope', '$timeout', 'uiDataAccess', 'dialog
 		tools.attachInternal(window);
 		
 		$scope.windows.push(window);
-		$scope.selectedWindow = window;
 	};
 	
 }]);
@@ -102,7 +111,9 @@ module.directive('windowToolboxItem', [function() {
 				$(element).addClass('ui-item-selected').siblings().removeClass('ui-item-selected');
 				
 				// Scope parent du ng-repeat
-				scope.$parent.selectedComponent = window;
+				scope.$apply(function() {
+					scope.$parent.$parent.selectedWindow = window;
+				});
 			});
 		}
 	};
