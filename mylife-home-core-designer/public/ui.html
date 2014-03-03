@@ -28,7 +28,7 @@
 										<span ng-show="!selectedWindow">Pas de selection</span>
 									</div>
 									<div id="propertybox-content">
-										<table ng-show="selectedWindow.internal().type">
+										<table ng-show="selectedWindow">
 											<thead>
 												<tr>
 													<th width="35%">Nom</th>
@@ -40,10 +40,12 @@
 													<td>ID</td>
 													<td><input type="text" ng-model="selectedWindow.id"></input></td>
 												</tr>
+												<!-- 
 												<tr ng-repeat="(key, value) in selectedWindow.parameters">
 													<td>{{key}}</td>
 													<td><input type="text" ng-model="value"></input></td>
 												</tr>
+												-->
 											</tbody>
 										</table>
 									</div>
