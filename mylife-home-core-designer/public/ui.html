@@ -40,6 +40,19 @@
 													<td>ID</td>
 													<td><input type="text" ng-model="selectedWindow.id"></input></td>
 												</tr>
+												<tr>
+													<td>Image de fond</td>
+													<td>
+														<input type="text" ng-model="selectedWindow.background" class="dropdown-toggle">
+														</input>
+														<ul class="dropdown-menu">
+															<li ng-repeat="item in resources">
+																<span class="ui-resource-list">{{resource.id}}</span>
+																<img class="ui-resource-list" src="{{resource.data}}" tooltip-html-unsafe="<img class=&quot;ui-resource-tooltip&quot; src=&quot;{{resource.data}}&quot;></img>"></img>
+															</li>
+														</ul>
+  													</td>
+												</tr>
 												<!-- 
 												<tr ng-repeat="(key, value) in selectedWindow.parameters">
 													<td>{{key}}</td>
