@@ -8,16 +8,41 @@ var module = angular.module('mylife.ui.designer', ['mylife.ui.dataAccess', 'myli
 
 module.controller('uiController', ['$scope', '$timeout', 'uiDataAccess', 'dialogAlert', 'idGenerator', 'tools', function($scope, $timeout, uiDataAccess, dialogAlert, idGenerator, tools) {
 	
+	var app = {
+		defaultWindow: ''
+	};
+	tools.attachInternal(app);
+	app.internal().type = 'application';
+	
 	$scope.resources = [];
 	$scope.windows = [];
-	$scope.defaultWindow = '';
 	$scope.components = [];
-	$scope.selectedWindow = null;
+	$scope.app = app;
+	
+	$scope.ui = {
+		selectedItem: null
+	};
+	
+	var prepareCommand = function(command, parent) {
+		command.internal().type = 'command';
+		command.internal().parent = parent;
+	};
+	
+	var prepareWindow = function(window) {
+		window.internal().type = 'window';
+		if(!window.commands)
+			window.commands = [];
+		window.commands.forEach(function(command) {
+			prepareCommand(command, window);
+		});
+	};
 	
 	var applyData = function(data) {
 		$scope.resources = data.resources;
 		$scope.windows = data.windows;
-		$scope.defaultWindow = data.defaultWindow;
+		$scope.app.defaultWindow = data.defaultWindow;
+		
+		$scope.windows.forEach(prepareWindow);
 	};
 	
 	var applyComponents = function(components) {
@@ -25,7 +50,7 @@ module.controller('uiController', ['$scope', '$timeout', 'uiDataAccess', 'dialog
 	};
 	
 	var checkSchema = function() {
-		
+		// TODO
 	};
 	
 	$scope.reload = function() {
@@ -34,7 +59,13 @@ module.controller('uiController', ['$scope', '$timeout', 'uiDataAccess', 'dialog
 	};
 
 	$scope.save = function() {
-		uiDataAccess.save($scope, function() {
+		var data = {
+			resources: $scope.resources,
+			windows: $scope.windows,
+			defaultWindow: $scope.app.defaultWindow
+		};
+		
+		uiDataAccess.save(data, function() {
 			dialogAlert({text: 'Enregistrement effectué'});
 		});
 	};
@@ -75,44 +106,134 @@ module.controller('uiController', ['$scope', '$timeout', 'uiDataAccess', 'dialog
 		checkSchema();
 	};
 	
-	$scope.selectedWindowDelete = function() {
-		var window = $scope.selectedWindow; 
-		var index = $scope.windows.indexOf(window);
-		if (index === -1) {
+	$scope.deleteItem = function() {
+		
+		var deleteWindow = function(window) {
+			var index = $scope.windows.indexOf(window);
+			if (index === -1) {
+				return;
+			}
+			$scope.windows.splice(index, 1);
+		};
+		
+		var deleteCommand = function(command) {
+			var window = command.internal().parent;
+			var index = window.commands.indexOf(command);
+			if (index === -1) {
+				return;
+			}
+			window.commands.splice(index, 1);
+		};
+		
+		var item = $scope.ui.selectedItem;
+		if(!item) {
 			return;
 		}
-		$scope.windows.splice(index, 1);
-		$scope.selectedWindow = null;
 		
+		switch(item.internal().type) {
+		case 'application':
+			return;
+			
+		case 'window':
+			deleteWindow(item);
+			break;
+			
+		case 'command':
+			deleteCommand(item);
+			break;
+		}
+		
+		$scope.ui.selectedItem = null;
 		checkSchema();
 	};
 	
-	$scope.selectedWindowCreate = function() {
-		var window = {
-			id: 'new_window_' + idGenerator()
+	$scope.createItem = function() {
+		
+		var createWindow = function() {
+			var window = {
+				id: 'new_window_' + idGenerator()
+			};
+			
+			tools.attachInternal(window);
+			prepareWindow(window);
+			
+			$scope.windows.push(window);
 		};
 		
-		tools.attachInternal(window);
+		var createCommand = function(window) {
+			
+			var command = {
+				id: 'new_command_' + idGenerator(),
+				display: {},
+				primaryAction: {},
+				secondaryAction: {}
+			};
+			
+			tools.attachInternal(command);
+			prepareCommand(command, window);
+			window.commands.push(command);
+		};
+
+		var item = $scope.ui.selectedItem;
+		if(!item) {
+			return;
+		}
 		
-		$scope.windows.push(window);
+		switch(item.internal().type) {
+		case 'application':
+			createWindow();
+			break;
+			
+		case 'window':
+			createCommand(item);
+			break;
+			
+		case 'command':
+			createCommand(item.internal().parent);
+			break;
+		}
 	};
 	
+	$scope.formatCommandAction = function(action) {
+		// TODO
+	};
+	
+	$scope.formatCommandDisplay = function(display) {
+		if(!display)
+			return null;
+		if(!display.defaultImage)
+			return null;
+		
+		var value = display.defaultImage;
+		if(display.map && display.map.length > 0) {
+			value += ' (...)';
+		}
+		return value;
+	};
+	
+	$scope.designCommandAction = function(action) {
+		// TODO
+	};
+	
+	$scope.designCommandDisplay = function(display) {
+		// TODO
+	};
 }]);
 
-module.directive('windowToolboxItem', [function() {
+module.directive('itemlistItem', [function() {
 	return {
 		replace: true,
-		controller: 'uiController',
 		link: function (scope, element, attrs) {
 
-			var window = scope.window;
+			var item = scope.item;
 			
 			element.bind('click', function() {
-				$(element).addClass('ui-item-selected').siblings().removeClass('ui-item-selected');
+				$('.ui-item-selected').removeClass('ui-item-selected');
+				$(element).addClass('ui-item-selected');
 				
 				// Scope parent du ng-repeat
 				scope.$apply(function() {
-					scope.$parent.$parent.selectedWindow = window;
+					scope.ui.selectedItem = item;
 				});
 			});
 		}
