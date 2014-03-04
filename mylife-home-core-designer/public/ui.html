@@ -8,27 +8,59 @@
 		    	<tab-heading><img class="tab-image" src="images/window.jpeg"></img>&nbsp;Fenêtres</tab-heading>
 				<div id="ui-windows">
 					<div id="ui-leftpane" splitter="{direction:'vertical',min:'110',max:'500'}">
-						<div id="ui-toolbox-container" splitter="{direction:'horizontal',min:'100'}">
-							<div id="ui-toolbox">
-								<div class="ui-toolbox-item" window-toolbox-item data-identifier="{{window.id}}" ng-repeat="window in windows">
-									<span class="ui-toolbox-item-title">{{window.id}}</span>
-									<div class="ui-toolbox-item-image-wrapper">
-										<img class="ui-toolbox-item-image" src="images/ui.png" height="48" width="48"></img>
-									</div>
+						<div id="ui-itemlist-container" splitter="{direction:'horizontal',min:'100'}">
+							<div id="ui-itemlist">
+								<div id="ui-itemlist-wrapper">
+									<ul class="ui-itemlist-list">
+										<li class="ui-itemlist-item" data-identifier="app" ng-init="item = app">
+											<div itemlist-item class="ui-itemlist-item">
+												<img class="ui-itemlist-item" src="images/application.jpg"></img>
+												<span class="ui-itemlist-item">Application</span>
+											</div>
+											<ul class="ui-itemlist-list">
+												<li class="ui-itemlist-item" data-identifier="window:{{window.id}}" ng-repeat="window in windows" ng-init="item = window">
+													<div itemlist-item class="ui-itemlist-item">
+														<img class="ui-itemlist-item" src="images/ui.png"></img>
+														<span class="ui-itemlist-item">{{window.id}}</span>
+													</div>
+													<ul class="ui-itemlist-list">
+														<li class="ui-itemlist-item" data-identifier="command:{{action.id}}" ng-repeat="command in window.commands" ng-init="item = command">
+															<div itemlist-item class="ui-itemlist-item">
+																<img class="ui-itemlist-item" src="images/command.jpg"></img>
+																<span class="ui-itemlist-item">{{command.id}}</span>
+															</div>
+														</li>
+													</ul>
+												</li>
+											</ul>
+										</li>
+									</ul>
 								</div>
 							</div>
 						</div>
 						<div id="ui-propertybox-container">
 							<div id="ui-propertybox">
 								<div id="ui-propertybox-wrapper">
-									<div id="ui-propertybox-title">
-										<img ng-show="selectedWindow" class="item-image" src="images/ui.png" title="{{selectedWindow.id}}"></img>
-										&nbsp;&nbsp;&nbsp;
-										<span>{{selectedWindow.id}}</span>
-										<span ng-show="!selectedWindow">Pas de selection</span>
+									<div ng-show="!ui.selectedItem" class="ui-propertybox-title">
+										<span>Pas de selection</span>
 									</div>
-									<div id="propertybox-content">
-										<table ng-show="selectedWindow">
+									<div ng-show="ui.selectedItem && ui.selectedItem.internal().type === 'application'" class="ui-propertybox-title">
+										<img class="item-image" src="images/application.jpg" title="Application"></img>
+										&nbsp;&nbsp;&nbsp;
+										<span>Application</span>
+									</div>
+									<div ng-show="ui.selectedItem && ui.selectedItem.internal().type === 'window'" class="ui-propertybox-title">
+										<img class="item-image" src="images/ui.png" title="{{ui.selectedItem.id}}"></img>
+										&nbsp;&nbsp;&nbsp;
+										<span>{{ui.selectedItem.id}}</span>
+									</div>
+									<div ng-show="ui.selectedItem && ui.selectedItem.internal().type === 'command'" class="ui-propertybox-title">
+										<img class="item-image" src="images/command.jpg" title="{{ui.selectedItem.id}}"></img>
+										&nbsp;&nbsp;&nbsp;
+										<span>{{ui.selectedItem.id}}</span>
+									</div>
+									<div id="ui-propertybox-content">
+										<table ng-show="ui.selectedItem">
 											<thead>
 												<tr>
 													<th width="35%">Nom</th>
@@ -36,35 +68,68 @@
 												</tr>
 											</thead>
 											<tbody>
-												<tr>
-													<td>ID</td>
-													<td><input type="text" ng-model="selectedWindow.id"></input></td>
-												</tr>
-												<tr>
-													<td>Image de fond</td>
+												<tr ng-show="ui.selectedItem.internal().type === 'application'">
+													<td>Fenêtre def.</td>
 													<td>
-														<input type="text" ng-model="selectedWindow.background" class="dropdown-toggle">
-														</input>
-														<ul class="dropdown-menu">
-															<li ng-repeat="item in resources">
-																<span class="ui-resource-list">{{resource.id}}</span>
-																<img class="ui-resource-list" src="{{resource.data}}" tooltip-html-unsafe="<img class=&quot;ui-resource-tooltip&quot; src=&quot;{{resource.data}}&quot;></img>"></img>
-															</li>
-														</ul>
+														<div class="dropdown">
+															<input type="text" ng-model="ui.selectedItem.defaultWindow" class="dropdown-toggle">
+															</input>
+															<ul class="dropdown-menu">
+																<li class="ui-dropdown-item" ng-repeat="window in windows" ng-click="ui.selectedItem.defaultWindow = window.id">
+																	<a><span>{{window.id}}</span></a>
+																</li>
+															</ul>
+														</div>
+													</td>
+												</tr>
+												<tr ng-show="ui.selectedItem.internal().type === 'window' || ui.selectedItem.internal().type === 'command'" >
+													<td>ID</td>
+													<td><input type="text" ng-model="ui.selectedItem.id"></input></td>
+												</tr>
+												<tr ng-show="ui.selectedItem.internal().type === 'window'">
+													<td>Img. fond</td>
+													<td>
+														<div class="dropdown">
+															<input type="text" ng-model="ui.selectedItem.background" class="dropdown-toggle">
+															</input>
+															<ul class="dropdown-menu">
+																<li ng-repeat="resource in resources" ng-click="ui.selectedItem.background = resource.id">
+																	<a>
+																		<span>{{resource.id}}</span>
+																		<img class="ui-resource-list" src="{{resource.data}}"
+																			tooltip-html-unsafe="<img class=&quot;ui-resource-tooltip&quot; src=&quot;{{resource.data}}&quot;></img>"></img>
+																	</a>
+																</li>
+															</ul>
+														</div>
   													</td>
 												</tr>
-												<!-- 
-												<tr ng-repeat="(key, value) in selectedWindow.parameters">
-													<td>{{key}}</td>
-													<td><input type="text" ng-model="value"></input></td>
+												<tr ng-show="ui.selectedItem.internal().type === 'command'" >
+													<td>X</td>
+													<td><input type="number" ng-model="ui.selectedItem.x"></input></td>
 												</tr>
-												-->
+												<tr ng-show="ui.selectedItem.internal().type === 'command'" >
+													<td>Y</td>
+													<td><input type="number" ng-model="ui.selectedItem.y"></input></td>
+												</tr>
+												<tr ng-show="ui.selectedItem.internal().type === 'command'" >
+													<td>Affichage</td>
+													<td>{{formatCommandDisplay(ui.selectedItem.display)}}&nbsp;&nbsp;&nbsp;<button type="button" ng-click="designCommandDisplay(ui.selectedItem.display)" class="btn btn-default btn-xs">...</button></td>
+												</tr>
+												<tr ng-show="ui.selectedItem.internal().type === 'command'" >
+													<td>Prim. act.</td>
+													<td>{{formatCommandAction(ui.selectedItem.primaryAction)}}&nbsp;&nbsp;&nbsp;<button type="button" ng-click="designCommandAction(ui.selectedItem.primaryAction" class="btn btn-default btn-xs">...</button></td>
+												</tr>
+												<tr ng-show="ui.selectedItem.internal().type === 'command'" >
+													<td>Sec. act.</td>
+													<td>{{formatCommandAction(ui.selectedItem.secondaryAction)}}&nbsp;&nbsp;&nbsp;<button type="button" ng-click="designCommandAction(ui.selectedItem.secondaryAction)" class="btn btn-default btn-xs">...</button></td>
+												</tr>
 											</tbody>
 										</table>
 									</div>
 									<div id="ui-propertybox-commands">
-										<button ng-show="selectedWindow" type="button" class="btn btn-default btn-xs" ng-click="selectedWindowDelete()" title="Supprimer"><img src="images/delete.png" height="16" width="16"></src></button>
-										<button type="button" class="btn btn-default btn-xs" ng-click="selectedWindowCreate()" title="Nouveau"><img src="images/new.png" height="16" width="16"></src></button>
+										<button ng-show="ui.selectedItem && ui.selectedItem.internal().type !== 'application'" type="button" class="btn btn-default btn-xs" ng-click="deleteItem()" title="Supprimer"><img src="images/delete.png" height="16" width="16"></src></button>
+										<button ng-show="ui.selectedItem" type="button" class="btn btn-default btn-xs" ng-click="createItem()" title="Nouveau"><img src="images/new.png" height="16" width="16"></src></button>
 									</div>
 								</div>
 							</div>

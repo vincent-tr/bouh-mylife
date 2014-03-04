@@ -39,13 +39,26 @@ module.factory('tools', [function() {
 	
 	var appTitle = '';
 	
+	var findScopeAncestor = function(scope, id) {
+		while(scope) {
+			if(scope.$id === id) {
+				return scope;
+			}
+			
+			scope = scope.$parent;
+		}
+		
+		return null;
+	};
+	
 	return {
 		removeFromArray: removeFromArray,
 		checkParam: checkParam,
 		attachInternal: attachInternal,
 		clone: clone,
 		getAppTitle: function() { return appTitle; },
-		setAppTitle: function(title) { appTitle = title; }
+		setAppTitle: function(title) { appTitle = title; },
+		findScopeAncestor: findScopeAncestor
 	};
 }]);
 
