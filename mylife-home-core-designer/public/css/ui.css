@@ -245,3 +245,11 @@ img.ui-resource-tooltip {
 .ui-dropdown-item {
 	cursor: pointer;
 }
+
+.ui-design-command-display-map {
+	width: 550px;
+}
+
+.ui-design-command-display-map-actions {
+	width: 20px;
+}

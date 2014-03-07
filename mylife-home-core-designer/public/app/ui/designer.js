@@ -6,7 +6,7 @@
 
 var module = angular.module('mylife.ui.designer', ['mylife.ui.dataAccess', 'mylife.tools', 'mylife.ui.fileReader', 'mylife.idGenerator']);
 
-module.controller('uiController', ['$scope', '$timeout', 'uiDataAccess', 'dialogAlert', 'idGenerator', 'tools', function($scope, $timeout, uiDataAccess, dialogAlert, idGenerator, tools) {
+module.controller('uiController', ['$scope', '$modal', '$timeout', 'uiDataAccess', 'dialogAlert', 'idGenerator', 'tools', function($scope, $modal, $timeout, uiDataAccess, dialogAlert, idGenerator, tools) {
 	
 	var app = {
 		defaultWindow: ''
@@ -108,23 +108,6 @@ module.controller('uiController', ['$scope', '$timeout', 'uiDataAccess', 'dialog
 	
 	$scope.deleteItem = function() {
 		
-		var deleteWindow = function(window) {
-			var index = $scope.windows.indexOf(window);
-			if (index === -1) {
-				return;
-			}
-			$scope.windows.splice(index, 1);
-		};
-		
-		var deleteCommand = function(command) {
-			var window = command.internal().parent;
-			var index = window.commands.indexOf(command);
-			if (index === -1) {
-				return;
-			}
-			window.commands.splice(index, 1);
-		};
-		
 		var item = $scope.ui.selectedItem;
 		if(!item) {
 			return;
@@ -135,11 +118,11 @@ module.controller('uiController', ['$scope', '$timeout', 'uiDataAccess', 'dialog
 			return;
 			
 		case 'window':
-			deleteWindow(item);
+			tools.removeFromArray($scope.windows, item);
 			break;
 			
 		case 'command':
-			deleteCommand(item);
+			tools.removeFromArray(item.internal().parent.commands, item);
 			break;
 		}
 		
@@ -194,8 +177,28 @@ module.controller('uiController', ['$scope', '$timeout', 'uiDataAccess', 'dialog
 		}
 	};
 	
-	$scope.formatCommandAction = function(action) {
-		// TODO
+	$scope.formatCommandAction = function(action, short) {
+		switch(action.type) {
+		case 'component':
+			if(short) {
+				return action.component;
+			}
+			
+			return 'component : ' + action.component + ':' + action.componentAction;
+			
+		case 'window':
+			if(short) {
+				return action.window;
+			}
+			
+			var value = 'window : ' + action.window;
+			if(action.popup) {
+				value += ' (popup)';
+			}
+			return value;
+		}
+		
+		return null;
 	};
 	
 	$scope.formatCommandDisplay = function(display) {
@@ -212,11 +215,131 @@ module.controller('uiController', ['$scope', '$timeout', 'uiDataAccess', 'dialog
 	};
 	
 	$scope.designCommandAction = function(action) {
-		// TODO
+		
+		var data = {
+			type: action.type,
+			component: action.component,
+			componentAction: action.componentAction,
+			window: action.window,
+			popup: action.popup
+		};
+		
+		var componentActions = [];
+		$scope.components.plugins.forEach(function(component) {
+			component.internal().type['class'].members.forEach(function(member) {
+				if(member.membertype === 'action' && member.arguments.length === 0) {
+					componentActions.push({
+						component: component.id,
+						action: member.name
+					});
+				}
+			});
+		});
+		
+		var windows = $scope.windows;
+		
+		var modalInstance = $modal.open({
+			templateUrl: 'designCommandAction.html',
+			controller: function ($scope, $modalInstance) {
+
+				$scope.data = data;
+				$scope.componentActions = componentActions;
+				$scope.windows = windows;
+				
+				$scope.changeComponentAction = function(componentAction) {
+					data.component = componentAction.component;
+					data.componentAction = componentAction.action;
+				};
+				
+				$scope.ok = function () {
+					$modalInstance.close();
+				};
+
+				$scope.cancel = function () {
+					$modalInstance.dismiss();
+				};
+			}
+		});
+
+		modalInstance.result.then(function () {
+			action.type = data.type;
+			action.component = data.component;
+			action.componentAction = data.componentAction;
+			action.window = data.window;
+			action.popup = data.popup;
+		});
 	};
 	
 	$scope.designCommandDisplay = function(display) {
-		// TODO
+
+		var componentAttributes = [];
+		$scope.components.plugins.forEach(function(component) {
+			component.internal().type['class'].members.forEach(function(member) {
+				if(member.membertype === 'attribute') {
+					componentAttributes.push({
+						component: component.id,
+						attribute: member.name,
+						type: member.type
+					});
+				}
+			});
+		});
+		
+		var data = {
+			component: display.component,
+			attribute: display.attribute,
+			defaultImage: display.defaultImage,
+			map: []
+		};
+		if(display.map) {
+			data.map = tools.clone(display.map);
+		}
+		
+		// On recherche le type si un attribut est déjà sélectionné
+		componentAttributes.forEach(function(componentAttribute) {
+			if(componentAttribute.component !== data.component)
+				return;
+			if(componentAttribute.attribute !== data.attribute)
+				return;
+			data.type = componentAttribute.type;
+		});
+		
+		var resources = $scope.resources;
+		
+		var modalInstance = $modal.open({
+			templateUrl: 'designCommandDisplay.html',
+			controller: function ($scope, $modalInstance) {
+
+				$scope.data = data;
+				$scope.componentAttributes = componentAttributes;
+				$scope.resources = resources;
+				
+				$scope.changeComponentAttribute = function(componentAttribute) {
+					data.component = componentAttribute.component;
+					data.attribute = componentAttribute.attribute;
+					data.type = componentAttribute.type;
+				};
+				
+				$scope.deleteItem = function(item) {
+					tools.removeFromArray(data.map, item);
+				};
+				
+				$scope.ok = function () {
+					$modalInstance.close();
+				};
+
+				$scope.cancel = function () {
+					$modalInstance.dismiss();
+				};
+			}
+		});
+
+		modalInstance.result.then(function () {
+			display.component = data.component;
+			display.attribute = data.attribute;
+			display.defaultImage = data.defaultImage;
+			display.map = data.map;
+		});
 	};
 }]);
 
