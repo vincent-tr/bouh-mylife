@@ -1,5 +1,151 @@
 <meta charset="UTF8">
 
+<script type="text/ng-template" id="designCommandAction.html">
+	<div class="modal-header">
+		<h3>mylife-home-core-designer</h3>
+	</div>
+	<div class="modal-body">
+		<input type="radio" ng-model="data.type" value="component">Composant</input>
+		<p>
+			<div class="dropdown">
+				<span>{{data.component}}:{{data.componentAction}}</span>
+				<button type="button" class="dropdown-toggle btn btn-default btn-xs" ng-disabled="data.type !== 'component'">...</button>
+				<ul class="dropdown-menu">
+					<li class="ui-dropdown-item" ng-repeat="componentAction in componentActions" ng-click="changeComponentAction(componentAction)">
+						<a><span>{{componentAction.component}}:{{componentAction.action}}</span></a>
+					</li>
+				</ul>
+			</div>
+		</p>
+		<br/>
+		<input type="radio" ng-model="data.type" value="window">Fenêtre</input>
+		<p>
+			<div class="dropdown">
+				<input type="text" ng-model="data.window" class="dropdown-toggle" ng-disabled="data.type !== 'window'"></input>
+				<button type="button" class="dropdown-toggle btn btn-default btn-xs" ng-disabled="data.type !== 'window'">...</button>
+				<ul class="dropdown-menu">
+					<li class="ui-dropdown-item" ng-repeat="window in windows" ng-click="data.window = window.id">
+						<a><span>{{window.id}}</span></a>
+					</li>
+				</ul>
+			</div>
+			<input type="checkbox" ng-model="data.popup" ng-disabled="data.type !== 'window'">Popup</input>
+		</p>
+
+	</div>
+	<div class="modal-footer">
+		<button class="btn btn-primary" ng-click="ok()">OK</button>
+		<button class="btn btn-warning" ng-click="cancel()">Annuler</button>
+	</div>
+</script>
+
+<script type="text/ng-template" id="designCommandDisplay.html">
+	<div class="modal-header">
+		<h3>mylife-home-core-designer</h3>
+	</div>
+	<div class="modal-body">
+		Image par défaut : 
+		<div class="dropdown">
+			<input type="text" ng-model="data.defaultImage" class="dropdown-toggle"></input>
+			<ul class="dropdown-menu">
+				<li ng-repeat="resource in resources" ng-click="data.defaultImage = resource.id">
+					<a>
+						<span>{{resource.id}}</span>
+						<img class="ui-resource-list" src="{{resource.data}}"
+							tooltip-html-unsafe="<img class=&quot;ui-resource-tooltip&quot; src=&quot;{{resource.data}}&quot;></img>"></img>
+					</a>
+				</li>
+			</ul>
+		</div>
+		<br/>
+		Binding : 
+		<div class="dropdown">
+			<span>{{data.component}}:{{data.attribute}}</span>
+			<button type="button" class="dropdown-toggle btn btn-default btn-xs">...</button>
+			<ul class="dropdown-menu">
+				<li class="ui-dropdown-item" ng-repeat="componentAttribute in componentAttributes" ng-click="changeComponentAttribute(componentAttribute)">
+					<a><span>{{componentAttribute.component}}:{{componentAttribute.attribute}}</span></a>
+				</li>
+			</ul>
+		</div>
+		<table class="ui-design-command-display-map" ng-show="data.type.type === 'enum'">
+			<thead>
+				<tr>
+					<th>Valeur</th>
+					<th>Image</th>
+					<th class="ui-design-command-display-map-actions"><button class="btn btn-default btn-xs" ng-click="data.map.push({ value:null, image:null })" title="Nouveau"><img src="images/new.png" height="16" width="16"></img></button></th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr ng-repeat="item in data.map">
+					<td>
+						<div class="dropdown">
+							
+							<button type="button" class="dropdown-toggle btn btn-default btn-xs">...</button>
+							&nbsp;&nbsp;&nbsp;{{item.value}}
+							<ul class="dropdown-menu">
+								<li class="ui-dropdown-item" ng-repeat="value in data.type.values" ng-click="item.value = value">
+									<a><span>{{value}}</span></a>
+								</li>
+							</ul>
+						</div>
+					</td>
+					<td>
+						<div class="dropdown">
+							<input type="text" ng-model="item.image" class="dropdown-toggle"></input>
+							<ul class="dropdown-menu">
+								<li ng-repeat="resource in resources" ng-click="item.image = resource.id">
+									<a>
+										<span>{{resource.id}}</span>
+										<img class="ui-resource-list" src="{{resource.data}}"
+											tooltip-html-unsafe="<img class=&quot;ui-resource-tooltip&quot; src=&quot;{{resource.data}}&quot;></img>"></img>
+									</a>
+								</li>
+							</ul>
+						</div>
+					</td>
+					<td><button type="button" class="btn btn-default btn-xs" ng-click="deleteItem(item)" title="Supprimer"><img src="images/delete.png" height="16" width="16"></img></button></td>
+				</tr>
+			</tbody>
+		</table>
+		<table class="ui-design-command-display-map" ng-show="data.type.type === 'range'">
+			<thead>
+				<tr>
+					<th>Min</th>
+					<th>Max</th>
+					<th>Image</th>
+					<th class="ui-design-command-display-map-actions"><button class="btn btn-default btn-xs" ng-click="data.map.push({ min:data.type.min, max:data.type.max, image:null })" title="Nouveau"><img src="images/new.png" height="16" width="16"></img></button></th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr ng-repeat="item in data.map">
+					<td><input type="number" ng-model="item.min"></td>
+					<td><input type="number" ng-model="item.max"></td>
+					<td>
+						<div class="dropdown">
+							<input type="text" ng-model="item.image" class="dropdown-toggle"></input>
+							<ul class="dropdown-menu">
+								<li ng-repeat="resource in resources" ng-click="item.image = resource.id">
+									<a>
+										<span>{{resource.id}}</span>
+										<img class="ui-resource-list" src="{{resource.data}}"
+											tooltip-html-unsafe="<img class=&quot;ui-resource-tooltip&quot; src=&quot;{{resource.data}}&quot;></img>"></img>
+									</a>
+								</li>
+							</ul>
+						</div>
+					</td>
+					<td><button type="button" class="btn btn-default btn-xs" ng-click="deleteItem(item)" title="Supprimer"><img src="images/delete.png" height="16" width="16"></img></button></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	<div class="modal-footer">
+		<button class="btn btn-primary" ng-click="ok()">OK</button>
+		<button class="btn btn-warning" ng-click="cancel()">Annuler</button>
+	</div>
+</script>
+
 <div id="ui" ng-controller="uiController">
 
 	<div id="main" class="light">
@@ -114,22 +260,31 @@
 												</tr>
 												<tr ng-show="ui.selectedItem.internal().type === 'command'" >
 													<td>Affichage</td>
-													<td>{{formatCommandDisplay(ui.selectedItem.display)}}&nbsp;&nbsp;&nbsp;<button type="button" ng-click="designCommandDisplay(ui.selectedItem.display)" class="btn btn-default btn-xs">...</button></td>
+													<td>
+														<button type="button" ng-click="designCommandDisplay(ui.selectedItem.display)" class="btn btn-default btn-xs">...</button>
+														&nbsp;&nbsp;&nbsp;{{ui.selectedItem && ui.selectedItem.internal().type === 'command' && formatCommandDisplay(ui.selectedItem.display)}}
+													</td>
 												</tr>
 												<tr ng-show="ui.selectedItem.internal().type === 'command'" >
 													<td>Prim. act.</td>
-													<td>{{formatCommandAction(ui.selectedItem.primaryAction)}}&nbsp;&nbsp;&nbsp;<button type="button" ng-click="designCommandAction(ui.selectedItem.primaryAction" class="btn btn-default btn-xs">...</button></td>
+													<td title="{{ui.selectedItem && ui.selectedItem.internal().type === 'command' && formatCommandAction(ui.selectedItem.primaryAction, false)}}">
+														<button type="button" ng-click="designCommandAction(ui.selectedItem.primaryAction)" class="btn btn-default btn-xs">...</button>
+														&nbsp;&nbsp;&nbsp;{{ui.selectedItem && ui.selectedItem.internal().type === 'command' && formatCommandAction(ui.selectedItem.primaryAction, true)}}
+													</td>
 												</tr>
 												<tr ng-show="ui.selectedItem.internal().type === 'command'" >
 													<td>Sec. act.</td>
-													<td>{{formatCommandAction(ui.selectedItem.secondaryAction)}}&nbsp;&nbsp;&nbsp;<button type="button" ng-click="designCommandAction(ui.selectedItem.secondaryAction)" class="btn btn-default btn-xs">...</button></td>
+													<td title="{{ui.selectedItem && ui.selectedItem.internal().type === 'command' && formatCommandAction(ui.selectedItem.secondaryAction, false)}}">
+														<button type="button" ng-click="designCommandAction(ui.selectedItem.secondaryAction)" class="btn btn-default btn-xs">...</button>
+														&nbsp;&nbsp;&nbsp;{{ui.selectedItem && ui.selectedItem.internal().type === 'command' && formatCommandAction(ui.selectedItem.secondaryAction, true)}}
+													</td>
 												</tr>
 											</tbody>
 										</table>
 									</div>
 									<div id="ui-propertybox-commands">
-										<button ng-show="ui.selectedItem && ui.selectedItem.internal().type !== 'application'" type="button" class="btn btn-default btn-xs" ng-click="deleteItem()" title="Supprimer"><img src="images/delete.png" height="16" width="16"></src></button>
-										<button ng-show="ui.selectedItem" type="button" class="btn btn-default btn-xs" ng-click="createItem()" title="Nouveau"><img src="images/new.png" height="16" width="16"></src></button>
+										<button ng-show="ui.selectedItem && ui.selectedItem.internal().type !== 'application'" type="button" class="btn btn-default btn-xs" ng-click="deleteItem()" title="Supprimer"><img src="images/delete.png" height="16" width="16"></img></button>
+										<button ng-show="ui.selectedItem" type="button" class="btn btn-default btn-xs" ng-click="createItem()" title="Nouveau"><img src="images/new.png" height="16" width="16"></img></button>
 									</div>
 								</div>
 							</div>
