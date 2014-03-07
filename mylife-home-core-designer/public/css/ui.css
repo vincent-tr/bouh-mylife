@@ -253,3 +253,35 @@ img.ui-resource-tooltip {
 .ui-design-command-display-map-actions {
 	width: 20px;
 }
+
+#ui-designer-main-wrapper {
+	position: absolute;
+}
+
+#ui-designer-main {
+	width: 1024px;
+	height: 768px;
+	border: 1px solid darkgray;
+}
+
+#ui-designer-main-img {
+	width: 1024px;
+	height: 768px;
+}
+
+.ui-designer-main-command {
+	position: absolute;
+}
+
+.ui-designer-main-command-img {
+	
+}
+
+.ui-designer-main-command-selected {
+	box-shadow: 2px 2px 30px black;
+	-o-box-shadow: 2px 2px 30px black;
+	-webkit-box-shadow: 2px 2px 30px black;
+	-moz-box-shadow: 2px 2px 30px black;
+	-moz-border-radius: 0.5em;
+	border-radius: 0.5em;
+}

@@ -290,7 +290,13 @@
 							</div>
 						</div>
 					</div>
-					<div id="schema-container" class="drop-container" ng-click="addEvent($event)" schema-container>
+					<div id="ui-designer-main-wrapper">
+						<div id="ui-designer-main">
+							<img id="ui-designer-main-img" src="{{getResource(ui.selectedWindow.background)}}"></img>
+							<div ng-repeat="command in ui.selectedWindow.commands" class="ui-designer-main-command" ng-class="{true: 'ui-designer-main-command-selected'}[command === ui.selectedItem]" ng-style="{ 'left':command.x, 'top':command.y }">
+								<img class="ui-designer-main-command-img" src="{{command.display && command.display.defaultImage && getResource(command.display.defaultImage)}}"></img>
+							</div>
+						</div>
 					</div>
 				</div>
 			</tab>
