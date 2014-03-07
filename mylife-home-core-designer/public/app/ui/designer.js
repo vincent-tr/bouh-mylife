@@ -19,9 +19,35 @@ module.controller('uiController', ['$scope', '$modal', '$timeout', 'uiDataAccess
 	$scope.components = [];
 	$scope.app = app;
 	
-	$scope.ui = {
-		selectedItem: null
+	var ui = {
+		selectedItem: null,
+		selectedWindow: null
 	};
+	
+	ui.selectItem = function(item) {
+		
+		ui.selectedItem = item;
+		
+		if(!item) {
+			return;
+		}
+		
+		switch(item.internal().type) {
+		case 'application':
+			ui.selectedWindow = null;
+			break;
+			
+		case 'window':
+			ui.selectedWindow = item;
+			break;
+			
+		case 'command':
+			ui.selectedWindow = item.internal().parent;
+			break;
+		}
+	};
+	
+	$scope.ui = ui;
 	
 	var prepareCommand = function(command, parent) {
 		command.internal().type = 'command';
@@ -106,6 +132,21 @@ module.controller('uiController', ['$scope', '$modal', '$timeout', 'uiDataAccess
 		checkSchema();
 	};
 	
+	$scope.getResource = function(id) {
+		
+		if(!id) {
+			return null;
+		}
+		
+		for(var i=0, l=$scope.resources.length; i<l; i++) {
+			var resource = $scope.resources[i];
+			if(resource.id === id) {
+				return resource.data;
+			}
+		}
+		return null;
+	};
+	
 	$scope.deleteItem = function() {
 		
 		var item = $scope.ui.selectedItem;
@@ -126,7 +167,7 @@ module.controller('uiController', ['$scope', '$modal', '$timeout', 'uiDataAccess
 			break;
 		}
 		
-		$scope.ui.selectedItem = null;
+		$scope.ui.selectItem(null);
 		checkSchema();
 	};
 	
@@ -356,7 +397,7 @@ module.directive('itemlistItem', [function() {
 				
 				// Scope parent du ng-repeat
 				scope.$apply(function() {
-					scope.ui.selectedItem = item;
+					scope.ui.selectItem(item);
 				});
 			});
 		}
