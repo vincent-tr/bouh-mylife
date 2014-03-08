@@ -2,7 +2,9 @@
 	"http": {
 		"port": 8886
 	},
-
+	"core": {
+		"url": "http://rpi-devel:8887"
+	},
 	"irc": {
 		"server": "rpi-devel",
 		"channels": ["#mylife-home-ui"]

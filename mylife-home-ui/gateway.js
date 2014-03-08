@@ -1,13 +1,15 @@
 /**
- * 
+ * Transmission client irc 
  */
+
+// http://www.html5rocks.com/en/tutorials/frameworks/angular-websockets/
 
 var sys = require('sys');
 var irc = require('irc');
 
 var config = require('./config.json');
 
-module.exports.create = function(socket) {
+var create = function(socket) {
 
 	var endpoint = socket.address();
 	sys.log('connection from ' + endpoint.address + ':' + endpoint.port);
@@ -93,3 +95,5 @@ module.exports.create = function(socket) {
 		});
 	});
 };
+
+module.exports.create = create;
