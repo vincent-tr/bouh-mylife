@@ -1,0 +1,14 @@
+{
+	"name": "mylife-home-ui",
+	"version": "0.1.0",
+	"description": "mylife-home-ui",
+	"main": "main.js",
+	"author": "Vincent TRUMPFF",
+	"license": "MIT",
+	"dependencies": {
+		"irc": ">= 0.3.6",
+		"express": "3.2.6",
+		"request": "2.33.0",
+		"socket.io": "0.9.16"
+	}
+}
