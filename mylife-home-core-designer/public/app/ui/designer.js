@@ -134,11 +134,6 @@ module.controller('uiController', ['$scope', '$modal', '$timeout', 'uiDataAccess
 			
 			window.commands.forEach(function(command) {
 				
-				if(!resourceExists(command.defaultImage)) {
-					command.defaultImage = null;
-					errors.push({ message: 'L\'image par défaut de la commande \'' + window.id + ':' + command.id + '\' est indéfinie.' });
-				}
-				
 				var checkAction = function(action, name) {
 					
 					switch(action.type) {
@@ -162,14 +157,23 @@ module.controller('uiController', ['$scope', '$modal', '$timeout', 'uiDataAccess
 				checkAction(command.primaryAction, window.id + ':' + command.id + ' (primary)');
 				checkAction(command.secondaryAction, window.id + ':' + command.id + ' (secondary)');
 				
-				command.map.forEach(function(item) {
+				if(!resourceExists(command.display.defaultImage)) {
+					command.display.defaultImage = null;
+					errors.push({ message: 'L\'image par défaut de la commande \'' + window.id + ':' + command.id + '\' est indéfinie.' });
+				}
+				
+				command.display.map.forEach(function(item) {
 					if(!resourceExists(item.image)) {
-						window.background = null;
+						item.image = null;
 						errors.push({ message: 'L\'image d\'un binding de la commande \'' + window.id + ':' + command.id + '\' est indéfinie.' });
 					}
 				});
 			});
 		});
+		
+		if(errors.length === 0) {
+			return;
+		}
 		
 		var modalInstance = $modal.open({
 			templateUrl: 'checkSchemaErrors.html',
