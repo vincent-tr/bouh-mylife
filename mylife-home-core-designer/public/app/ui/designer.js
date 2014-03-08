@@ -63,20 +63,147 @@ module.controller('uiController', ['$scope', '$modal', '$timeout', 'uiDataAccess
 		});
 	};
 	
+	var checkSchema = function() {
+		
+		// on verifie que chaque lien de ressource, de fenêtre et de composant existe toujours,
+		// sinon on l'enleve et on l'ajoute à la liste des erreurs
+		
+		var resourceExists = function(id) {
+			if(!id) {
+				return true;
+			}
+			
+			var resources = $scope.resources;
+			for(var i=0, l=resources.length; i<l; i++) {
+				if(resources[i].id === id) {
+					return true;
+				}
+			}
+			return false;
+		};
+		
+		var windowExists = function(id) {
+			if(!id) {
+				return true;
+			}
+			
+			var windows = $scope.windows;
+			for(var i=0, l=windows.length; i<l; i++) {
+				if(windows[i].id === id) {
+					return true;
+				}
+			}
+			return false;
+		};
+		
+		var componentExists = function(componentId, memberName, memberType) {
+			if(!componentId && !memberName) {
+				return true;
+			}
+			
+			var components = $scope.components.plugins;
+			for(var i=0, l=components.length; i<l; i++) {
+				var component = components[i];
+				if(component.id === componentId) {
+					var members = component.internal().type['class'].members;
+					for(var i2=0, l2=members.length; i2<l2; i2++) {
+						var member = members[i2];
+						if(member.name === memberName) {
+							return member.membertype === memberType;
+						}
+					}
+					return false;
+				}
+			}
+			return false;
+		};
+		
+		var errors = [];
+		
+		if(!windowExists($scope.app.defaultWindow)) {
+			$scope.app.defaultWindow = null;
+			errors.push({ message: 'La fenêtre par défaut de l\'application est indéfinie.' });
+		}
+		
+		$scope.windows.forEach(function(window) {
+			
+			if(!resourceExists(window.background)) {
+				window.background = null;
+				errors.push({ message: 'Le fond de la fenêtre \'' + window.id + '\' est indéfini.' });
+			}
+			
+			window.commands.forEach(function(command) {
+				
+				if(!resourceExists(command.defaultImage)) {
+					command.defaultImage = null;
+					errors.push({ message: 'L\'image par défaut de la commande \'' + window.id + ':' + command.id + '\' est indéfinie.' });
+				}
+				
+				var checkAction = function(action, name) {
+					
+					switch(action.type) {
+					case 'component':
+						if(!componentExists(action.component, action.componentAction, 'action')) {
+							action.component = null;
+							action.componentAction = null;
+							errors.push({ message: 'Le composant de l\'action \'' + name + '\' est indéfini.' });
+						}
+						break;
+						
+					case 'window':
+						if(!windowExists(action.window)) {
+							action.window = null;
+							errors.push({ message: 'La fenêtre de l\'action \'' + name + '\' est indéfinie.' });
+						}
+						break;
+					}
+				};
+				
+				checkAction(command.primaryAction, window.id + ':' + command.id + ' (primary)');
+				checkAction(command.secondaryAction, window.id + ':' + command.id + ' (secondary)');
+				
+				command.map.forEach(function(item) {
+					if(!resourceExists(item.image)) {
+						window.background = null;
+						errors.push({ message: 'L\'image d\'un binding de la commande \'' + window.id + ':' + command.id + '\' est indéfinie.' });
+					}
+				});
+			});
+		});
+		
+		var modalInstance = $modal.open({
+			templateUrl: 'checkSchemaErrors.html',
+			controller: function ($scope, $modalInstance) {
+
+				$scope.errors = errors;
+				
+				$scope.ok = function () {
+					$modalInstance.close();
+				};
+
+				$scope.cancel = function () {
+					$modalInstance.dismiss();
+				};
+			}
+		});
+
+		modalInstance.result.then(function () {
+			// rien à faire
+		});
+	};
+	
 	var applyData = function(data) {
 		$scope.resources = data.resources;
 		$scope.windows = data.windows;
 		$scope.app.defaultWindow = data.defaultWindow;
 		
 		$scope.windows.forEach(prepareWindow);
+		
+		checkSchema();
 	};
 	
 	var applyComponents = function(components) {
 		$scope.components = components;
-	};
-	
-	var checkSchema = function() {
-		// TODO
 	};
 	
 	$scope.reload = function() {
