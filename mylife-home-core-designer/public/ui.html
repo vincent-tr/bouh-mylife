@@ -146,6 +146,21 @@
 	</div>
 </script>
 
+<script type="text/ng-template" id="checkSchemaErrors.html">
+	<div class="modal-header">
+		<h3>mylife-home-core-designer</h3>
+	</div>
+	<div class="modal-body">
+		Les erreurs de données suivantes ont été détectées suite à la vérification du schéma
+		<ul>
+			<li ng-repeat="error in errors">{{error.message}}</li>
+		</ul>
+	</div>
+	<div class="modal-footer">
+		<button class="btn btn-primary" ng-click="ok()">OK</button>
+	</div>
+</script>
+
 <div id="ui" ng-controller="uiController">
 
 	<div id="main" class="light">
