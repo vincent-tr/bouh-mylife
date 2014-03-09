@@ -11,9 +11,10 @@ var config = require('./config.json');
 
 var create = function(socket) {
 
-	var endpoint = socket.address();
+	//var endpoint = socket.address();
+	var endpoint = socket.handshake.address;
 	sys.log('connection from ' + endpoint.address + ':' + endpoint.port);
-	var id = endpoint.address + '-' + endpoint.port;
+	var id = 'ui-' + endpoint.address.replace(/\./g, '_') + '-' + endpoint.port;
 	var channel = config.irc.channels[0];
 
 	var ircclient = new irc.Client(config.irc.server, id, config.irc);
@@ -43,14 +44,14 @@ var create = function(socket) {
 
 	// ------------------ socket -------------------
 
-	socket.on('disconnect', function(socket) {
+	socket.on('disconnect', function() {
 		console.log('client disconnected : ' + id);
 
-		socket.close();
+		//socket.close();
 		ircclient.disconnect();
 	});
 
-	socket.on('message', function(data) {
+	socket.on('msg', function(data) {
 		// data = { target, message }
 		ircclient.say(channel, data.target + ' ' + data.message);
 	});
@@ -58,7 +59,7 @@ var create = function(socket) {
 	// ------------------- irc -------------------
 
 	ircclient.on('error', function(message) {
-		console.log('client error : ' + id + ', ' + message);
+		console.log('client error : ' + id + ', ' + JSON.stringify(message));
 	});
 
 	ircclient.on('close', function() {
@@ -90,9 +91,11 @@ var create = function(socket) {
 	});
 
 	ircclient.on('names', function(channel, users) {
-		users.forEach(function(user) {
-			join(user);
-		});
+		for(var user in users) {
+			if(users.hasOwnProperty(user)) {
+				join(user);
+			}
+		}
 	});
 };
 

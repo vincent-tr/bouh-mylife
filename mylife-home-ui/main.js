@@ -12,9 +12,9 @@ var port = config.http.port;
 
 var server = http.createServer(app.create(port));
 
-var ioServer = io.listen(server, {
+var ioServer = io.listen(server/*, {
 	'resource' : '/socket.io'
-});
+}*/);
 
 ioServer.on('connection', function(socket) {
 	gatewayFactory.create(socket);
