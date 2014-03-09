@@ -24,9 +24,29 @@
 
 <link rel="stylesheet" href="css/app.css">
 
+<script type="text/ng-template" id="window.html">
+	<div class="panel panel-primary">
+		<div class="panel-heading text-center">
+			<h3 class="panel-title">{{ window.displayName }}</h3>
+		</div>
+		<div class="panel-body text-center">
+			<div class="mylife-window center-block">
+				<img src="{{ window.backgroundImage }}" mylife-resize-parent></img>
+				<div class="mylife-component" ng-repeat="component in window.components" mylife-component-position title="{{ component.displayName }}">
+					<button class="btn btn-default mylife-component-button" ng-mousedown="component.mouseDown()" ng-mouseup="component.mouseUp()">			
+						<img src="{{ component.image }}"></img>
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</script>
+
 </head>
 <body>
 	<div class="main" ng-controller="controller">
-	connected : {{connected()}}
+		<div class="offline"  ng-show="!connected()">
+			<img src="images/offline.png"></img>
+		</div>
 	</div>
 </html>
