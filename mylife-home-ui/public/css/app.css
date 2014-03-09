@@ -3,3 +3,17 @@ div.main {
 	width: 1024px;
 	height: 768px;
 }
+
+div.offline {
+	height: 100%;
+	width: 100%;
+	position: relative;
+}
+
+div.offline > img {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	margin-top: -64px;
+	margin-left: -64px;
+}
