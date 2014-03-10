@@ -4,7 +4,7 @@
 
 'use strict';
 
-var module = angular.module('mylife.app', ['ngRoute', 'mylife.tools', 'mylife.net', 'mylife.structure']);
+var module = angular.module('mylife.app', ['ngRoute', 'mylife.tools', 'mylife.net', 'mylife.api']);
 
 module.run(['tools', function(tools) {
 	tools.setAppTitle('mylife-home-ui');
@@ -20,21 +20,22 @@ module.config(['$provide', '$routeProvider', function($provide, $routeProvider) 
 	});
 }]);
 
-module.run(['$routeProvider', '$route', 'structure', function($routeProvider, $route, structure) {
+module.run(['$routeProvider', '$route', 'api', function($routeProvider, $route, api) {
 
-	structure.data.get({}, function(data) {
+	api.structure.get({}, function(structure) {
 		
 		$routeProvider.
 			when('/:windowId', {
 				controller : 'windowController',
-				templateUrl : urlHelper.partial('window.html'),
+				templateUrl : 'window.html',
 				resolve : {
-					'window' : ['$route', function($route) { return structure.getWindow($route.current.params.windowId);}],
-					'popup' : function() { return false; }
+					'structure' : structure,
+					'windowId' : ['$route', function($route) { return $route.current.params.windowId; }],
+					'popup' : false
 				}
 			}).
 			otherwise({
-				redirectTo : '/' + windowId
+				redirectTo : '/' + structure.defaultWindow
 			});
 		
 		$route.reload();
