@@ -4,7 +4,7 @@
 
 'use strict';
 
-var module = angular.module('mylife.app', ['ngRoute', 'mylife.tools', 'mylife.net']);
+var module = angular.module('mylife.app', ['ngRoute', 'mylife.tools', 'mylife.net', 'mylife.structure']);
 
 module.run(['tools', function(tools) {
 	tools.setAppTitle('mylife-home-ui');
@@ -14,15 +14,16 @@ module.controller('controller', ['$scope', 'net', function($scope, net) {
 	$scope.connected = function() { return net.connected; };
 }]);
 
-app.config(['$provide', '$routeProvider', function($provide, $routeProvider) {
+module.config(['$provide', '$routeProvider', function($provide, $routeProvider) {
 	$provide.factory('$routeProvider', function() {
 		return $routeProvider;
 	});
 }]);
 
-app.run(['$routeProvider', '$route', 'urlHelper', 'structure', function($routeProvider, $route, urlHelper, structure) {
+module.run(['$routeProvider', '$route', 'structure', function($routeProvider, $route, structure) {
 
-	structure.getDefaultWindowId().then(function(windowId) {
+	structure.data.get({}, function(data) {
+		
 		$routeProvider.
 			when('/:windowId', {
 				controller : 'windowController',
