@@ -96,6 +96,17 @@ module.factory('net', ['socket', function(socket) {
 		socket.emit('msg', {target: componentId, message: actionName});
 	};
 	
+	service.componentAttribute = function(componentId, attributeIndex) {
+		var component = service.net[componentId];
+		if(!component) {
+			return null;
+		}
+		if(component.attrs.length <= attributeIndex) {
+			return null;
+		}
+		return component.attrs[attributeIndex];
+	};
+	
 	return service;
 	
 }]);
