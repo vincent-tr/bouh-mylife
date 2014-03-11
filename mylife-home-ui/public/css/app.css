@@ -5,6 +5,10 @@ div.main {
 	position: relative;
 }
 
+div.popup {
+	position: relative;
+}
+
 div.offline {
 	height: 100%;
 	width: 100%;
@@ -19,7 +23,7 @@ div.offline > img {
 	margin-left: -64px;
 }
 
-img.window {
+div.main > img.window {
 	width: 1022px;
 	height: 766px;
 }

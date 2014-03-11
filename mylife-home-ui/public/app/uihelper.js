@@ -45,7 +45,7 @@ module.factory('mouseManager', ['$log', function($log) {
 	};
 }]);
 
-module.factory('uihelper', ['$log', 'tools', 'net', 'mouseManager', function($log, tools, net, mouseManager) {
+module.factory('uihelper', ['$log', '$location', '$modal', 'tools', 'net', 'mouseManager', function($log, $location, $modal, tools, net, mouseManager) {
 
 	var findResource = function(structure, id) {
 		var resource = tools.arrayFind(structure.resources, function(res) { return res.id === id; });
@@ -58,15 +58,57 @@ module.factory('uihelper', ['$log', 'tools', 'net', 'mouseManager', function($lo
 	var createCommand = function(structure, swindow, scommand) {
 		var imageGetter = function(sdisplay) {
 			return function() {
-				// TODO
+				if(sdisplay.component && sdisplay.attribute && sdisplay.map && sdisplay.map.length > 0) {
+					var value = net.componentAttribute(sdisplay.component, sdisplay.attributeIndex);
+					if(value) {
+						// Recherche de mapping
+						for(var i=0, l=sdisplay.map.length; i<l; i++) {
+							var item = sdisplay.map[i];
+							// Attention : si numérique on doit caster ici !
+							if(item.value == value) {
+								return findResource(structure, item.image);
+							}
+						}
+					}
+				}
+				// Valeur par défaut
 				return findResource(structure, sdisplay.defaultImage);
 			};
+		};
+		
+		var popup = function(windowId) {
+			
+			var modalInstance = $modal.open({
+				controller : 'windowController',
+				templateUrl : 'popup.html',
+				resolve : {
+					'structure': function() { return structure; },
+					'windowId': function() { return windowId; },
+					'popup': function() { return true; }
+				}
+			});
+			
+			modalInstance.result.then(function() {
+				// rien à faire
+			});
 		};
 		
 		var actionGetter = function(saction, type) {
 			return function() {
 				$log.debug('execute action : ' + swindow.id + ':' + scommand.id + ' (' + type + ')');
-				// TODO
+				
+				switch(saction.type) {
+				case 'window':
+					if(saction.popup) {
+						popup(saction.window);
+					} else {
+						$location.path('/' + saction.window);
+					}
+					break;
+				case 'component':
+					net.action(saction.component, saction.componentAction);
+					break;
+				}
 			};
 		};
 		
