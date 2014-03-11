@@ -2,6 +2,7 @@ div.main {
 	border: 1px solid darkgray;
 	width: 1024px;
 	height: 768px;
+	position: relative;
 }
 
 div.offline {
@@ -16,4 +17,13 @@ div.offline > img {
 	left: 50%;
 	margin-top: -64px;
 	margin-left: -64px;
+}
+
+img.window {
+	width: 1022px;
+	height: 766px;
+}
+
+div.command {
+	position: absolute;
 }

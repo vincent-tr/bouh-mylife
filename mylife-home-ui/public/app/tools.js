@@ -16,6 +16,25 @@ module.factory('tools', [function() {
 		return true;
 	};
 	
+	var arrayFind = function(array, predicate) {
+		for(var i=0, l=array.length; i<l; i++) {
+			var item = array[i];
+			if(predicate(item)) {
+				return item;
+			}
+		}
+		return null;
+	};
+	
+	var arraySelect = function(array, transform) {
+		var ret = [];
+		for(var i=0, l=array.length; i<l; i++) {
+			var item = array[i];
+			ret.push(transform(item));
+		}
+		return ret;
+	};
+	
 	var checkParam = function(param, defaultValue) {
 		if(param)
 			return param;
@@ -53,6 +72,8 @@ module.factory('tools', [function() {
 	
 	return {
 		removeFromArray: removeFromArray,
+		arrayFind: arrayFind,
+		arraySelect: arraySelect,
 		checkParam: checkParam,
 		attachInternal: attachInternal,
 		clone: clone,
