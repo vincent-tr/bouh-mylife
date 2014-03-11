@@ -29,9 +29,9 @@ module.run(['$routeProvider', '$route', 'api', function($routeProvider, $route, 
 				controller : 'windowController',
 				templateUrl : 'window.html',
 				resolve : {
-					'structure' : structure,
+					'structure' : function() { return structure; },
 					'windowId' : ['$route', function($route) { return $route.current.params.windowId; }],
-					'popup' : false
+					'popup' : function() { return false; }
 				}
 			}).
 			otherwise({
