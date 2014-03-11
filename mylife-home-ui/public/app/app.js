@@ -4,14 +4,10 @@
 
 'use strict';
 
-var module = angular.module('mylife.app', ['ngRoute', 'mylife.tools', 'mylife.net', 'mylife.api']);
+var module = angular.module('mylife.app', ['ngRoute', 'mylife.api', 'mylife.controllers']);
 
 module.run(['tools', function(tools) {
 	tools.setAppTitle('mylife-home-ui');
-}]);
-
-module.controller('controller', ['$scope', 'net', function($scope, net) {
-	$scope.connected = function() { return net.connected; };
 }]);
 
 module.config(['$provide', '$routeProvider', function($provide, $routeProvider) {
