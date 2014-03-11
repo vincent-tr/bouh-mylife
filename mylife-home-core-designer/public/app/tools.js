@@ -16,6 +16,16 @@ module.factory('tools', [function() {
 		return true;
 	};
 	
+	var arrayFind = function(array, predicate) {
+		for(var i=0, l=array.length; i<l; i++) {
+			var item = array[i];
+			if(predicate(item)) {
+				return item;
+			}
+		}
+		return null;
+	};
+	
 	var checkParam = function(param, defaultValue) {
 		if(param)
 			return param;
@@ -53,6 +63,7 @@ module.factory('tools', [function() {
 	
 	return {
 		removeFromArray: removeFromArray,
+		arrayFind: arrayFind,
 		checkParam: checkParam,
 		attachInternal: attachInternal,
 		clone: clone,
