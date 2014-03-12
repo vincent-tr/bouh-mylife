@@ -15,6 +15,7 @@ var init = function(apiarg) {
 			api.netobject.netAction('stop'),
 			api.netobject.netAction('play'),
 			api.netobject.netAction('pause'),
+			api.netobject.netAction('state-switch'),
 			api.netobject.netAction('volume-more'),
 			api.netobject.netAction('volume-less'));
 
@@ -67,6 +68,16 @@ var create = function(context) {
 	
 	obj.on('action#pause', function(args) {
 		obj.setAttribute('state', 'pause');
+	});
+	
+	obj.on('action#state-switch', function(args) {
+		var state = obj.getAttribute('state');
+		if(state === ('play')) {
+			state = 'pause';
+		} else {
+			state = 'play';
+		}
+		obj.setAttribute('state', state);
 	});
 	
 	obj.on('action#volume-more', function(args) {
