@@ -66,6 +66,16 @@ var create = function(port) {
 		res.json(manager.getPluginTypes());
 	});
 	
+	app.get('/api/pluginTypes/refresh', function(req, res) {
+		try {
+			manager.refreshPluginTypes();
+			res.json({});
+		}catch(err) {
+			console.error(err);
+			res.json(500, errorToObject(err));
+		}
+	});
+	
 	app.post('/api/pluginTypes', function(req, res) {
 		try {
 			var type = req.body;

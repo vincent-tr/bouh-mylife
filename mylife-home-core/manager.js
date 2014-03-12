@@ -89,7 +89,7 @@ var addPlugin = function(config) {
 };
 	
 var removePlugin = function(id) {
-	// on regarde s'il n'est pas utilisé dans des liens
+	// on regarde s'il n'est pas utilisï¿½ dans des liens
 	checkLink(id);
 	
 	if(!plugins.destroy(id)) {
@@ -120,6 +120,10 @@ var getPluginTypes = function() {
 	return data;
 };
 
+var refreshPluginTypes = function() {
+	plugins.refreshTypes();
+};
+
 var addPluginType = function(name, content) {
 	plugins.register(name, content);
 };
@@ -145,7 +149,7 @@ var addHardware = function(config) {
 };
 
 var removeHardware = function(id) {
-	// on regarde s'il n'est pas utilisé dans des liens
+	// on regarde s'il n'est pas utilisï¿½ dans des liens
 	checkLink(id);
 	
 	if(!hardware.destroy(id)) {

@@ -135,3 +135,4 @@ module.exports.destroy = destroy;
 module.exports.list = list;
 module.exports.types = types;
 module.exports.register = register;
+module.exports.refreshTypes = refreshPluginTypes;
