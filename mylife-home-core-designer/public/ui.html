@@ -52,7 +52,8 @@
 					<a>
 						<span>{{resource.id}}</span>
 						<img class="ui-resource-list" src="{{resource.data}}"
-							tooltip-html-unsafe="<img class=&quot;ui-resource-tooltip&quot; src=&quot;{{resource.data}}&quot;></img>"></img>
+							tooltip-html-unsafe="<img class=&quot;ui-resource-tooltip&quot; src=&quot;{{resource.data}}&quot;></img>"
+							tooltip-append-to-body="true"></img>
 					</a>
 				</li>
 			</ul>
@@ -98,7 +99,8 @@
 									<a>
 										<span>{{resource.id}}</span>
 										<img class="ui-resource-list" src="{{resource.data}}"
-											tooltip-html-unsafe="<img class=&quot;ui-resource-tooltip&quot; src=&quot;{{resource.data}}&quot;></img>"></img>
+											tooltip-html-unsafe="<img class=&quot;ui-resource-tooltip&quot; src=&quot;{{resource.data}}&quot;></img>"
+											tooltip-append-to-body="true"></img>
 									</a>
 								</li>
 							</ul>
@@ -129,7 +131,7 @@
 									<a>
 										<span>{{resource.id}}</span>
 										<img class="ui-resource-list" src="{{resource.data}}"
-											tooltip-html-unsafe="<img class=&quot;ui-resource-tooltip&quot; src=&quot;{{resource.data}}&quot;></img>"></img>
+											tooltip-html-unsafe="<img class=&quot;ui-resource-tooltip&quot; src=&quot;{{resource.data}}&quot;></img>" tooltip-append-to-body="true"></img>
 									</a>
 								</li>
 							</ul>
@@ -253,12 +255,13 @@
 														<div class="dropdown">
 															<input type="text" ng-model="ui.selectedItem.background" class="dropdown-toggle">
 															</input>
-															<ul class="dropdown-menu">
-																<li ng-repeat="resource in resources" ng-click="ui.selectedItem.background = resource.id">
+															<ul class="dropdown-menu dropdown-menu-limit">
+																<li class="ui-dropdown-item" ng-repeat="resource in resources" ng-click="ui.selectedItem.background = resource.id">
 																	<a>
 																		<span>{{resource.id}}</span>
 																		<img class="ui-resource-list" src="{{resource.data}}"
-																			tooltip-html-unsafe="<img class=&quot;ui-resource-tooltip&quot; src=&quot;{{resource.data}}&quot;></img>"></img>
+																			tooltip-html-unsafe="<img class=&quot;ui-resource-tooltip&quot; src=&quot;{{resource.data}}&quot;></img>"
+																			tooltip-append-to-body="true"></img>
 																	</a>
 																</li>
 															</ul>
@@ -325,7 +328,7 @@
 					
 					<div class="panel panel-default">
 						<div class="thumbnail ui-resource-list" ng-repeat="resource in resources">
-							<img class="ui-resource-list" src="{{resource.data}}" tooltip-html-unsafe="<img class=&quot;ui-resource-tooltip&quot; src=&quot;{{resource.data}}&quot;></img>"></img>
+							<img class="ui-resource-list" src="{{resource.data}}" tooltip-html-unsafe="<img class=&quot;ui-resource-tooltip&quot; src=&quot;{{resource.data}}&quot;></img>" tooltip-append-to-body="true"></img>
 							<div class="caption">
 								<span class="ui-resource-list">{{resource.id}}</span>
 								<p><button type="button" class="btn btn-default btn-xs" ng-click="destroyResource(resource)" title="Supprimer"><img src="images/delete.png" height="16" width="16"></src></button></p>
@@ -349,7 +352,7 @@
 												<img src="images/upload.png" height="16" width="16"></img>
 											    <input type="file" input-data="$parent.newResourceData" />
 											</span>						
-											<img src="{{$parent.newResourceData}}" class="ui-resource-new" tooltip-html-unsafe="<img class=&quot;ui-resource-tooltip&quot; src=&quot;{{$parent.newResourceData}}&quot;></img>"></img>
+											<img src="{{$parent.newResourceData}}" class="ui-resource-new" tooltip-html-unsafe="<img class=&quot;ui-resource-tooltip&quot; src=&quot;{{$parent.newResourceData}}&quot;></img>" tooltip-append-to-body="true"></img>
 										</td>
 									</tr>
 									<tr>

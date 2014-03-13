@@ -52,3 +52,9 @@
     cursor: inherit;
     display: block;
 }
+
+.dropdown-menu-limit {
+	height: 300px;
+    overflow: scroll;
+    overflow-x: hidden;
+}
