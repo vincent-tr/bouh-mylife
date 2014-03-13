@@ -171,10 +171,16 @@
 	padding-left: 5px;
 }
 
-#schema-container {
+#schema-container-wrapper {
 	height: 100%;
 	position: absolute;
 	top: 0px;
+	overflow: auto;
+}
+
+#schema-container {
+	height: 10000px;
+	width: 10000px;
 }
 
 .item {
