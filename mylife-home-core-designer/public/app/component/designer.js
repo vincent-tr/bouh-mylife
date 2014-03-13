@@ -12,9 +12,14 @@ module.controller('componentController', ['$scope', '$timeout', 'componentDataAc
 	$scope.plugins = [];
 	$scope.hardware = [];
 	$scope.links = [];
-	$scope.selectedComponent = null;
+
 	$scope.ui = {
+		selectedComponent: null,
 		schemaZoom: 1.0
+	};
+	
+	$scope.ui.schemaZoomPercent = function() {
+		return Math.round($scope.ui.schemaZoom * 100);
 	};
 	
 	$scope.schemaHelper = schemaHelper;
@@ -24,7 +29,7 @@ module.controller('componentController', ['$scope', '$timeout', 'componentDataAc
 		$scope.plugins = data.plugins;
 		$scope.hardware = data.hardware;
 		$scope.links = data.links;
-		$scope.selectedComponent = null;
+		$scope.ui.selectedComponent = null;
 	};
 	
 	$scope.reload = function() {
@@ -48,8 +53,8 @@ module.controller('componentController', ['$scope', '$timeout', 'componentDataAc
 	};
 	
 	$scope.selectedComponentDelete = function() {
-		schemaHelper.deleteComponent($scope, $scope.selectedComponent);
-		$scope.selectedComponent = null;
+		schemaHelper.deleteComponent($scope, $scope.ui.selectedComponent);
+		$scope.ui.selectedComponent = null;
 	};
 	
 	$scope.init = function() {
@@ -59,6 +64,8 @@ module.controller('componentController', ['$scope', '$timeout', 'componentDataAc
 	
 	$scope.zoomOut = function() {
 		var zoom = $scope.ui.schemaZoom;
+		if(zoom <= 0.15) // arrondis ...
+			return;
 		zoom -= 0.1;
 		zoom = Math.round(zoom*100)/100;
 		$scope.ui.schemaZoom = zoom;
@@ -66,9 +73,15 @@ module.controller('componentController', ['$scope', '$timeout', 'componentDataAc
 	
 	$scope.zoomIn = function() {
 		var zoom = $scope.ui.schemaZoom; 
+		if(zoom >= 1.95) // arrondis ...
+			return;
 		zoom += 0.1;
 		zoom = Math.round(zoom*100)/100;
 		$scope.ui.schemaZoom = zoom;
+	};
+	
+	$scope.applyZoom = function(val) {
+		return val * $scope.ui.schemaZoom;
 	};
 }]);
 
@@ -76,7 +89,6 @@ module.controller('componentController', ['$scope', '$timeout', 'componentDataAc
 module.directive('toolboxItem', function() {
 	return {
 		replace: true,
-		controller: 'componentController',
 		link: function (scope, element, attrs) {
 			
 			$(element).draggable({
@@ -92,7 +104,6 @@ module.directive('toolboxItem', function() {
 module.directive('schemaItem', ['plumbHelper', function(plumbHelper) {
 	return {
 		replace: true,
-		controller: 'componentController',
 		link: function (scope, element, attrs) {
 
 			// Soit un plugin soit un hwitem (dans les ng-repeat)
@@ -114,7 +125,7 @@ module.directive('schemaItem', ['plumbHelper', function(plumbHelper) {
 				$(element).addClass('item-selected').siblings().removeClass('item-selected');
 				
 				// Scope parent du ng-repeat
-				scope.$parent.selectedComponent = component;
+				scope.ui.selectedComponent = component;
 			});
 		}
 	};
@@ -155,20 +166,25 @@ module.directive('schemaLink', ['plumbHelper', function(plumbHelper) {
 	};
 }]);
 
-module.directive('schemaContainer', ['$compile', function($compile) {
+module.directive('schemaContainer', ['$compile', '$timeout', function($compile, $timeout) {
 	return {
 		restrict: 'A',
 		link: function(scope, element, attrs){
 			
-			var setZoom = function(z) {
-			    var p = [ "-webkit-", "-moz-", "-ms-", "-o-", "" ],
-			        s = "scale(" + z + ")";
+			var setZoom = function(value) {
+			    var prefixes = [ "-webkit-", "-moz-", "-ms-", "-o-", "" ],
+			        scale = "scale(" + value + ")";
 
-			    for (var i = 0; i < p.length; i++) {
-			        el.css(p[i] + "transform", s);
+			    for (var i = 0; i < prefixes.length; i++) {
+			    	element.css(prefixes[i] + "transform", scale);
+			    	element.css(prefixes[i] + "transform-origin", '0 0 0');
 			    }
 
-			    jsPlumb.setZoom(z);
+			    jsPlumb.setZoom(value);
+			    
+			    $timeout(function() {
+			    	jsPlumb.repaintEverything();
+			    });
 			};
 			
 			scope.$watch('ui.schemaZoom', function(newValue) {

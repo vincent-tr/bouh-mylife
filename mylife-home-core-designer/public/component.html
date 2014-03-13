@@ -72,14 +72,14 @@
 				<div id="propertybox">
 					<div id="propertybox-wrapper">
 						<div id="propertybox-title">
-							<img ng-show="selectedComponent.internal().type" class="item-image" src="{{selectedComponent.internal().type.imageUrl}}" title="{{selectedComponent.internal().type.displayName}}"></img>
+							<img ng-show="ui.selectedComponent.internal().type" class="item-image" src="{{ui.selectedComponent.internal().type.imageUrl}}" title="{{ui.selectedComponent.internal().type.displayName}}"></img>
 							&nbsp;&nbsp;&nbsp;
-							<img ng-show="selectedComponent&&!selectedComponent.internal().type" class="item-image" src="images/hardware.jpeg" title="Matériel"></img>
-							<span>{{selectedComponent.id}}</span>
-							<span ng-show="!selectedComponent">Pas de selection</span>
+							<img ng-show="ui.selectedComponent&&!ui.selectedComponent.internal().type" class="item-image" src="images/hardware.jpeg" title="Matériel"></img>
+							<span>{{ui.selectedComponent.id}}</span>
+							<span ng-show="!ui.selectedComponent">Pas de selection</span>
 						</div>
 						<div id="propertybox-content">
-							<table ng-show="selectedComponent.internal().type">
+							<table ng-show="ui.selectedComponent.internal().type">
 								<thead>
 									<tr>
 										<th width="35%">Nom</th>
@@ -89,9 +89,9 @@
 								<tbody>
 									<tr>
 										<td>ID</td>
-										<td><input type="text" ng-model="selectedComponent.id"></input></td>
+										<td><input type="text" ng-model="ui.selectedComponent.id"></input></td>
 									</tr>
-									<tr ng-repeat="(key, value) in selectedComponent.parameters">
+									<tr ng-repeat="(key, value) in ui.selectedComponent.parameters">
 										<td>{{key}}</td>
 										<td><input type="text" ng-model="value"></input></td>
 									</tr>
@@ -100,10 +100,10 @@
 						</div>
 						<div id="propertybox-commands">
 							<button type="button" class="btn btn-default btn-xs" ng-click="zoomOut()">-</button>
-							{{ui.schemaZoom}}
+							{{ ui.schemaZoomPercent() }} %
 							<button type="button" class="btn btn-default btn-xs" ng-click="zoomIn()">+</button>
 							&nbsp;&nbsp;&nbsp;
-							<button ng-show="selectedComponent" type="button" class="btn btn-default btn-xs" ng-click="selectedComponentDelete()" title="Supprimer"><img src="images/delete.png" height="16" width="16"></src></button>
+							<button ng-show="ui.selectedComponent" type="button" class="btn btn-default btn-xs" ng-click="selectedComponentDelete()" title="Supprimer"><img src="images/delete.png" height="16" width="16"></src></button>
 						</div>
 					</div>
 				</div>
@@ -111,7 +111,7 @@
 		</div>
 		<div id="schema-container-wrapper">
 			<div id="schema-container" class="drop-container" ng-click="addEvent($event)" schema-container>
-				<div class="item" schema-id="plugin:{{plugin.id}}" ng-repeat="plugin in plugins" ng-style="{ 'left':plugin.designer.x, 'top':plugin.designer.y }"
+				<div class="item" schema-id="plugin:{{plugin.id}}" ng-repeat="plugin in plugins" ng-style="{ 'left':applyZoom(plugin.designer.x), 'top':applyZoom(plugin.designer.y) }"
 					data-identifier="{{plugin.id}}" schema-item>
 					<div class="item-title">
 						<img class="item-image" src="{{plugin.internal().type.imageUrl}}" title="{{plugin.internal().type.displayName}}"></img>
