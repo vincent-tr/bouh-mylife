@@ -21,7 +21,8 @@ module.controller('uiController', ['$scope', '$modal', '$timeout', 'uiDataAccess
 	
 	var ui = {
 		selectedItem: null,
-		selectedWindow: null
+		selectedWindow: null,
+		showAsPopup: false
 	};
 	
 	ui.selectItem = function(item) {
