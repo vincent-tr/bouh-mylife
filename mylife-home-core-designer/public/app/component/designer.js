@@ -13,6 +13,9 @@ module.controller('componentController', ['$scope', '$timeout', 'componentDataAc
 	$scope.hardware = [];
 	$scope.links = [];
 	$scope.selectedComponent = null;
+	$scope.ui = {
+		schemaZoom: 1.0
+	};
 	
 	$scope.schemaHelper = schemaHelper;
 
@@ -52,6 +55,20 @@ module.controller('componentController', ['$scope', '$timeout', 'componentDataAc
 	$scope.init = function() {
 		plumbHelper.initBindings($scope);
 		$scope.reload();
+	};
+	
+	$scope.zoomOut = function() {
+		var zoom = $scope.ui.schemaZoom;
+		zoom -= 0.1;
+		zoom = Math.round(zoom*100)/100;
+		$scope.ui.schemaZoom = zoom;
+	};
+	
+	$scope.zoomIn = function() {
+		var zoom = $scope.ui.schemaZoom; 
+		zoom += 0.1;
+		zoom = Math.round(zoom*100)/100;
+		$scope.ui.schemaZoom = zoom;
 	};
 }]);
 
@@ -138,10 +155,25 @@ module.directive('schemaLink', ['plumbHelper', function(plumbHelper) {
 	};
 }]);
 
-module.directive('schemaContainer', function($compile) {
+module.directive('schemaContainer', ['$compile', function($compile) {
 	return {
 		restrict: 'A',
 		link: function(scope, element, attrs){
+			
+			var setZoom = function(z) {
+			    var p = [ "-webkit-", "-moz-", "-ms-", "-o-", "" ],
+			        s = "scale(" + z + ")";
+
+			    for (var i = 0; i < p.length; i++) {
+			        el.css(p[i] + "transform", s);
+			    }
+
+			    jsPlumb.setZoom(z);
+			};
+			
+			scope.$watch('ui.schemaZoom', function(newValue) {
+				setZoom(newValue);
+			});
 
 			element.droppable({
 				drop: function(event, ui) {
@@ -163,4 +195,4 @@ module.directive('schemaContainer', function($compile) {
 			});
 		}
 	};
-});
+}]);
