@@ -105,38 +105,40 @@
 				</div>
 			</div>
 		</div>
-		<div id="schema-container" class="drop-container" ng-click="addEvent($event)" schema-container>
-			<div class="item" schema-id="plugin:{{plugin.id}}" ng-repeat="plugin in plugins" ng-style="{ 'left':plugin.designer.x, 'top':plugin.designer.y }"
-				data-identifier="{{plugin.id}}" schema-item>
-				<div class="item-title">
-					<img class="item-image" src="{{plugin.internal().type.imageUrl}}" title="{{plugin.internal().type.displayName}}"></img>
-					<span>{{plugin.id}}</span>
-					<img ng-show={{plugin.internal().type.ui}} class="item-image-ui" title="ui" src="images/ui.png"></img>
+		<div id="schema-container-wrapper">
+			<div id="schema-container" class="drop-container" ng-click="addEvent($event)" schema-container>
+				<div class="item" schema-id="plugin:{{plugin.id}}" ng-repeat="plugin in plugins" ng-style="{ 'left':plugin.designer.x, 'top':plugin.designer.y }"
+					data-identifier="{{plugin.id}}" schema-item>
+					<div class="item-title">
+						<img class="item-image" src="{{plugin.internal().type.imageUrl}}" title="{{plugin.internal().type.displayName}}"></img>
+						<span>{{plugin.id}}</span>
+						<img ng-show={{plugin.internal().type.ui}} class="item-image-ui" title="ui" src="images/ui.png"></img>
+					</div>
+					<div ng-repeat="(key, value) in plugin.parameters">
+						<div class="component-parameter" title="Paramètre">{{key}} : {{value}}</div>
+					</div>
+					<div ng-repeat="member in plugin.internal().type.class.members | filter:{membertype:'attribute'}">
+						<div schema-id="attribute:{{plugin.id}}:{{member.name}}" class="component-attribute" title="{{schemaHelper.memberTitle(member)}}" component-attribute>{{member.name}}</div>
+					</div>
+					<div ng-repeat="member in plugin.internal().type.class.members | filter:{membertype:'action'}">
+						<div schema-id="action:{{plugin.id}}:{{member.name}}" class="component-action" title="{{schemaHelper.memberTitle(member)}}" component-action>{{member.name}}</div>
+					</div>
 				</div>
-				<div ng-repeat="(key, value) in plugin.parameters">
-					<div class="component-parameter" title="Paramètre">{{key}} : {{value}}</div>
+				<div class="item" schema-id="hardware:{{hwitem.id}}" ng-repeat="hwitem in hardware" ng-style="{ 'left':hwitem.designer.x, 'top':hwitem.designer.y }"
+					data-identifier="{{hwitem.id}}" schema-item>
+					<div class="item-title">
+						<img class="item-image" src="images/hardware.jpeg" title="Matériel"></img>
+						<span>{{hwitem.id}}</span>
+					</div>
+					<div ng-repeat="member in hwitem.class.members | filter:{membertype:'attribute'}">
+						<div schema-id="attribute:{{hwitem.id}}:{{member.name}}" class="component-attribute" title="{{schemaHelper.memberTitle(member)}}" component-attribute>{{member.name}}</div>
+					</div>
+					<div ng-repeat="member in hwitem.class.members | filter:{membertype:'action'}">
+						<div schema-id="action:{{hwitem.id}}:{{member.name}}" class="component-action" title="{{schemaHelper.memberTitle(member)}}" component-action>{{member.name}}</div>
+					</div>
 				</div>
-				<div ng-repeat="member in plugin.internal().type.class.members | filter:{membertype:'attribute'}">
-					<div schema-id="attribute:{{plugin.id}}:{{member.name}}" class="component-attribute" title="{{schemaHelper.memberTitle(member)}}" component-attribute>{{member.name}}</div>
-				</div>
-				<div ng-repeat="member in plugin.internal().type.class.members | filter:{membertype:'action'}">
-					<div schema-id="action:{{plugin.id}}:{{member.name}}" class="component-action" title="{{schemaHelper.memberTitle(member)}}" component-action>{{member.name}}</div>
-				</div>
+				<div schema-id="link:{{link.id}}" ng-repeat="link in links" schema-link></div>
 			</div>
-			<div class="item" schema-id="hardware:{{hwitem.id}}" ng-repeat="hwitem in hardware" ng-style="{ 'left':hwitem.designer.x, 'top':hwitem.designer.y }"
-				data-identifier="{{hwitem.id}}" schema-item>
-				<div class="item-title">
-					<img class="item-image" src="images/hardware.jpeg" title="Matériel"></img>
-					<span>{{hwitem.id}}</span>
-				</div>
-				<div ng-repeat="member in hwitem.class.members | filter:{membertype:'attribute'}">
-					<div schema-id="attribute:{{hwitem.id}}:{{member.name}}" class="component-attribute" title="{{schemaHelper.memberTitle(member)}}" component-attribute>{{member.name}}</div>
-				</div>
-				<div ng-repeat="member in hwitem.class.members | filter:{membertype:'action'}">
-					<div schema-id="action:{{hwitem.id}}:{{member.name}}" class="component-action" title="{{schemaHelper.memberTitle(member)}}" component-action>{{member.name}}</div>
-				</div>
-			</div>
-			<div schema-id="link:{{link.id}}" ng-repeat="link in links" schema-link></div>
 		</div>
 	</div>
 	
