@@ -270,11 +270,36 @@ module.directive('splitter', ['$timeout', '$window', function($timeout, $window)
 
 module.directive('initializer', [ '$timeout', function($timeout) {
 	return {
-		restrict : 'A', 
+		restrict : 'A',
 		terminal : true,
 		transclude : true,
 		link : function(scope, element, attrs) {
 			$timeout(scope.init, 0);
 		}
 	};
+}]);
+
+module.directive('sglclick', ['$parse', function($parse) {
+	return {
+		restrict: 'A',
+		link: function(scope, element, attr) {
+			var fn = $parse(attr.sglclick);
+			var delay = 300, clicks = 0, timer = null;
+
+			element.on('click', function (event) {
+				clicks++; //count clicks
+				if(clicks === 1) {
+					timer = setTimeout(function() {
+						scope.$apply(function () {
+							fn(scope, { $event: event });
+						});
+						clicks = 0; //after action performed, reset counter
+					}, delay);
+				} else {
+					clearTimeout(timer); //prevent single-click action
+					clicks = 0; //after action performed, reset counter
+				}
+			});
+		}
+    };
 }]);

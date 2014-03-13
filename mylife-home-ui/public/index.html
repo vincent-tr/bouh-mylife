@@ -34,7 +34,7 @@
 	<div ng-show="connected()">
 		<img class="window" src="{{ window.image }}"></img>
 		<div class="command" ng-repeat="command in window.commands" ng-style="{ 'left':command.x, 'top':command.y }">
-			<button class="btn btn-default command" ng-mousedown="command.mouseDown()" ng-mouseup="command.mouseUp()">
+			<button class="btn btn-default command" ng-mousedown="command.mouseDown()" ng-mouseup="command.mouseUp()" sglclick="command.sglclick()" ng-dblclick="command.dblclick()">
 				<img class="command" src="{{ command.image() }}"></img>
 			</button>
 		</div>

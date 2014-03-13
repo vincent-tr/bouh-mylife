@@ -17,7 +17,6 @@ module.factory('mouseManager', ['$log', function($log) {
 		
 		commandMouseDown : function(command) {
 			var timestamp = new Date().getTime();
-			//$log.debug('mouse down on command ' + command.id + ' at ' + timestamp);
 			mouseDownEvent = {
 				command : command,
 				timestamp : timestamp
@@ -26,21 +25,27 @@ module.factory('mouseManager', ['$log', function($log) {
 		
 		commandMouseUp : function(command) {
 			var timestamp = new Date().getTime();
-			//$log.debug('mouse up on command ' + command.id + ' at ' + timestamp);
 			if(!mouseDownEvent) {
 				return;
 			}
 			
 			if(mouseDownEvent.command.id === command.id) {
 				var elapsed = timestamp - mouseDownEvent.timestamp;
-				//$log.debug('elapsed : ' + elapsed);
 				if(elapsed < 2000) {
-					command.primaryAction();
+					//command.primaryAction();
 				} else {
-					command.secondaryAction();
+					//command.secondaryAction();
 				}
 			}
 			mouseDownEvent = null;
+		},
+		
+		commandSglclick : function(command) {
+			command.primaryAction();
+		},
+		
+		commandDblclick : function(command) {
+			command.secondaryAction();
 		}
 	};
 }]);
@@ -119,6 +124,12 @@ module.factory('uihelper', ['$log', '$location', '$modal', 'tools', 'net', 'mous
 			};
 			command.mouseUp = function() {
 				mouseManager.commandMouseUp(command);
+			};
+			command.sglclick = function() {
+				mouseManager.commandSglclick(command);
+			};
+			command.dblclick = function() {
+				mouseManager.commandDblclick(command);
 			};
 		};
 		
