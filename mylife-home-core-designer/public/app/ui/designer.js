@@ -205,6 +205,8 @@ module.controller('uiController', ['$scope', '$modal', '$timeout', 'uiDataAccess
 		$scope.windows.forEach(prepareWindow);
 		
 		checkSchema();
+		
+		$scope.ui.selectItem(null);
 	};
 	
 	var applyComponents = function(components) {
