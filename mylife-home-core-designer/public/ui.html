@@ -47,7 +47,7 @@
 		Image par défaut : 
 		<div class="dropdown">
 			<input type="text" ng-model="data.defaultImage" class="dropdown-toggle"></input>
-			<ul class="dropdown-menu">
+			<ul class="dropdown-menu dropdown-menu-limit">
 				<li ng-repeat="resource in resources" ng-click="data.defaultImage = resource.id">
 					<a>
 						<span>{{resource.id}}</span>
@@ -94,7 +94,7 @@
 					<td>
 						<div class="dropdown">
 							<input type="text" ng-model="item.image" class="dropdown-toggle"></input>
-							<ul class="dropdown-menu">
+							<ul class="dropdown-menu dropdown-menu-limit">
 								<li ng-repeat="resource in resources" ng-click="item.image = resource.id">
 									<a>
 										<span>{{resource.id}}</span>
@@ -126,7 +126,7 @@
 					<td>
 						<div class="dropdown">
 							<input type="text" ng-model="item.image" class="dropdown-toggle"></input>
-							<ul class="dropdown-menu">
+							<ul class="dropdown-menu dropdown-menu-limit">
 								<li ng-repeat="resource in resources" ng-click="item.image = resource.id">
 									<a>
 										<span>{{resource.id}}</span>
