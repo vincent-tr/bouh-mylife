@@ -298,6 +298,7 @@
 										</table>
 									</div>
 									<div id="ui-propertybox-commands">
+										<input type="checkbox" ng-model="ui.showAsPopup">popup</input>
 										<button ng-show="ui.selectedItem && ui.selectedItem.internal().type !== 'application'" type="button" class="btn btn-default btn-xs" ng-click="deleteItem()" title="Supprimer"><img src="images/delete.png" height="16" width="16"></img></button>
 										<button ng-show="ui.selectedItem" type="button" class="btn btn-default btn-xs" ng-click="createItem()" title="Nouveau"><img src="images/new.png" height="16" width="16"></img></button>
 									</div>
@@ -307,9 +308,11 @@
 					</div>
 					<div id="ui-designer-main-wrapper">
 						<div id="ui-designer-main">
-							<img id="ui-designer-main-img" src="{{getResource(ui.selectedWindow.background)}}"></img>
+							<img id="ui-designer-main-img" ng-class="{true: 'ui-designer-main-img-normal'}[!ui.showAsPopup]" src="{{getResource(ui.selectedWindow.background)}}"></img>
 							<div ng-repeat="command in ui.selectedWindow.commands" class="ui-designer-main-command" ng-class="{true: 'ui-designer-main-command-selected'}[command === ui.selectedItem]" ng-style="{ 'left':command.x, 'top':command.y }">
-								<img class="ui-designer-main-command-img" src="{{command.display && command.display.defaultImage && getResource(command.display.defaultImage)}}"></img>
+								<button class="btn btn-default command">
+									<img class="ui-designer-main-command-img" src="{{command.display && command.display.defaultImage && getResource(command.display.defaultImage)}}"></img>
+								</button>
 							</div>
 						</div>
 					</div>
