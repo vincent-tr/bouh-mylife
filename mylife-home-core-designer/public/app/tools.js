@@ -175,7 +175,7 @@ module.factory('dialogPrompt', ['$modal', 'tools', function($modal, tools) {
 	};
 }]);
 
-module.directive('splitter', ['$timeout', '$window', function($timeout, $window) {
+module.directive('splitter', ['$timeout', '$window', '$rootScope', function($timeout, $window, $rootScope) {
 	return {
 		restrict:'A',
 		link: function(scope, element, attrs) {
@@ -197,7 +197,9 @@ module.directive('splitter', ['$timeout', '$window', function($timeout, $window)
 					handles: 'e',
 					minWidth: min,
 					maxWidth: max,
-					resize: resizeRight
+					resize: function(event, ui) {
+						resizeRight();
+					}
 				});
 
 				$timeout(function(){
@@ -205,6 +207,10 @@ module.directive('splitter', ['$timeout', '$window', function($timeout, $window)
 				}, 100); // TODO : better
 				
 				angular.element($window).bind('resize', function() {
+					resizeRight();
+				});
+				
+				$rootScope.$on('tabSelect', function() {
 					resizeRight();
 				});
 			};
@@ -226,14 +232,20 @@ module.directive('splitter', ['$timeout', '$window', function($timeout, $window)
 					handles: 's',
 					minHeight: min,
 					maxHeight: max,
-					resize: resizeBottom
+					resize:  function(event, ui) {
+						resizeBottom();
+					}
 				});
 				
 				$timeout(function(){
 					resizeBottom();
 				}, 100); // TODO : better
 				
-				angular.element($window).bind('resize', function() {
+				angular.element($window).bind('resize', function(event) {
+					resizeBottom();
+				});
+				
+				$rootScope.$on('tabSelect', function() {
 					resizeBottom();
 				});
 			};
