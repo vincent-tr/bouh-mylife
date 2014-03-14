@@ -6,51 +6,7 @@
 
 var module = angular.module('mylife.uihelper', ['mylife.tools', 'mylife.net']);
 
-/**
- * Gestion du mouseup/mousedown
- */
-module.factory('mouseManager', ['$log', function($log) {
-	
-	var mouseDownEvent = null;
-	
-	return {
-		
-		commandMouseDown : function(command) {
-			var timestamp = new Date().getTime();
-			mouseDownEvent = {
-				command : command,
-				timestamp : timestamp
-			};
-		},
-		
-		commandMouseUp : function(command) {
-			var timestamp = new Date().getTime();
-			if(!mouseDownEvent) {
-				return;
-			}
-			
-			if(mouseDownEvent.command.id === command.id) {
-				var elapsed = timestamp - mouseDownEvent.timestamp;
-				if(elapsed < 2000) {
-					//command.primaryAction();
-				} else {
-					//command.secondaryAction();
-				}
-			}
-			mouseDownEvent = null;
-		},
-		
-		commandSglclick : function(command) {
-			command.primaryAction();
-		},
-		
-		commandDblclick : function(command) {
-			command.secondaryAction();
-		}
-	};
-}]);
-
-module.factory('uihelper', ['$log', '$location', '$modal', 'tools', 'net', 'mouseManager', function($log, $location, $modal, tools, net, mouseManager) {
+module.factory('uihelper', ['$log', '$location', '$modal', 'tools', 'net', function($log, $location, $modal, tools, net) {
 
 	var findResource = function(structure, id) {
 		var resource = tools.arrayFind(structure.resources, function(res) { return res.id === id; });
@@ -117,22 +73,6 @@ module.factory('uihelper', ['$log', '$location', '$modal', 'tools', 'net', 'mous
 			};
 		};
 		
-		var attachBehavior = function(command) {
-
-			command.mouseDown = function() {
-				mouseManager.commandMouseDown(command);
-			};
-			command.mouseUp = function() {
-				mouseManager.commandMouseUp(command);
-			};
-			command.sglclick = function() {
-				mouseManager.commandSglclick(command);
-			};
-			command.dblclick = function() {
-				mouseManager.commandDblclick(command);
-			};
-		};
-		
 		var command = {
 			structure: scommand,
 			id: swindow.id + ':' + scommand.id,
@@ -142,13 +82,135 @@ module.factory('uihelper', ['$log', '$location', '$modal', 'tools', 'net', 'mous
 			primaryAction: actionGetter(scommand.primaryAction, 'primary'),
 			secondaryAction: actionGetter(scommand.secondaryAction, 'secondary'),
 		};
-		
-		attachBehavior(command);
 		return command;
 	};
 	
 	return {
 		findResource: findResource,
 		createCommand: createCommand
+	};
+}]);
+
+module.directive('inputHandler', ['$parse', 'inputManager', function($parse, inputManager) {
+	return {
+		restrict: 'A',
+		link: function(scope, element, attrs){
+			
+			var config = $parse(attrs.inputHandler)(scope);
+			var manager = inputManager(config);
+			
+			element.bind('mousedown', function() {
+				manager.down();
+			});
+			element.bind('mouseup', function() {
+				manager.up();
+			});
+		}
+	};
+}]);
+
+/**
+ * Gestion du mouseup/mousedown
+ */
+module.factory('inputManager', ['$log', '$timeout', function($log, $timeout) {
+
+	return function(config) {
+		
+		var lastDown = null;
+		var eventStack = '';
+		var endWait = null;
+		
+		var executeEvents = function() {
+			$log.debug('inputManager: execute events : \'' + eventStack + '\')');
+			
+			var fn = config[eventStack];
+			if(fn) {
+				fn();
+			}
+		};
+		
+		return {
+			
+			down: function() {
+				// Pas de fin de saisie de suite
+				if(endWait) {
+					$timeout.cancel(endWait);
+				}
+				
+				lastDown = {
+					timestamp: new Date().getTime()
+				};
+			},
+			
+			up: function() {
+				// Pas de fin de saisie de suite
+				if(endWait) {
+					$timeout.cancel(endWait);
+				}
+				// Si pas de down, tchao
+				if(!lastDown) {
+					eventStack = '';
+					return;
+				}
+				
+				// Prise en compte de l'event 
+				var down_ts = lastDown.timestamp;
+				var up_ts = new Date().getTime();
+				lastDown = null;
+				
+				// Ajout de l'event
+				if(up_ts - down_ts < 500) {
+					eventStack += 's';
+				} else {
+					eventStack += 'l';
+				}
+				
+				// Attente de la fin de saisie
+				endWait = $timeout(function() {
+					executeEvents();
+					
+					eventStack = '';
+					endWait = null;
+				}, 300);
+			}
+		};
+	};
+	
+	var mouseDownEvent = null;
+	
+	return {
+		
+		commandMouseDown : function(command) {
+			var timestamp = new Date().getTime();
+			mouseDownEvent = {
+				command : command,
+				timestamp : timestamp
+			};
+		},
+		
+		commandMouseUp : function(command) {
+			var timestamp = new Date().getTime();
+			if(!mouseDownEvent) {
+				return;
+			}
+			
+			if(mouseDownEvent.command.id === command.id) {
+				var elapsed = timestamp - mouseDownEvent.timestamp;
+				if(elapsed < 2000) {
+					//command.primaryAction();
+				} else {
+					//command.secondaryAction();
+				}
+			}
+			mouseDownEvent = null;
+		},
+		
+		commandSglclick : function(command) {
+			command.primaryAction();
+		},
+		
+		commandDblclick : function(command) {
+			command.secondaryAction();
+		}
 	};
 }]);
