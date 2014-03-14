@@ -104,18 +104,22 @@ module.directive('inputHandler', ['$parse', 'inputManager', function($parse, inp
 			var manager = inputManager(config);
 			
 			if(isTouchDevice) {
-				element.bind('touchstart', function() {
+				element.bind('touchstart', function(event) {
 					manager.down();
+					event.preventDefault();
 				});
-				element.bind('touchend', function() {
+				element.bind('touchend', function(event) {
 					manager.up();
+					event.preventDefault();
 				});
 			} else {
-				element.bind('mousedown', function() {
+				element.bind('mousedown', function(event) {
 					manager.down();
+					event.preventDefault();
 				});
-				element.bind('mouseup', function() {
+				element.bind('mouseup', function(event) {
 					manager.up();
+					event.preventDefault();
 				});
 			}
 		}
