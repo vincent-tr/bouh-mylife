@@ -177,8 +177,9 @@ module.directive('schemaContainer', ['$compile', '$timeout', function($compile, 
 			        scale = "scale(" + newValue + ")";
 				
 			    var wrapperElement = element.parent();
-				var scrollHeight = wrapperElement.scrollTop() / ((element.height() * oldValue) - wrapperElement.height());
-				var scrollWidth = wrapperElement.scrollLeft() / ((element.width() * oldValue) - wrapperElement.width());
+			    var rect = element[0].getBoundingClientRect();
+				var scrollHeight = wrapperElement.scrollTop() / (rect.height - wrapperElement.height());
+				var scrollWidth = wrapperElement.scrollLeft() / (rect.width - wrapperElement.width());
 
 			    for (var i = 0; i < prefixes.length; i++) {
 			    	element.css(prefixes[i] + "transform", scale);
@@ -188,8 +189,9 @@ module.directive('schemaContainer', ['$compile', '$timeout', function($compile, 
 			    jsPlumb.setZoom(newValue);
 			    
 			    $timeout(function() {
-					var scrollTop = ((element.height() * newValue) - wrapperElement.height()) * scrollHeight;
-					var scrollLeft = ((element.width() * newValue) - wrapperElement.width()) * scrollWidth;
+			    	rect = element[0].getBoundingClientRect();
+					var scrollTop = (rect.height - wrapperElement.height()) * scrollHeight;
+					var scrollLeft = (rect.width - wrapperElement.width()) * scrollWidth;
 					//var scrollTop = wrapperElement.scrollTop();
 					//var scrollLeft = wrapperElement.scrollLeft();
 					
@@ -203,7 +205,7 @@ module.directive('schemaContainer', ['$compile', '$timeout', function($compile, 
 			};
 			
 			scope.$watch('ui.schemaZoom', function(newValue, oldValue) {
-				setZoom(newValue);
+				setZoom(newValue, oldValue);
 			});
 
 			element.droppable({
