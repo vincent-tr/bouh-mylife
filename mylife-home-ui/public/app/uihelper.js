@@ -103,7 +103,7 @@ module.directive('inputHandler', ['$parse', 'inputManager', function($parse, inp
 			var config = $parse(attrs.inputHandler)(scope);
 			var manager = inputManager(config);
 			
-			if(isTouchDevice) {
+			if(isTouchDevice()) {
 				element.bind('touchstart', function(event) {
 					manager.down();
 					event.preventDefault();
