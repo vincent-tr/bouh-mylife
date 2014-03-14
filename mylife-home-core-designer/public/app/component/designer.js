@@ -175,12 +175,12 @@ module.directive('schemaContainer', ['$compile', '$timeout', function($compile, 
 				
 			    var prefixes = [ "-webkit-", "-moz-", "-ms-", "-o-", "" ],
 			        scale = "scale(" + newValue + ")";
-				
+			    
 			    var wrapperElement = element.parent();
-			    var rect = element[0].getBoundingClientRect();
-				var scrollHeight = wrapperElement.scrollTop() / (rect.height - wrapperElement.height());
-				var scrollWidth = wrapperElement.scrollLeft() / (rect.width - wrapperElement.width());
-
+			    //var rect = element[0].getBoundingClientRect();
+				var scrollHeight = wrapperElement.scrollTop() / (element.height() - wrapperElement.height());
+				var scrollWidth = wrapperElement.scrollLeft() / (element.width() - wrapperElement.width());
+				
 			    for (var i = 0; i < prefixes.length; i++) {
 			    	element.css(prefixes[i] + "transform", scale);
 			    	element.css(prefixes[i] + "transform-origin", '0 0 0');
@@ -189,16 +189,14 @@ module.directive('schemaContainer', ['$compile', '$timeout', function($compile, 
 			    jsPlumb.setZoom(newValue);
 			    
 			    $timeout(function() {
-			    	rect = element[0].getBoundingClientRect();
-					var scrollTop = (rect.height - wrapperElement.height()) * scrollHeight;
-					var scrollLeft = (rect.width - wrapperElement.width()) * scrollWidth;
-					//var scrollTop = wrapperElement.scrollTop();
-					//var scrollLeft = wrapperElement.scrollLeft();
+			    	//rect = element[0].getBoundingClientRect();
+					var scrollTop = (element.height() - wrapperElement.height()) * scrollHeight;
+					var scrollLeft = (element.width() - wrapperElement.width()) * scrollWidth;
 					
 			    	wrapperElement.scrollTop(0);
 			    	wrapperElement.scrollLeft(0);
 			    	jsPlumb.repaintEverything();
-
+			    	
 			    	wrapperElement.scrollTop(scrollTop);
 			    	wrapperElement.scrollLeft(scrollLeft);
 			    });
