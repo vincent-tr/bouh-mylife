@@ -264,6 +264,19 @@ img.ui-resource-tooltip {
 	width: 1024px;
 	height: 768px;
 	border: 1px solid darkgray;
+	
+	position: relative;
+}
+
+#ui-designer-main-img {
+	border: 1px solid darkgray;
+	
+    position: absolute;
+    margin: auto;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
 }
 
 .ui-designer-main-img-normal {
