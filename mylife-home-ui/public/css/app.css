@@ -35,3 +35,7 @@ div.command {
 button.command {
 	-webkit-touch-callout: none;
 }
+
+.modal-content {
+	display: table-cell;
+}
