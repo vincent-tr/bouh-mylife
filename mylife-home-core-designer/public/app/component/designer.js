@@ -171,23 +171,38 @@ module.directive('schemaContainer', ['$compile', '$timeout', function($compile, 
 		restrict: 'A',
 		link: function(scope, element, attrs){
 			
-			var setZoom = function(value) {
+			var setZoom = function(newValue, oldValue) {
+				
 			    var prefixes = [ "-webkit-", "-moz-", "-ms-", "-o-", "" ],
-			        scale = "scale(" + value + ")";
+			        scale = "scale(" + newValue + ")";
+				
+			    var wrapperElement = element.parent();
+				var scrollHeight = wrapperElement.scrollTop() / ((element.height() * oldValue) - wrapperElement.height());
+				var scrollWidth = wrapperElement.scrollLeft() / ((element.width() * oldValue) - wrapperElement.width());
 
 			    for (var i = 0; i < prefixes.length; i++) {
 			    	element.css(prefixes[i] + "transform", scale);
 			    	element.css(prefixes[i] + "transform-origin", '0 0 0');
 			    }
 
-			    jsPlumb.setZoom(value);
+			    jsPlumb.setZoom(newValue);
 			    
 			    $timeout(function() {
+					var scrollTop = ((element.height() * newValue) - wrapperElement.height()) * scrollHeight;
+					var scrollLeft = ((element.width() * newValue) - wrapperElement.width()) * scrollWidth;
+					//var scrollTop = wrapperElement.scrollTop();
+					//var scrollLeft = wrapperElement.scrollLeft();
+					
+			    	wrapperElement.scrollTop(0);
+			    	wrapperElement.scrollLeft(0);
 			    	jsPlumb.repaintEverything();
+
+			    	wrapperElement.scrollTop(scrollTop);
+			    	wrapperElement.scrollLeft(scrollLeft);
 			    });
 			};
 			
-			scope.$watch('ui.schemaZoom', function(newValue) {
+			scope.$watch('ui.schemaZoom', function(newValue, oldValue) {
 				setZoom(newValue);
 			});
 

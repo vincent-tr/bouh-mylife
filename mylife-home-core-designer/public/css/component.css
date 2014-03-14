@@ -5,6 +5,7 @@
 	position: absolute;
 	top: 0px;
 	left: 0px;
+	z-index: 2;
 }
 
 #toolbox-container {
@@ -176,6 +177,7 @@
 	position: absolute;
 	top: 0px;
 	overflow: auto;
+	z-index: 1;
 }
 
 #schema-container {

@@ -13,6 +13,7 @@
 	position: absolute;
 	top: 0px;
 	left: 0px;
+	z-index: 2;
 }
 
 #ui-itemlist-container {
@@ -256,6 +257,7 @@ img.ui-resource-tooltip {
 
 #ui-designer-main-wrapper {
 	position: absolute;
+	z-index: 1;
 }
 
 #ui-designer-main {
