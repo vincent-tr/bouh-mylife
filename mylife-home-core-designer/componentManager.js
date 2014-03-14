@@ -8,7 +8,7 @@ var data = function(callback) {
 	var fetch = function(url, callback) {
 		request.get(url, function(err, response, body) {
 			if (err) {
-				callback(JSON.parse(err));
+				callback(err);
 			} else {
 				callback(null, JSON.parse(body));
 			}
