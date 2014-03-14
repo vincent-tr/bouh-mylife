@@ -95,16 +95,29 @@ module.directive('inputHandler', ['$parse', 'inputManager', function($parse, inp
 	return {
 		restrict: 'A',
 		link: function(scope, element, attrs){
+
+			function isTouchDevice() {
+				return !!('ontouchstart' in window);
+			}
 			
 			var config = $parse(attrs.inputHandler)(scope);
 			var manager = inputManager(config);
 			
-			element.bind('mousedown', function() {
-				manager.down();
-			});
-			element.bind('mouseup', function() {
-				manager.up();
-			});
+			if(isTouchDevice) {
+				element.bind('touchstart', function() {
+					manager.down();
+				});
+				element.bind('touchend', function() {
+					manager.up();
+				});
+			} else {
+				element.bind('mousedown', function() {
+					manager.down();
+				});
+				element.bind('mouseup', function() {
+					manager.up();
+				});
+			}
 		}
 	};
 }]);
