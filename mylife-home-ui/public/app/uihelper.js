@@ -175,42 +175,4 @@ module.factory('inputManager', ['$log', '$timeout', function($log, $timeout) {
 			}
 		};
 	};
-	
-	var mouseDownEvent = null;
-	
-	return {
-		
-		commandMouseDown : function(command) {
-			var timestamp = new Date().getTime();
-			mouseDownEvent = {
-				command : command,
-				timestamp : timestamp
-			};
-		},
-		
-		commandMouseUp : function(command) {
-			var timestamp = new Date().getTime();
-			if(!mouseDownEvent) {
-				return;
-			}
-			
-			if(mouseDownEvent.command.id === command.id) {
-				var elapsed = timestamp - mouseDownEvent.timestamp;
-				if(elapsed < 2000) {
-					//command.primaryAction();
-				} else {
-					//command.secondaryAction();
-				}
-			}
-			mouseDownEvent = null;
-		},
-		
-		commandSglclick : function(command) {
-			command.primaryAction();
-		},
-		
-		commandDblclick : function(command) {
-			command.secondaryAction();
-		}
-	};
 }]);
