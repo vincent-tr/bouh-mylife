@@ -31,3 +31,7 @@ div.main > img.window {
 div.command {
 	position: absolute;
 }
+
+button.command {
+	-webkit-touch-callout: none;
+}
