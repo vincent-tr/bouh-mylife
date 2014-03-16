@@ -25,9 +25,19 @@ module.factory('uihelper', ['$log', '$location', '$modal', 'tools', 'net', funct
 						// Recherche de mapping
 						for(var i=0, l=sdisplay.map.length; i<l; i++) {
 							var item = sdisplay.map[i];
-							// Attention : si numérique on doit caster ici !
-							if(item.value == value) {
-								return findResource(structure, item.image);
+							if(typeof item.value !== 'undefined') {
+								// enum
+								
+								// Attention : si numérique on doit caster ici !
+								if(item.value == value) {
+									return findResource(structure, item.image);
+								}
+							} else {
+								// range
+								var intValue = parseInt(value);
+								if(intValue >= item.min && intValue <= item.max) {
+									return findResource(structure, item.image);
+								}
 							}
 						}
 					}
