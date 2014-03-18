@@ -6,7 +6,7 @@
 
 var module = angular.module('mylife.uihelper', ['mylife.tools', 'mylife.net']);
 
-module.factory('uihelper', ['$log', '$location', '$modal', 'tools', 'net', function($log, $location, $modal, tools, net) {
+module.factory('uihelper', ['$log', '$location', '$parse', '$modal', 'tools', 'net', function($log, $location, $parse, $modal, tools, net) {
 
 	var findResource = function(structure, id) {
 		var resource = tools.arrayFind(structure.resources, function(res) { return res.id === id; });
@@ -95,9 +95,31 @@ module.factory('uihelper', ['$log', '$location', '$modal', 'tools', 'net', funct
 		return command;
 	};
 	
+	var createText = function(structure, swindow, stext) {
+		
+		var context = {
+			text: stext,
+			attr: net.componentAttribute
+		};
+
+		var styleEval = $parse(stext.style);
+		var valueEval = $parse(stext.text);
+		
+		var text = {
+			structure: stext,
+			id: swindow.id + ':' + stext.id,
+			x: stext.x,
+			y: stext.y,
+			style: function() { return styleEval(context); },
+			value: function() { return valueEval(context); }
+		};
+		return text;
+	};
+	
 	return {
 		findResource: findResource,
-		createCommand: createCommand
+		createCommand: createCommand,
+		createText: createText
 	};
 }]);
 

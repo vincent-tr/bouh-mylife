@@ -38,6 +38,9 @@
 				<img class="command" src="{{ command.image() }}"></img>
 			</button>
 		</div>
+		<div class="text" ng-repeat="text in window.texts" ng-style="{ 'left':text.x, 'top':text.y }">
+			<span ng-style="text.style()">{{text.value()}}</span>
+		</div>
 	</div>
 </script>
 
