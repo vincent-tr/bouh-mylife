@@ -22,6 +22,7 @@ module.controller('windowController',
 	$scope.window = {
 		structure: swindow,
 		image: uihelper.findResource(structure, swindow.background),
-		commands: tools.arraySelect(swindow.commands, function(scommand) { return uihelper.createCommand(structure, swindow, scommand); })
+		commands: tools.arraySelect(swindow.commands, function(scommand) { return uihelper.createCommand(structure, swindow, scommand); }),
+		texts: tools.arraySelect(swindow.texts, function(stext) { return uihelper.createText(structure, swindow, stext); })
 	};
 }]);
