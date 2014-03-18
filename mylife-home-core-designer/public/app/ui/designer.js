@@ -43,6 +43,7 @@ module.controller('uiController', ['$scope', '$modal', '$timeout', 'uiDataAccess
 			break;
 			
 		case 'command':
+		case 'text':
 			ui.selectedWindow = item.internal().parent;
 			break;
 		}
@@ -55,12 +56,26 @@ module.controller('uiController', ['$scope', '$modal', '$timeout', 'uiDataAccess
 		command.internal().parent = parent;
 	};
 	
+	var prepareText = function(text, parent) {
+		text.internal().type = 'text';
+		text.internal().parent = parent;
+	};
+	
 	var prepareWindow = function(window) {
 		window.internal().type = 'window';
-		if(!window.commands)
+		
+		if(!window.commands) {
 			window.commands = [];
+		}
 		window.commands.forEach(function(command) {
 			prepareCommand(command, window);
+		});
+		
+		if(!window.texts) {
+			window.texts = [];
+		}
+		window.texts.forEach(function(text) {
+			prepareText(text, window);
 		});
 	};
 	
@@ -299,13 +314,17 @@ module.controller('uiController', ['$scope', '$modal', '$timeout', 'uiDataAccess
 		case 'command':
 			tools.removeFromArray(item.internal().parent.commands, item);
 			break;
+			
+		case 'text':
+			tools.removeFromArray(item.internal().parent.texts, item);
+			break;
 		}
 		
 		$scope.ui.selectItem(null);
 		checkSchema();
 	};
 	
-	$scope.createItem = function() {
+	$scope.createItem = function(isText) {
 		
 		var createWindow = function() {
 			var window = {
@@ -331,6 +350,17 @@ module.controller('uiController', ['$scope', '$modal', '$timeout', 'uiDataAccess
 			prepareCommand(command, window);
 			window.commands.push(command);
 		};
+		
+		var createText = function(window) {
+			
+			var text = {
+				id: 'new_text_' + idGenerator()
+			};
+			
+			tools.attachInternal(text);
+			prepareText(text, window);
+			window.texts.push(text);
+		};
 
 		var item = $scope.ui.selectedItem;
 		if(!item) {
@@ -343,11 +373,19 @@ module.controller('uiController', ['$scope', '$modal', '$timeout', 'uiDataAccess
 			break;
 			
 		case 'window':
-			createCommand(item);
+			if(isText) {
+				createText(item);
+			} else {
+				createCommand(item);
+			}
 			break;
 			
 		case 'command':
 			createCommand(item.internal().parent);
+			break;
+
+		case 'text':
+			createText(item.internal().parent);
 			break;
 		}
 	};

@@ -9,4 +9,5 @@ ui
 			action
 				comp action
 				window (popup - open)
+		texts
 	defaultWindow

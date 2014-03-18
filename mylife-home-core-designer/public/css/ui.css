@@ -292,3 +292,17 @@ img.ui-resource-tooltip {
 	-moz-border-radius: 0.5em;
 	border-radius: 0.5em;
 }
+
+
+.ui-designer-main-text {
+	position: absolute;
+}
+
+.ui-designer-main-text-selected {
+	box-shadow: 2px 2px 30px black;
+	-o-box-shadow: 2px 2px 30px black;
+	-webkit-box-shadow: 2px 2px 30px black;
+	-moz-box-shadow: 2px 2px 30px black;
+	-moz-border-radius: 0.5em;
+	border-radius: 0.5em;
+}

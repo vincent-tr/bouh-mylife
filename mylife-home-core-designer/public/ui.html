@@ -193,6 +193,12 @@
 																<span class="ui-itemlist-item">{{command.id}}</span>
 															</div>
 														</li>
+														<li class="ui-itemlist-item" data-identifier="command:{{action.id}}" ng-repeat="text in window.texts" ng-init="item = text">
+															<div itemlist-item class="ui-itemlist-item">
+																<img class="ui-itemlist-item" src="images/text.png"></img>
+																<span class="ui-itemlist-item">{{text.id}}</span>
+															</div>
+														</li>
 													</ul>
 												</li>
 											</ul>
@@ -245,7 +251,7 @@
 														</div>
 													</td>
 												</tr>
-												<tr ng-show="ui.selectedItem.internal().type === 'window' || ui.selectedItem.internal().type === 'command'" >
+												<tr ng-show="ui.selectedItem.internal().type === 'window' || ui.selectedItem.internal().type === 'command' || ui.selectedItem.internal().type === 'text'" >
 													<td>ID</td>
 													<td><input type="text" ng-model="ui.selectedItem.id"></input></td>
 												</tr>
@@ -268,11 +274,11 @@
 														</div>
   													</td>
 												</tr>
-												<tr ng-show="ui.selectedItem.internal().type === 'command'" >
+												<tr ng-show="ui.selectedItem.internal().type === 'command' || ui.selectedItem.internal().type === 'text'" >
 													<td>X</td>
 													<td><input type="number" ng-model="ui.selectedItem.x"></input></td>
 												</tr>
-												<tr ng-show="ui.selectedItem.internal().type === 'command'" >
+												<tr ng-show="ui.selectedItem.internal().type === 'command' || ui.selectedItem.internal().type === 'text'" >
 													<td>Y</td>
 													<td><input type="number" ng-model="ui.selectedItem.y"></input></td>
 												</tr>
@@ -297,6 +303,14 @@
 														&nbsp;&nbsp;&nbsp;{{ui.selectedItem && ui.selectedItem.internal().type === 'command' && formatCommandAction(ui.selectedItem.secondaryAction, true)}}
 													</td>
 												</tr>
+												<tr ng-show="ui.selectedItem.internal().type === 'text'" >
+													<td>Style</td>
+													<td><input ng-model="ui.selectedItem.style"></input></td>
+												</tr>
+												<tr ng-show="ui.selectedItem.internal().type === 'text'" >
+													<td>Texte</td>
+													<td><input ng-model="ui.selectedItem.text"></input></td>
+												</tr>
 											</tbody>
 										</table>
 									</div>
@@ -304,6 +318,7 @@
 										<input type="checkbox" ng-model="ui.showAsPopup">popup</input>
 										<button ng-show="ui.selectedItem && ui.selectedItem.internal().type !== 'application'" type="button" class="btn btn-default btn-xs" ng-click="deleteItem()" title="Supprimer"><img src="images/delete.png" height="16" width="16"></img></button>
 										<button ng-show="ui.selectedItem" type="button" class="btn btn-default btn-xs" ng-click="createItem()" title="Nouveau"><img src="images/new.png" height="16" width="16"></img></button>
+										<button ng-show="ui.selectedItem && ui.selectedItem.internal().type === 'window'" type="button" class="btn btn-default btn-xs" ng-click="createItem(true)" title="Nouveau texte"><img src="images/new.png" height="16" width="16"></img></button>
 									</div>
 								</div>
 							</div>
@@ -316,6 +331,9 @@
 								<button class="btn btn-default command">
 									<img class="ui-designer-main-command-img" src="{{command.display && command.display.defaultImage && getResource(command.display.defaultImage)}}"></img>
 								</button>
+							</div>
+							<div ng-repeat="text in ui.selectedWindow.texts" class="ui-designer-main-text" ng-class="{true: 'ui-designer-main-text-selected'}[text === ui.selectedItem]" ng-style="{ 'left':text.x, 'top':text.y }">
+								<span>{{text.id}}</span>
 							</div>
 						</div>
 					</div>
