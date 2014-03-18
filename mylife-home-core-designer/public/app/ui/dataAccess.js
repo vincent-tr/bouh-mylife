@@ -25,6 +25,9 @@ module.factory('uiDataAccess', ['$modal', 'api', 'tools', 'dialogAlert', functio
 				if(window.commands) {
 					window.commands.forEach(tools.attachInternal);
 				}
+				if(window.texts) {
+					window.texts.forEach(tools.attachInternal);
+				}
 			});
 		};
 		
