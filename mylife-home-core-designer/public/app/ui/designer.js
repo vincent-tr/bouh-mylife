@@ -6,7 +6,7 @@
 
 var module = angular.module('mylife.ui.designer', ['mylife.ui.dataAccess', 'mylife.tools', 'mylife.ui.fileReader', 'mylife.idGenerator']);
 
-module.controller('uiController', ['$scope', '$modal', '$timeout', 'uiDataAccess', 'dialogAlert', 'idGenerator', 'tools', function($scope, $modal, $timeout, uiDataAccess, dialogAlert, idGenerator, tools) {
+module.controller('uiController', ['$scope', '$modal', '$timeout', '$q', 'uiDataAccess', 'dialogAlert', 'idGenerator', 'tools', function($scope, $modal, $timeout, $q, uiDataAccess, dialogAlert, idGenerator, tools) {
 	
 	var app = {
 		defaultWindow: ''
@@ -178,12 +178,31 @@ module.controller('uiController', ['$scope', '$modal', '$timeout', 'uiDataAccess
 					errors.push({ message: 'L\'image par défaut de la commande \'' + window.id + ':' + command.id + '\' est indéfinie.' });
 				}
 				
+				if(!componentExists(command.display.component, command.display.attribute, 'attribute')) {
+					command.display.component = null;
+					command.display.attribute = null;
+					errors.push({ message: 'Le composant du binding d\'affiche de la commande ' + window.id + ':' + command.id + '\' est indéfini.' });
+				}
+				
 				command.display.map.forEach(function(item) {
 					if(!resourceExists(item.image)) {
 						item.image = null;
 						errors.push({ message: 'L\'image d\'un binding de la commande \'' + window.id + ':' + command.id + '\' est indéfinie.' });
 					}
 				});
+			});
+			
+			window.texts.forEach(function(text) {
+				
+				if(text.context) {
+					text.context.forEach(function(item) {
+						if(!componentExists(item.component, item.attribute, 'attribute')) {
+							item.component = null;
+							item.attribute = null;
+							errors.push({ message: 'Le composant d\'un binding du texte ' + window.id + ':' + text.id + '\' est indéfini.' });
+						}
+					});
+				}
 			});
 		});
 		
@@ -218,9 +237,6 @@ module.controller('uiController', ['$scope', '$modal', '$timeout', 'uiDataAccess
 		$scope.app.defaultWindow = data.defaultWindow;
 		
 		$scope.windows.forEach(prepareWindow);
-		
-		checkSchema();
-		
 		$scope.ui.selectItem(null);
 	};
 	
@@ -229,8 +245,13 @@ module.controller('uiController', ['$scope', '$modal', '$timeout', 'uiDataAccess
 	};
 	
 	$scope.reload = function() {
-		uiDataAccess.load(applyData);
-		uiDataAccess.components(applyComponents);
+		var loadPromise = uiDataAccess.load(applyData).$promise;
+		var componentsPromise = uiDataAccess.components(applyComponents).$promise;
+		
+		$q.all([loadPromise, componentsPromise]).then(function() {
+			// Le schema doit être vérifié à la fois avec les nouvelles données et les nouveaux composants
+			checkSchema();
+		});
 	};
 
 	$scope.save = function() {
@@ -552,6 +573,59 @@ module.controller('uiController', ['$scope', '$modal', '$timeout', 'uiDataAccess
 			display.attribute = data.attribute;
 			display.defaultImage = data.defaultImage;
 			display.map = data.map;
+		});
+	};
+
+	
+	$scope.designTextContext = function(text) {
+
+		var componentAttributes = [];
+		$scope.components.plugins.forEach(function(component) {
+			component.internal().type['class'].members.forEach(function(member) {
+				if(member.membertype === 'attribute') {
+					componentAttributes.push({
+						component: component.id,
+						attribute: member.name
+					});
+				}
+			});
+		});
+		
+		var data = {
+			context: []
+		};
+		if(text.context) {
+			data.context = tools.clone(text.context);
+		}
+		
+		var modalInstance = $modal.open({
+			templateUrl: 'designTextContext.html',
+			controller: function ($scope, $modalInstance) {
+
+				$scope.data = data;
+				$scope.componentAttributes = componentAttributes;
+				
+				$scope.changeComponentAttribute = function(item, componentAttribute) {
+					item.component = componentAttribute.component;
+					item.attribute = componentAttribute.attribute;
+				};
+				
+				$scope.deleteItem = function(item) {
+					tools.removeFromArray(data.context, item);
+				};
+				
+				$scope.ok = function () {
+					$modalInstance.close();
+				};
+
+				$scope.cancel = function () {
+					$modalInstance.dismiss();
+				};
+			}
+		});
+
+		modalInstance.result.then(function () {
+			text.context = data.context;
 		});
 	};
 }]);

@@ -148,6 +148,78 @@
 	</div>
 </script>
 
+<script type="text/ng-template" id="designTextContext.html">
+	<div class="modal-header">
+		<h3>mylife-home-core-designer</h3>
+	</div>
+	<div class="modal-body">
+		Binding : 
+		<table class="ui-design-command-display-map">
+			<thead>
+				<tr>
+					<th>Nom</th>
+					<th>Attribut</th>
+					<th class="ui-design-command-display-map-actions"><button class="btn btn-default btn-xs" ng-click="data.context.push({ component:null, attribute:null, id:null })" title="Nouveau"><img src="images/new.png" height="16" width="16"></img></button></th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr ng-repeat="item in data.context">
+					<td>
+						<input type="text" ng-model="item.id"></input>
+					</td>
+					<td>
+						<div class="dropdown">
+						<span>{{item.component}}:{{item.attribute}}</span>
+							<button type="button" class="dropdown-toggle btn btn-default btn-xs">...</button>
+							<ul class="dropdown-menu">
+								<li class="ui-dropdown-item" ng-repeat="componentAttribute in componentAttributes" ng-click="changeComponentAttribute(item, componentAttribute)">
+									<a><span>{{componentAttribute.component}}:{{componentAttribute.attribute}}</span></a>
+								</li>
+							</ul>
+						</div>
+					</td>
+					<td><button type="button" class="btn btn-default btn-xs" ng-click="deleteItem(item)" title="Supprimer"><img src="images/delete.png" height="16" width="16"></img></button></td>
+				</tr>
+			</tbody>
+		</table>
+		<table class="ui-design-command-display-map" ng-show="data.type.type === 'range'">
+			<thead>
+				<tr>
+					<th>Min</th>
+					<th>Max</th>
+					<th>Image</th>
+					<th class="ui-design-command-display-map-actions"><button class="btn btn-default btn-xs" ng-click="data.map.push({ min:data.type.min, max:data.type.max, image:null })" title="Nouveau"><img src="images/new.png" height="16" width="16"></img></button></th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr ng-repeat="item in data.map">
+					<td><input type="number" ng-model="item.min"></td>
+					<td><input type="number" ng-model="item.max"></td>
+					<td>
+						<div class="dropdown">
+							<input type="text" ng-model="item.image" class="dropdown-toggle"></input>
+							<ul class="dropdown-menu dropdown-menu-limit">
+								<li ng-repeat="resource in resources" ng-click="item.image = resource.id">
+									<a>
+										<span>{{resource.id}}</span>
+										<img class="ui-resource-list" src="{{resource.data}}"
+											tooltip-html-unsafe="<img class=&quot;ui-resource-tooltip&quot; src=&quot;{{resource.data}}&quot;></img>" tooltip-append-to-body="true"></img>
+									</a>
+								</li>
+							</ul>
+						</div>
+					</td>
+					<td><button type="button" class="btn btn-default btn-xs" ng-click="deleteItem(item)" title="Supprimer"><img src="images/delete.png" height="16" width="16"></img></button></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	<div class="modal-footer">
+		<button class="btn btn-primary" ng-click="ok()">OK</button>
+		<button class="btn btn-warning" ng-click="cancel()">Annuler</button>
+	</div>
+</script>
+
 <script type="text/ng-template" id="checkSchemaErrors.html">
 	<div class="modal-header">
 		<h3>mylife-home-core-designer</h3>
@@ -301,6 +373,13 @@
 													<td title="{{ui.selectedItem && ui.selectedItem.internal().type === 'command' && formatCommandAction(ui.selectedItem.secondaryAction, false)}}">
 														<button type="button" ng-click="designCommandAction(ui.selectedItem.secondaryAction)" class="btn btn-default btn-xs">...</button>
 														&nbsp;&nbsp;&nbsp;{{ui.selectedItem && ui.selectedItem.internal().type === 'command' && formatCommandAction(ui.selectedItem.secondaryAction, true)}}
+													</td>
+												</tr>
+												<tr ng-show="ui.selectedItem.internal().type === 'text'" >
+													<td>Context</td>
+													<td>
+														<button type="button" ng-click="designTextContext(ui.selectedItem)" class="btn btn-default btn-xs">...</button>
+														&nbsp;&nbsp;&nbsp;{{ui.selectedItem && ui.selectedItem.internal().type === 'text' && ui.selectedItem.context.length}} item(s)
 													</td>
 												</tr>
 												<tr ng-show="ui.selectedItem.internal().type === 'text'" >
