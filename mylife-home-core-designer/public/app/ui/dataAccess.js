@@ -31,7 +31,7 @@ module.factory('uiDataAccess', ['$modal', 'api', 'tools', 'dialogAlert', functio
 			});
 		};
 		
-		api.ui.data.get({}, function(data) {
+		return api.ui.data.get({}, function(data) {
 			prepareData(data);
 			if(callback) {
 				callback(data);
@@ -77,7 +77,7 @@ module.factory('uiDataAccess', ['$modal', 'api', 'tools', 'dialogAlert', functio
 			data.plugins.forEach(attachTypeToPlugin);
 		};
 		
-		api.ui.components.get({}, function(data) {
+		return api.ui.components.get({}, function(data) {
 			prepareData(data);
 			if(callback) {
 				callback(data);
