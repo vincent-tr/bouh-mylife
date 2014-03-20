@@ -97,9 +97,17 @@ module.factory('uihelper', ['$log', '$location', '$parse', '$modal', 'tools', 'n
 	
 	var createText = function(structure, swindow, stext) {
 		
-		var context = {
-			text: stext,
-			attr: net.componentAttribute
+		var createContext = function() {
+			var context = {};
+
+			if(stext.context) {
+				stext.context.forEach(function(item) {
+					var value = net.componentAttribute(item.component, item.attributeIndex);
+					context[item.id] = value;
+				});
+			}
+			
+			return context;
 		};
 
 		var styleEval = $parse(stext.style);
@@ -110,8 +118,14 @@ module.factory('uihelper', ['$log', '$location', '$parse', '$modal', 'tools', 'n
 			id: swindow.id + ':' + stext.id,
 			x: stext.x,
 			y: stext.y,
-			style: function() { return styleEval(context); },
-			value: function() { return valueEval(context); }
+			style: function() {
+				var ctx = createContext();
+				return styleEval(ctx);
+			},
+			value: function() {
+				var ctx = createContext();
+				return valueEval(ctx);
+			}
 		};
 		return text;
 	};

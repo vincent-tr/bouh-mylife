@@ -100,6 +100,14 @@ var get = function(callback) {
 					display.attributeIndex = getAttributeIndex(display.component, display.attribute);
 				}
 			});
+			
+			window.texts.forEach(function(text) {
+				if(text.context) {
+					text.context.forEach(function(item) {
+						item.attributeIndex = getAttributeIndex(item.component, item.attribute);
+					});
+				}
+			});
 		});
 		
 		callback(null, data.ui);
