@@ -33,5 +33,7 @@ extern void comp_internal_gpioin_init();
 extern void comp_internal_gpioin_terminate();
 extern void comp_internal_gpioout_init();
 extern void comp_internal_gpioout_terminate();
+extern void comp_internal_rcswitch_init();
+extern void comp_internal_rcswitch_terminate();
 
 #endif /* COMPONENTS_H_ */
