@@ -43,10 +43,12 @@ void sub_init()
 	comp_internal_mpd_init();
 	comp_internal_gpioin_init();
 	comp_internal_gpioout_init();
+	comp_internal_rcswitch_init();
 }
 
 void sub_terminate()
 {
+	comp_internal_rcswitch_terminate();
 	comp_internal_gpioout_terminate();
 	comp_internal_gpioin_terminate();
 	comp_internal_mpd_terminate();
